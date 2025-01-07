@@ -44,7 +44,40 @@ public interface Constants {
         SwerveDriveCommandConfig DRIVE_COMMAND_CONFIG = new SwerveDriveCommandConfig(THETA_DEADZONE, MAX_SPEED_METERS_PER_SECOND, MAX_ANGULAR_SPEED_METERS_PER_SECOND);
     }
 
+    public interface Elevator {
+    
+        enum Position {
+            L1(-1),
+            L2(-1),
+            L3(-1),
+            L4(-1),
+            Feeder(-1);
+
+            double pos;
+            private Position(double pos){
+                this.pos = pos;
+            }
+
+            public double getPosition() {
+                return pos;
+            }
+        }
+    }
+
     public interface FieldElements {
+
+        enum ReefAprilTag {
+            Red(-1),
+            Blue(-1);
+            double pos;
+            private ReefAprilTag(double pos){
+                this.pos = pos;
+            }
+
+            public double getPosition() {
+                return pos;
+            }
+        }
 
     }
 }

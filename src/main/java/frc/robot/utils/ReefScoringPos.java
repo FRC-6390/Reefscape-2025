@@ -1,47 +1,45 @@
 package frc.robot.utils;
 
+import edu.wpi.first.wpilibj.DriverStation.Alliance;
+
 public class ReefScoringPos {
 
-    /**
-     * Read the positions relative to the current
-     * driver station clockwise
-     *           1
-     *         -----
-     *     6  /     \ 2
-     *     5  \     / 3
-     *         -----
-     *           4 
-     * ------------------------
-     * |  DS1 |  DS2  |  DS3  |
-     * ------------------------
-     *       L     R
-     *       _     _
-     *      | |   | |
-     *      | |   | |
-     *      | |   | |
-     *      | |   | |
-     *      | |   | |
-     * |-----------------|
-     * |      ___        |
-     * |     |   |       |
-     * |      ‾‾‾        |
-     * 
-     * Poles are read relative to the april tag (or if you were facing the side)
-     */
+    private final ReefLevel level;
+    private final ReefPole side;
 
-    public enum ReefSide {
-        ONE_LEFT,
-        ONE_RIGHT,
-        TWO_LEFT,
-        TWO_RIGHT,
-        THREE_LEFT,
-        THREE_RIGHT,
-        FOUR_LEFT,
-        FOUR_RIGHT,
-        FIVE_LEFT,
-        FIVE_RIGHT,
-        SIX_LEFT,
-        SIX_RIGHT
+     public enum ReefPole {
+        
+        A(18, 7),
+        B(18, 7),
+        C(17, 8),
+        D(17, 8),
+        E(22, 9),
+        F(22, 9),
+        G(21, 10),
+        H(21, 10),
+        I(20, 11),
+        J(20, 11),
+        K(19, 6),
+        L(19, 6);
+    
+        private final int apriltagIdRed;
+        private final int apriltagIdBlue;
+    
+        ReefPole(int apriltagIdBlue, int apriltagIdRed) {
+            this.apriltagIdRed = apriltagIdRed;
+            this.apriltagIdBlue = apriltagIdBlue;
+        }
+    
+        public int getApriltagId(Alliance team) {
+            switch (team) {
+                case Red:
+                    return apriltagIdRed;
+                case Blue:
+                    return apriltagIdBlue;
+                default:
+                    throw new IllegalArgumentException("Unknown team: " + team);
+            }
+        }
     }
 
     public enum ReefLevel {
@@ -51,7 +49,21 @@ public class ReefScoringPos {
         L4
     }
 
-    public ReefScoringPos(ReefLevel level, ReefSide side) {
-
+    public ReefScoringPos(ReefLevel level, ReefPole side) {
+        this.level = level;
+        this.side = side;
     }
+
+    public ReefLevel getLevel() {
+        return level;
+    }
+
+    public ReefPole getSide() {
+        return side;
+    }
+
+    public int getApriltagId(Alliance team) {
+        return side.getApriltagId(team);
+    }
+
 }
