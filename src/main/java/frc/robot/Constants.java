@@ -43,4 +43,8 @@ public interface Constants {
 
         SwerveDriveCommandConfig DRIVE_COMMAND_CONFIG = new SwerveDriveCommandConfig(THETA_DEADZONE, MAX_SPEED_METERS_PER_SECOND, MAX_ANGULAR_SPEED_METERS_PER_SECOND);
     }
+
+    public interface FieldElements {
+
+    }
 }
