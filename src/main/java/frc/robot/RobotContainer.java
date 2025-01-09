@@ -13,7 +13,7 @@ import frc.robot.subsystems.DriveTrain;
 
 public class RobotContainer {
 
-  private final RobotIMU<?> imu = RobotIMU.createFromPigeon2(Constants.DriveTrain.PIDGEON_ID,  Constants.DriveTrain.SWERVE_CAN_BUS);
+  private final RobotIMU<?> imu = RobotIMU.createFromPigeon2(Constants.DriveTrain.PIGEON_ID,  Constants.DriveTrain.CANBUS);
   private final DriveTrain driveTrain = new DriveTrain(imu);
   private final DebouncedController driverController = new DebouncedController(0);
 
