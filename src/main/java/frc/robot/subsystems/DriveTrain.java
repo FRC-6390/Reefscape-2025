@@ -15,11 +15,13 @@ public class DriveTrain extends SwerveDrivetrain {
     super(Constants.DriveTrain.MODULE_CONFIGS, Constants.DriveTrain.PIDGEON_ID, true, Constants.DriveTrain.DRIFT_PID);
 
     ShuffleboardTab tab = Shuffleboard.getTab("DriveTrain");
-    this.shuffleboard(tab);
+    // this.shuffleboard(tab);
+  
   }
 
   @Override
   public void periodic() {
     this.update();
+    // System.out.println(this.getHeading());
   }
 }

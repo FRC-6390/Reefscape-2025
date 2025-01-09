@@ -13,21 +13,23 @@ public interface Constants {
     
     public interface DriveTrain {
         
-        int PIDGEON_ID = -1;
+        int PIDGEON_ID = 20;
         double SWERVE_WHEEL_DIAMETER_METERS = Units.inchesToMeters(4);
 
         double TRACKWIDTH_METERS = Units.inchesToMeters(24);
         double WHEELBASE_METERS = Units.inchesToMeters(24);
 
-        String SWERVE_CAN_BUS = "canivore";
+        String SWERVE_CAN_BUS = "can";
         PIDController ROTATION_PID = new PIDController(0, 0, 0);
         PIDController DRIFT_PID = new PIDController(0, 0, 0);
 
         //LF,FR,BL,BR
-        int[] DRIVE_IDS = {-1,-1,-1,-1};
-        int[] ROTATION_IDS = {-1,-1,-1,-1};
-        int[] ENCODER_IDS = {-1,-1,-1,-1};
-        double[] ENCODER_OFFSETS = {-1,-1,-1,-1};
+        int[] DRIVE_IDS = {5,14,6,17};
+        int[] ROTATION_IDS = {15,12,8,9};
+        int[] ENCODER_IDS = {1,2,3,4};
+        double[] ENCODER_OFFSETS = {0,0,0,0};
+
+        
 
         Translation2d[] MODULE_LOCATIONS = SwerveHelpers.generateModuleLocations(TRACKWIDTH_METERS, WHEELBASE_METERS);
         SwerveMotor[] DRIVE_MOTORS = SwerveHelpers.generateMotors((8.14d/1d), Units.feetToMeters(12.9), SWERVE_CAN_BUS, DRIVE_IDS);
