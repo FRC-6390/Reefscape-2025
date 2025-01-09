@@ -4,6 +4,7 @@
 
 package frc.robot.subsystems;
 
+import ca.frc6390.athena.core.RobotIMU;
 import ca.frc6390.athena.drivetrains.swerve.SwerveDrivetrain;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
@@ -11,17 +12,15 @@ import frc.robot.Constants;
 
 public class DriveTrain extends SwerveDrivetrain {
   /** Creates a new DriveTrain. */
-  public DriveTrain() {
-    super(Constants.DriveTrain.MODULE_CONFIGS, Constants.DriveTrain.PIDGEON_ID, true, Constants.DriveTrain.DRIFT_PID);
+  public DriveTrain(RobotIMU<?> imu) {
+    super(Constants.DriveTrain.MODULE_CONFIGS,imu, true, Constants.DriveTrain.DRIFT_PID);
 
     ShuffleboardTab tab = Shuffleboard.getTab("DriveTrain");
-    // this.shuffleboard(tab);
-  
+    this.shuffleboard(tab);
   }
 
   @Override
   public void periodic() {
     this.update();
-    // System.out.println(this.getHeading());
   }
 }
