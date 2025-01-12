@@ -13,11 +13,8 @@ import frc.robot.Constants;
 public class DriveTrain extends SwerveDrivetrain {
   /** Creates a new DriveTrain. */
   public DriveTrain(RobotIMU<?> imu) {
-    super(Constants.DriveTrain.MODULE_CONFIGS,imu,Constants.DriveTrain.MODULE.calculateFreeSpeedMeter(), true, Constants.DriveTrain.DRIFT_PID);
-    Constants.DriveTrain.ROTATION_PID.enableContinuousInput(-Math.PI, Math.PI);
-    // Constants.DriveTrain.DRIFT_PID.enableContinuousInput(-Math.PI, Math.PI);
+    super(Constants.DriveTrain.MODULE_CONFIGS,imu, true, Constants.DriveTrain.DRIFT_PID);    
     ShuffleboardTab tab = Shuffleboard.getTab("DriveTrain");
-    
     this.shuffleboard(tab);
   }
 

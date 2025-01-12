@@ -1,10 +1,8 @@
 package frc.robot;
 
-import ca.frc6390.athena.commands.SwerveDriveCommand.SwerveDriveCommandConfig;
+import ca.frc6390.athena.core.RobotLocalization.RobotLocalizationConfig;
 import ca.frc6390.athena.drivetrains.swerve.SwerveHelpers;
-import ca.frc6390.athena.drivetrains.swerve.SwerveModule.SwerveEncoder;
 import ca.frc6390.athena.drivetrains.swerve.SwerveModule.SwerveModuleConfig;
-import ca.frc6390.athena.drivetrains.swerve.SwerveModule.SwerveMotor;
 import ca.frc6390.athena.drivetrains.swerve.modules.SDSModules;
 import ca.frc6390.athena.drivetrains.swerve.modules.SDSModules.MK4i;
 import ca.frc6390.athena.drivetrains.swerve.modules.SDSModules.SDSMotor;
@@ -45,13 +43,15 @@ public interface Constants {
         // int PIGEON_ID = 20;
 
         Translation2d[] MODULE_LOCATIONS = SwerveHelpers.generateModuleLocations(TRACKWIDTH_METERS, WHEELBASE_METERS);
-        SwerveMotor[] DRIVE_MOTORS = MODULE.generateDriveMotors(DRIVE_IDS);
-        SwerveMotor[] ROTATION_MOTORS = MODULE.generateRotationMotors(ROTATION_IDS);
-        SwerveEncoder[] MODULE_ENCODERS = MODULE.generateEncoders(ENCODER_IDS, ENCODER_OFFSETS);
-        SwerveModuleConfig[] MODULE_CONFIGS = MODULE.generateConfigs(MODULE_LOCATIONS, DRIVE_MOTORS, ROTATION_MOTORS, ROTATION_PID, MODULE_ENCODERS);
+        SwerveModuleConfig[] MODULE_CONFIGS = MODULE.generateConfigs(MODULE_LOCATIONS, DRIVE_IDS, ROTATION_IDS, ROTATION_PID, ENCODER_IDS, ENCODER_OFFSETS);
 
-        double THETA_DEADZONE = 0.01;
-        SwerveDriveCommandConfig DRIVE_COMMAND_CONFIG = new SwerveDriveCommandConfig(THETA_DEADZONE, MODULE.calculateFreeSpeedMeter(), MODULE.calculateFreeSpeedMeter(),MAX_ACCELERATION_METERS_PER_SECOND, MAX_ANGULAR_ACCELERATION_METERS_PER_SECOND);
+
+        String[] LIMELIGHTS = {"llm2"};
+        RobotLocalizationConfig LOCALIZATION_CONFIG = new RobotLocalizationConfig(0.1, 0.1, 3);
+    }
+
+    public interface Controllers {
+        double THETA_DEADZONE = 0.01;       
     }
 
     public interface Elevator {
