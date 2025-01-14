@@ -4,7 +4,7 @@ import ca.frc6390.athena.core.RobotLocalization.RobotLocalizationConfig;
 import ca.frc6390.athena.drivetrains.swerve.SwerveHelpers;
 import ca.frc6390.athena.drivetrains.swerve.SwerveModule.SwerveModuleConfig;
 import ca.frc6390.athena.drivetrains.swerve.modules.SDSModules;
-import ca.frc6390.athena.drivetrains.swerve.modules.SDSModules.MK4i;
+import ca.frc6390.athena.drivetrains.swerve.modules.SDSModules.SDSMK4i;
 import ca.frc6390.athena.drivetrains.swerve.modules.SDSModules.SDSMotor;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.geometry.Translation2d;
@@ -13,14 +13,11 @@ import edu.wpi.first.math.util.Units;
 public interface Constants {
     
     public interface DriveTrain {
-        double TRACKWIDTH_METERS = Units.inchesToMeters(24);
-        double WHEELBASE_METERS = Units.inchesToMeters(24);
-
-        double MAX_ACCELERATION_METERS_PER_SECOND = 2.75; //15
-        double MAX_ANGULAR_ACCELERATION_METERS_PER_SECOND = 3.85;
+        double TRACKWIDTH_METERS = Units.inchesToMeters(18.375); 
+        double WHEELBASE_METERS = Units.inchesToMeters(18.375);
 
         String CANBUS = "can";
-        SDSModules MODULE = new SDSModules(SDSMotor.KRAKEN_X60, MK4i.L1, CANBUS);
+        SDSModules MODULE = new SDSModules(SDSMotor.FALCON_500, SDSMK4i.L1, CANBUS);
         PIDController ROTATION_PID = new PIDController(0.5 , 0, 0);
     
         PIDController DRIFT_PID = new PIDController(5.0, 0, 0);
