@@ -17,38 +17,30 @@ public interface Constants {
         double WHEELBASE_METERS = Units.inchesToMeters(18.375);
 
         String CANBUS = "can";
-        SDSModules MODULE = new SDSModules(SDSMotor.FALCON_500, SDSMK4i.L1, CANBUS);
-        PIDController ROTATION_PID = new PIDController(0.5 , 0, 0);
+        SDSModules MODULE = new SDSModules(SDSMotor.KRAKEN_X60, SDSMK4i.L3, CANBUS);
+        PIDController ROTATION_PID = new PIDController(0.5 , 0,0);
     
-        PIDController DRIFT_PID = new PIDController(5.0, 0, 0);
+        PIDController DRIFT_PID = new PIDController(5, 0, 0);
 
-
-        //SAM INFO
+        int PIGEON_ID = 20;
         //LF,FR,BL,BR
         int[] DRIVE_IDS = {1,2,3,4};
         int[] ROTATION_IDS = {5,6,7,8};
         int[] ENCODER_IDS = {9,10,11,12};
-        double[] ENCODER_OFFSETS = {-0.5916,0,-0.0688132815 + 0.17749,0.36307 + 0.27};
-        int PIGEON_ID = 20;
-
-        //PATRICK INFO
-        // LF,FR,BL,BR
-        // int[] DRIVE_IDS = {5,14,6,17};
-        // int[] ROTATION_IDS = {15,12,8,9};
-        // int[] ENCODER_IDS = {1,2,3,4};
-        // double[] ENCODER_OFFSETS = {0.3681 + 0.2639, 0.2026 - 0.4050 + 0.5, 0.1746 - 0.3491, -0.1140 + 0.2279 + 0.5};
-        // int PIGEON_ID = 20;
+        // SAM OFFSETS
+        // double[] ENCODER_OFFSETS = {0.697,3.123,2.445,-0.851};
+        // PATRICK OFFSETS
+        double[] ENCODER_OFFSETS = {-0.932,-1.942,-2.198,2.376};
 
         Translation2d[] MODULE_LOCATIONS = SwerveHelpers.generateModuleLocations(TRACKWIDTH_METERS, WHEELBASE_METERS);
         SwerveModuleConfig[] MODULE_CONFIGS = MODULE.generateConfigs(MODULE_LOCATIONS, DRIVE_IDS, ROTATION_IDS, ROTATION_PID, ENCODER_IDS, ENCODER_OFFSETS);
 
-
-        String[] LIMELIGHTS = {"llm2"};
-        RobotLocalizationConfig LOCALIZATION_CONFIG = new RobotLocalizationConfig(0.1, 0.1, 3);
+        String[] LIMELIGHTS = {"limelight-tag"};
+        RobotLocalizationConfig LOCALIZATION_CONFIG = new RobotLocalizationConfig(0.1, 0.1, 0.0000001, 0.3, 0.3, 9999999);
     }
 
     public interface Controllers {
-        double THETA_DEADZONE = 0.01;       
+        double THETA_DEADZONE = 0.1;       
     }
 
     public interface Elevator {

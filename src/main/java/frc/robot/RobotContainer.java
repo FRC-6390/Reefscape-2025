@@ -33,6 +33,9 @@ public class RobotContainer {
   private void configureBindings() 
   {
     driverController.rightX.setDeadzone(Constants.Controllers.THETA_DEADZONE);
+    driverController.leftX.setDeadzone(Constants.Controllers.THETA_DEADZONE);
+    driverController.leftY.setDeadzone(Constants.Controllers.THETA_DEADZONE);
+
     driverController.start.onTrue(new InstantCommand(() -> driveTrain.getIMU().setYaw(0)));
   }
 
