@@ -1,5 +1,8 @@
 package frc.robot;
 
+import com.pathplanner.lib.auto.AutoBuilder;
+import com.pathplanner.lib.path.PathPlannerPath;
+
 import ca.frc6390.athena.core.RobotLocalization.RobotLocalizationConfig;
 import ca.frc6390.athena.drivetrains.swerve.SwerveHelpers;
 import ca.frc6390.athena.drivetrains.swerve.SwerveModule.SwerveModuleConfig;
@@ -17,10 +20,10 @@ public interface Constants {
         double WHEELBASE_METERS = Units.inchesToMeters(18.375);
 
         String CANBUS = "can";
-        SDSModules MODULE = new SDSModules(SDSMotor.KRAKEN_X60, SDSMK4i.L3, CANBUS);
+        SDSModules MODULE = new SDSModules(SDSMotor.FALCON_500, SDSMK4i.L3, CANBUS);
         PIDController ROTATION_PID = new PIDController(0.5 , 0,0);
     
-        PIDController DRIFT_PID = new PIDController(5, 0, 0);
+        PIDController DRIFT_PID = new PIDController(0.5, 0, 0);
 
         int PIGEON_ID = 20;
         //LF,FR,BL,BR
@@ -30,17 +33,19 @@ public interface Constants {
         // SAM OFFSETS
         // double[] ENCODER_OFFSETS = {0.697,3.123,2.445,-0.851};
         // PATRICK OFFSETS
-        double[] ENCODER_OFFSETS = {-0.932,-1.942,-2.198,2.376};
+        // double[] ENCODER_OFFSETS = {-0.932,-1.942,-2.198,2.376};
+        double[] ENCODER_OFFSETS = {2.337,-2.371,1.056,2.345};
+
 
         Translation2d[] MODULE_LOCATIONS = SwerveHelpers.generateModuleLocations(TRACKWIDTH_METERS, WHEELBASE_METERS);
         SwerveModuleConfig[] MODULE_CONFIGS = MODULE.generateConfigs(MODULE_LOCATIONS, DRIVE_IDS, ROTATION_IDS, ROTATION_PID, ENCODER_IDS, ENCODER_OFFSETS);
 
-        String[] LIMELIGHTS = {"limelight-tag"};
+        String[] LIMELIGHTS = {"limelight-driver", "limelight-tag"};
         RobotLocalizationConfig LOCALIZATION_CONFIG = new RobotLocalizationConfig(0.1, 0.1, 0.0000001, 0.3, 0.3, 9999999);
     }
 
     public interface Controllers {
-        double THETA_DEADZONE = 0.1;       
+        double THETA_DEADZONE = 0.1;      
     }
 
     public interface Elevator {
@@ -63,6 +68,8 @@ public interface Constants {
         }
     }
 
+   
+
     public interface FieldElements {
 
         enum ReefAprilTag {
@@ -72,6 +79,7 @@ public interface Constants {
             private ReefAprilTag(double pos){
                 this.pos = pos;
             }
+
 
             public double getPosition() {
                 return pos;

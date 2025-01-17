@@ -4,6 +4,15 @@
 
 package frc.robot;
 
+import java.io.IOException;
+
+import org.json.simple.parser.ParseException;
+
+import com.pathplanner.lib.auto.AutoBuilder;
+import com.pathplanner.lib.path.PathConstraints;
+import com.pathplanner.lib.path.PathPlannerPath;
+import com.pathplanner.lib.util.FileVersionException;
+
 import ca.frc6390.athena.controllers.DebouncedController;
 import ca.frc6390.athena.core.RobotIMU;
 import ca.frc6390.athena.core.RobotLocalization;
@@ -11,14 +20,19 @@ import ca.frc6390.athena.core.RobotVision;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
+import frc.robot.commands.AprilTagAlign;
+import frc.robot.commands.DriveToGoal;
 import frc.robot.subsystems.DriveTrain;
 
 public class RobotContainer {
 
   private final RobotIMU imu = RobotIMU.createFromPigeon2(Constants.DriveTrain.PIGEON_ID,  Constants.DriveTrain.CANBUS);
   private final RobotVision vision = new RobotVision(Constants.DriveTrain.LIMELIGHTS);
-  private final DriveTrain driveTrain = new DriveTrain(imu);
-  private final RobotLocalization localization = new RobotLocalization(driveTrain, vision, Constants.DriveTrain.LOCALIZATION_CONFIG);
+  public final DriveTrain driveTrain = new DriveTrain(imu);
+ 
+  
+  public final RobotLocalization localization = new RobotLocalization(driveTrain, vision, Constants.DriveTrain.LOCALIZATION_CONFIG);
+  public DriveToGoal driveToGoal = new DriveToGoal(driveTrain, localization);
   private final DebouncedController driverController = new DebouncedController(0);
 
   public RobotContainer() {
@@ -27,6 +41,7 @@ public class RobotContainer {
     localization.shuffleboard("Localization");
 
     configureBindings();
+    
     driveTrain.setDriveCommand(driverController.leftX, driverController.leftY, driverController.rightX);
   }
 
@@ -37,6 +52,10 @@ public class RobotContainer {
     driverController.leftY.setDeadzone(Constants.Controllers.THETA_DEADZONE);
 
     driverController.start.onTrue(new InstantCommand(() -> driveTrain.getIMU().setYaw(0)));
+    driverController.a.toggleOnTrue(new AprilTagAlign("limelight-tag", driveTrain, driverController));
+
+    driverController.leftBumper.onTrue(new DriveToGoal(driveTrain, localization));
+   
   }
 
   public Command getAutonomousCommand() {
