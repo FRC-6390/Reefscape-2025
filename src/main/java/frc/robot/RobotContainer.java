@@ -32,14 +32,11 @@ public class RobotContainer {
  
   
   public final RobotLocalization localization = new RobotLocalization(driveTrain, vision, Constants.DriveTrain.LOCALIZATION_CONFIG);
-  public DriveToGoal driveToGoal = new DriveToGoal(driveTrain, localization);
   private final DebouncedController driverController = new DebouncedController(0);
 
   public RobotContainer() {
 
-    driveTrain.shuffleboard("DriveTrain");
-    localization.shuffleboard("Localization");
-
+    
     configureBindings();
     
     driveTrain.setDriveCommand(driverController.leftX, driverController.leftY, driverController.rightX);
@@ -52,7 +49,7 @@ public class RobotContainer {
     driverController.leftY.setDeadzone(Constants.Controllers.THETA_DEADZONE);
 
     driverController.start.onTrue(new InstantCommand(() -> driveTrain.getIMU().setYaw(0)));
-    driverController.a.toggleOnTrue(new AprilTagAlign("limelight-tag", driveTrain, driverController));
+    driverController.a.whileTrue(new AprilTagAlign(vision, localization, driveTrain, driverController));
 
     driverController.leftBumper.onTrue(new DriveToGoal(driveTrain, localization));
    

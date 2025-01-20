@@ -9,6 +9,7 @@ import ca.frc6390.athena.drivetrains.swerve.SwerveModule.SwerveModuleConfig;
 import ca.frc6390.athena.drivetrains.swerve.modules.SDSModules;
 import ca.frc6390.athena.drivetrains.swerve.modules.SDSModules.SDSMK4i;
 import ca.frc6390.athena.drivetrains.swerve.modules.SDSModules.SDSMotor;
+import ca.frc6390.athena.sensors.camera.limelight.LimeLight.PoseEstimateWithLatencyType;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.util.Units;
@@ -23,7 +24,7 @@ public interface Constants {
         SDSModules MODULE = new SDSModules(SDSMotor.FALCON_500, SDSMK4i.L3, CANBUS);
         PIDController ROTATION_PID = new PIDController(0.5 , 0,0);
     
-        PIDController DRIFT_PID = new PIDController(0.5, 0, 0);
+        PIDController DRIFT_PID = new PIDController(1.5, 0, 0);
 
         int PIGEON_ID = 20;
         //LF,FR,BL,BR
@@ -33,15 +34,16 @@ public interface Constants {
         // SAM OFFSETS
         // double[] ENCODER_OFFSETS = {0.697,3.123,2.445,-0.851};
         // PATRICK OFFSETS
-        // double[] ENCODER_OFFSETS = {-0.932,-1.942,-2.198,2.376};
-        double[] ENCODER_OFFSETS = {2.337,-2.371,1.056,2.345};
+        //RL IN, FL OUT
+        double[] ENCODER_OFFSETS = {2.284,-1.942,1.0952,2.376};
+        // double[] ENCODER_OFFSETS = {2.337,-2.371,1.056,2.345};
 
 
         Translation2d[] MODULE_LOCATIONS = SwerveHelpers.generateModuleLocations(TRACKWIDTH_METERS, WHEELBASE_METERS);
         SwerveModuleConfig[] MODULE_CONFIGS = MODULE.generateConfigs(MODULE_LOCATIONS, DRIVE_IDS, ROTATION_IDS, ROTATION_PID, ENCODER_IDS, ENCODER_OFFSETS);
 
         String[] LIMELIGHTS = {"limelight-driver", "limelight-tag"};
-        RobotLocalizationConfig LOCALIZATION_CONFIG = new RobotLocalizationConfig(0.1, 0.1, 0.0000001, 0.3, 0.3, 9999999);
+        RobotLocalizationConfig LOCALIZATION_CONFIG = new RobotLocalizationConfig(0.1, 0.1, 0.00001, 0.3, 0.3,999999, PoseEstimateWithLatencyType.BOT_POSE_MT2_BLUE);
     }
 
     public interface Controllers {

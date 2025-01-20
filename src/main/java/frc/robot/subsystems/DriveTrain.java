@@ -16,7 +16,7 @@ public class DriveTrain extends SwerveDrivetrain {
 
   /** Creates a new DriveTrain. */
   public DriveTrain(RobotIMU imu) {
-    super(Constants.DriveTrain.MODULE_CONFIGS,imu, true, Constants.DriveTrain.DRIFT_PID);    
+    super(Constants.DriveTrain.MODULE_CONFIGS,imu, false, Constants.DriveTrain.DRIFT_PID);    
   }
 
   @Override

@@ -56,10 +56,15 @@ public class Robot extends TimedRobot {
 
     m_robotContainer.localization.update();
     
-    SmartDashboard.putNumber("Wheel Diameter", m_robotContainer.driveTrain.swerveModules[0].getDriveMotorRotations());
     // SmartDashboard.putNumber("X", m_robotContainer.localization.getOdometryPose().getX());
     // SmartDashboard.putNumber("Y", m_robotContainer.localization.getOdometryPose().getY());
     // SmartDashboard.putNumber("Theta", m_robotContainer.localization.getOdometryPose().getRotation().getDegrees());
+  }
+
+  @Override
+  public void robotInit() {
+    m_robotContainer.driveTrain.shuffleboard("DriveTrain");
+    m_robotContainer.localization.shuffleboard("Localization");
   }
 
   @Override
