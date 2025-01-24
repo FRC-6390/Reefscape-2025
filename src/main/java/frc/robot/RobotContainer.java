@@ -9,6 +9,8 @@ import java.io.IOException;
 import org.json.simple.parser.ParseException;
 
 import com.pathplanner.lib.auto.AutoBuilder;
+import com.pathplanner.lib.auto.NamedCommands;
+import com.pathplanner.lib.commands.PathPlannerAuto;
 import com.pathplanner.lib.path.PathConstraints;
 import com.pathplanner.lib.path.PathPlannerPath;
 import com.pathplanner.lib.util.FileVersionException;
@@ -38,7 +40,7 @@ public class RobotContainer {
 
     
     configureBindings();
-    
+    NamedCommands.registerCommand("Align", new AprilTagAlign(vision, localization, driveTrain, driverController));
     driveTrain.setDriveCommand(driverController.leftX, driverController.leftY, driverController.rightX);
   }
 
@@ -56,6 +58,6 @@ public class RobotContainer {
   }
 
   public Command getAutonomousCommand() {
-    return Commands.print("No autonomous command configured");
+    return new PathPlannerAuto("Bum");
   }
 }

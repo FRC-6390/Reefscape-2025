@@ -12,8 +12,10 @@ import ca.frc6390.athena.core.RobotVision;
 import ca.frc6390.athena.drivetrains.swerve.SwerveDrivetrain;
 import ca.frc6390.athena.sensors.camera.limelight.LimeLight;
 import ca.frc6390.athena.sensors.camera.limelight.LimelightConfig;
+import ca.frc6390.athena.sensors.camera.limelight.LimeLight.PoseEstimateType;
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.controller.PIDController;
+import edu.wpi.first.math.filter.MedianFilter;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
@@ -23,6 +25,10 @@ import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.CommandScheduler;
+import edu.wpi.first.wpilibj2.command.WaitCommand;
+import edu.wpi.first.wpilibj2.command.WaitUntilCommand;
+import frc.robot.Constants;
 
 public class AprilTagAlign extends Command {
   public LimeLight limelight; 
@@ -30,14 +36,25 @@ public class AprilTagAlign extends Command {
   public DebouncedController cont; 
   // public PIDController controller = new PIDController(0.025, 0, 0);
   // public PIDController xController = new PIDController(1.225, 0, 0);
-  public PIDController controller = new PIDController(0.05, 0, 0);
-  public PIDController xController = new PIDController(0.05, 0, 0);
+  public PIDController controller = new PIDController(0.025, 0, 0);
+  public PIDController xController = new PIDController(0.07, 0, 0.0001);
   public double thetaSpeed = 0;
   public Pose2d targetRed = new Pose2d(13.043, 4.007, new Rotation2d());
   public RobotVision vision;
   public RobotLocalization localization;
   public NetworkTable table;
   public NetworkTableEntry raw;
+  public MedianFilter filter = new MedianFilter(10);
+  public boolean closeEnough;
+  public boolean isDone;
+  public ChassisSpeeds speeds;
+  public int runTag;
+  public boolean hasSet;
+  public Rotation2d lastYaw;
+  public Rotation2d lastRobotYaw;
+  public double xMeasurement = 0;
+  public double thetaMeasurement = 0;
+  public double rVel = 0;
 
   public AprilTagAlign(RobotVision vision, RobotLocalization localization, SwerveDrivetrain drivetrain, DebouncedController cont) {
     this.drivetrain = drivetrain; 
@@ -50,108 +67,52 @@ public class AprilTagAlign extends Command {
   @Override
   public void initialize() 
   {
+    closeEnough = false;
+    hasSet = false;
+    isDone =false;
+    speeds = new ChassisSpeeds();
     // controller.enableContinuousInput(-Math.PI, Math.PI);
     controller.setTolerance(0.3);
     table = NetworkTableInstance.getDefault().getTable("limelight-driver");
-    raw = table.getEntry("rawfiducials");
-    
+    raw = table.getEntry("rawfiducials");    
   }
 
 
   @Override
   public void execute() 
   {
-    
-    
+    System.out.println(runTag);
     if(limelight.hasValidTarget()){
-      SmartDashboard.putNumber("X", limelight.getTargetHorizontalOffset());
-      SmartDashboard.putNumber("Raw X", (double)limelight.getRawFiducials()[1]);
-        // if(Math.abs(limelight.getTargetHorizontalOffset()) > 25)
-        // {
-        // double xdiff = targetRed.getX() - localization.getPose().getX();
-        // double ydiff = targetRed.getY() - localization.getPose().getY();
-        // double angle = Math.atan2(ydiff, xdiff);
-        double rotationalVelocity = controller.calculate(limelight.getTargetHorizontalOffset());
-
-        double xVelocity = -xController.calculate(limelight.getRawFiducials()[1].doubleValue());
-        ChassisSpeeds speeds = new ChassisSpeeds(cont.leftY.getAsDouble(), xVelocity, rotationalVelocity); 
-        //  ChassisSpeeds fieldRelative = ChassisSpeeds.fromFieldRelativeSpeeds(speeds, poseEstimate.getRotation());
-         drivetrain.drive(speeds);
-        // }
-        // else
-        // {
-        //  Pose2d poseEstimate = limelight.getPoseEstimate(LimeLight.PoseEstimateType.BOT_POSE_TARGET_SPACE).getPose();
-        //  double rotationalVelocity = controller.calculate(poseEstimate.getRotation().getDegrees());
-        //  double xVelocity = -xController.calculate(limelight.getTargetHorizontalOffset());
-        //  ChassisSpeeds speeds = new ChassisSpeeds(cont.leftY.getAsDouble(), xVelocity, rotationalVelocity); 
-        //  ChassisSpeeds fieldRelative = ChassisSpeeds.fromFieldRelativeSpeeds(speeds, poseEstimate.getRotation());
-        //  drivetrain.drive(fieldRelative);
-        // }
-      }
-      else{
-        drivetrain.drive(new ChassisSpeeds(0,0,0));
-
+      if(!hasSet)
+      {
+        hasSet = true;
+        runTag = ((int)limelight.getAprilTagID());
       }
 
+      if(((int)limelight.getAprilTagID()) == runTag) 
+      {
+      thetaMeasurement = -filter.calculate(limelight.getPoseEstimate(PoseEstimateType.TARGET_POSE_ROBOT_SPACE).getRaw()[4]);
+      lastYaw = Rotation2d.fromDegrees(thetaMeasurement);
+      lastRobotYaw = drivetrain.getIMU().getYaw();
+      xMeasurement = limelight.getTargetHorizontalOffset();
+      SmartDashboard.putNumber("Yaw",thetaMeasurement);
+       rVel = -controller.calculate(thetaMeasurement);
+      }
+      
+      else
+      {
+        double rot = lastRobotYaw.minus(lastYaw).getDegrees();
+        // thetaMeasurement -= rot;
+        rVel = -controller.calculate(localization.getPose().getRotation().getDegrees(), rot);
+      }
+    }
 
-    // if(DriverStation.isTeleop())
-    // {
-    // if(limelight.hasValidTarget()){
-    //   if(Math.abs(limelight.getTargetHorizontalOffset()) > 35)
-    //   {
-    //     drivetrain.addFeedbackSpeed(
-    //     new ChassisSpeeds(
-    //       cont.leftY.getAsDouble(), 
-    //       0, 
-    //       // controller.calculate(LimelightHelpers.getBotPose_TargetSpace(limelight)[4])
-    //       controller.calculate(limelight.getPoseEstimate(LimeLight.PoseEstimateType.BOT_POSE_TARGET_SPACE).getPose().getRotation().getDegrees()))
-    //       );
-    //   }
-    //   else
-    //   {
-    //     drivetrain.addFeedbackSpeed(
-    //       new ChassisSpeeds(
-    //         cont.leftY.getAsDouble(), 
-    //         -xController.calculate(limelight.getTargetHorizontalOffset()), 
-    //         // controller.calculate(LimelightHelpers.getBotPose_TargetSpace(limelight)[4])
-    //         controller.calculate(limelight.getPoseEstimate(LimeLight.PoseEstimateType.BOT_POSE_TARGET_SPACE).getPose().getRotation().getDegrees()))
-    //         );
-    //   }
-
-    //    }
-    //   }
-    // else if(DriverStation.isAutonomous())
-    // {
-    // if(limelight.hasValidTarget()){
-    //   if(Math.abs(limelight.getTargetHorizontalOffset()) > 35)
-    //   {
-    //     drivetrain.drive(new ChassisSpeeds(drivetrain.getDriveSpeeds().vxMetersPerSecond, 0, drivetrain.getDriveSpeeds().omegaRadiansPerSecond));
-    //     drivetrain.addFeedbackSpeed(
-    //     new ChassisSpeeds(
-    //       0, 
-    //       0, 
-    //       // controller.calculate(LimelightHelpers.getBotPose_TargetSpace(limelight)[4])
-    //       controller.calculate(limelight.getPoseEstimate(LimeLight.PoseEstimateType.BOT_POSE_TARGET_SPACE).getPose().getRotation().getDegrees()))
-    //       );
-    //   }
-    //   else
-    //   {
-    //     drivetrain.addFeedbackSpeed(
-    //       new ChassisSpeeds(
-    //         cont.leftY.getAsDouble(), 
-    //         -xController.calculate(limelight.getTargetHorizontalOffset()), 
-    //         // controller.calculate(LimelightHelpers.getBotPose_TargetSpace(limelight)[4])
-    //         controller.calculate(limelight.getPoseEstimate(LimeLight.PoseEstimateType.BOT_POSE_TARGET_SPACE).getPose().getRotation().getDegrees()))
-    //         );
-    //   }
-
-    //    }
-    //    else
-    //    {
-    //     drivetrain.drive(drivetrain.getDriveSpeeds());
-    //     drivetrain.addFeedbackSpeed(new ChassisSpeeds(0,0,0));
-    //    }
-    //   }
+    if(hasSet) {
+      double xVelocity = -xController.calculate(xMeasurement);
+      // double rotationalVelocity = -controller.calculate(thetaMeasurement);
+      speeds = new ChassisSpeeds(-1,xVelocity, rVel);   
+      drivetrain.drive(speeds);
+    }
   }
 
   // Called once the command ends or is interrupted.
@@ -159,7 +120,7 @@ public class AprilTagAlign extends Command {
   public void end(boolean interrupted) 
   {
     drivetrain.drive(new ChassisSpeeds(0,0,0));
-    drivetrain.addFeedbackSpeed(new ChassisSpeeds(0,0,0));
+    drivetrain.feedbackSpeeds(new ChassisSpeeds(0,0,0));
     drivetrain.drive(drivetrain.getDriveSpeeds());
     SmartDashboard.putNumber("Is Running", 0);
   }

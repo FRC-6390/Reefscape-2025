@@ -43,7 +43,7 @@ public interface Constants {
         SwerveModuleConfig[] MODULE_CONFIGS = MODULE.generateConfigs(MODULE_LOCATIONS, DRIVE_IDS, ROTATION_IDS, ROTATION_PID, ENCODER_IDS, ENCODER_OFFSETS);
 
         String[] LIMELIGHTS = {"limelight-driver", "limelight-tag"};
-        RobotLocalizationConfig LOCALIZATION_CONFIG = new RobotLocalizationConfig(0.1, 0.1, 0.00001, 0.3, 0.3,999999, PoseEstimateWithLatencyType.BOT_POSE_MT2_BLUE);
+        RobotLocalizationConfig LOCALIZATION_CONFIG = new RobotLocalizationConfig(3333, 33333, 33333, 0.000001, 0.0000001,0.0000001, PoseEstimateWithLatencyType.BOT_POSE_BLUE);
     }
 
     public interface Controllers {
