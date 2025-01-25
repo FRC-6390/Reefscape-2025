@@ -41,7 +41,6 @@ public class AprilTagAlign extends Command {
   public double thetaSpeed = 0;
   public Pose2d targetRed = new Pose2d(13.043, 4.007, new Rotation2d());
   public RobotVision vision;
-  public RobotLocalization localization;
   public NetworkTable table;
   public NetworkTableEntry raw;
   public MedianFilter filter = new MedianFilter(10);
@@ -52,15 +51,14 @@ public class AprilTagAlign extends Command {
   public boolean hasSet;
   public Rotation2d lastYaw;
   public Rotation2d lastRobotYaw;
-  public double xMeasurement = 0;
-  public double thetaMeasurement = 0;
-  public double rVel = 0;
+  public double xMeasurement;
+  public double thetaMeasurement;
+  public double rVel;
 
-  public AprilTagAlign(RobotVision vision, RobotLocalization localization, SwerveDrivetrain drivetrain, DebouncedController cont) {
+  public AprilTagAlign(RobotVision vision, SwerveDrivetrain drivetrain, DebouncedController cont) {
     this.drivetrain = drivetrain; 
     this.vision = vision;
     this.cont = cont;
-    this.localization = localization;
     limelight = vision.getCamera("limelight-driver");
   }
 
@@ -71,6 +69,13 @@ public class AprilTagAlign extends Command {
     hasSet = false;
     isDone =false;
     speeds = new ChassisSpeeds();
+    rVel = 0;
+    lastYaw = new Rotation2d();
+    lastRobotYaw  =new Rotation2d();
+    thetaMeasurement =0;
+    xMeasurement = 0;
+    speeds =new ChassisSpeeds();
+    runTag = -1;
     // controller.enableContinuousInput(-Math.PI, Math.PI);
     controller.setTolerance(0.3);
     table = NetworkTableInstance.getDefault().getTable("limelight-driver");
@@ -81,10 +86,12 @@ public class AprilTagAlign extends Command {
   @Override
   public void execute() 
   {
-    System.out.println(runTag);
+    SmartDashboard.putNumber("Tag",runTag);
     if(limelight.hasValidTarget()){
+      SmartDashboard.putBoolean("Sim", ((int)limelight.getAprilTagID()) == runTag);
       if(!hasSet)
       {
+        System.out.println("Setting Tag");
         hasSet = true;
         runTag = ((int)limelight.getAprilTagID());
       }
@@ -93,21 +100,30 @@ public class AprilTagAlign extends Command {
       {
       thetaMeasurement = -filter.calculate(limelight.getPoseEstimate(PoseEstimateType.TARGET_POSE_ROBOT_SPACE).getRaw()[4]);
       lastYaw = Rotation2d.fromDegrees(thetaMeasurement);
-      lastRobotYaw = drivetrain.getIMU().getYaw();
+      lastRobotYaw = Rotation2d.fromRadians(MathUtil.angleModulus(drivetrain.getIMU().getYaw().getRadians()));
       xMeasurement = limelight.getTargetHorizontalOffset();
       SmartDashboard.putNumber("Yaw",thetaMeasurement);
        rVel = -controller.calculate(thetaMeasurement);
       }
-      
       else
       {
-        double rot = lastRobotYaw.minus(lastYaw).getDegrees();
+        double rot = lastRobotYaw.plus(lastYaw).getDegrees();
         // thetaMeasurement -= rot;
-        rVel = -controller.calculate(localization.getPose().getRotation().getDegrees(), rot);
+        rVel = controller.calculate(drivetrain.getIMU().getYaw().getDegrees(), rot);
       }
+    }
+    else
+    {
+      double rot = lastRobotYaw.plus(lastYaw).getDegrees();
+      // thetaMeasurement -= rot;
+      rVel = controller.calculate(drivetrain.getIMU().getYaw().getDegrees(), rot);
     }
 
     if(hasSet) {
+      SmartDashboard.putNumber("Last Yaw", lastYaw.getDegrees());
+      SmartDashboard.putNumber("Last Robot Yaw", lastRobotYaw.getDegrees());
+      SmartDashboard.putNumber("Cur Heading", drivetrain.getIMU().getYaw().getDegrees());
+       
       double xVelocity = -xController.calculate(xMeasurement);
       // double rotationalVelocity = -controller.calculate(thetaMeasurement);
       speeds = new ChassisSpeeds(-1,xVelocity, rVel);   

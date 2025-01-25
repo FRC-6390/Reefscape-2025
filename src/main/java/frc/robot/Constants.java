@@ -34,10 +34,8 @@ public interface Constants {
         // SAM OFFSETS
         // double[] ENCODER_OFFSETS = {0.697,3.123,2.445,-0.851};
         // PATRICK OFFSETS
-        //RL IN, FL OUT
         double[] ENCODER_OFFSETS = {2.284,-1.942,1.0952,2.376};
-        // double[] ENCODER_OFFSETS = {2.337,-2.371,1.056,2.345};
-
+        
 
         Translation2d[] MODULE_LOCATIONS = SwerveHelpers.generateModuleLocations(TRACKWIDTH_METERS, WHEELBASE_METERS);
         SwerveModuleConfig[] MODULE_CONFIGS = MODULE.generateConfigs(MODULE_LOCATIONS, DRIVE_IDS, ROTATION_IDS, ROTATION_PID, ENCODER_IDS, ENCODER_OFFSETS);
