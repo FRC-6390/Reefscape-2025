@@ -25,30 +25,30 @@ public class Robot extends TimedRobot {
 
   public Robot() {
     m_robotContainer = new RobotContainer();
-    try{
-      config = RobotConfig.fromGUISettings();  }catch(Exception e){
-        DriverStation.reportError("Failed to load PathPlanner config and configure AutoBuilder", e.getStackTrace());
-      }
-      System.out.println("AutoBuilder Configured");
-      AutoBuilder.configure(
-        m_robotContainer.localization::getPose, 
-        m_robotContainer.localization::reset, 
-        m_robotContainer.driveTrain::getDriveSpeeds, 
-        (speeds, feedforwards) -> m_robotContainer.driveTrain.drive(speeds), 
-        new PPHolonomicDriveController(
-          new PIDConstants(5,0,0),
-          new PIDConstants(5,0,0)
-        ),
-        config,
-        () -> {
-            var alliance = DriverStation.getAlliance();
-            if (alliance.isPresent()) {
-                return alliance.get() == DriverStation.Alliance.Red;
-            }
-            return false;
-        },
-        m_robotContainer.driveTrain
-      );
+    // try{
+    //   config = RobotConfig.fromGUISettings();  }catch(Exception e){
+    //     DriverStation.reportError("Failed to load PathPlanner config and configure AutoBuilder", e.getStackTrace());
+    //   }
+    //   System.out.println("AutoBuilder Configured");
+    //   // AutoBuilder.configure(
+    //   //   m_robotContainer.localization::getPose, 
+    //   //   m_robotContainer.localization::reset, 
+    //   //   m_robotContainer.driveTrain::getDriveSpeeds, 
+    //   //   (speeds, feedforwards) -> m_robotContainer.driveTrain.drive(speeds), 
+    //   //   new PPHolonomicDriveController(
+    //   //     new PIDConstants(5,0,0),
+    //   //     new PIDConstants(5,0,0)
+    //   //   ),
+    //   //   config,
+    //   //   () -> {
+    //   //       var alliance = DriverStation.getAlliance();
+    //   //       if (alliance.isPresent()) {
+    //   //           return alliance.get() == DriverStation.Alliance.Red;
+    //   //       }
+    //   //       return false;
+    //   //   },
+    //   //   m_robotContainer.driveTrain
+    //   // );
     }
 
   @Override

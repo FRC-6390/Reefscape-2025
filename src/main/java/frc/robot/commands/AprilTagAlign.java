@@ -103,20 +103,22 @@ public class AprilTagAlign extends Command {
       lastRobotYaw = Rotation2d.fromRadians(MathUtil.angleModulus(drivetrain.getIMU().getYaw().getRadians()));
       xMeasurement = limelight.getTargetHorizontalOffset();
       SmartDashboard.putNumber("Yaw",thetaMeasurement);
-       rVel = -controller.calculate(thetaMeasurement);
+       rVel = -controller.calculate(thetaMeasurement, 0);
       }
       else
       {
-        double rot = lastRobotYaw.plus(lastYaw).getDegrees();
+        double rot = lastRobotYaw.getDegrees() + lastYaw.getDegrees();
         // thetaMeasurement -= rot;
-        rVel = controller.calculate(drivetrain.getIMU().getYaw().getDegrees(), rot);
+        rVel = controller.calculate(MathUtil.angleModulus(drivetrain.getIMU().getYaw().getRadians()) * 180/Math.PI, rot);
       }
     }
     else
     {
-      double rot = lastRobotYaw.plus(lastYaw).getDegrees();
+      double rot = lastRobotYaw.getDegrees() + lastYaw.getDegrees();
+      SmartDashboard.putNumber("Des Rot", rot);
+      SmartDashboard.putNumber("Hedingng", MathUtil.angleModulus(drivetrain.getIMU().getYaw().getRadians()) * 180/Math.PI);
       // thetaMeasurement -= rot;
-      rVel = controller.calculate(drivetrain.getIMU().getYaw().getDegrees(), rot);
+      rVel = controller.calculate(MathUtil.angleModulus(drivetrain.getIMU().getYaw().getRadians()) * 180/Math.PI, rot);
     }
 
     if(hasSet) {

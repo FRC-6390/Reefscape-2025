@@ -21,7 +21,7 @@ public interface Constants {
         double WHEELBASE_METERS = Units.inchesToMeters(18.375);
 
         String CANBUS = "can";
-        SDSModules MODULE = new SDSModules(SDSMotor.FALCON_500, SDSMK4i.L3, CANBUS);
+        SDSModules MODULE = new SDSModules(SDSMotor.KRAKEN_X60, SDSMK4i.L3, CANBUS);
         PIDController ROTATION_PID = new PIDController(0.5 , 0,0);
     
         PIDController DRIFT_PID = new PIDController(1.5, 0, 0);
@@ -41,7 +41,7 @@ public interface Constants {
         SwerveModuleConfig[] MODULE_CONFIGS = MODULE.generateConfigs(MODULE_LOCATIONS, DRIVE_IDS, ROTATION_IDS, ROTATION_PID, ENCODER_IDS, ENCODER_OFFSETS);
 
         String[] LIMELIGHTS = {"limelight-driver", "limelight-tag"};
-        RobotLocalizationConfig LOCALIZATION_CONFIG = new RobotLocalizationConfig(3333, 33333, 33333, 0.000001, 0.0000001,0.0000001, PoseEstimateWithLatencyType.BOT_POSE_BLUE);
+        RobotLocalizationConfig LOCALIZATION_CONFIG = new RobotLocalizationConfig(0.1, 0.1, 0.001);
     }
 
     public interface Controllers {
@@ -49,13 +49,21 @@ public interface Constants {
     }
 
     public interface Elevator {
+
+        int ENCODER = 1;
+        int LEFT_MOTOR = 2;
+        int RIGHT_MOTOR = 3;
+        double ROTATION_TO_CM = 320;
+        int LOWER_LIMIT_SWITCH = 0;
+        int UPPER_LIMIT_SWITCH = 0;
     
         enum Position {
-            L1(-1),
-            L2(-1),
-            L3(-1),
-            L4(-1),
-            Feeder(-1);
+            //ELEVATOR HEIGHT IN CM
+            L1(0),
+            L2(10),
+            L3(20),
+            L4(30),
+            Feeder(15);
 
             double pos;
             private Position(double pos){

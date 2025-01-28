@@ -33,7 +33,7 @@ public class RobotContainer {
   public final DriveTrain driveTrain = new DriveTrain(imu);
  
   
-  public final RobotLocalization localization = new RobotLocalization(driveTrain, vision, Constants.DriveTrain.LOCALIZATION_CONFIG);
+  public final RobotLocalization localization = new RobotLocalization(driveTrain, Constants.DriveTrain.LOCALIZATION_CONFIG);
   private final DebouncedController driverController = new DebouncedController(0);
 
   public RobotContainer() {
@@ -58,6 +58,6 @@ public class RobotContainer {
   }
 
   public Command getAutonomousCommand() {
-    return new PathPlannerAuto("Bum");
+    return new PathPlannerAuto("Prac");
   }
 }
