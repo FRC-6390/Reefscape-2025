@@ -5,12 +5,12 @@
 package frc.robot.subsystems;
 
 import com.ctre.phoenix6.configs.CurrentLimitsConfigs;
+import com.ctre.phoenix6.hardware.CANcoder;
 import com.ctre.phoenix6.hardware.TalonFX;
 
-import edu.wpi.first.cscore.UsbCamera;
+import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.wpilibj.DigitalInput;
-import edu.wpi.first.wpilibj.motorcontrol.Talon;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
 import frc.robot.Constants;
@@ -19,20 +19,17 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 public class Climber extends SubsystemBase {
   public TalonFX leftMotor;
   public TalonFX rightMotor;
+  public CANcoder encoder;
+  
   public DigitalInput limitSwitch;
   public double speed;
   public ShuffleboardTab tab;
-  public PIDController controller;
-  public double setpoint;
-
   /** Creates a new Climber. */
   public Climber() 
   {
     leftMotor = new TalonFX(Constants.Climber.LEFT_MOTOR);
     rightMotor = new TalonFX(Constants.Climber.RIGHT_MOTOR);
     limitSwitch = new DigitalInput(Constants.Climber.LIMIT_SWITCH);
-    controller = new PIDController(0.1, 0, 0);
-    setpoint = 0;
     tab = Shuffleboard.getTab("Climber");
     leftMotor.getConfigurator().apply(new CurrentLimitsConfigs().withStatorCurrentLimit(40).withStatorCurrentLimitEnable(true));
     rightMotor.getConfigurator().apply(new CurrentLimitsConfigs().withStatorCurrentLimit(40).withStatorCurrentLimitEnable(true));
@@ -75,6 +72,14 @@ public class Climber extends SubsystemBase {
   {
     tab.add("Climber Speed", speed);
     tab.add("Limit Switch", !limitSwitch.get());
+  }
+
+  public double getPosition() {
+    return encoder.getAbsolutePosition(true).getValueAsDouble();
+  }
+
+  public Rotation2d getAngle() {
+    return Rotation2d.fromRotations(getPosition() / Constants.Climber.ENCODER_GEAR_RATIO).minus(Rotation2d.fromDegrees(Constants.Climber.ENCODER_OFFSET));
   }
 
   @Override
