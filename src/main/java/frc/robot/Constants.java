@@ -47,6 +47,11 @@ public interface Constants {
     public interface Controllers {
         double THETA_DEADZONE = 0.1;      
     }
+    public interface Climber {
+    int LEFT_MOTOR = 0;
+    int RIGHT_MOTOR = 1;
+        
+    }
 
     public interface Elevator {
 
