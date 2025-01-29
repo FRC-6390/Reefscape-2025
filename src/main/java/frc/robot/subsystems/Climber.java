@@ -4,10 +4,12 @@
 
 package frc.robot.subsystems;
 
+import com.ctre.phoenix6.configs.CANcoderConfiguration;
 import com.ctre.phoenix6.configs.CurrentLimitsConfigs;
 import com.ctre.phoenix6.hardware.CANcoder;
 import com.ctre.phoenix6.hardware.TalonFX;
 
+import ca.frc6390.athena.sensors.limitswitch.GenericLimitSwitch;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.wpilibj.DigitalInput;
@@ -21,7 +23,7 @@ public class Climber extends SubsystemBase {
   public TalonFX rightMotor;
   public CANcoder encoder;
   public double setpoint;
-  public DigitalInput limitSwitch;
+  public GenericLimitSwitch limitSwitch;
   public double speed;
   public ShuffleboardTab tab;
   /** Creates a new Climber. */
@@ -29,7 +31,12 @@ public class Climber extends SubsystemBase {
   {
     leftMotor = new TalonFX(Constants.Climber.LEFT_MOTOR);
     rightMotor = new TalonFX(Constants.Climber.RIGHT_MOTOR);
-    limitSwitch = new DigitalInput(Constants.Climber.LIMIT_SWITCH);
+    limitSwitch = new GenericLimitSwitch(Constants.Climber.LIMIT_SWITCH);
+
+    encoder = new CANcoder(Constants.Climber.ENCODER);
+
+    limitSwitch.onPress(() -> encoder.setPosition(0));
+
     tab = Shuffleboard.getTab("Climber");
     leftMotor.getConfigurator().apply(new CurrentLimitsConfigs().withStatorCurrentLimit(40).withStatorCurrentLimitEnable(true));
     rightMotor.getConfigurator().apply(new CurrentLimitsConfigs().withStatorCurrentLimit(40).withStatorCurrentLimitEnable(true));
@@ -56,7 +63,7 @@ public class Climber extends SubsystemBase {
 
   public void update()
   {
-    if(!limitSwitch.get() && speed < 0)
+    if(limitSwitch.isPressed() && speed < 0)
     {
       stopMotors();
       setSpeed(0);
@@ -71,15 +78,15 @@ public class Climber extends SubsystemBase {
   public void shuffleboard()
   {
     tab.add("Climber Speed", speed);
-    tab.add("Limit Switch", !limitSwitch.get());
+    tab.add("Limit Switch", limitSwitch.isPressed());
   }
 
   public double getPosition() {
-    return encoder.getAbsolutePosition(true).getValueAsDouble();
+    return encoder.getPosition(true).getValueAsDouble();
   }
 
   public Rotation2d getAngle() {
-    return Rotation2d.fromRotations(getPosition() / Constants.Climber.ENCODER_GEAR_RATIO).minus(Rotation2d.fromDegrees(Constants.Climber.ENCODER_OFFSET));
+    return Rotation2d.fromRotations(getPosition() / Constants.Climber.ENCODER_GEAR_RATIO);
   }
 
   @Override
