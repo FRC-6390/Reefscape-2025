@@ -50,7 +50,7 @@ public interface Constants {
     public interface Climber {
     int LEFT_MOTOR = 0;
     int RIGHT_MOTOR = 1;
-        
+    int LIMIT_SWITCH = 2;
     }
 
     public interface Elevator {
