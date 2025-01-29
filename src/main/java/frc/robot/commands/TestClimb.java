@@ -11,14 +11,14 @@ import frc.robot.subsystems.superstructure.Climber;
 import frc.robot.subsystems.superstructure.Climber.STATE;
 
 /* You should consider using the more terse Command factories API instead https://docs.wpilib.org/en/stable/docs/software/commandbased/organizing-command-based.html#defining-commands */
-public class Climb extends Command {
+public class TestClimb extends Command {
   /** Creates a new Climb. */
   public Climber climber;
-  public STATE state;
+  public double speed;
   
-  public Climb(Climber climber,STATE state) {
+  public TestClimb(Climber climber, double speed) {
     this.climber = climber;
-    this.state = state;
+    this.speed = speed;
     // Use addRequirements() here to declare subsystem dependencies.
   }
 
@@ -30,7 +30,7 @@ public class Climb extends Command {
   @Override
   public void execute() 
   {
-    climber.setPosition(state);
+    climber.moveClimber(speed);
   }
 
   // Called once the command ends or is interrupted.
@@ -38,6 +38,7 @@ public class Climb extends Command {
   public void end(boolean interrupted) 
   {
     climber.stopMotors();
+    System.out.print("UGHHHHHH");
   }
 
   // Returns true when the command should end.

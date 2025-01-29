@@ -2,12 +2,13 @@
 // Open Source Software; you can modify and/or share it under the terms of
 // the WPILib BSD license file in the root directory of this project.
 
-package frc.robot.subsystems;
+package frc.robot.subsystems.superstructure;
 
 import com.ctre.phoenix6.StatusSignal;
 import com.ctre.phoenix6.hardware.CANcoder;
 import com.ctre.phoenix6.hardware.TalonFX;
 
+import ca.frc6390.athena.sensors.limitswitch.GenericLimitSwitch;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.wpilibj.DigitalInput;
@@ -17,7 +18,7 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
 
 
-public class Elevator extends SubsystemBase {
+public class Elevator {
   /** Creates a new Climber. */
 
   public double setpoint;
@@ -26,8 +27,7 @@ public class Elevator extends SubsystemBase {
   public TalonFX leftMotor;
   public TalonFX rightMotor;
   public boolean hasSetHome;
-  public DigitalInput lowerlimitSwitch;
-  public DigitalInput upperlimitSwitch;
+  public GenericLimitSwitch lowerlimitSwitch;
   public ShuffleboardTab tab;
   
 
@@ -37,8 +37,7 @@ public class Elevator extends SubsystemBase {
     encoder = new CANcoder(Constants.Elevator.ENCODER);
     leftMotor = new TalonFX(Constants.Elevator.LEFT_MOTOR);
     rightMotor = new TalonFX(Constants.Elevator.RIGHT_MOTOR);
-    lowerlimitSwitch = new DigitalInput(Constants.Elevator.LOWER_LIMIT_SWITCH);
-    upperlimitSwitch = new DigitalInput(Constants.Elevator.UPPER_LIMIT_SWITCH);
+    lowerlimitSwitch = new GenericLimitSwitch(Constants.Elevator.LOWER_LIMIT_SWITCH);
     controller = new PIDController(0.1, 0, 0);
     tab = Shuffleboard.getTab("Elevator");
   }
@@ -75,8 +74,7 @@ public class Elevator extends SubsystemBase {
 
   public void shuffleboard()
   {
-    tab.add("Upper Limit",upperlimitSwitch.get());
-    tab.add("Lower Limit", lowerlimitSwitch.get());
+    tab.add("Lower Limit", lowerlimitSwitch.isPressed());
     tab.add("Encoder Rotations", encoder.getPosition().refresh().getValueAsDouble());
     tab.add("Elevator Height CM", getPositionInCM());
     tab.add("Setpoint", setpoint);
@@ -85,10 +83,11 @@ public class Elevator extends SubsystemBase {
 
   public void update()
   {
+    shuffleboard();
     if(!hasSetHome)
     {
       moveElevator(-0.5);
-      if(!lowerlimitSwitch.get())
+      if(!lowerlimitSwitch.isPressed())
       {
         homeEncoder();
         hasSetHome = true;
@@ -97,22 +96,11 @@ public class Elevator extends SubsystemBase {
     else
     {
       double speed = controller.calculate(getPositionInCM(), setpoint);
-      if(!lowerlimitSwitch.get() && speed < 0)
-      {
-        speed = 0;
-      }
-      else if(!upperlimitSwitch.get() && speed > 0)
+      if(!lowerlimitSwitch.isPressed() && speed < 0)
       {
         speed = 0;
       }
       moveElevator(speed);
     }
-  }
-  
-  @Override
-  public void periodic() 
-  {
-    update();
-    shuffleboard();
   }
 }

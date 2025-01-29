@@ -32,9 +32,9 @@ public interface Constants {
         int[] ROTATION_IDS = {5,6,7,8};
         int[] ENCODER_IDS = {9,10,11,12};
         // SAM OFFSETS
-        // double[] ENCODER_OFFSETS = {0.697,3.123,2.445,-0.851};
+        double[] ENCODER_OFFSETS = {0.697,3.123,2.445,-0.851};
         // PATRICK OFFSETS
-        double[] ENCODER_OFFSETS = {2.284,-1.942,1.0952,2.376};
+        // double[] ENCODER_OFFSETS = {2.284,-1.942,1.0952,2.376};
         
 
         Translation2d[] MODULE_LOCATIONS = SwerveHelpers.generateModuleLocations(TRACKWIDTH_METERS, WHEELBASE_METERS);
@@ -48,19 +48,19 @@ public interface Constants {
         double THETA_DEADZONE = 0.1;      
     }
     public interface Climber {
-        int LEFT_MOTOR = 0;
-        int RIGHT_MOTOR = 1;
         int LIMIT_SWITCH = 1;
-        int ENCODER = 1;
+        int ENCODER = 40;
+        int LEFT_MOTOR = 21;
+        int RIGHT_MOTOR = 30;
         double ENCODER_OFFSET = 0;
         double ENCODER_GEAR_RATIO = 4d/1d;
     }
 
     public interface Elevator {
 
-        int ENCODER = 1;
-        int LEFT_MOTOR = 2;
-        int RIGHT_MOTOR = 3;
+        int ENCODER = 40;
+        int LEFT_MOTOR = 21;
+        int RIGHT_MOTOR = 30;
         double ROTATION_TO_CM = 320;
         int LOWER_LIMIT_SWITCH = 0;
         int UPPER_LIMIT_SWITCH = 0;
