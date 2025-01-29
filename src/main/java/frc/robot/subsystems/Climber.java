@@ -20,7 +20,7 @@ public class Climber extends SubsystemBase {
   public TalonFX leftMotor;
   public TalonFX rightMotor;
   public CANcoder encoder;
-  
+  public double setpoint;
   public DigitalInput limitSwitch;
   public double speed;
   public ShuffleboardTab tab;
