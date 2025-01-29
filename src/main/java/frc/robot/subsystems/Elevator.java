@@ -33,6 +33,7 @@ public class Elevator extends SubsystemBase {
 
   public Elevator() 
   {
+    setpoint = 0;
     encoder = new CANcoder(Constants.Elevator.ENCODER);
     leftMotor = new TalonFX(Constants.Elevator.LEFT_MOTOR);
     rightMotor = new TalonFX(Constants.Elevator.RIGHT_MOTOR);

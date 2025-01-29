@@ -8,6 +8,7 @@ import com.ctre.phoenix6.configs.CurrentLimitsConfigs;
 import com.ctre.phoenix6.hardware.TalonFX;
 
 import edu.wpi.first.cscore.UsbCamera;
+import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.motorcontrol.Talon;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
@@ -21,12 +22,17 @@ public class Climber extends SubsystemBase {
   public DigitalInput limitSwitch;
   public double speed;
   public ShuffleboardTab tab;
+  public PIDController controller;
+  public double setpoint;
+
   /** Creates a new Climber. */
   public Climber() 
   {
     leftMotor = new TalonFX(Constants.Climber.LEFT_MOTOR);
     rightMotor = new TalonFX(Constants.Climber.RIGHT_MOTOR);
     limitSwitch = new DigitalInput(Constants.Climber.LIMIT_SWITCH);
+    controller = new PIDController(0.1, 0, 0);
+    setpoint = 0;
     tab = Shuffleboard.getTab("Climber");
     leftMotor.getConfigurator().apply(new CurrentLimitsConfigs().withStatorCurrentLimit(40).withStatorCurrentLimitEnable(true));
     rightMotor.getConfigurator().apply(new CurrentLimitsConfigs().withStatorCurrentLimit(40).withStatorCurrentLimitEnable(true));
@@ -42,6 +48,10 @@ public class Climber extends SubsystemBase {
     speed = sspeed;
   }
 
+  public void setPosition(double setpoint)
+  {
+    this.setpoint = setpoint;
+  }
   public void stopMotors() {
     leftMotor.stopMotor();
     rightMotor.stopMotor();
@@ -55,7 +65,10 @@ public class Climber extends SubsystemBase {
       setSpeed(0);
     }else{
       moveClimber(speed);
-    }   
+      //double spd = controller.calculate(encoder.getPosition(), setpoint);
+      //moveClimber(spd);
+    }  
+     
   }
 
   public void shuffleboard()
