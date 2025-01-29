@@ -48,9 +48,12 @@ public interface Constants {
         double THETA_DEADZONE = 0.1;      
     }
     public interface Climber {
-    int LEFT_MOTOR = 0;
-    int RIGHT_MOTOR = 1;
-        
+        int LEFT_MOTOR = 0;
+        int RIGHT_MOTOR = 1;
+        int LIMIT_SWITCH = 1;
+        int ENCODER = 1;
+        double ENCODER_OFFSET = 0;
+        double ENCODER_GEAR_RATIO = 4d/1d;
     }
 
     public interface Elevator {
