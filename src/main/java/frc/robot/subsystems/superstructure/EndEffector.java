@@ -42,15 +42,15 @@ public class EndEffector extends SubsystemBase {
         return angle;
       }
   }
-  /** Creates a new Climber. */
+  /** Creates a new EndEffector. */
   public EndEffector() 
   {
-    leftMotor = new TalonFX(Constants.Climber.LEFT_MOTOR, Constants.Climber.CANBUS);
-    rightMotor = new TalonFX(Constants.Climber.RIGHT_MOTOR, Constants.Climber.CANBUS);
-    encoder = new CANcoder(Constants.Climber.ENCODER, Constants.Climber.CANBUS);
-    limitSwitch = new GenericLimitSwitch(Constants.Climber.LIMIT_SWITCH);
+    leftMotor = new TalonFX(Constants.EndEffector.LEFT_MOTOR, Constants.EndEffector.CANBUS);
+    rightMotor = new TalonFX(Constants.EndEffector.RIGHT_MOTOR, Constants.EndEffector.CANBUS);
+    encoder = new CANcoder(Constants.EndEffector.ENCODER, Constants.EndEffector.CANBUS);
+    limitSwitch = new GenericLimitSwitch(Constants.EndEffector.LIMIT_SWITCH);
 
-    controller = Constants.Climber.controller;
+    controller = Constants.EndEffector.CONTORLLER;
     controller.enableContinuousInput(0, 90);
     controller.setTolerance(1);
 
@@ -92,7 +92,7 @@ public class EndEffector extends SubsystemBase {
   }
 
   public Rotation2d getAngle() {
-    return Rotation2d.fromRotations(getPosition() / Constants.Climber.ENCODER_GEAR_RATIO).minus(Rotation2d.fromDegrees(Constants.Climber.ENCODER_OFFSET));
+    return Rotation2d.fromRotations(getPosition() / Constants.EndEffector.ENCODER_GEAR_RATIO).minus(Rotation2d.fromDegrees(Constants.EndEffector.ENCODER_OFFSET));
   }
 
   public void update()

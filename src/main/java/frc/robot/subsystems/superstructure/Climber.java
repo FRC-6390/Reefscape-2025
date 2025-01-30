@@ -46,7 +46,7 @@ public class Climber extends SubsystemBase{
     encoder = new CANcoder(Constants.Climber.ENCODER, Constants.Climber.CANBUS);
     limitSwitch = new GenericLimitSwitch(Constants.Climber.LIMIT_SWITCH);
 
-    controller = Constants.Climber.controller;
+    controller = Constants.Climber.CONTORLLER;
     controller.enableContinuousInput(0, 90);
     controller.setTolerance(1);
 

@@ -58,7 +58,7 @@ public class Elevator extends SubsystemBase{
     lowerlimitSwitch = new GenericLimitSwitch(Constants.Elevator.LOWER_LIMIT_SWITCH);
     lowerlimitSwitch.onPress(() ->  encoder.setPosition(0));
 
-    controller = new PIDController(0.1, 0, 0);
+    controller = Constants.Elevator.CONTORLLER;
     controller.setTolerance(1);
     
     leftMotor.setNeutralMode(NeutralModeValue.Brake);

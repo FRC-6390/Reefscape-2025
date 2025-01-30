@@ -55,7 +55,7 @@ public interface Constants {
         double ENCODER_OFFSET = 0;
         double ENCODER_GEAR_RATIO = 4d/1d;
         String CANBUS = "can";
-        PIDController controller = new PIDController(0.015, 0, 0);
+        PIDController CONTORLLER = new PIDController(0.015, 0, 0);
     }
 
     public interface Elevator {
@@ -68,7 +68,7 @@ public interface Constants {
         double GEAR_RATIO = 3d/1d;
         int LOWER_LIMIT_SWITCH = 0;
         int UPPER_LIMIT_SWITCH = 0;
-
+        PIDController CONTORLLER = new PIDController(0.015, 0, 0);
     }
 
     public interface EndEffector {
@@ -79,7 +79,7 @@ public interface Constants {
         double ENCODER_OFFSET = 0;
         double ENCODER_GEAR_RATIO = 4d/1d;
         String CANBUS = "can";
-        PIDController controller = new PIDController(0.015, 0, 0);
+        PIDController CONTORLLER = new PIDController(0.015, 0, 0);
 
     }
 
