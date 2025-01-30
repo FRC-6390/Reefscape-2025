@@ -27,7 +27,7 @@ public class TestClimb extends Command {
   @Override
   public void execute() 
   {
-    climber.moveClimber(speed);
+    climber.setMotors(speed);
   }
 
   // Called once the command ends or is interrupted.

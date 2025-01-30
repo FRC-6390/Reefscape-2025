@@ -6,6 +6,7 @@ package frc.robot.subsystems.superstructure;
 
 import com.ctre.phoenix6.hardware.CANcoder;
 import com.ctre.phoenix6.hardware.TalonFX;
+import com.ctre.phoenix6.signals.NeutralModeValue;
 
 import ca.frc6390.athena.mechanisms.StateMachine;
 import ca.frc6390.athena.sensors.limitswitch.GenericLimitSwitch;
@@ -60,6 +61,9 @@ public class Elevator extends SubsystemBase{
     controller = new PIDController(0.1, 0, 0);
     controller.setTolerance(1);
     
+    leftMotor.setNeutralMode(NeutralModeValue.Brake);
+    rightMotor.setNeutralMode(NeutralModeValue.Brake);
+
     tab = Shuffleboard.getTab("Elevator");
     stateMachine = new StateMachine<State>(State.Home, controller::atSetpoint);
   }
@@ -78,19 +82,14 @@ public class Elevator extends SubsystemBase{
     return stateMachine;
   }
 
-  private void setMotors(double speed)
-  {
-    leftMotor.set(speed);
-    rightMotor.set(-speed);
-  }
-
   //MOVES ELEVATOR UP OR DOWN
-  private void moveElevator(double speed)
+  private void setMotors(double speed)
   {
     if (lowerlimitSwitch.isPressed() && speed < 0){
       speed = 0;
     }
-    setMotors(speed);
+    leftMotor.set(speed);
+    rightMotor.set(-speed);
   }
   
   public void shuffleboard()
@@ -107,11 +106,11 @@ public class Elevator extends SubsystemBase{
     shuffleboard();
     switch (stateMachine.getGoalState()) {
       case Home:
-        moveElevator(-0.5);
+        setMotors(-0.5);
         break;
       case Feeder, L1, L2, L3, L4, StartConfiguration:
         double speed = controller.calculate(getHeightFromFloor(), stateMachine.getGoalState().get());
-        moveElevator(speed);
+        setMotors(speed);
     }
   }
 

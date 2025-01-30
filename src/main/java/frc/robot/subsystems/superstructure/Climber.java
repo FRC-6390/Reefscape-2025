@@ -4,6 +4,7 @@ import com.ctre.phoenix6.configs.CANcoderConfiguration;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.hardware.CANcoder;
 import com.ctre.phoenix6.hardware.TalonFX;
+import com.ctre.phoenix6.signals.NeutralModeValue;
 
 import ca.frc6390.athena.mechanisms.StateMachine;
 import ca.frc6390.athena.sensors.limitswitch.GenericLimitSwitch;
@@ -52,6 +53,9 @@ public class Climber extends SubsystemBase{
     leftMotor.getConfigurator().apply(new TalonFXConfiguration());
     rightMotor.getConfigurator().apply(new TalonFXConfiguration());
 
+    leftMotor.setNeutralMode(NeutralModeValue.Brake);
+    rightMotor.setNeutralMode(NeutralModeValue.Brake);
+
     CANcoderConfiguration config = new CANcoderConfiguration();
     config.MagnetSensor.AbsoluteSensorDiscontinuityPoint = 1;
     encoder.getConfigurator().apply(config);
@@ -59,16 +63,12 @@ public class Climber extends SubsystemBase{
     stateMachine = new StateMachine<State>(State.Home, controller::atSetpoint);
   }
 
-  public void moveClimber(double speed)
+  public void setMotors(double speed)
   {
     if(limitSwitch.isPressed() && speed > 0)
     {
       speed = 0;
     }
-    moveMotors(speed);
-  }
-
-  private void moveMotors(double speed) {
     leftMotor.set(speed);
     rightMotor.set(-speed);
   }
@@ -89,7 +89,7 @@ public class Climber extends SubsystemBase{
     switch (stateMachine.getGoalState()) {
       case Climb, Home:
       double speed = -controller.calculate(getAngle().getDegrees(), stateMachine.getGoalState().get());
-      moveClimber(speed);
+      setMotors(speed);
     }
   }
 
