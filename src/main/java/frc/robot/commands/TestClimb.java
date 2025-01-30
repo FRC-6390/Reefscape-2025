@@ -4,11 +4,8 @@
 
 package frc.robot.commands;
 
-import ca.frc6390.athena.controllers.DebouncedController;
-import edu.wpi.first.math.filter.Debouncer.DebounceType;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.subsystems.superstructure.Climber;
-import frc.robot.subsystems.superstructure.Climber.STATE;
 
 /* You should consider using the more terse Command factories API instead https://docs.wpilib.org/en/stable/docs/software/commandbased/organizing-command-based.html#defining-commands */
 public class TestClimb extends Command {

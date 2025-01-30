@@ -4,30 +4,76 @@
 
 package frc.robot.subsystems;
 
-import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import ca.frc6390.athena.mechanisms.StateMachine;
+import edu.wpi.first.wpilibj2.command.InstantCommand;
 import frc.robot.subsystems.superstructure.Climber;
 import frc.robot.subsystems.superstructure.Elevator;
-import frc.robot.subsystems.superstructure.Climber.STATE;
+import frc.robot.subsystems.superstructure.EndEffector;
 
-public class Superstructure extends SubsystemBase {
+public class Superstructure {
+  
   /** Creates a new Superstructure. */
-  // Elevator elevator;
-  Climber climber;
+  StateMachine<Elevator.State> elevator;
+  StateMachine<Climber.State> climber;
+  StateMachine<EndEffector.State> endEffector;
 
   public Superstructure(Climber climber) 
   {
-    this.climber = climber;
+    this.climber = climber.getStateMachine();
   }
 
-  public void setClimberState(STATE state){
-
+  public InstantCommand setClimber(Climber.State state){
+    return new InstantCommand(() -> climberStateManager(state));
   }
 
+  public InstantCommand setElevator(Elevator.State state){
+    return new InstantCommand(() -> elevatorStateManager(state));
+  }
 
-  @Override
-  public void periodic() {
-    climber.update();
-    // elevator.update();
-    // This method will be called once per scheduler run
+  public InstantCommand setEndEffectir(EndEffector.State state){
+    return new InstantCommand(() -> endEffectorStateManager(state));
+  }
+
+  public void climberStateManager(Climber.State state){
+    switch (state) {
+      case Climb:
+        elevatorStateManager(Elevator.State.L2);
+        endEffectorStateManager(EndEffector.State.Home);
+        climber.setGoalState(state, () -> elevator.atState(Elevator.State.L2) && endEffector.atState(EndEffector.State.Home));
+        break;
+      case Home:
+        climber.setGoalState(state);
+        break;
+    }
+  }
+
+  public void elevatorStateManager(Elevator.State state){
+    switch (state) {
+      case Home, Feeder, StartConfiguration:
+        climberStateManager(Climber.State.Home);
+        endEffectorStateManager(EndEffector.State.Home);
+        elevator.setGoalState(state, () -> !climber.atState(Climber.State.Climb) && endEffector.atState(EndEffector.State.Home));
+        break;
+      case L1:
+        climberStateManager(Climber.State.Home);
+        elevator.setGoalState(state, () -> !climber.atState(Climber.State.Climb));
+        break;
+      case L2, L3, L4:
+        elevator.setGoalState(state);
+    }
+  }
+
+  public void endEffectorStateManager(EndEffector.State state){
+    switch (state) {
+      case StartConfiguration:
+        elevatorStateManager(Elevator.State.L1);
+        endEffector.setGoalState(state, () -> elevator.atState(Elevator.State.L1));
+      case Home:
+        endEffector.setGoalState(state);
+        break;
+      case Left, LeftL4, Right, RightL4:
+        endEffector.setGoalState(state, () -> !elevator.atState(Elevator.State.Home));
+        break;
+    }
   }
 }

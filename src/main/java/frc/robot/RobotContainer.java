@@ -29,7 +29,6 @@ import frc.robot.commands.TestClimb;
 import frc.robot.subsystems.DriveTrain;
 import frc.robot.subsystems.Superstructure;
 import frc.robot.subsystems.superstructure.Climber;
-import frc.robot.subsystems.superstructure.Climber.STATE;
 
 public class RobotContainer {
 
@@ -61,8 +60,8 @@ public class RobotContainer {
 
     // driverController.leftBumper.onTrue(new Climb(climber, STATE.HOME));
     // driverController.rightBumper.whileTrue(new Climb(climber, STATE.CLIMB));
-    driverController.leftBumper.whileTrue(new Climb(climber,STATE.HOME));
-    driverController.rightBumper.whileTrue(new Climb(climber, STATE.CLIMB));
+    driverController.leftBumper.whileTrue(superstructure.setClimber(Climber.State.Home));
+    driverController.rightBumper.whileTrue(superstructure.setClimber(Climber.State.Climb));
   }
 
   public Command getAutonomousCommand() {

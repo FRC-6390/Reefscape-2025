@@ -12,11 +12,11 @@ import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
-public class Climber extends SubsystemBase{
+
+public class EndEffector extends SubsystemBase {
   public TalonFX leftMotor;
   public TalonFX rightMotor;
   public CANcoder encoder;
-  
   public GenericLimitSwitch limitSwitch;
   public PIDController controller;
 
@@ -24,21 +24,25 @@ public class Climber extends SubsystemBase{
 
   public enum State
   {
+      StartConfiguration(35),
       Home(0),
-      Climb(45);
+      Left(35),
+      Right(-35),
+      LeftL4(35),
+      RightL4(-35);
+
       private double angle;
       private State(double angle)
       {
-      this.angle = angle;
+        this.angle = angle;
       }
 
-      public double get()
-      {
-      return angle;
+      public Double getValue() {
+        return angle;
       }
   }
   /** Creates a new Climber. */
-  public Climber() 
+  public EndEffector() 
   {
     leftMotor = new TalonFX(Constants.Climber.LEFT_MOTOR, Constants.Climber.CANBUS);
     rightMotor = new TalonFX(Constants.Climber.RIGHT_MOTOR, Constants.Climber.CANBUS);
@@ -83,12 +87,20 @@ public class Climber extends SubsystemBase{
     rightMotor.stopMotor();
   }
 
+  public double getPosition() {
+    return encoder.getAbsolutePosition(true).getValueAsDouble();
+  }
+
+  public Rotation2d getAngle() {
+    return Rotation2d.fromRotations(getPosition() / Constants.Climber.ENCODER_GEAR_RATIO).minus(Rotation2d.fromDegrees(Constants.Climber.ENCODER_OFFSET));
+  }
+
   public void update()
   {
     shuffleboard();
     switch (stateMachine.getGoalState()) {
-      case Climb, Home:
-      double speed = -controller.calculate(getAngle().getDegrees(), stateMachine.getGoalState().get());
+      case Left, Right, RightL4, LeftL4, Home, StartConfiguration:
+      double speed = -controller.calculate(getAngle().getDegrees(), (double)stateMachine.getGoalState().getValue());
       moveClimber(speed);
     }
   }
@@ -96,18 +108,10 @@ public class Climber extends SubsystemBase{
   public void shuffleboard()
   {
     SmartDashboard.putBoolean("Limit Switch", limitSwitch.isPressed());
-    SmartDashboard.putNumber("Setpoint", stateMachine.getGoalState().get());
-    SmartDashboard.putNumber("PID Output", controller.calculate(getAngle().getDegrees(), stateMachine.getGoalState().get()));
+    SmartDashboard.putNumber("Setpoint", stateMachine.getGoalState().getValue());
+    SmartDashboard.putNumber("PID Output", controller.calculate(getAngle().getDegrees(), (double)stateMachine.getGoalState().getValue()));
     SmartDashboard.putNumber("Angle", getAngle().getDegrees());
     SmartDashboard.putNumber("Rotations", getPosition());
-  }
-
-  public double getPosition() {
-    return encoder.getAbsolutePosition(true).getValueAsDouble();
-  }
-
-  public Rotation2d getAngle() {
-    return Rotation2d.fromRotations(getPosition() / Constants.Climber.ENCODER_GEAR_RATIO).minus(Rotation2d.fromDegrees(Constants.Climber.ENCODER_OFFSET));
   }
 
   @Override

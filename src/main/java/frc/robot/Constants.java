@@ -54,6 +54,8 @@ public interface Constants {
         int RIGHT_MOTOR = 30;
         double ENCODER_OFFSET = 0;
         double ENCODER_GEAR_RATIO = 4d/1d;
+        String CANBUS = "can";
+        PIDController controller = new PIDController(0.015, 0, 0);
     }
 
     public interface Elevator {
@@ -61,27 +63,24 @@ public interface Constants {
         int ENCODER = 40;
         int LEFT_MOTOR = 21;
         int RIGHT_MOTOR = 30;
-        double ROTATION_TO_CM = 320;
+        double GEAR_DIAMETER_INCHES = 5;
+        double OFFSET_FROM_FLOOR = 0;
+        double GEAR_RATIO = 3d/1d;
         int LOWER_LIMIT_SWITCH = 0;
         int UPPER_LIMIT_SWITCH = 0;
-    
-        enum Position {
-            //ELEVATOR HEIGHT IN CM
-            L1(0),
-            L2(10),
-            L3(20),
-            L4(30),
-            Feeder(15);
 
-            double pos;
-            private Position(double pos){
-                this.pos = pos;
-            }
+    }
 
-            public double getPosition() {
-                return pos;
-            }
-        }
+    public interface EndEffector {
+        int LIMIT_SWITCH = 1;
+        int ENCODER = 40;
+        int LEFT_MOTOR = 21;
+        int RIGHT_MOTOR = 30;
+        double ENCODER_OFFSET = 0;
+        double ENCODER_GEAR_RATIO = 4d/1d;
+        String CANBUS = "can";
+        PIDController controller = new PIDController(0.015, 0, 0);
+
     }
 
    

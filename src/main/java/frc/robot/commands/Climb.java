@@ -4,20 +4,17 @@
 
 package frc.robot.commands;
 
-import ca.frc6390.athena.controllers.DebouncedController;
-import edu.wpi.first.math.filter.Debouncer.DebounceType;
 import edu.wpi.first.wpilibj2.command.Command;
+import frc.robot.subsystems.Superstructure;
 import frc.robot.subsystems.superstructure.Climber;
-import frc.robot.subsystems.superstructure.Climber.STATE;
-
 /* You should consider using the more terse Command factories API instead https://docs.wpilib.org/en/stable/docs/software/commandbased/organizing-command-based.html#defining-commands */
 public class Climb extends Command {
   /** Creates a new Climb. */
-  public Climber climber;
-  public STATE state;
+  public Superstructure superstructure;
+  public Climber.State state;
   
-  public Climb(Climber climber,STATE state) {
-    this.climber = climber;
+  public Climb(Superstructure superstructure, Climber.State state) {
+    this.superstructure = superstructure;
     this.state = state;
     // Use addRequirements() here to declare subsystem dependencies.
   }
@@ -30,14 +27,14 @@ public class Climb extends Command {
   @Override
   public void execute() 
   {
-    climber.setPosition(state);
+    superstructure.climberStateManager(state);
   }
 
   // Called once the command ends or is interrupted.
   @Override
   public void end(boolean interrupted) 
   {
-    climber.stopMotors();
+
   }
 
   // Returns true when the command should end.
