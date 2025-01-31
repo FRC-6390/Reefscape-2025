@@ -10,8 +10,12 @@ import com.pathplanner.lib.config.PIDConstants;
 import com.pathplanner.lib.config.RobotConfig;
 import com.pathplanner.lib.controllers.PPHolonomicDriveController;
 
+import choreo.auto.AutoFactory;
+import choreo.trajectory.SwerveSample;
+import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
@@ -24,9 +28,37 @@ public class Robot extends TimedRobot {
 
   private final RobotContainer m_robotContainer;
   public RobotConfig config;
+  private AutoFactory factory;
 
-  public Robot() {
+ private final PIDController xController = new PIDController(10.0, 0.0, 0.0);
+    private final PIDController yController = new PIDController(10.0, 0.0, 0.0);
+    private final PIDController headingController = new PIDController(7.5, 0.0, 0.0);
+
+  public void drive(SwerveSample sample) {
+     Pose2d pose = m_robotContainer.localization.getPose();
+
+        // Generate the next speeds for the robot
+        ChassisSpeeds speeds = new ChassisSpeeds(
+            sample.vx + xController.calculate(pose.getX(), sample.x),
+            sample.vy + yController.calculate(pose.getY(), sample.y),
+            sample.omega + headingController.calculate(pose.getRotation().getRadians(), sample.heading)
+        );
+
+
+
+        // Apply the generated speeds
+        m_robotContainer.driveTrain.drive(ChassisSpeeds.fromRobotRelativeSpeeds(speeds, m_robotContainer.driveTrain.getIMU().getFieldYaw()));
+  }
+
+
+  public Robot() {  
     m_robotContainer = new RobotContainer();
+headingController.enableContinuousInput(-Math.PI, Math.PI);
+    factory = new AutoFactory(m_robotContainer.localization::getPose, m_robotContainer.localization::reset, this::drive, 
+     true,
+          m_robotContainer.driveTrain
+          );
+
     // try{
     //   config = RobotConfig.fromGUISettings();  }catch(Exception e){
     //     DriverStation.reportError("Failed to load PathPlanner config and configure AutoBuilder", e.getStackTrace());
@@ -84,7 +116,8 @@ public class Robot extends TimedRobot {
 
   @Override
   public void autonomousInit() {
-    m_autonomousCommand = m_robotContainer.getAutonomousCommand();
+    factory.resetOdometry("test");
+    m_autonomousCommand = factory.trajectoryCmd("test");
 
     if (m_autonomousCommand != null) {
       m_autonomousCommand.schedule();
