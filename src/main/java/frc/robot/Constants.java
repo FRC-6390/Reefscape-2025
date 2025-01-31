@@ -1,6 +1,7 @@
 package frc.robot;
 
 import com.pathplanner.lib.auto.AutoBuilder;
+import com.pathplanner.lib.config.PIDConstants;
 import com.pathplanner.lib.path.PathPlannerPath;
 
 import ca.frc6390.athena.core.RobotLocalization.RobotLocalizationConfig;
@@ -41,7 +42,10 @@ public interface Constants {
         SwerveModuleConfig[] MODULE_CONFIGS = MODULE.generateConfigs(MODULE_LOCATIONS, DRIVE_IDS, ROTATION_IDS, ROTATION_PID, ENCODER_IDS, ENCODER_OFFSETS);
 
         String[] LIMELIGHTS = {"limelight-driver", "limelight-tag"};
-        RobotLocalizationConfig LOCALIZATION_CONFIG = new RobotLocalizationConfig(0.00001, 0.0001, 0.001);
+        RobotLocalizationConfig LOCALIZATION_CONFIG = new RobotLocalizationConfig(0.1, 0.1, 0.001);
+
+        PIDConstants PATHPLANNER_TRANSLATION_PID = new PIDConstants(5,0,0);
+        PIDConstants PATHPLANNER_ROTATION_PID = new PIDConstants(5,0,0);
     }
 
     public interface Controllers {

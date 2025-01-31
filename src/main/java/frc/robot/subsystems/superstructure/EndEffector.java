@@ -38,7 +38,7 @@ public class EndEffector extends SubsystemBase {
         this.angle = angle;
       }
 
-      public Double getValue() {
+      public double get() {
         return angle;
       }
   }
@@ -100,7 +100,7 @@ public class EndEffector extends SubsystemBase {
     shuffleboard();
     switch (stateMachine.getGoalState()) {
       case Left, Right, RightL4, LeftL4, Home, StartConfiguration:
-      double speed = -controller.calculate(getAngle().getDegrees(), (double)stateMachine.getGoalState().getValue());
+      double speed = -controller.calculate(getAngle().getDegrees(), stateMachine.getGoalState().get());
       setMotors(speed);
     }
   }
@@ -108,8 +108,8 @@ public class EndEffector extends SubsystemBase {
   public void shuffleboard()
   {
     SmartDashboard.putBoolean("Limit Switch", limitSwitch.isPressed());
-    SmartDashboard.putNumber("Setpoint", stateMachine.getGoalState().getValue());
-    SmartDashboard.putNumber("PID Output", controller.calculate(getAngle().getDegrees(), (double)stateMachine.getGoalState().getValue()));
+    SmartDashboard.putNumber("Setpoint", stateMachine.getGoalState().get());
+    SmartDashboard.putNumber("PID Output", controller.calculate(getAngle().getDegrees(), stateMachine.getGoalState().get()));
     SmartDashboard.putNumber("Angle", getAngle().getDegrees());
     SmartDashboard.putNumber("Rotations", getPosition());
   }
