@@ -34,11 +34,11 @@ public class RobotContainer {
 
   private final RobotIMU imu = RobotIMU.createFromPigeon2(Constants.DriveTrain.PIGEON_ID,  Constants.DriveTrain.CANBUS);
   private final RobotVision vision = new RobotVision(Constants.DriveTrain.LIMELIGHTS);
-  // public final DriveTrain driveTrain = new DriveTrain(imu);
-  public final Climber climber = new Climber();
-  public final Superstructure superstructure = new Superstructure(climber);
+  public final DriveTrain driveTrain = new DriveTrain(imu);
+  // public final Climber climber = new Climber();
+  // public final Superstructure superstructure = new Superstructure(climber);
   
-  // public final RobotLocalization localization = new RobotLocalization(driveTrain, Constants.DriveTrain.LOCALIZATION_CONFIG);
+  public final RobotLocalization localization = new RobotLocalization(driveTrain, Constants.DriveTrain.LOCALIZATION_CONFIG);
   private final DebouncedController driverController = new DebouncedController(0);
 
   public RobotContainer() {
@@ -46,7 +46,7 @@ public class RobotContainer {
     
     configureBindings();
     // NamedCommands.registerCommand("Align", new AprilTagAlign(vision, driveTrain, driverController));
-    // driveTrain.setDriveCommand(driverController.leftX, driverController.leftY, driverController.rightX);
+    driveTrain.setDriveCommand(driverController.leftX, driverController.leftY, driverController.rightX);
   }
 
   private void configureBindings() 
@@ -55,13 +55,13 @@ public class RobotContainer {
     driverController.leftX.setDeadzone(Constants.Controllers.THETA_DEADZONE);
     driverController.leftY.setDeadzone(Constants.Controllers.THETA_DEADZONE);
 
-    // driverController.start.onTrue(new InstantCommand(() -> driveTrain.getIMU().setYaw(0)));
-    // driverController.a.whileTrue(new AprilTagAlign(vision, driveTrain, driverController));
+    driverController.start.onTrue(new InstantCommand(() -> driveTrain.getIMU().setYaw(0)));
+    driverController.a.whileTrue(new AprilTagAlign(vision, driveTrain, driverController));
 
     // driverController.leftBumper.onTrue(new Climb(climber, STATE.HOME));
     // driverController.rightBumper.whileTrue(new Climb(climber, STATE.CLIMB));
-    driverController.leftBumper.whileTrue(superstructure.setClimber(Climber.State.Home));
-    driverController.rightBumper.whileTrue(superstructure.setClimber(Climber.State.Climb));
+    // driverController.leftBumper.whileTrue(superstructure.setClimber(Climber.State.Home));
+    // driverController.rightBumper.whileTrue(superstructure.setClimber(Climber.State.Climb));
   }
 
   public Command getAutonomousCommand() {

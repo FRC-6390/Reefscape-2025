@@ -32,16 +32,16 @@ public interface Constants {
         int[] ROTATION_IDS = {5,6,7,8};
         int[] ENCODER_IDS = {9,10,11,12};
         // SAM OFFSETS
-        double[] ENCODER_OFFSETS = {0.697,3.123,2.445,-0.851};
+        // double[] ENCODER_OFFSETS = {0.697,3.123,2.445,-0.851};
         // PATRICK OFFSETS
-        // double[] ENCODER_OFFSETS = {2.284,-1.942,1.0952,2.376};
+        double[] ENCODER_OFFSETS = {2.284,-1.942,1.0952,2.376};
         
 
         Translation2d[] MODULE_LOCATIONS = SwerveHelpers.generateModuleLocations(TRACKWIDTH_METERS, WHEELBASE_METERS);
         SwerveModuleConfig[] MODULE_CONFIGS = MODULE.generateConfigs(MODULE_LOCATIONS, DRIVE_IDS, ROTATION_IDS, ROTATION_PID, ENCODER_IDS, ENCODER_OFFSETS);
 
         String[] LIMELIGHTS = {"limelight-driver", "limelight-tag"};
-        RobotLocalizationConfig LOCALIZATION_CONFIG = new RobotLocalizationConfig(0.1, 0.1, 0.001);
+        RobotLocalizationConfig LOCALIZATION_CONFIG = new RobotLocalizationConfig(0.00001, 0.0001, 0.001);
     }
 
     public interface Controllers {
