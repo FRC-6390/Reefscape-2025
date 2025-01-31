@@ -23,6 +23,7 @@ import ca.frc6390.athena.drivetrains.swerve.SwerveDrivetrain;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
+import frc.robot.Constants.DriveTrain;
 import frc.robot.commands.AprilTagAlign;
 import frc.robot.commands.Climb;
 import frc.robot.commands.DriveToGoal;
@@ -35,18 +36,18 @@ public class RobotContainer {
   private final RobotIMU imu = RobotIMU.createFromPigeon2(Constants.DriveTrain.PIGEON_ID,  Constants.DriveTrain.CANBUS);
   private final RobotVision vision = new RobotVision(Constants.DriveTrain.LIMELIGHTS);
   public final SwerveDrivetrain driveTrain = new SwerveDrivetrain(Constants.DriveTrain.MODULE_CONFIGS, imu, false, Constants.DriveTrain.DRIFT_PID);
-  public final Climber climber = new Climber();
-  public final Superstructure superstructure = new Superstructure(climber);
+  // public final Climber climber = new Climber();
+  // public final Superstructure superstructure = new Superstructure(climber);
   
   public final RobotLocalization localization = new RobotLocalization(driveTrain, Constants.DriveTrain.LOCALIZATION_CONFIG);
   private final DebouncedController driverController = new DebouncedController(0);
 
   public RobotContainer() {
-
     
+    localization.configurePathPlanner(Constants.DriveTrain.PATHPLANNER_TRANSLATION_PID, DriveTrain.PATHPLANNER_ROTATION_PID);
     configureBindings();
-    // NamedCommands.registerCommand("Align", new AprilTagAlign(vision, driveTrain, driverController));
-    // driveTrain.setDriveCommand(driverController.leftX, driverController.leftY, driverController.rightX);
+    NamedCommands.registerCommand("Align", new AprilTagAlign(vision, driveTrain, driverController));
+    driveTrain.setDriveCommand(driverController.leftX, driverController.leftY, driverController.rightX);
   }
 
   private void configureBindings() 

@@ -5,9 +5,22 @@
     "data": {
       "commands": [
         {
-          "type": "path",
+          "type": "parallel",
           "data": {
-            "pathName": "Test"
+            "commands": [
+              {
+                "type": "path",
+                "data": {
+                  "pathName": "Practice"
+                }
+              },
+              {
+                "type": "named",
+                "data": {
+                  "name": "Align"
+                }
+              }
+            ]
           }
         }
       ]

@@ -18,6 +18,7 @@ import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.networktables.NetworkTable;
 import edu.wpi.first.networktables.NetworkTableEntry;
 import edu.wpi.first.networktables.NetworkTableInstance;
+import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 
@@ -77,9 +78,10 @@ public class AprilTagAlign extends Command {
   @Override
   public void execute() 
   {
-    SmartDashboard.putNumber("Tag",runTag);
+    
+  if(DriverStation.isTeleop())
+  {
     if(limelight.hasValidTarget()){
-      SmartDashboard.putBoolean("Sim", ((int)limelight.getAprilTagID()) == runTag);
       if(!hasSet)
       {
         System.out.println("Setting Tag");
@@ -93,7 +95,6 @@ public class AprilTagAlign extends Command {
       lastYaw = Rotation2d.fromDegrees(thetaMeasurement);
       lastRobotYaw = Rotation2d.fromRadians(MathUtil.angleModulus(drivetrain.getIMU().getYaw().getRadians()));
       xMeasurement = limelight.getTargetHorizontalOffset();
-      SmartDashboard.putNumber("Yaw",thetaMeasurement);
        rVel = -controller.calculate(thetaMeasurement, 0);
       }
       else
@@ -106,22 +107,66 @@ public class AprilTagAlign extends Command {
     else
     {
       double rot = lastRobotYaw.getDegrees() + lastYaw.getDegrees();
-      SmartDashboard.putNumber("Des Rot", rot);
-      SmartDashboard.putNumber("Hedingng", MathUtil.angleModulus(drivetrain.getIMU().getYaw().getRadians()) * 180/Math.PI);
       // thetaMeasurement -= rot;
       rVel = controller.calculate(MathUtil.angleModulus(drivetrain.getIMU().getYaw().getRadians()) * 180/Math.PI, rot);
     }
 
     if(hasSet) {
-      SmartDashboard.putNumber("Last Yaw", lastYaw.getDegrees());
-      SmartDashboard.putNumber("Last Robot Yaw", lastRobotYaw.getDegrees());
-      SmartDashboard.putNumber("Cur Heading", drivetrain.getIMU().getYaw().getDegrees());
        
       double xVelocity = -xController.calculate(xMeasurement);
       // double rotationalVelocity = -controller.calculate(thetaMeasurement);
       speeds = new ChassisSpeeds(-1,xVelocity, rVel);   
       drivetrain.drive(speeds);
     }
+  }
+  else
+  {
+    if(limelight.hasValidTarget()){
+      if(!hasSet)
+      {
+        System.out.println("Setting Tag");
+        hasSet = true;
+        runTag = ((int)limelight.getAprilTagID());
+      }
+
+      if(((int)limelight.getAprilTagID()) == runTag) 
+      {
+      thetaMeasurement = -filter.calculate(limelight.getPoseEstimate(PoseEstimateType.TARGET_POSE_ROBOT_SPACE).getRaw()[4]);
+      lastYaw = Rotation2d.fromDegrees(thetaMeasurement);
+      lastRobotYaw = Rotation2d.fromRadians(MathUtil.angleModulus(drivetrain.getIMU().getYaw().getRadians()));
+      xMeasurement = limelight.getTargetHorizontalOffset();
+      rVel = -controller.calculate(thetaMeasurement, 0);
+      if(limelight.getTargetArea() > 45)
+      {
+        closeEnough = true;
+      }
+      }
+      else
+      {
+        double rot = lastRobotYaw.getDegrees() + lastYaw.getDegrees();
+        // thetaMeasurement -= rot;
+        rVel = controller.calculate(MathUtil.angleModulus(drivetrain.getIMU().getYaw().getRadians()) * 180/Math.PI, rot);
+      }
+    }
+    else
+    {
+      if(closeEnough)
+      {
+        isDone = true;
+      }
+      double rot = lastRobotYaw.getDegrees() + lastYaw.getDegrees();
+      // thetaMeasurement -= rot;
+      rVel = controller.calculate(MathUtil.angleModulus(drivetrain.getIMU().getYaw().getRadians()) * 180/Math.PI, rot);
+    }
+
+    if(hasSet) {
+       
+      double xVelocity = -xController.calculate(xMeasurement);
+      // double rotationalVelocity = -controller.calculate(thetaMeasurement);
+      speeds = new ChassisSpeeds(-1,xVelocity, rVel);   
+      drivetrain.drive(speeds);
+    }
+  }
   }
 
   // Called once the command ends or is interrupted.
@@ -137,6 +182,13 @@ public class AprilTagAlign extends Command {
   // Returns true when the command should end.
   @Override
   public boolean isFinished() {
+    if(DriverStation.isTeleop())
+    {
     return false;
+    }
+    else
+    {
+      return isDone;
+    }
   }
 }
