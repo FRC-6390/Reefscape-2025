@@ -1,6 +1,7 @@
 package frc.robot;
 
 import com.pathplanner.lib.auto.AutoBuilder;
+import com.pathplanner.lib.config.PIDConstants;
 import com.pathplanner.lib.path.PathPlannerPath;
 
 import ca.frc6390.athena.core.RobotLocalization.RobotLocalizationConfig;
@@ -42,6 +43,9 @@ public interface Constants {
 
         String[] LIMELIGHTS = {"limelight-driver", "limelight-tag"};
         RobotLocalizationConfig LOCALIZATION_CONFIG = new RobotLocalizationConfig(0.1, 0.1, 0.001);
+
+        PIDConstants PATHPLANNER_TRANSLATION_PID = new PIDConstants(5,0,0);
+        PIDConstants PATHPLANNER_ROTATION_PID = new PIDConstants(5,0,0);
     }
 
     public interface Controllers {
