@@ -139,4 +139,10 @@ public class AprilTagAlign extends Command {
   public boolean isFinished() {
     return false;
   }
+
+  public Pose2d getGoalPose(double offsetAngleOffsetAngleRadians, double distanceToTag, Rotation2d botAngle) {
+    double xOffset = distanceToTag * Math.sin(offsetAngleOffsetAngleRadians);
+    double yOffset = distanceToTag * Math.cos(offsetAngleOffsetAngleRadians);
+    return new Pose2d(xOffset, yOffset, botAngle.plus(Rotation2d.fromRadians(offsetAngleOffsetAngleRadians)));
+  } 
 }
