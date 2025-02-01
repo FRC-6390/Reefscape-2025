@@ -68,7 +68,6 @@ headingController.enableContinuousInput(-Math.PI, Math.PI);
      true,
           m_robotContainer.driveTrain
           );
-
     // try{
     //   config = RobotConfig.fromGUISettings();  }catch(Exception e){
     //     DriverStation.reportError("Failed to load PathPlanner config and configure AutoBuilder", e.getStackTrace());
