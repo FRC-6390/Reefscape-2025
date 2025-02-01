@@ -23,11 +23,12 @@ import ca.frc6390.athena.drivetrains.swerve.SwerveDrivetrain;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
+import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.Constants.DriveTrain;
 import frc.robot.commands.AprilTagAlign;
 import frc.robot.commands.Climb;
 import frc.robot.commands.DriveToGoal;
-import frc.robot.commands.TestClimb;
+import frc.robot.commands.AprilTagAlign.ALIGNMODE;
 import frc.robot.subsystems.Superstructure;
 import frc.robot.subsystems.superstructure.Climber;
 
@@ -43,10 +44,10 @@ public class RobotContainer {
   private final DebouncedController driverController = new DebouncedController(0);
 
   public RobotContainer() {
-    
     localization.configurePathPlanner(Constants.DriveTrain.PATHPLANNER_TRANSLATION_PID, DriveTrain.PATHPLANNER_ROTATION_PID);
     configureBindings();
-    NamedCommands.registerCommand("Align", new AprilTagAlign(vision, driveTrain, driverController));
+    NamedCommands.registerCommand("Align", new AprilTagAlign(vision.getCamera("limelight-driver"), driveTrain, driverController,ALIGNMODE.REEF));
+    NamedCommands.registerCommand("AlignFeeder", new AprilTagAlign(vision.getCamera("limelight-tag"), driveTrain, driverController, ALIGNMODE.FEEDER));
     driveTrain.setDriveCommand(driverController.leftX, driverController.leftY, driverController.rightX);
   }
 
@@ -57,7 +58,8 @@ public class RobotContainer {
     driverController.leftY.setDeadzone(Constants.Controllers.THETA_DEADZONE);
 
     driverController.start.onTrue(new InstantCommand(() -> driveTrain.getIMU().setYaw(0)));
-    driverController.a.whileTrue(new AprilTagAlign(vision, driveTrain, driverController));
+    driverController.a.whileTrue(new AprilTagAlign(vision.getCamera("limelight-tag"), driveTrain, driverController, ALIGNMODE.FEEDER));
+    driverController.b.whileTrue(new AprilTagAlign(vision.getCamera("limelight-driver"), driveTrain, driverController, ALIGNMODE.REEF));
 
     // driverController.leftBumper.onTrue(new Climb(climber, STATE.HOME));
     // driverController.rightBumper.whileTrue(new Climb(climber, STATE.CLIMB));
@@ -66,6 +68,6 @@ public class RobotContainer {
   }
 
   public Command getAutonomousCommand() {
-    return new PathPlannerAuto("Prac");
+    return new PathPlannerAuto("LeftSide");
   }
 }

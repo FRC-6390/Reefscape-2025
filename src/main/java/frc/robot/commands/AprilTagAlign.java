@@ -4,6 +4,10 @@
 
 package frc.robot.commands;
 
+import javax.sound.sampled.Port;
+
+import com.revrobotics.Rev2mDistanceSensor.Unit;
+
 import ca.frc6390.athena.controllers.DebouncedController;
 import ca.frc6390.athena.core.RobotVision;
 import ca.frc6390.athena.drivetrains.swerve.SwerveDrivetrain;
@@ -15,24 +19,24 @@ import edu.wpi.first.math.filter.MedianFilter;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
+import edu.wpi.first.math.util.Units;
 import edu.wpi.first.networktables.NetworkTable;
 import edu.wpi.first.networktables.NetworkTableEntry;
 import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
+import frc.robot.utils.DistanceSensor;
 
 public class AprilTagAlign extends Command {
   public LimeLight limelight; 
   public SwerveDrivetrain drivetrain;
+  public boolean crashed;
   public DebouncedController cont; 
-  // public PIDController controller = new PIDController(0.025, 0, 0);
-  // public PIDController xController = new PIDController(1.225, 0, 0);
   public PIDController controller = new PIDController(0.025, 0, 0);
-  public PIDController xController = new PIDController(0.07, 0, 0.0001);
+  public PIDController xController = new PIDController(0.065, 0, 0.0001);
   public double thetaSpeed = 0;
   public Pose2d targetRed = new Pose2d(13.043, 4.007, new Rotation2d());
-  public RobotVision vision;
   public NetworkTable table;
   public NetworkTableEntry raw;
   public MedianFilter filter = new MedianFilter(10);
@@ -40,24 +44,56 @@ public class AprilTagAlign extends Command {
   public boolean isDone;
   public ChassisSpeeds speeds;
   public int runTag;
+  public DistanceSensor distanceSensor = new DistanceSensor(com.revrobotics.Rev2mDistanceSensor.Port.kOnboard);
   public boolean hasSet;
   public Rotation2d lastYaw;
   public Rotation2d lastRobotYaw;
   public double xMeasurement;
   public double thetaMeasurement;
   public double rVel;
+  public ALIGNMODE mode;
+  
+  public enum ALIGNMODE
+  {
+    FEEDER(1),
+    REEF(-1);
 
-  public AprilTagAlign(RobotVision vision, SwerveDrivetrain drivetrain, DebouncedController cont) {
+    double num;
+    private ALIGNMODE(double num)
+    {
+      this.num = num;
+    } 
+
+    public double get()
+    {
+      return num;
+    }
+  }
+
+  public AprilTagAlign(LimeLight limeLight, SwerveDrivetrain drivetrain, DebouncedController cont, ALIGNMODE mode ) {
     this.drivetrain = drivetrain; 
-    this.vision = vision;
     this.cont = cont;
-    limelight = vision.getCamera("limelight-driver");
+    limelight = limeLight;
+    this.mode = mode;
+  }
+
+  public AprilTagAlign(LimeLight limeLight, SwerveDrivetrain drivetrain, DebouncedController cont, ALIGNMODE mode, int tagNum) {
+    this.drivetrain = drivetrain; 
+    this.cont = cont;
+    limelight = limeLight;
+    this.mode = mode;
+    runTag = tagNum;
+    if(runTag == tagNum)
+    {
+    hasSet = true;
+    }
   }
 
   @Override
   public void initialize() 
   {
     closeEnough = false;
+    crashed = false;
     hasSet = false;
     isDone =false;
     speeds = new ChassisSpeeds();
@@ -68,18 +104,17 @@ public class AprilTagAlign extends Command {
     xMeasurement = 0;
     speeds =new ChassisSpeeds();
     runTag = -1;
-    // controller.enableContinuousInput(-Math.PI, Math.PI);
-    controller.setTolerance(0.3);
-    table = NetworkTableInstance.getDefault().getTable("limelight-driver");
-    raw = table.getEntry("rawfiducials");    
+    distanceSensor.setEnabled(true);
+    distanceSensor.setAutomaticMode(true);
+    
   }
 
 
   @Override
   public void execute() 
   {
-    
-  if(DriverStation.isTeleop())
+    SmartDashboard.putNumber("Distance",distanceSensor.getRange(Unit.kInches));
+   if(DriverStation.isTeleop())
   {
     if(limelight.hasValidTarget()){
       if(!hasSet)
@@ -88,6 +123,7 @@ public class AprilTagAlign extends Command {
         hasSet = true;
         runTag = ((int)limelight.getAprilTagID());
       }
+      
 
       if(((int)limelight.getAprilTagID()) == runTag) 
       {
@@ -113,14 +149,15 @@ public class AprilTagAlign extends Command {
 
     if(hasSet) {
        
-      double xVelocity = -xController.calculate(xMeasurement);
+      double xVelocity = mode.get() * xController.calculate(xMeasurement);
       // double rotationalVelocity = -controller.calculate(thetaMeasurement);
-      speeds = new ChassisSpeeds(-1,xVelocity, rVel);   
-      drivetrain.drive(speeds);
+      speeds = new ChassisSpeeds(mode.get(),xVelocity, rVel);   
+      drivetrain.feedbackSpeeds(speeds);
     }
   }
   else
   {
+    System.out.print("EXECUTING");
     if(limelight.hasValidTarget()){
       if(!hasSet)
       {
@@ -135,37 +172,26 @@ public class AprilTagAlign extends Command {
       lastYaw = Rotation2d.fromDegrees(thetaMeasurement);
       lastRobotYaw = Rotation2d.fromRadians(MathUtil.angleModulus(drivetrain.getIMU().getYaw().getRadians()));
       xMeasurement = limelight.getTargetHorizontalOffset();
-      rVel = -controller.calculate(thetaMeasurement, 0);
-      if(limelight.getTargetArea() > 45)
+      rVel =  -controller.calculate(thetaMeasurement, 0);
+      System.out.println(limelight.getTargetArea());
+      if(limelight.getTargetArea() > 10)
       {
         closeEnough = true;
       }
       }
-      else
-      {
-        double rot = lastRobotYaw.getDegrees() + lastYaw.getDegrees();
-        // thetaMeasurement -= rot;
-        rVel = controller.calculate(MathUtil.angleModulus(drivetrain.getIMU().getYaw().getRadians()) * 180/Math.PI, rot);
-      }
     }
-    else
+    if(!limelight.hasValidTarget() && closeEnough && distanceSensor.getRange(Unit.kInches) < 6 && distanceSensor.isRangeValid())
     {
-      if(closeEnough)
-      {
-        isDone = true;
-      }
-      double rot = lastRobotYaw.getDegrees() + lastYaw.getDegrees();
-      // thetaMeasurement -= rot;
-      rVel = controller.calculate(MathUtil.angleModulus(drivetrain.getIMU().getYaw().getRadians()) * 180/Math.PI, rot);
+      isDone = true;
     }
-
     if(hasSet) {
        
-      double xVelocity = -xController.calculate(xMeasurement);
+      double xVelocity =  mode.get() * xController.calculate(xMeasurement);
       // double rotationalVelocity = -controller.calculate(thetaMeasurement);
-      speeds = new ChassisSpeeds(-1,xVelocity, rVel);   
-      drivetrain.drive(speeds);
+      speeds = new ChassisSpeeds(mode.get(),xVelocity, rVel);   
+      drivetrain.feedbackSpeeds(speeds);
     }
+    
   }
   }
 
@@ -175,7 +201,6 @@ public class AprilTagAlign extends Command {
   {
     drivetrain.drive(new ChassisSpeeds(0,0,0));
     drivetrain.feedbackSpeeds(new ChassisSpeeds(0,0,0));
-    drivetrain.drive(drivetrain.getDriveSpeeds());
     SmartDashboard.putNumber("Is Running", 0);
   }
 
@@ -188,7 +213,7 @@ public class AprilTagAlign extends Command {
     }
     else
     {
-      return isDone;
+    return isDone;
     }
   }
 }

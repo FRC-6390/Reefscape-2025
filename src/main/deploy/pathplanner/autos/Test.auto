@@ -5,19 +5,19 @@
     "data": {
       "commands": [
         {
-          "type": "parallel",
+          "type": "race",
           "data": {
             "commands": [
               {
                 "type": "path",
                 "data": {
-                  "pathName": "Practice"
+                  "pathName": "Side2ToFeeder"
                 }
               },
               {
                 "type": "named",
                 "data": {
-                  "name": "Align"
+                  "name": "AlignFeeder"
                 }
               }
             ]

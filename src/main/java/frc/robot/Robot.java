@@ -4,11 +4,20 @@
 
 package frc.robot;
 
+import java.io.IOException;
+import java.nio.file.Path;
+import java.util.List;
+
+import org.json.simple.parser.ParseException;
+
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.commands.PathPlannerAuto;
 import com.pathplanner.lib.config.PIDConstants;
 import com.pathplanner.lib.config.RobotConfig;
 import com.pathplanner.lib.controllers.PPHolonomicDriveController;
+import com.pathplanner.lib.path.PathPlannerPath;
+import com.pathplanner.lib.trajectory.PathPlannerTrajectory;
+import com.pathplanner.lib.util.FileVersionException;
 
 import choreo.auto.AutoFactory;
 import choreo.trajectory.SwerveSample;
@@ -36,7 +45,6 @@ public class Robot extends TimedRobot {
 
   public void drive(SwerveSample sample) {
      Pose2d pose = m_robotContainer.localization.getPose();
-
         // Generate the next speeds for the robot
         ChassisSpeeds speeds = new ChassisSpeeds(
             sample.vx + xController.calculate(pose.getX(), sample.x),
@@ -53,6 +61,7 @@ public class Robot extends TimedRobot {
 
   public Robot() {  
     m_robotContainer = new RobotContainer();
+    m_autonomousCommand = m_robotContainer.getAutonomousCommand();
     
 headingController.enableContinuousInput(-Math.PI, Math.PI);
     factory = new AutoFactory(m_robotContainer.localization::getPose, m_robotContainer.localization::reset, this::drive, 
@@ -90,7 +99,7 @@ headingController.enableContinuousInput(-Math.PI, Math.PI);
   public void robotPeriodic() {
     CommandScheduler.getInstance().run();
     m_robotContainer.localization.update();
-    System.out.println(m_robotContainer.localization.getPose().getY());
+    // System.out.println(m_robotContainer.localization.getPose().getY());
     // System.out.println(m_robotContainer.localization.getPose().getX());
   }
 
@@ -111,9 +120,18 @@ headingController.enableContinuousInput(-Math.PI, Math.PI);
 
   @Override
   public void autonomousInit() {
-    factory.resetOdometry("test");
-    m_autonomousCommand = factory.trajectoryCmd("test");
-
+    // factory.resetOdometry("test");
+    try {
+      List<PathPlannerPath> p = PathPlannerAuto.getPathGroupFromAutoFile("LeftSide");
+      PathPlannerPath firstPath = p.get(0);
+      m_robotContainer.localization.reset(firstPath.getStartingHolonomicPose().get());
+    } catch (IOException | ParseException e) {
+      // TODO Auto-generated catch block
+      e.printStackTrace();
+    }
+    
+    
+    
     if (m_autonomousCommand != null) {
       m_autonomousCommand.schedule();
     }
