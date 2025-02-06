@@ -32,38 +32,23 @@ import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
-import frc.robot.utils.AutoAlignInfo;
+import frc.robot.utils.AutoAlignHelper;
 import frc.robot.utils.DistanceSensor;
 public class AlignTets extends Command {
+  
   public LimeLight limelight; 
   public SwerveDrivetrain drivetrain;
   public DebouncedController cont; 
-  public PIDController controller = new PIDController(0.025, 0, 0);
-  public PIDController xController = new PIDController(0.065, 0, 0.0001);
-  public MedianFilter yFilter = new MedianFilter(10);
-  public MedianFilter filter = new MedianFilter(10);
   public boolean closeEnough;
   public boolean isDone;
   public ChassisSpeeds speeds;
   public int runTag;
   public DistanceSensor distanceSensor = new DistanceSensor(com.revrobotics.Rev2mDistanceSensor.Port.kOnboard);
   public boolean hasSet;
-  public Rotation2d lastYaw;
-  public Rotation2d lastRobotYaw;
-  public Pose2d lastRObotPose2d;
-  public double xVelocity;
-  public double xMeasurement;
-  public double thetaMeasurement;
-  public double yVelocity;
-  public FilterList x;
-  public FilterList y;
-  public PIDController xController2 = new PIDController(1.2, 0,0);
-  public Pose2d botPose;
-  public double yMeasurement;
-  public double rVel;
   public RobotLocalization localization;
   public ALIGNMODE mode;
-  public AutoAlignInfo info;
+  public AutoAlignHelper info;
+
   public enum ALIGNMODE
   {
     FEEDER(1),
@@ -81,7 +66,6 @@ public class AlignTets extends Command {
     }
   }
   
-
   public AlignTets(LimeLight limeLight, SwerveDrivetrain drivetrain, DebouncedController cont, ALIGNMODE mode, RobotLocalization localization) {
     this.drivetrain = drivetrain; 
     this.cont = cont;
@@ -109,23 +93,10 @@ public class AlignTets extends Command {
     hasSet = false;
     isDone =false;
     speeds = new ChassisSpeeds();
-    rVel = 0;
-    xVelocity = 0;
-    yVelocity = 0;
-    lastYaw = new Rotation2d();
-    lastRobotYaw  =new Rotation2d();
-    thetaMeasurement =0;
-    xMeasurement = 0;
-    speeds =new ChassisSpeeds();
     runTag = -1;
-    lastRObotPose2d = new Pose2d();
     distanceSensor.setEnabled(true);
     distanceSensor.setAutomaticMode(true);
-    botPose = new Pose2d();
-    x =  new FilterList().addMedianFilter(10);
-    y = new FilterList().addMedianFilter(50);
-    info = new AutoAlignInfo(limelight, localization, drivetrain);
- 
+    info = new AutoAlignHelper(limelight, localization, drivetrain);
   }
 
 
@@ -139,41 +110,22 @@ public class AlignTets extends Command {
       }
       if(((int)limelight.getAprilTagID()) == runTag) {
       info.gatherData();
-      // thetaMeasurement = -filter.calculate(limelight.getPoseEstimate(PoseEstimateType.TARGET_POSE_ROBOT_SPACE).getRaw()[4]);
-      // lastYaw = Rotation2d.fromDegrees(thetaMeasurement);
-      // lastRobotYaw = Rotation2d.fromRadians(MathUtil.angleModulus(drivetrain.getIMU().getYaw().getRadians()));
-      // lastRObotPose2d = localization.getRelativePose();
-      // localization.resetRelativePose(0,  0, 0);
-      // Pose2d pos = limelight.getPoseEstimate(PoseEstimateType.TARGET_POSE_ROBOT_SPACE).getPose();
-      // botPose = new Pose2d(-x.calculate(pos.getX()), -y.calculate(pos.getY()), pos.getRotation());
-      // xMeasurement = limelight.getTargetHorizontalOffset();
-      rVel = -controller.calculate(info.getThetatMeasurement(), 0);
+      speeds = info.calculateSpeeds(mode, true);
       if(limelight.getTargetArea() > 20){
         closeEnough = true;
       }
       }
       else{
-        yVelocity = xController2.calculate(localization.getRelativePose().getX(),info.getTargetPoseRobotSpace().getX());
-        xVelocity = xController2.calculate(localization.getRelativePose().getY(),info.getTargetPoseRobotSpace().getY());
-        double rot = info.getLastRobotYaw().getDegrees() + info.getLastYaw().getDegrees();
-        rVel = controller.calculate(MathUtil.angleModulus(drivetrain.getIMU().getYaw().getRadians()) * 180/Math.PI, rot);
+        speeds = info.calculateSpeeds(mode, false);
       }
     }
     else{
-      yVelocity = xController2.calculate(localization.getRelativePose().getX(),info.getTargetPoseRobotSpace().getX());
-      xVelocity = xController2.calculate(localization.getRelativePose().getY(),info.getTargetPoseRobotSpace().getY());
-      double rot = info.getLastRobotYaw().getDegrees() + info.getLastYaw().getDegrees();
-      rVel = controller.calculate(MathUtil.angleModulus(drivetrain.getIMU().getYaw().getRadians()) * 180/Math.PI, rot);
+      speeds = info.calculateSpeeds(mode, false);
     }
     if(hasSet) {
-      if(limelight.hasValidTarget()){
-      xVelocity = mode.get() * xController.calculate(info.getXMeasurement() , 0);
-      yVelocity = mode.get();
-      }
       if(closeEnough  && distanceSensor.isRangeValid() && distanceSensor.getRange(Unit.kInches) < 16){
         isDone = true;
-      }
-      speeds = new ChassisSpeeds(yVelocity,xVelocity, rVel);   
+      } 
       drivetrain.feedbackSpeeds(speeds);
     }
   }
@@ -191,9 +143,4 @@ public class AlignTets extends Command {
     return isDone;
   }
 
-  public Pose2d getGoalPose(double offsetAngleOffsetAngleRadians, double distanceToTag) {
-    double xOffset = distanceToTag * Math.sin(offsetAngleOffsetAngleRadians);
-    double yOffset = distanceToTag * Math.cos(offsetAngleOffsetAngleRadians);
-    return new Pose2d(xOffset, yOffset, (Rotation2d.fromRadians(offsetAngleOffsetAngleRadians)));
-  } 
 }
