@@ -25,6 +25,7 @@ import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.Constants.DriveTrain;
+import frc.robot.commands.AlignTets;
 import frc.robot.commands.AprilTagAlign;
 import frc.robot.commands.Climb;
 import frc.robot.commands.DriveToGoal;
@@ -58,9 +59,7 @@ public class RobotContainer {
     driverController.leftY.setDeadzone(Constants.Controllers.THETA_DEADZONE);
 
     driverController.start.onTrue(new InstantCommand(() -> driveTrain.getIMU().setYaw(0)));
-    driverController.a.whileTrue(new AprilTagAlign(vision.getCamera("limelight-tag"), driveTrain, driverController, ALIGNMODE.FEEDER));
-    driverController.b.whileTrue(new AprilTagAlign(vision.getCamera("limelight-driver"), driveTrain, driverController, ALIGNMODE.REEF));
-
+    driverController.b.onTrue(new AlignTets(vision.getCamera("limelight-driver"), driveTrain, driverController, frc.robot.commands.AlignTets.ALIGNMODE.REEF, localization));
     // driverController.leftBumper.onTrue(new Climb(climber, STATE.HOME));
     // driverController.rightBumper.whileTrue(new Climb(climber, STATE.CLIMB));
     // driverController.leftBumper.whileTrue(superstructure.setClimber(Climber.State.Home));

@@ -65,7 +65,7 @@ public class DriveToGoal extends Command {
   {
     smallestDistance = 99999;
     for (int i = 0; i < goals.length; i++) {
-      Transform2d distanceTransform = goals[i].minus(localization.getPose());
+      Transform2d distanceTransform = goals[i].minus(localization.getFieldPose());
       double distance = Math.sqrt((distanceTransform.getY() * distanceTransform.getY() + distanceTransform.getX() * distanceTransform.getX()));
       if(distance <= smallestDistance)
       {

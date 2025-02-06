@@ -43,55 +43,12 @@ public class Robot extends TimedRobot {
     private final PIDController yController = new PIDController(10.0, 0.0, 0.0);
     private final PIDController headingController = new PIDController(7.5, 0.0, 0.0);
 
-  public void drive(SwerveSample sample) {
-     Pose2d pose = m_robotContainer.localization.getPose();
-        // Generate the next speeds for the robot
-        ChassisSpeeds speeds = new ChassisSpeeds(
-            sample.vx + xController.calculate(pose.getX(), sample.x),
-            sample.vy + yController.calculate(pose.getY(), sample.y),
-            sample.omega + headingController.calculate(pose.getRotation().getRadians(), sample.heading)
-        );
-
-
-
-        // Apply the generated speeds
-        m_robotContainer.driveTrain.drive(ChassisSpeeds.fromRobotRelativeSpeeds(speeds, m_robotContainer.driveTrain.getIMU().getFieldYaw()));
-  }
+  
 
 
   public Robot() {  
     m_robotContainer = new RobotContainer();
     m_autonomousCommand = m_robotContainer.getAutonomousCommand();
-    
-headingController.enableContinuousInput(-Math.PI, Math.PI);
-    factory = new AutoFactory(m_robotContainer.localization::getPose, m_robotContainer.localization::reset, this::drive, 
-     true,
-          m_robotContainer.driveTrain
-          );
-    // try{
-    //   config = RobotConfig.fromGUISettings();  }catch(Exception e){
-    //     DriverStation.reportError("Failed to load PathPlanner config and configure AutoBuilder", e.getStackTrace());
-    //   }
-    //   System.out.println("AutoBuilder Configured");
-    //   AutoBuilder.configure(
-    //     m_robotContainer.localization::getPose, 
-    //     m_robotContainer.localization::reset, 
-    //     m_robotContainer.driveTrain::getDriveSpeeds, 
-    //     (speeds, feedforwards) -> m_robotContainer.driveTrain.drive(speeds), 
-    //     new PPHolonomicDriveController(
-    //       new PIDConstants(5,0,0),
-    //       new PIDConstants(5,0,0)
-    //     ),
-    //     config,
-    //     () -> {
-    //         var alliance = DriverStation.getAlliance();
-    //         if (alliance.isPresent()) {
-    //             return alliance.get() == DriverStation.Alliance.Red;
-    //         }
-    //         return false;
-    //     },
-    //     m_robotContainer.driveTrain
-    //   );
     }
 
   @Override
@@ -105,7 +62,7 @@ headingController.enableContinuousInput(-Math.PI, Math.PI);
   @Override
   public void robotInit() {
     m_robotContainer.localization.shuffleboard("Localization");
-    m_robotContainer.localization.reset(new Pose2d(0,0, new Rotation2d()));
+    m_robotContainer.localization.resetFieldPose(new Pose2d(0,0, new Rotation2d()));
   }
 
   @Override
@@ -119,11 +76,10 @@ headingController.enableContinuousInput(-Math.PI, Math.PI);
 
   @Override
   public void autonomousInit() {
-    // factory.resetOdometry("test");
     try {
       List<PathPlannerPath> p = PathPlannerAuto.getPathGroupFromAutoFile("LeftSide");
       PathPlannerPath firstPath = p.get(0);
-      m_robotContainer.localization.reset(firstPath.getStartingHolonomicPose().get());
+      m_robotContainer.localization.resetFieldPose(firstPath.getStartingHolonomicPose().get());
     } catch (IOException | ParseException e) {
       // TODO Auto-generated catch block
       e.printStackTrace();
