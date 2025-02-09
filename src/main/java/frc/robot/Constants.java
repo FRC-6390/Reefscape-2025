@@ -69,9 +69,8 @@ public interface Constants {
         int RIGHT_MOTOR = 30;
         double GEAR_DIAMETER_INCHES = 5;
         double OFFSET_FROM_FLOOR = 0;
-        double GEAR_RATIO = 3d/1d;
-        int LOWER_LIMIT_SWITCH = 0;
-        int UPPER_LIMIT_SWITCH = 0;
+        double GEAR_RATIO = 1d/1d; //from motors 4d/1d
+        int LIMIT_SWITCH = 0;
         PIDController CONTORLLER = new PIDController(0.015, 0, 0);
     }
 
@@ -81,7 +80,7 @@ public interface Constants {
         int LEFT_MOTOR = 21;
         int RIGHT_MOTOR = 30;
         double ENCODER_OFFSET = 0;
-        double ENCODER_GEAR_RATIO = 4d/1d;
+        double ENCODER_GEAR_RATIO = 1d/1d; //from motors 125d/1d;
         String CANBUS = "can";
         PIDController CONTORLLER = new PIDController(0.015, 0, 0);
 

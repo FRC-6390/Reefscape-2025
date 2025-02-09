@@ -55,7 +55,7 @@ public class Elevator extends SubsystemBase{
     leftMotor = new TalonFX(Constants.Elevator.LEFT_MOTOR);
     rightMotor = new TalonFX(Constants.Elevator.RIGHT_MOTOR);
     
-    lowerlimitSwitch = new GenericLimitSwitch(Constants.Elevator.LOWER_LIMIT_SWITCH);
+    lowerlimitSwitch = new GenericLimitSwitch(Constants.Elevator.LIMIT_SWITCH);
     lowerlimitSwitch.onPress(() ->  encoder.setPosition(0));
 
     controller = Constants.Elevator.CONTORLLER;
