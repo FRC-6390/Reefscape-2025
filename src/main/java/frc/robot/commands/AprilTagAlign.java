@@ -8,7 +8,6 @@ import static edu.wpi.first.units.Units.Rotation;
 
 import javax.sound.sampled.Port;
 
-import com.revrobotics.Rev2mDistanceSensor.Unit;
 
 import ca.frc6390.athena.controllers.DebouncedController;
 import ca.frc6390.athena.core.RobotVision;
@@ -28,7 +27,6 @@ import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
-import frc.robot.utils.DistanceSensor;
 
 public class AprilTagAlign extends Command {
   public LimeLight limelight; 
@@ -46,7 +44,6 @@ public class AprilTagAlign extends Command {
   public boolean isDone;
   public ChassisSpeeds speeds;
   public int runTag;
-  public DistanceSensor distanceSensor = new DistanceSensor(com.revrobotics.Rev2mDistanceSensor.Port.kOnboard);
   public boolean hasSet;
   public Rotation2d lastYaw;
   public Rotation2d lastRobotYaw;
@@ -107,9 +104,7 @@ public class AprilTagAlign extends Command {
     xMeasurement = 0;
     speeds =new ChassisSpeeds();
     runTag = -1;
-    distanceSensor.setEnabled(true);
-    distanceSensor.setAutomaticMode(true);
-    
+   
   }
 
 
@@ -181,10 +176,10 @@ public class AprilTagAlign extends Command {
       }
       }
     }
-    if(!limelight.hasValidTarget() && closeEnough && distanceSensor.getRange(Unit.kInches) < 6 && distanceSensor.isRangeValid())
-    {
-      isDone = true;
-    }
+    // if(!limelight.hasValidTarget() && closeEnough && distanceSensor.getRange(Unit.kInches) < 6 && distanceSensor.isRangeValid())
+    // {
+    //   isDone = true;
+    // }
     if(hasSet) {
        
       double xVelocity =  mode.get() * xController.calculate(xMeasurement);

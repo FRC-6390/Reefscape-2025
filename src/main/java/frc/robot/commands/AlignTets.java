@@ -9,8 +9,6 @@ import static edu.wpi.first.units.Units.Rotation;
 import javax.print.attribute.standard.Media;
 import javax.sound.sampled.Port;
 
-import com.revrobotics.Rev2mDistanceSensor.Unit;
-
 import ca.frc6390.athena.controllers.DebouncedController;
 import ca.frc6390.athena.core.RobotLocalization;
 import ca.frc6390.athena.core.RobotVision;
@@ -33,7 +31,6 @@ import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.utils.AutoAlignHelper;
-import frc.robot.utils.DistanceSensor;
 public class AlignTets extends Command {
   
   public LimeLight limelight; 
@@ -43,7 +40,6 @@ public class AlignTets extends Command {
   public boolean isDone;
   public ChassisSpeeds speeds;
   public int runTag;
-  public DistanceSensor distanceSensor = new DistanceSensor(com.revrobotics.Rev2mDistanceSensor.Port.kOnboard);
   public boolean hasSet;
   public RobotLocalization localization;
   public ALIGNMODE mode;
@@ -94,8 +90,6 @@ public class AlignTets extends Command {
     isDone =false;
     speeds = new ChassisSpeeds();
     runTag = -1;
-    distanceSensor.setEnabled(true);
-    distanceSensor.setAutomaticMode(true);
     info = new AutoAlignHelper(limelight, localization, drivetrain);
   }
 
@@ -123,9 +117,9 @@ public class AlignTets extends Command {
       speeds = info.calculateSpeeds(mode, false);
     }
     if(hasSet) {
-      if(closeEnough  && distanceSensor.isRangeValid() && distanceSensor.getRange(Unit.kInches) < 16){
-        isDone = true;
-      } 
+      // if(closeEnough  && distanceSensor.isRangeValid() && distanceSensor.getRange(Unit.kInches) < 16){
+      //   isDone = true;
+      // } 
       drivetrain.feedbackSpeeds(speeds);
     }
   }

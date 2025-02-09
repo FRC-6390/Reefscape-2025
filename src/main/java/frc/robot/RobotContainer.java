@@ -19,7 +19,9 @@ import ca.frc6390.athena.controllers.DebouncedController;
 import ca.frc6390.athena.core.RobotIMU;
 import ca.frc6390.athena.core.RobotLocalization;
 import ca.frc6390.athena.core.RobotVision;
+import ca.frc6390.athena.core.imu.devices.Pigeon2IMU;
 import ca.frc6390.athena.drivetrains.swerve.SwerveDrivetrain;
+import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
@@ -35,7 +37,7 @@ import frc.robot.subsystems.superstructure.Climber;
 
 public class RobotContainer {
 
-  private final RobotIMU imu = RobotIMU.createFromPigeon2(Constants.DriveTrain.PIGEON_ID,  Constants.DriveTrain.CANBUS);
+  private final RobotIMU<Pigeon2IMU> imu = RobotIMU.createFromPigeon2(Constants.DriveTrain.PIGEON_ID,  Constants.DriveTrain.CANBUS);
   private final RobotVision vision = new RobotVision(Constants.DriveTrain.LIMELIGHTS);
   public final SwerveDrivetrain driveTrain = new SwerveDrivetrain(Constants.DriveTrain.MODULE_CONFIGS, imu, false, Constants.DriveTrain.DRIFT_PID);
   // public final Climber climber = new Climber();
@@ -59,7 +61,12 @@ public class RobotContainer {
     driverController.leftY.setDeadzone(Constants.Controllers.THETA_DEADZONE);
 
     driverController.start.onTrue(new InstantCommand(() -> driveTrain.getIMU().setYaw(0)));
-    driverController.b.onTrue(new AlignTets(vision.getCamera("limelight-driver"), driveTrain, driverController, frc.robot.commands.AlignTets.ALIGNMODE.REEF, localization));
+    // driverController.b.onTrue(new AlignTets(vision.getCamera("limelight-driver"), driveTrain, driverController, frc.robot.commands.AlignTets.ALIGNMODE.REEF, localization));
+    
+    driverController.a.onTrue(() -> localization.resetFieldPose(0, 0, 0));
+    driverController.x.onTrue(() -> localization.resetFieldPose(0, 0, 90));
+    driverController.y.onTrue(() -> localization.resetFieldPose(0, 0, 180));
+
     // driverController.leftBumper.onTrue(new Climb(climber, STATE.HOME));
     // driverController.rightBumper.whileTrue(new Climb(climber, STATE.CLIMB));
     // driverController.leftBumper.whileTrue(superstructure.setClimber(Climber.State.Home));
@@ -67,6 +74,12 @@ public class RobotContainer {
   }
 
   public Command getAutonomousCommand() {
-    return new PathPlannerAuto("LeftSide");
+    try{
+        PathPlannerPath path = PathPlannerPath.fromChoreoTrajectory("Test");
+        return AutoBuilder.followPath(path);
+      } catch (Exception e) {
+        DriverStation.reportError("FATAL AUTO COULD NOT BE LOADED: " + e.getMessage(), e.getStackTrace());
+        return Commands.none();
+      }
   }
 }
