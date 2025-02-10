@@ -63,13 +63,14 @@ public interface Constants {
     }
 
     public interface Elevator {
-
-        int ENCODER = 40;
-        int LEFT_MOTOR = 21;
-        int RIGHT_MOTOR = 30;
-        double GEAR_DIAMETER_INCHES = 5;
+        String CANBUS = "can";
+        int ENCODER = 9;
+        int LEFT_MOTOR = 1;
+        int RIGHT_MOTOR = 5;
+        double GEAR_DIAMETER_INCHES = 3d;
         double OFFSET_FROM_FLOOR = 0;
-        double GEAR_RATIO = 1d/1d; //from motors 4d/1d
+        double ENCODER_GEAR_RATIO = 1d/1d;
+        double MOTOR_GEAR_RATIO = 6d/1d;
         int LIMIT_SWITCH = 0;
         PIDController CONTORLLER = new PIDController(0.015, 0, 0);
     }

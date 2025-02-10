@@ -34,24 +34,26 @@ import frc.robot.commands.DriveToGoal;
 import frc.robot.commands.AprilTagAlign.ALIGNMODE;
 import frc.robot.subsystems.Superstructure;
 import frc.robot.subsystems.superstructure.Climber;
+import frc.robot.subsystems.superstructure.Elevator;
 
 public class RobotContainer {
 
-  private final RobotIMU<Pigeon2IMU> imu = RobotIMU.createFromPigeon2(Constants.DriveTrain.PIGEON_ID,  Constants.DriveTrain.CANBUS);
-  private final RobotVision vision = new RobotVision(Constants.DriveTrain.LIMELIGHTS);
-  public final SwerveDrivetrain driveTrain = new SwerveDrivetrain(Constants.DriveTrain.MODULE_CONFIGS, imu, false, Constants.DriveTrain.DRIFT_PID);
+  // private final RobotIMU<Pigeon2IMU> imu = RobotIMU.createFromPigeon2(Constants.DriveTrain.PIGEON_ID,  Constants.DriveTrain.CANBUS);
+  // private final RobotVision vision = new RobotVision(Constants.DriveTrain.LIMELIGHTS);
+  // public final SwerveDrivetrain driveTrain = new SwerveDrivetrain(Constants.DriveTrain.MODULE_CONFIGS, imu, false, Constants.DriveTrain.DRIFT_PID);
   // public final Climber climber = new Climber();
+  public final Elevator elevator = new Elevator();
   // public final Superstructure superstructure = new Superstructure(climber);
   
-  public final RobotLocalization localization = new RobotLocalization(driveTrain, Constants.DriveTrain.LOCALIZATION_CONFIG);
+  // public final RobotLocalization localization = new RobotLocalization(driveTrain, Constants.DriveTrain.LOCALIZATION_CONFIG);
   private final DebouncedController driverController = new DebouncedController(0);
 
   public RobotContainer() {
-    localization.configurePathPlanner(Constants.DriveTrain.PATHPLANNER_TRANSLATION_PID, DriveTrain.PATHPLANNER_ROTATION_PID);
+    // localization.configurePathPlanner(Constants.DriveTrain.PATHPLANNER_TRANSLATION_PID, DriveTrain.PATHPLANNER_ROTATION_PID);
     configureBindings();
-    NamedCommands.registerCommand("Align", new AprilTagAlign(vision.getCamera("limelight-driver"), driveTrain, driverController,ALIGNMODE.REEF));
-    NamedCommands.registerCommand("AlignFeeder", new AprilTagAlign(vision.getCamera("limelight-tag"), driveTrain, driverController, ALIGNMODE.FEEDER));
-    driveTrain.setDriveCommand(driverController.leftX, driverController.leftY, driverController.rightX);
+    // NamedCommands.registerCommand("Align", new AprilTagAlign(vision.getCamera("limelight-driver"), driveTrain, driverController,ALIGNMODE.REEF));
+    // NamedCommands.registerCommand("AlignFeeder", new AprilTagAlign(vision.getCamera("limelight-tag"), driveTrain, driverController, ALIGNMODE.FEEDER));
+    // driveTrain.setDriveCommand(driverController.leftX, driverController.leftY, driverController.rightX);
   }
 
   private void configureBindings() 
@@ -60,12 +62,17 @@ public class RobotContainer {
     driverController.leftX.setDeadzone(Constants.Controllers.THETA_DEADZONE);
     driverController.leftY.setDeadzone(Constants.Controllers.THETA_DEADZONE);
 
-    driverController.start.onTrue(new InstantCommand(() -> driveTrain.getIMU().setYaw(0)));
+    // driverController.start.onTrue(new InstantCommand(() -> driveTrain.getIMU().setYaw(0)));
     // driverController.b.onTrue(new AlignTets(vision.getCamera("limelight-driver"), driveTrain, driverController, frc.robot.commands.AlignTets.ALIGNMODE.REEF, localization));
-    
-    driverController.a.onTrue(() -> localization.resetFieldPose(0, 0, 0));
-    driverController.x.onTrue(() -> localization.resetFieldPose(0, 0, 90));
-    driverController.y.onTrue(() -> localization.resetFieldPose(0, 0, 180));
+
+    driverController.rightBumper.whileTrue(() -> elevator.setMotors(0.5)).onFalse(new InstantCommand(() -> elevator.setMotors(0)));
+    driverController.leftBumper.whileTrue(() -> elevator.setMotors(-0.5)).onFalse(new InstantCommand(() -> elevator.setMotors(0)));
+
+    driverController.a.onTrue(() -> elevator.getStateMachine().setGoalState(Elevator.State.L1));
+    driverController.y.onTrue(() -> elevator.getStateMachine().setGoalState(Elevator.State.L4));
+    driverController.b.onTrue(() -> elevator.getStateMachine().setGoalState(Elevator.State.L3));
+    driverController.x.onTrue(() -> elevator.getStateMachine().setGoalState(Elevator.State.Feeder));
+
 
     // driverController.leftBumper.onTrue(new Climb(climber, STATE.HOME));
     // driverController.rightBumper.whileTrue(new Climb(climber, STATE.CLIMB));
@@ -74,12 +81,14 @@ public class RobotContainer {
   }
 
   public Command getAutonomousCommand() {
-    try{
-        PathPlannerPath path = PathPlannerPath.fromChoreoTrajectory("Test");
-        return AutoBuilder.followPath(path);
-      } catch (Exception e) {
-        DriverStation.reportError("FATAL AUTO COULD NOT BE LOADED: " + e.getMessage(), e.getStackTrace());
-        return Commands.none();
-      }
+
+    return Commands.none();
+    // try{
+    //     PathPlannerPath path = PathPlannerPath.fromChoreoTrajectory("Test");
+    //     return AutoBuilder.followPath(path);
+    //   } catch (Exception e) {
+    //     DriverStation.reportError("FATAL AUTO COULD NOT BE LOADED: " + e.getMessage(), e.getStackTrace());
+    //     return Commands.none();
+    //   }
   }
 }

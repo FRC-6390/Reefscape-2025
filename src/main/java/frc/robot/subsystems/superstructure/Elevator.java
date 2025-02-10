@@ -4,6 +4,7 @@
 
 package frc.robot.subsystems.superstructure;
 
+import com.ctre.phoenix6.StatusSignal;
 import com.ctre.phoenix6.hardware.CANcoder;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.NeutralModeValue;
@@ -11,6 +12,8 @@ import com.ctre.phoenix6.signals.NeutralModeValue;
 import ca.frc6390.athena.mechanisms.StateMachine;
 import ca.frc6390.athena.sensors.limitswitch.GenericLimitSwitch;
 import edu.wpi.first.math.controller.PIDController;
+import edu.wpi.first.units.measure.Angle;
+import edu.wpi.first.wpilibj.shuffleboard.BuiltInWidgets;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
@@ -28,7 +31,9 @@ public class Elevator extends SubsystemBase{
   public ShuffleboardTab tab;
 
   public StateMachine<State> stateMachine;
+  public StatusSignal<Angle> getPosition;
 
+  public double gear_ratio;
   public enum State {
     //ELEVATOR HEIGHT FROM FLOOR IN INCHES
     StartConfiguration(12),
@@ -51,10 +56,18 @@ public class Elevator extends SubsystemBase{
 
   public Elevator() 
   {
-    encoder = new CANcoder(Constants.Elevator.ENCODER);
-    leftMotor = new TalonFX(Constants.Elevator.LEFT_MOTOR);
-    rightMotor = new TalonFX(Constants.Elevator.RIGHT_MOTOR);
+    encoder = new CANcoder(Constants.Elevator.ENCODER, Constants.Elevator.CANBUS);
+    leftMotor = new TalonFX(Constants.Elevator.LEFT_MOTOR, Constants.Elevator.CANBUS);
+    rightMotor = new TalonFX(Constants.Elevator.RIGHT_MOTOR, Constants.Elevator.CANBUS);
     
+    if (encoder != null) {
+      getPosition = encoder.getPosition();
+      gear_ratio = Constants.Elevator.ENCODER_GEAR_RATIO;
+    }else{
+      getPosition = leftMotor.getRotorPosition();
+      gear_ratio = Constants.Elevator.MOTOR_GEAR_RATIO;
+
+    }
     lowerlimitSwitch = new GenericLimitSwitch(Constants.Elevator.LIMIT_SWITCH);
     lowerlimitSwitch.onPress(() ->  encoder.setPosition(0));
 
@@ -64,14 +77,13 @@ public class Elevator extends SubsystemBase{
     leftMotor.setNeutralMode(NeutralModeValue.Brake);
     rightMotor.setNeutralMode(NeutralModeValue.Brake);
 
-    tab = Shuffleboard.getTab("Elevator");
     stateMachine = new StateMachine<State>(State.Home, controller::atSetpoint);
   }
 
   //POSITION IN INCHES
   public double getHeight()
   {
-    return (encoder.getPosition(true).getValueAsDouble() / Constants.Elevator.GEAR_RATIO) * Math.PI *  Constants.Elevator.GEAR_DIAMETER_INCHES;
+    return (getPosition.getValueAsDouble() / gear_ratio) * Math.PI *  Constants.Elevator.GEAR_DIAMETER_INCHES;
   }
 
   public double getHeightFromFloor(){
@@ -83,32 +95,44 @@ public class Elevator extends SubsystemBase{
   }
 
   //MOVES ELEVATOR UP OR DOWN
-  private void setMotors(double speed)
+  public void setMotors(double speed)
   {
-    if (lowerlimitSwitch.isPressed() && speed < 0){
-      speed = 0;
-    }
+    // if (lowerlimitSwitch.isPressed() && speed < 0){
+    //   speed = 0;
+    // }
     leftMotor.set(speed);
     rightMotor.set(-speed);
   }
   
-  public void shuffleboard()
-  {
-    tab.add("Lower Limit", lowerlimitSwitch.isPressed());
-    tab.add("Elevator Height", getHeight());
-    tab.add("Elevator Height From Floor Inches", getHeightFromFloor());
-    tab.add("Setpoint", stateMachine.getGoalState());
-    tab.add("PID Output", controller.calculate(getHeightFromFloor(), stateMachine.getGoalState().get()));
+
+  public ShuffleboardTab shuffleboard(String tab) {
+      return shuffleboard(Shuffleboard.getTab(tab));
+  }
+
+  public ShuffleboardTab shuffleboard(ShuffleboardTab tab) {
+      // tab.addBoolean("Lower Limit", () -> lowerlimitSwitch.isPressed());
+      tab.addDouble("Elevator Height", this::getHeight);
+      tab.addDouble("Elevator Height From Floor Inches", this::getHeightFromFloor);
+      tab.addString("Setpoint", () -> stateMachine.getGoalState().name());
+      tab.addString("Next State", () -> stateMachine.getNextState().name());
+      tab.addDouble("PID Output", () -> controller.calculate(getHeightFromFloor(), stateMachine.getGoalState().get()));
+      tab.addBoolean("State Changer", stateMachine.getChangeStateSupplier());
+
+      return tab;
+  }
+
+  public void refresh(){
+    getPosition.refresh();
+    stateMachine.update();
   }
 
   public void update()
   {
-    shuffleboard();
     switch (stateMachine.getGoalState()) {
-      case Home:
-        setMotors(-0.5);
-        break;
-      case Feeder, L1, L2, L3, L4, StartConfiguration:
+      // case Home:
+      //   setMotors(-0.5);
+      //   break;
+      case Home, Feeder, L1, L2, L3, L4, StartConfiguration:
         double speed = controller.calculate(getHeightFromFloor(), stateMachine.getGoalState().get());
         setMotors(speed);
     }
@@ -116,6 +140,7 @@ public class Elevator extends SubsystemBase{
 
   @Override
   public void periodic() {
-      update();
+    refresh();
+    update();
   }
 }
