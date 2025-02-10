@@ -65,8 +65,8 @@ public class RobotContainer {
     // driverController.start.onTrue(new InstantCommand(() -> driveTrain.getIMU().setYaw(0)));
     // driverController.b.onTrue(new AlignTets(vision.getCamera("limelight-driver"), driveTrain, driverController, frc.robot.commands.AlignTets.ALIGNMODE.REEF, localization));
 
-    driverController.rightBumper.whileTrue(() -> elevator.setMotors(0.5)).onFalse(new InstantCommand(() -> elevator.setMotors(0)));
-    driverController.leftBumper.whileTrue(() -> elevator.setMotors(-0.5)).onFalse(new InstantCommand(() -> elevator.setMotors(0)));
+    driverController.rightBumper.whileTrue(() -> elevator.setMotors(0.05)).onFalse(new InstantCommand(() -> elevator.setMotors(0)));
+    driverController.leftBumper.whileTrue(() -> elevator.setMotors(-0.1)).onFalse(new InstantCommand(() -> elevator.setMotors(0)));
 
     driverController.a.onTrue(() -> elevator.getStateMachine().setGoalState(Elevator.State.L1));
     driverController.y.onTrue(() -> elevator.getStateMachine().setGoalState(Elevator.State.L4));

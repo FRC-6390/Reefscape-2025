@@ -63,10 +63,10 @@ public interface Constants {
     }
 
     public interface Elevator {
-        String CANBUS = "can";
-        int ENCODER = 9;
-        int LEFT_MOTOR = 1;
-        int RIGHT_MOTOR = 5;
+        String CANBUS = "rio";
+        int ENCODER = 22;
+        int LEFT_MOTOR = 20;
+        int RIGHT_MOTOR = 21;
         double GEAR_DIAMETER_INCHES = 3d;
         double OFFSET_FROM_FLOOR = 0;
         double ENCODER_GEAR_RATIO = 1d/1d;

@@ -56,7 +56,7 @@ public class Elevator extends SubsystemBase{
 
   public Elevator() 
   {
-    encoder = new CANcoder(Constants.Elevator.ENCODER, Constants.Elevator.CANBUS);
+   // encoder = new CANcoder(Constants.Elevator.ENCODER, Constants.Elevator.CANBUS);
     leftMotor = new TalonFX(Constants.Elevator.LEFT_MOTOR, Constants.Elevator.CANBUS);
     rightMotor = new TalonFX(Constants.Elevator.RIGHT_MOTOR, Constants.Elevator.CANBUS);
     
@@ -83,7 +83,7 @@ public class Elevator extends SubsystemBase{
   //POSITION IN INCHES
   public double getHeight()
   {
-    return (getPosition.getValueAsDouble() / gear_ratio) * Math.PI *  Constants.Elevator.GEAR_DIAMETER_INCHES;
+    return -(getPosition.getValueAsDouble() / gear_ratio) * Math.PI *  Constants.Elevator.GEAR_DIAMETER_INCHES;
   }
 
   public double getHeightFromFloor(){
@@ -97,11 +97,13 @@ public class Elevator extends SubsystemBase{
   //MOVES ELEVATOR UP OR DOWN
   public void setMotors(double speed)
   {
+    //negative is up, this makes negative down
+    speed = -speed;
     // if (lowerlimitSwitch.isPressed() && speed < 0){
     //   speed = 0;
     // }
     leftMotor.set(speed);
-    rightMotor.set(-speed);
+    rightMotor.set(speed);
   }
   
 
@@ -128,14 +130,14 @@ public class Elevator extends SubsystemBase{
 
   public void update()
   {
-    switch (stateMachine.getGoalState()) {
-      // case Home:
-      //   setMotors(-0.5);
-      //   break;
-      case Home, Feeder, L1, L2, L3, L4, StartConfiguration:
-        double speed = controller.calculate(getHeightFromFloor(), stateMachine.getGoalState().get());
-        setMotors(speed);
-    }
+    // switch (stateMachine.getGoalState()) {
+    //   // case Home:
+    //   //   setMotors(-0.5);
+    //   //   break;
+    //   case Home, Feeder, L1, L2, L3, L4, StartConfiguration:
+    //     double speed = controller.calculate(getHeightFromFloor(), stateMachine.getGoalState().get());
+    //     setMotors(speed);
+    // }
   }
 
   @Override
