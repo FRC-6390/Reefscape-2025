@@ -45,7 +45,6 @@ public class Superstructure {
         climber.setGoalState(state);
         break;
     }
-    FeedF
   }
 
   public void elevatorStateManager(Elevator.State state){
