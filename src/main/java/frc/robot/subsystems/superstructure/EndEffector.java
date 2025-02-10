@@ -1,5 +1,6 @@
 package frc.robot.subsystems.superstructure;
 
+import com.ctre.phoenix6.StatusSignal;
 import com.ctre.phoenix6.configs.CANcoderConfiguration;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.hardware.CANcoder;
@@ -9,8 +10,10 @@ import com.ctre.phoenix6.signals.NeutralModeValue;
 import ca.frc6390.athena.mechanisms.StateMachine;
 import ca.frc6390.athena.sensors.limitswitch.GenericLimitSwitch;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.math.controller.PIDController;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
+import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
 
@@ -22,6 +25,7 @@ public class EndEffector extends SubsystemBase {
   public PIDController controller;
 
   public StateMachine<State> stateMachine;
+  public StatusSignal<Angle> getAbsolutePosition;
 
   public enum State
   {
@@ -49,6 +53,8 @@ public class EndEffector extends SubsystemBase {
     rightMotor = new TalonFX(Constants.EndEffector.RIGHT_MOTOR, Constants.EndEffector.CANBUS);
     encoder = new CANcoder(Constants.EndEffector.ENCODER, Constants.EndEffector.CANBUS);
     limitSwitch = new GenericLimitSwitch(Constants.EndEffector.LIMIT_SWITCH);
+
+    getAbsolutePosition = encoder.getAbsolutePosition();
 
     controller = Constants.EndEffector.CONTORLLER;
     controller.enableContinuousInput(0, 90);
@@ -88,7 +94,7 @@ public class EndEffector extends SubsystemBase {
   }
 
   public double getPosition() {
-    return encoder.getAbsolutePosition(true).getValueAsDouble();
+    return getAbsolutePosition.getValueAsDouble();
   }
 
   public Rotation2d getAngle() {
@@ -97,7 +103,6 @@ public class EndEffector extends SubsystemBase {
 
   public void update()
   {
-    shuffleboard();
     switch (stateMachine.getGoalState()) {
       case Left, Right, RightL4, LeftL4, Home, StartConfiguration:
       double speed = -controller.calculate(getAngle().getDegrees(), stateMachine.getGoalState().get());
@@ -105,17 +110,29 @@ public class EndEffector extends SubsystemBase {
     }
   }
 
-  public void shuffleboard()
-  {
-    SmartDashboard.putBoolean("Limit Switch", limitSwitch.isPressed());
-    SmartDashboard.putNumber("Setpoint", stateMachine.getGoalState().get());
-    SmartDashboard.putNumber("PID Output", controller.calculate(getAngle().getDegrees(), stateMachine.getGoalState().get()));
-    SmartDashboard.putNumber("Angle", getAngle().getDegrees());
-    SmartDashboard.putNumber("Rotations", getPosition());
+  public ShuffleboardTab shuffleboard(String tab) {
+      return shuffleboard(Shuffleboard.getTab(tab));
+  }
+
+  public ShuffleboardTab shuffleboard(ShuffleboardTab tab) {
+    tab.addBoolean("Limit Switch", limitSwitch::isPressed).withPosition(1,1);
+    tab.addString("Setpoint", () -> stateMachine.getGoalState().name()).withPosition(2,1);
+    tab.addNumber("PID Output", () -> controller.calculate(getAngle().getDegrees(), stateMachine.getGoalState().get())).withPosition(3,1);
+    tab.addNumber("Angle", () -> getAngle().getDegrees()).withPosition(4,1);
+    tab.addNumber("Rotations", this::getPosition).withPosition(4,1);
+    tab.addString("Next State", () -> stateMachine.getNextState().name()).withPosition(5, 1);
+
+    return tab;
+  }
+
+  public void refresh(){
+    getAbsolutePosition.refresh();
+    stateMachine.update();
   }
 
   @Override
   public void periodic() {
+      refresh();
       update();
   }
 }

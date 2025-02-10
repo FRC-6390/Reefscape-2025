@@ -1,8 +1,6 @@
 package frc.robot;
 
-import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.config.PIDConstants;
-import com.pathplanner.lib.path.PathPlannerPath;
 
 import ca.frc6390.athena.core.RobotLocalization.RobotLocalizationConfig;
 import ca.frc6390.athena.drivetrains.swerve.SwerveHelpers;
@@ -10,7 +8,6 @@ import ca.frc6390.athena.drivetrains.swerve.SwerveModule.SwerveModuleConfig;
 import ca.frc6390.athena.drivetrains.swerve.modules.SDSModules;
 import ca.frc6390.athena.drivetrains.swerve.modules.SDSModules.SDSMK4i;
 import ca.frc6390.athena.drivetrains.swerve.modules.SDSModules.SDSMotor;
-import ca.frc6390.athena.sensors.camera.limelight.LimeLight.PoseEstimateWithLatencyType;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.util.Units;

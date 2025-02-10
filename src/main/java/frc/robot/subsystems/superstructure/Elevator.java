@@ -13,7 +13,6 @@ import ca.frc6390.athena.mechanisms.StateMachine;
 import ca.frc6390.athena.sensors.limitswitch.GenericLimitSwitch;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.units.measure.Angle;
-import edu.wpi.first.wpilibj.shuffleboard.BuiltInWidgets;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
@@ -66,8 +65,8 @@ public class Elevator extends SubsystemBase{
     }else{
       getPosition = leftMotor.getRotorPosition();
       gear_ratio = Constants.Elevator.MOTOR_GEAR_RATIO;
-
     }
+
     lowerlimitSwitch = new GenericLimitSwitch(Constants.Elevator.LIMIT_SWITCH);
     lowerlimitSwitch.onPress(() ->  encoder.setPosition(0));
 
@@ -106,6 +105,9 @@ public class Elevator extends SubsystemBase{
     rightMotor.set(speed);
   }
   
+  public void stop() {
+    setMotors(0);
+  }
 
   public ShuffleboardTab shuffleboard(String tab) {
       return shuffleboard(Shuffleboard.getTab(tab));
@@ -113,12 +115,12 @@ public class Elevator extends SubsystemBase{
 
   public ShuffleboardTab shuffleboard(ShuffleboardTab tab) {
       // tab.addBoolean("Lower Limit", () -> lowerlimitSwitch.isPressed());
-      tab.addDouble("Elevator Height", this::getHeight);
-      tab.addDouble("Elevator Height From Floor Inches", this::getHeightFromFloor);
-      tab.addString("Setpoint", () -> stateMachine.getGoalState().name());
-      tab.addString("Next State", () -> stateMachine.getNextState().name());
-      tab.addDouble("PID Output", () -> controller.calculate(getHeightFromFloor(), stateMachine.getGoalState().get()));
-      tab.addBoolean("State Changer", stateMachine.getChangeStateSupplier());
+      tab.addDouble("Elevator Height", this::getHeight).withPosition(1, 1);
+      tab.addDouble("Elevator Height From Floor Inches", this::getHeightFromFloor).withPosition(2, 1);
+      tab.addString("Setpoint", () -> stateMachine.getGoalState().name()).withPosition(3, 1);
+      tab.addString("Next State", () -> stateMachine.getNextState().name()).withPosition(4, 1);
+      tab.addDouble("PID Output", () -> controller.calculate(getHeightFromFloor(), stateMachine.getGoalState().get())).withPosition(5, 1);
+      tab.addBoolean("State Changer", stateMachine.getChangeStateSupplier()).withPosition(6, 1);
 
       return tab;
   }
@@ -130,14 +132,14 @@ public class Elevator extends SubsystemBase{
 
   public void update()
   {
-    // switch (stateMachine.getGoalState()) {
-    //   // case Home:
-    //   //   setMotors(-0.5);
-    //   //   break;
-    //   case Home, Feeder, L1, L2, L3, L4, StartConfiguration:
-    //     double speed = controller.calculate(getHeightFromFloor(), stateMachine.getGoalState().get());
-    //     setMotors(speed);
-    // }
+    switch (stateMachine.getGoalState()) {
+      // case Home:
+      //   setMotors(-0.2);
+      //   break;
+      case Home, Feeder, L1, L2, L3, L4, StartConfiguration:
+        double speed = controller.calculate(getHeightFromFloor(), stateMachine.getGoalState().get());
+        setMotors(speed);
+    }
   }
 
   @Override

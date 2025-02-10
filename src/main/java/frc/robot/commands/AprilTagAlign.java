@@ -195,7 +195,6 @@ public class AprilTagAlign extends Command {
   @Override
   public void end(boolean interrupted) 
   {
-    drivetrain.drive(new ChassisSpeeds(0,0,0));
     // drivetrain.feedbackSpeeds(new ChassisSpeeds(0,0,0));
     SmartDashboard.putNumber("Is Running", 0);
   }

@@ -120,15 +120,14 @@ public class AlignTets extends Command {
       // if(closeEnough  && distanceSensor.isRangeValid() && distanceSensor.getRange(Unit.kInches) < 16){
       //   isDone = true;
       // } 
-      drivetrain.feedbackSpeeds(speeds);
+      drivetrain.getRobotSpeeds().setFeedbackSpeeds(speeds);
     }
   }
 
   @Override
   public void end(boolean interrupted) 
   {
-    drivetrain.drive(new ChassisSpeeds(0,0,0));
-    drivetrain.feedbackSpeeds(new ChassisSpeeds(0,0,0));
+    drivetrain.getRobotSpeeds().stopFeedbackSpeeds();
     SmartDashboard.putNumber("Is Running", 0);
   }
 
