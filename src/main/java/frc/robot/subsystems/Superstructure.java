@@ -13,7 +13,7 @@ import frc.robot.subsystems.superstructure.EndEffector;
 public class Superstructure {
   
   /** Creates a new Superstructure. */
-  StateMachine<Elevator.State> elevator;
+  StateMachine<Elevator.ElevatorState> elevator;
   StateMachine<Climber.State> climber;
   StateMachine<EndEffector.State> endEffector;
 
@@ -26,7 +26,7 @@ public class Superstructure {
     return new InstantCommand(() -> climberStateManager(state));
   }
 
-  public InstantCommand setElevator(Elevator.State state){
+  public InstantCommand setElevator(Elevator.ElevatorState state){
     return new InstantCommand(() -> elevatorStateManager(state));
   }
 
@@ -37,9 +37,9 @@ public class Superstructure {
   public void climberStateManager(Climber.State state){
     switch (state) {
       case Climb:
-        elevatorStateManager(Elevator.State.L2);
+        elevatorStateManager(Elevator.ElevatorState.L2);
         endEffectorStateManager(EndEffector.State.Home);
-        climber.setGoalState(state, () -> elevator.atState(Elevator.State.L2) && endEffector.atState(EndEffector.State.Home));
+        climber.setGoalState(state, () -> elevator.atState(Elevator.ElevatorState.L2) && endEffector.atState(EndEffector.State.Home));
         break;
       case Home:
         climber.setGoalState(state);
@@ -47,7 +47,7 @@ public class Superstructure {
     }
   }
 
-  public void elevatorStateManager(Elevator.State state){
+  public void elevatorStateManager(Elevator.ElevatorState state){
     switch (state) {
       case Home, Feeder, StartConfiguration:
         climberStateManager(Climber.State.Home);
@@ -66,13 +66,13 @@ public class Superstructure {
   public void endEffectorStateManager(EndEffector.State state){
     switch (state) {
       case StartConfiguration:
-        elevatorStateManager(Elevator.State.L1);
-        endEffector.setGoalState(state, () -> elevator.atState(Elevator.State.L1));
+        elevatorStateManager(Elevator.ElevatorState.L1);
+        endEffector.setGoalState(state, () -> elevator.atState(Elevator.ElevatorState.L1));
       case Home:
         endEffector.setGoalState(state);
         break;
       case Left, LeftL4, Right, RightL4:
-        endEffector.setGoalState(state, () -> !elevator.atState(Elevator.State.Home));
+        endEffector.setGoalState(state, () -> !elevator.atState(Elevator.ElevatorState.Home));
         break;
     }
   }

@@ -8,6 +8,7 @@ import java.io.IOException;
 
 import org.json.simple.parser.ParseException;
 
+import com.ctre.phoenix.led.ColorFlowAnimation.Direction;
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.auto.NamedCommands;
 import com.pathplanner.lib.commands.PathPlannerAuto;
@@ -27,12 +28,13 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
+import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.robot.Constants.DriveTrain;
 import frc.robot.commands.AlignTets;
-import frc.robot.commands.AprilTagAlign;
+// import frc.robot.commands.AprilTagAlign;
 import frc.robot.commands.Climb;
 import frc.robot.commands.DriveToGoal;
-import frc.robot.commands.AprilTagAlign.ALIGNMODE;
+// import frc.robot.commands.AprilTagAlign.ALIGNMODE;
 import frc.robot.subsystems.Superstructure;
 import frc.robot.subsystems.superstructure.Climber;
 import frc.robot.subsystems.superstructure.Elevator;
@@ -52,6 +54,8 @@ public class RobotContainer {
   public RobotContainer() {
     // localization.configurePathPlanner(Constants.DriveTrain.PATHPLANNER_TRANSLATION_PID, DriveTrain.PATHPLANNER_ROTATION_PID);
     configureBindings();
+    elevator.shuffleboard("Elevator");
+    
     // NamedCommands.registerCommand("Align", new AprilTagAlign(vision.getCamera("limelight-driver"), driveTrain, driverController,ALIGNMODE.REEF));
     // NamedCommands.registerCommand("AlignFeeder", new AprilTagAlign(vision.getCamera("limelight-tag"), driveTrain, driverController, ALIGNMODE.FEEDER));
     // driveTrain.setDriveCommand(driverController.leftX, driverController.leftY, driverController.rightX);
@@ -69,11 +73,19 @@ public class RobotContainer {
     // driverController.rightBumper.whileTrue(() -> elevator.setMotors(-0.05)).onFalse(elevator::stop);
     // driverController.leftBumper.whileTrue(() -> elevator.setMotors(0.1)).onFalse(elevator::stop);
 
-    driverController.a.onTrue(() -> elevator.getStateMachine().setGoalState(Elevator.State.L1));
-    driverController.y.onTrue(() -> elevator.getStateMachine().setGoalState(Elevator.State.L4));
-    driverController.b.onTrue(() -> elevator.getStateMachine().setGoalState(Elevator.State.L3));
-    driverController.x.onTrue(() -> elevator.getStateMachine().setGoalState(Elevator.State.Feeder));
 
+    driverController.a.whileTrue(elevator.sysIdQuasistatic(SysIdRoutine.Direction.kForward));
+    driverController.b.whileTrue(elevator.sysIdQuasistatic(SysIdRoutine.Direction.kReverse));
+    driverController.leftBumper.whileTrue(elevator.sysIdDynamic(SysIdRoutine.Direction.kForward));
+    driverController.rightBumper.whileTrue(elevator.sysIdDynamic(SysIdRoutine.Direction.kReverse));
+
+    // driverController.a.onTrue(() -> elevator.getStateMachine().setGoalState(Elevator.ElevatorState.L1));
+    // driverController.b.onTrue(() -> elevator.getStateMachine().setGoalState(Elevator.ElevatorState.L2));
+    // driverController.x.onTrue(() -> elevator.getStateMachine().setGoalState(Elevator.ElevatorState.L3));
+    // driverController.y.onTrue(() -> elevator.getStateMachine().setGoalState(Elevator.ElevatorState.L4));
+    // driverController.rightBumper.onTrue(() -> elevator.getStateMachine().setGoalState(Elevator.ElevatorState.Home));
+    // driverController.leftBumper.onTrue(() -> elevator.getStateMachine().setGoalState(Elevator.ElevatorState.Feeder));
+    //35.7
 
     // driverController.leftBumper.onTrue(new Climb(climber, STATE.HOME));
     // driverController.rightBumper.whileTrue(new Climb(climber, STATE.CLIMB));
@@ -82,6 +94,7 @@ public class RobotContainer {
   // ChassisSpeeds.fromFieldRelativeSpeeds(speeds, null);
   }
   public Command getAutonomousCommand() {
-    return new PathPlannerAuto("LeftSide");
+    return Commands.none();
+    // return new PathPlannerAuto("LeftSide");
   }
 }

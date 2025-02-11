@@ -8,6 +8,7 @@ import ca.frc6390.athena.drivetrains.swerve.SwerveModule.SwerveModuleConfig;
 import ca.frc6390.athena.drivetrains.swerve.modules.SDSModules;
 import ca.frc6390.athena.drivetrains.swerve.modules.SDSModules.SDSMK4i;
 import ca.frc6390.athena.drivetrains.swerve.modules.SDSModules.SDSMotor;
+import edu.wpi.first.math.controller.ElevatorFeedforward;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.util.Units;
@@ -61,15 +62,16 @@ public interface Constants {
 
     public interface Elevator {
         String CANBUS = "rio";
-        int ENCODER = 22;
+        int ENCODER = 23;
         int LEFT_MOTOR = 20;
         int RIGHT_MOTOR = 21;
-        double GEAR_DIAMETER_INCHES = 3d;
+        double GEAR_DIAMETER_INCHES = 2d;
         double OFFSET_FROM_FLOOR = 0;
         double ENCODER_GEAR_RATIO = 1d/1d;
         double MOTOR_GEAR_RATIO = 6d/1d;
         int LIMIT_SWITCH = 0;
-        PIDController CONTORLLER = new PIDController(0.015, 0, 0);
+        PIDController CONTORLLER = new PIDController(0.11, 0.0095, 0);
+        ElevatorFeedforward FEEDFORWARD = new ElevatorFeedforward(GEAR_DIAMETER_INCHES, ENCODER_GEAR_RATIO, ENCODER);
     }
 
     public interface EndEffector {

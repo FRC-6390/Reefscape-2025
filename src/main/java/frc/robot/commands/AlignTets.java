@@ -21,7 +21,6 @@ import ca.frc6390.athena.controllers.DebouncedController;
 import ca.frc6390.athena.core.RobotLocalization;
 import ca.frc6390.athena.core.RobotVision;
 import ca.frc6390.athena.drivetrains.swerve.SwerveDrivetrain;
-import ca.frc6390.athena.drivetrains.swerve.SwerveDrivetrain.AXIS;
 import ca.frc6390.athena.filters.FilterList;
 import ca.frc6390.athena.filters.FilteredValue;
 import ca.frc6390.athena.sensors.camera.limelight.LimeLight;
@@ -113,7 +112,6 @@ public class AlignTets extends Command {
       if(!hasSet){
         hasSet = true;
         runTag = ((int)limelight.getAprilTagID());
-        drivetrain.disableAxis(AXIS.Disable);
       }
       if(((int)limelight.getAprilTagID()) == runTag) {
       helper.gatherData();
@@ -133,16 +131,14 @@ public class AlignTets extends Command {
       if(closeEnough  && las.getMeasurement().status == LaserCan.LASERCAN_STATUS_VALID_MEASUREMENT && las.getMeasurement().distance_mm < 32){
         isDone = true;
       } 
-      // drivetrain.
+      drivetrain.getRobotSpeeds().setAutoSpeeds(speeds);
     }
   }
 
   @Override
   public void end(boolean interrupted) 
   {
-    drivetrain.drive(new ChassisSpeeds(0,0,0));
-    drivetrain.feedbackSpeeds(new ChassisSpeeds(0,0,0));
-    drivetrain.disableAxis(AXIS.Enable);
+    drivetrain.getRobotSpeeds().setAutoSpeeds(new ChassisSpeeds(0,0,0));
     System.out.println("Done!");
   }
 
