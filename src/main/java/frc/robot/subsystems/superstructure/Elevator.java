@@ -37,6 +37,7 @@ import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Mechanism;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Config;
 import frc.robot.Constants;
+import frc.robot.utils.ElevatorController;
 
 public class Elevator extends SubsystemBase{
   /** Creates a new Climber. */
@@ -47,8 +48,8 @@ public class Elevator extends SubsystemBase{
   public TalonFX rightMotor;
   public boolean hasSetHome;
   public GenericLimitSwitch lowerlimitSwitch;
-  public ElevatorFeedforward feedforward;
   public ShuffleboardTab tab;
+  public ElevatorController elevatorController;
 
   public StateMachine<ElevatorState> stateMachine;
   public StatusSignal<Angle> getPosition;
@@ -76,33 +77,13 @@ public class Elevator extends SubsystemBase{
     }
 }
 
-public void logMotors(SysIdRoutineLog log)
-{
-System.out.println(log);
-}
+
   public Elevator() 
   {
    encoder = new CANcoder(Constants.Elevator.ENCODER, Constants.Elevator.CANBUS);
-    leftMotor = new TalonFX(Constants.Elevator.LEFT_MOTOR, Constants.Elevator.CANBUS);
-    rightMotor = new TalonFX(Constants.Elevator.RIGHT_MOTOR, Constants.Elevator.CANBUS);
-    feedforward = Constants.Elevator.FEEDFORWARD;
-    routine = 
-      new SysIdRoutine(
-          // Empty config defaults to 1 volt/second ramp rate and 7 volt step voltage.
-          new SysIdRoutine.Config(),
-          new SysIdRoutine.Mechanism(
-              // Tell SysId how to plumb the driving voltage to the motor(s).
-              this::voltageDrive,
-              // Tell SysId how to record a frame of data for each motor on the mechanism being
-              // characterized.
-              log -> {
-                // Record a frame for the shooter motor.
-                log.motor("left-motor")
-                    .voltage(leftMotor.getMotorVoltage().getValue())
-                    .linearVelocity(LinearVelocity.ofBaseUnits(getVel(), Units.InchesPerSecond))
-                    .linearPosition(Distance.ofBaseUnits(getHeight(), Units.Inches));
-              },
-              this));
+   leftMotor = new TalonFX(Constants.Elevator.LEFT_MOTOR, Constants.Elevator.CANBUS);
+   rightMotor = new TalonFX(Constants.Elevator.RIGHT_MOTOR, Constants.Elevator.CANBUS);
+  
     if (encoder != null) {
       getPosition = encoder.getPosition();
       getVelocity = encoder.getVelocity();
@@ -114,15 +95,19 @@ System.out.println(log);
 
     lowerlimitSwitch = new GenericLimitSwitch(Constants.Elevator.LIMIT_SWITCH);
     lowerlimitSwitch.getTrigger().whileTrue(new InstantCommand(() -> {encoder.setPosition(0); stop();}));
-
-    controller = Constants.Elevator.CONTORLLER;
-    controller.setIntegratorRange(-1, 1);
-    controller.setTolerance(0.2);
     
     leftMotor.setNeutralMode(NeutralModeValue.Brake);
     rightMotor.setNeutralMode(NeutralModeValue.Brake);
 
     stateMachine = new StateMachine<ElevatorState>(ElevatorState.Home, controller::atSetpoint);
+
+
+    //CONTROL SYSTEM SETUP
+    controller = Constants.Elevator.CONTORLLER;
+    controller.setIntegratorRange(-1, 1);
+    controller.setTolerance(0.2);
+
+    elevatorController = new ElevatorController(controller, Constants.Elevator.FEEDFORWARD, Constants.Elevator.PROFILE);
   }
 
   public Command sysIdQuasistatic(SysIdRoutine.Direction direction) {
@@ -205,7 +190,7 @@ System.out.println(log);
         setMotors(-0.1);
         break;
       case Feeder, L1, L2, L3, L4, StartConfiguration:
-        double speed = controller.calculate(getHeightFromFloor(), stateMachine.getGoalState().get()) + feedforward.calculate(1) / 12;
+        double speed = elevatorController.calculateElevatorSpeed(5, stateMachine.getGoalState().get(), getHeight());
         setMotors(speed);
     }
     
@@ -218,3 +203,28 @@ System.out.println(log);
   }
 }
 
+
+
+
+
+
+
+
+
+  // routine = 
+    //   new SysIdRoutine(
+    //       // Empty config defaults to 1 volt/second ramp rate and 7 volt step voltage.
+    //       new SysIdRoutine.Config(),
+    //       new SysIdRoutine.Mechanism(
+    //           // Tell SysId how to plumb the driving voltage to the motor(s).
+    //           this::voltageDrive,
+    //           // Tell SysId how to record a frame of data for each motor on the mechanism being
+    //           // characterized.
+    //           log -> {
+    //             // Record a frame for the shooter motor.
+    //             log.motor("left-motor")
+    //                 .voltage(leftMotor.getMotorVoltage().getValue())
+    //                 .linearVelocity(LinearVelocity.ofBaseUnits(getVel(), Units.InchesPerSecond))
+    //                 .linearPosition(Distance.ofBaseUnits(getHeight(), Units.Inches));
+    //           },
+    //           this));
