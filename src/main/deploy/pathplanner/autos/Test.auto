@@ -5,22 +5,9 @@
     "data": {
       "commands": [
         {
-          "type": "race",
+          "type": "path",
           "data": {
-            "commands": [
-              {
-                "type": "path",
-                "data": {
-                  "pathName": "Side2ToFeeder"
-                }
-              },
-              {
-                "type": "named",
-                "data": {
-                  "name": "AlignFeeder"
-                }
-              }
-            ]
+            "pathName": "b"
           }
         }
       ]

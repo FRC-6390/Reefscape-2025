@@ -41,7 +41,7 @@ public interface Constants {
         String[] LIMELIGHTS = {"limelight-driver", "limelight-tag"};
         RobotLocalizationConfig LOCALIZATION_CONFIG = new RobotLocalizationConfig(0.1, 0.1, 0.001);
 
-        PIDConstants PATHPLANNER_TRANSLATION_PID = new PIDConstants(7,0,0);
+        PIDConstants PATHPLANNER_TRANSLATION_PID = new PIDConstants(5,0,0);
         PIDConstants PATHPLANNER_ROTATION_PID = new PIDConstants(5,0,0);
     }
 

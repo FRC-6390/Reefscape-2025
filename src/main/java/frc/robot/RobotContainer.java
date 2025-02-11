@@ -22,6 +22,7 @@ import ca.frc6390.athena.core.RobotVision;
 import ca.frc6390.athena.core.imu.devices.Pigeon2IMU;
 import ca.frc6390.athena.drivetrains.swerve.SwerveDrivetrain;
 import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
@@ -51,9 +52,9 @@ public class RobotContainer {
   public RobotContainer() {
     // localization.configurePathPlanner(Constants.DriveTrain.PATHPLANNER_TRANSLATION_PID, DriveTrain.PATHPLANNER_ROTATION_PID);
     configureBindings();
-    // NamedCommands.registerCommand("Align", new AprilTagAlign(vision.getCamera("limelight-driver"), driveTrain, driverController,ALIGNMODE.REEF));
-    // NamedCommands.registerCommand("AlignFeeder", new AprilTagAlign(vision.getCamera("limelight-tag"), driveTrain, driverController, ALIGNMODE.FEEDER));
-    // driveTrain.setDriveCommand(driverController.leftX, driverController.leftY, driverController.rightX);
+    NamedCommands.registerCommand("Align", new AprilTagAlign(vision.getCamera("limelight-driver"), driveTrain, driverController,ALIGNMODE.REEF));
+    NamedCommands.registerCommand("AlignFeeder", new AprilTagAlign(vision.getCamera("limelight-tag"), driveTrain, driverController, ALIGNMODE.FEEDER));
+    driveTrain.setDriveCommand(driverController.leftX, driverController.leftY, driverController.rightX);
   }
 
   private void configureBindings() 
@@ -63,7 +64,7 @@ public class RobotContainer {
     driverController.leftY.setDeadzone(Constants.Controllers.THETA_DEADZONE);
 
     // driverController.start.onTrue(new InstantCommand(() -> driveTrain.getIMU().setYaw(0)));
-    // driverController.b.onTrue(new AlignTets(vision.getCamera("limelight-driver"), driveTrain, driverController, frc.robot.commands.AlignTets.ALIGNMODE.REEF, localization));
+    // driverController.b.whileTrue(new AlignTets(vision.getCamera("limelight-driver"), driveTrain, driverController, frc.robot.commands.AlignTets.ALIGNMODE.REEF, localization));
 
     driverController.rightBumper.whileTrue(() -> elevator.setMotors(-0.05)).onFalse(elevator::stop);
     driverController.leftBumper.whileTrue(() -> elevator.setMotors(0.1)).onFalse(elevator::stop);
@@ -78,17 +79,9 @@ public class RobotContainer {
     // driverController.rightBumper.whileTrue(new Climb(climber, STATE.CLIMB));
     // driverController.leftBumper.whileTrue(superstructure.setClimber(Climber.State.Home));
     // driverController.rightBumper.whileTrue(superstructure.setClimber(Climber.State.Climb));
+  // ChassisSpeeds.fromFieldRelativeSpeeds(speeds, null);
   }
-
   public Command getAutonomousCommand() {
-
-    return Commands.none();
-    // try{
-    //     PathPlannerPath path = PathPlannerPath.fromChoreoTrajectory("Test");
-    //     return AutoBuilder.followPath(path);
-    //   } catch (Exception e) {
-    //     DriverStation.reportError("FATAL AUTO COULD NOT BE LOADED: " + e.getMessage(), e.getStackTrace());
-    //     return Commands.none();
-    //   }
+    return new PathPlannerAuto("LeftSide");
   }
 }

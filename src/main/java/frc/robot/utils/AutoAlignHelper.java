@@ -44,6 +44,7 @@ public class AutoAlignHelper
  public AutoAlignHelper(LimeLight limeLight, RobotLocalization localization, SwerveDrivetrain drivetrain)
  {
     this.limeLight = limeLight;
+    this.drivetrain = drivetrain;
     this.localization = localization;
  }
 
