@@ -100,9 +100,7 @@ public class AlignTets extends Command {
     isDone =false;
     speeds = new ChassisSpeeds();
     runTag = -1;
-    distanceSensor.setEnabled(true);
-    distanceSensor.setAutomaticMode(true);
-    info = new AutoAlignHelper(limelight, localization, drivetrain);
+    helper = new AutoAlignHelper(limelight, localization, drivetrain);
   }
 
 
@@ -110,10 +108,6 @@ public class AlignTets extends Command {
   public void execute() 
   {
     System.out.println("Executing");
-    
-    SmartDashboard.putNumber("X", drivetrain.getDriveSpeeds().vxMetersPerSecond);
-    SmartDashboard.putNumber("Y", drivetrain.getDriveSpeeds().vyMetersPerSecond);
-    SmartDashboard.putNumber("Rot", drivetrain.getDriveSpeeds().omegaRadiansPerSecond);
     if(limelight.hasValidTarget()){
       
       if(!hasSet){
@@ -136,10 +130,10 @@ public class AlignTets extends Command {
       speeds = helper.calculateSpeeds(mode, false);
     }
     if(hasSet) {
-      if(closeEnough  && distanceSensor.isRangeValid() && distanceSensor.getRange(Unit.kInches) < 16){
+      if(closeEnough  && las.getMeasurement().status == LaserCan.LASERCAN_STATUS_VALID_MEASUREMENT && las.getMeasurement().distance_mm < 32){
         isDone = true;
       } 
-      drivetrain.feedbackSpeeds(speeds);
+      // drivetrain.
     }
   }
 

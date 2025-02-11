@@ -52,9 +52,9 @@ public class RobotContainer {
   public RobotContainer() {
     // localization.configurePathPlanner(Constants.DriveTrain.PATHPLANNER_TRANSLATION_PID, DriveTrain.PATHPLANNER_ROTATION_PID);
     configureBindings();
-    NamedCommands.registerCommand("Align", new AprilTagAlign(vision.getCamera("limelight-driver"), driveTrain, driverController,ALIGNMODE.REEF));
-    NamedCommands.registerCommand("AlignFeeder", new AprilTagAlign(vision.getCamera("limelight-tag"), driveTrain, driverController, ALIGNMODE.FEEDER));
-    driveTrain.setDriveCommand(driverController.leftX, driverController.leftY, driverController.rightX);
+    // NamedCommands.registerCommand("Align", new AprilTagAlign(vision.getCamera("limelight-driver"), driveTrain, driverController,ALIGNMODE.REEF));
+    // NamedCommands.registerCommand("AlignFeeder", new AprilTagAlign(vision.getCamera("limelight-tag"), driveTrain, driverController, ALIGNMODE.FEEDER));
+    // driveTrain.setDriveCommand(driverController.leftX, driverController.leftY, driverController.rightX);
   }
 
   private void configureBindings() 
@@ -66,8 +66,8 @@ public class RobotContainer {
     // driverController.start.onTrue(new InstantCommand(() -> driveTrain.getIMU().setYaw(0)));
     // driverController.b.whileTrue(new AlignTets(vision.getCamera("limelight-driver"), driveTrain, driverController, frc.robot.commands.AlignTets.ALIGNMODE.REEF, localization));
 
-    driverController.rightBumper.whileTrue(() -> elevator.setMotors(-0.05)).onFalse(elevator::stop);
-    driverController.leftBumper.whileTrue(() -> elevator.setMotors(0.1)).onFalse(elevator::stop);
+    // driverController.rightBumper.whileTrue(() -> elevator.setMotors(-0.05)).onFalse(elevator::stop);
+    // driverController.leftBumper.whileTrue(() -> elevator.setMotors(0.1)).onFalse(elevator::stop);
 
     driverController.a.onTrue(() -> elevator.getStateMachine().setGoalState(Elevator.State.L1));
     driverController.y.onTrue(() -> elevator.getStateMachine().setGoalState(Elevator.State.L4));
