@@ -74,17 +74,12 @@ public class RobotContainer {
     // driverController.leftBumper.whileTrue(() -> elevator.setMotors(0.1)).onFalse(elevator::stop);
 
 
-    driverController.a.whileTrue(elevator.sysIdQuasistatic(SysIdRoutine.Direction.kForward));
-    driverController.b.whileTrue(elevator.sysIdQuasistatic(SysIdRoutine.Direction.kReverse));
-    driverController.leftBumper.whileTrue(elevator.sysIdDynamic(SysIdRoutine.Direction.kForward));
-    driverController.rightBumper.whileTrue(elevator.sysIdDynamic(SysIdRoutine.Direction.kReverse));
-
-    // driverController.a.onTrue(() -> elevator.getStateMachine().setGoalState(Elevator.ElevatorState.L1));
-    // driverController.b.onTrue(() -> elevator.getStateMachine().setGoalState(Elevator.ElevatorState.L2));
-    // driverController.x.onTrue(() -> elevator.getStateMachine().setGoalState(Elevator.ElevatorState.L3));
-    // driverController.y.onTrue(() -> elevator.getStateMachine().setGoalState(Elevator.ElevatorState.L4));
-    // driverController.rightBumper.onTrue(() -> elevator.getStateMachine().setGoalState(Elevator.ElevatorState.Home));
-    // driverController.leftBumper.onTrue(() -> elevator.getStateMachine().setGoalState(Elevator.ElevatorState.Feeder));
+    driverController.a.onTrue(() -> elevator.getStateMachine().setGoalState(Elevator.ElevatorState.L1));
+    driverController.b.onTrue(() -> elevator.getStateMachine().setGoalState(Elevator.ElevatorState.L2));
+    driverController.x.onTrue(() -> elevator.getStateMachine().setGoalState(Elevator.ElevatorState.L3));
+    driverController.y.onTrue(() -> elevator.getStateMachine().setGoalState(Elevator.ElevatorState.L4));
+    driverController.rightBumper.onTrue(() -> elevator.getStateMachine().setGoalState(Elevator.ElevatorState.Home));
+    driverController.leftBumper.onTrue(() -> elevator.getStateMachine().setGoalState(Elevator.ElevatorState.Feeder));
     //35.7
 
     // driverController.leftBumper.onTrue(new Climb(climber, STATE.HOME));

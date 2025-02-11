@@ -10,6 +10,7 @@ import ca.frc6390.athena.drivetrains.swerve.modules.SDSModules.SDSMK4i;
 import ca.frc6390.athena.drivetrains.swerve.modules.SDSModules.SDSMotor;
 import edu.wpi.first.math.controller.ElevatorFeedforward;
 import edu.wpi.first.math.controller.PIDController;
+import edu.wpi.first.math.controller.ProfiledPIDController;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.math.trajectory.TrapezoidProfile.Constraints;
@@ -72,9 +73,8 @@ public interface Constants {
         double ENCODER_GEAR_RATIO = 1d/1d;
         double MOTOR_GEAR_RATIO = 6d/1d;
         int LIMIT_SWITCH = 0;
-        PIDController CONTORLLER = new PIDController(0.11, 0.0095, 0);
+        ProfiledPIDController CONTORLLER = new ProfiledPIDController(0.11, 0.0095, 0, new Constraints(10, 0), 5);
         ElevatorFeedforward FEEDFORWARD = new ElevatorFeedforward(GEAR_DIAMETER_INCHES, ENCODER_GEAR_RATIO, ENCODER);
-        TrapezoidProfile PROFILE = new TrapezoidProfile(new Constraints(10, 0));
     }
 
     public interface EndEffector {

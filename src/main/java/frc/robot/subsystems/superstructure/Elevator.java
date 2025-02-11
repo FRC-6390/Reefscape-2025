@@ -19,6 +19,7 @@ import ca.frc6390.athena.mechanisms.StateMachine;
 import ca.frc6390.athena.sensors.limitswitch.GenericLimitSwitch;
 import edu.wpi.first.math.controller.ElevatorFeedforward;
 import edu.wpi.first.math.controller.PIDController;
+import edu.wpi.first.math.controller.ProfiledPIDController;
 import edu.wpi.first.units.Units;
 import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.AngularVelocity;
@@ -42,7 +43,7 @@ import frc.robot.utils.ElevatorController;
 public class Elevator extends SubsystemBase{
   /** Creates a new Climber. */
 
-  public PIDController controller;
+  public ProfiledPIDController controller;
   public CANcoder encoder;
   public TalonFX leftMotor;
   public TalonFX rightMotor;
@@ -107,7 +108,7 @@ public class Elevator extends SubsystemBase{
     controller.setIntegratorRange(-1, 1);
     controller.setTolerance(0.2);
 
-    elevatorController = new ElevatorController(controller, Constants.Elevator.FEEDFORWARD, Constants.Elevator.PROFILE);
+    elevatorController = new ElevatorController(controller, Constants.Elevator.FEEDFORWARD);
   }
 
   public Command sysIdQuasistatic(SysIdRoutine.Direction direction) {
@@ -190,7 +191,7 @@ public class Elevator extends SubsystemBase{
         setMotors(-0.1);
         break;
       case Feeder, L1, L2, L3, L4, StartConfiguration:
-        double speed = elevatorController.calculateElevatorSpeed(5, stateMachine.getGoalState().get(), getHeight());
+        double speed = elevatorController.calculateElevatorSpeed(stateMachine.getGoalState().get(), getHeight());
         setMotors(speed);
     }
     
