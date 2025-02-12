@@ -29,14 +29,17 @@ import frc.robot.utils.ElevatorController;
 public class Elevator extends SubsystemBase{
   /** Creates a new Climber. */
 
-  public ProfiledPIDController controller;
+ 
   public CANcoder encoder;
   public TalonFX leftMotor;
   public TalonFX rightMotor;
   public boolean hasSetHome;
   public GenericLimitSwitch lowerlimitSwitch;
   public ShuffleboardTab tab;
+
+  public ProfiledPIDController controller;
   public ElevatorController elevatorController;
+  public ElevatorFeedforward feedforward;
 
   public StateMachine<ElevatorState> stateMachine;
   public StatusSignal<Angle> getPosition;
@@ -99,15 +102,6 @@ public class Elevator extends SubsystemBase{
     stateMachine = new StateMachine<ElevatorState>(ElevatorState.Home, controller::atSetpoint);
 
   }
-
-  public Command sysIdQuasistatic(SysIdRoutine.Direction direction) {
-  return routine.quasistatic(direction);
-  }
-
-  public Command sysIdDynamic(SysIdRoutine.Direction direction) {
-  return routine.dynamic(direction);
-  }
-
   //POSITION IN INCHES
   public double getHeight()
   {
@@ -136,11 +130,11 @@ public class Elevator extends SubsystemBase{
   //MOVES ELEVATOR UP OR DOWN
   public void setMotors(double speed)
   {
-    //negative is up, this makes negative down
     
     if (lowerlimitSwitch.isPressed() && speed < 0){
       speed = 0;
     }
+    //negative is up, this makes negative down
     speed = -speed;
     leftMotor.set(speed);
     rightMotor.set(speed);
@@ -180,7 +174,7 @@ public class Elevator extends SubsystemBase{
         setMotors(-0.1);
         break;
       case Feeder, L1, L2, L3, L4, StartConfiguration:
-        double speed = elevatorController.calculateElevatorSpeed(stateMachine.getGoalState().getSetpoint(), getHeight());
+        double speed = controller.calculate(getHeightFromFloor(),stateMachine.getGoalState().getSetpoint()) + feedforward.calculate(controller.getSetpoint().velocity) / 12;
         setMotors(speed);
     }
     
