@@ -19,13 +19,11 @@ import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.units.measure.Voltage;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
-import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 
 import frc.robot.Constants;
-import frc.robot.utils.ElevatorController;
 
 public class Elevator extends SubsystemBase{
   /** Creates a new Climber. */
@@ -39,7 +37,6 @@ public class Elevator extends SubsystemBase{
   public ShuffleboardTab tab;
 
   public ProfiledPIDController controller;
-  public ElevatorController elevatorController;
   public ElevatorFeedforward feedforward;
 
   public StateMachine<ElevatorState> stateMachine;
@@ -97,8 +94,6 @@ public class Elevator extends SubsystemBase{
     controller.setIntegratorRange(-1, 1);
     controller.setTolerance(0.2);
     controller.reset(getHeightFromFloor());
-
-    elevatorController = new ElevatorController(controller, Constants.Elevator.FEEDFORWARD);
 
     stateMachine = new StateMachine<ElevatorState>(ElevatorState.Home, controller::atSetpoint);
 

@@ -1,15 +1,10 @@
 package frc.robot.utils;
 
-import javax.print.attribute.standard.Media;
-
-import com.ctre.phoenix6.sim.ChassisReference;
-
 import ca.frc6390.athena.core.RobotLocalization;
 import ca.frc6390.athena.drivetrains.swerve.SwerveDrivetrain;
 import ca.frc6390.athena.filters.FilterList;
 import ca.frc6390.athena.sensors.camera.limelight.LimeLight;
 import ca.frc6390.athena.sensors.camera.limelight.LimeLight.PoseEstimateType;
-import ca.frc6390.athena.sensors.camera.limelight.LimelightConfig;
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.filter.MedianFilter;
