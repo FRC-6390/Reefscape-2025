@@ -8,6 +8,7 @@ import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 
 import ca.frc6390.athena.mechanisms.StateMachine;
+import ca.frc6390.athena.mechanisms.StateMachine.SetpointProvider;
 import ca.frc6390.athena.sensors.limitswitch.GenericLimitSwitch;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.units.measure.Angle;
@@ -27,7 +28,7 @@ public class EndEffector extends SubsystemBase {
   public StateMachine<State> stateMachine;
   public StatusSignal<Angle> getAbsolutePosition;
 
-  public enum State
+  public enum State implements SetpointProvider
   {
       StartConfiguration(35),
       Home(0),
@@ -42,7 +43,8 @@ public class EndEffector extends SubsystemBase {
         this.angle = angle;
       }
 
-      public double get() {
+      @Override
+      public double getSetpoint() {
         return angle;
       }
   }
@@ -105,7 +107,7 @@ public class EndEffector extends SubsystemBase {
   {
     switch (stateMachine.getGoalState()) {
       case Left, Right, RightL4, LeftL4, Home, StartConfiguration:
-      double speed = -controller.calculate(getAngle().getDegrees(), stateMachine.getGoalState().get());
+      double speed = -controller.calculate(getAngle().getDegrees(), stateMachine.getGoalState().getSetpoint());
       setMotors(speed);
     }
   }
@@ -117,7 +119,7 @@ public class EndEffector extends SubsystemBase {
   public ShuffleboardTab shuffleboard(ShuffleboardTab tab) {
     tab.addBoolean("Limit Switch", limitSwitch::isPressed).withPosition(1,1);
     tab.addString("Setpoint", () -> stateMachine.getGoalState().name()).withPosition(2,1);
-    tab.addNumber("PID Output", () -> controller.calculate(getAngle().getDegrees(), stateMachine.getGoalState().get())).withPosition(3,1);
+    tab.addNumber("PID Output", () -> controller.calculate(getAngle().getDegrees(), stateMachine.getGoalState().getSetpoint())).withPosition(3,1);
     tab.addNumber("Angle", () -> getAngle().getDegrees()).withPosition(4,1);
     tab.addNumber("Rotations", this::getPosition).withPosition(4,1);
     tab.addString("Next State", () -> stateMachine.getNextState().name()).withPosition(5, 1);

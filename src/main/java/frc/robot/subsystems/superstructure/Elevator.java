@@ -4,39 +4,25 @@
 
 package frc.robot.subsystems.superstructure;
 
-import static edu.wpi.first.units.Units.RotationsPerSecond;
-import static edu.wpi.first.units.Units.Volt;
-import static edu.wpi.first.units.Units.Volts;
-
-import com.ctre.phoenix6.SignalLogger;
 import com.ctre.phoenix6.StatusSignal;
-import com.ctre.phoenix6.controls.VoltageOut;
 import com.ctre.phoenix6.hardware.CANcoder;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 
 import ca.frc6390.athena.mechanisms.StateMachine;
+import ca.frc6390.athena.mechanisms.StateMachine.SetpointProvider;
 import ca.frc6390.athena.sensors.limitswitch.GenericLimitSwitch;
-import edu.wpi.first.math.controller.ElevatorFeedforward;
-import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.controller.ProfiledPIDController;
-import edu.wpi.first.units.Units;
 import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.AngularVelocity;
-import edu.wpi.first.units.measure.Distance;
-import edu.wpi.first.units.measure.LinearVelocity;
 import edu.wpi.first.units.measure.Voltage;
-import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
-import edu.wpi.first.wpilibj.sysid.SysIdRoutineLog;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 
-import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Mechanism;
-import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Config;
 import frc.robot.Constants;
 import frc.robot.utils.ElevatorController;
 
@@ -57,7 +43,8 @@ public class Elevator extends SubsystemBase{
   public StatusSignal<AngularVelocity> getVelocity;
   public SysIdRoutine routine;
   public double gear_ratio;
-  public enum ElevatorState {
+  
+  public enum ElevatorState implements SetpointProvider {
     //ELEVATOR HEIGHT FROM FLOOR IN INCHES
     StartConfiguration(0),
     Home(0),
@@ -73,8 +60,9 @@ public class Elevator extends SubsystemBase{
         this.pos = pos;
     }
 
-    public double get() {
-        return pos;
+    @Override
+    public double getSetpoint() {
+      return pos;
     }
 }
 
@@ -171,9 +159,9 @@ public class Elevator extends SubsystemBase{
       tab.addDouble("Elevator Height", this::getHeight).withPosition(1, 1);
       tab.addDouble("Elevator Height From Floor Inches", this::getHeightFromFloor).withPosition(2, 1);
       tab.addString("Setpoint", () -> stateMachine.getGoalState().name()).withPosition(3, 1);
-      tab.addDouble("SetpoitnValue", () -> stateMachine.getGoalState().get());
+      tab.addDouble("SetpoitnValue", () -> stateMachine.getGoalState().getSetpoint());
       tab.addString("Next State", () -> stateMachine.getNextState().name()).withPosition(4, 1);
-      tab.addDouble("PID Output", () -> controller.calculate(getHeightFromFloor(), stateMachine.getGoalState().get())).withPosition(5, 1);
+      tab.addDouble("PID Output", () -> controller.calculate(getHeightFromFloor(), stateMachine.getGoalState().getSetpoint())).withPosition(5, 1);
       tab.addBoolean("State Changer", stateMachine.getChangeStateSupplier()).withPosition(6, 1);
 
       return tab;
@@ -192,7 +180,7 @@ public class Elevator extends SubsystemBase{
         setMotors(-0.1);
         break;
       case Feeder, L1, L2, L3, L4, StartConfiguration:
-        double speed = elevatorController.calculateElevatorSpeed(stateMachine.getGoalState().get(), getHeight());
+        double speed = elevatorController.calculateElevatorSpeed(stateMachine.getGoalState().getSetpoint(), getHeight());
         setMotors(speed);
     }
     
