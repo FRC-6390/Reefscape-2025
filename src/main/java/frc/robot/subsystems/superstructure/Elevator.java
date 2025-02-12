@@ -100,15 +100,16 @@ public class Elevator extends SubsystemBase{
     leftMotor.setNeutralMode(NeutralModeValue.Brake);
     rightMotor.setNeutralMode(NeutralModeValue.Brake);
 
-    stateMachine = new StateMachine<ElevatorState>(ElevatorState.Home, controller::atSetpoint);
-
-
     //CONTROL SYSTEM SETUP
     controller = Constants.Elevator.CONTORLLER;
     controller.setIntegratorRange(-1, 1);
     controller.setTolerance(0.2);
+    controller.reset(getHeightFromFloor());
 
     elevatorController = new ElevatorController(controller, Constants.Elevator.FEEDFORWARD);
+
+    stateMachine = new StateMachine<ElevatorState>(ElevatorState.Home, controller::atSetpoint);
+
   }
 
   public Command sysIdQuasistatic(SysIdRoutine.Direction direction) {

@@ -16,7 +16,7 @@ import com.pathplanner.lib.path.PathConstraints;
 import com.pathplanner.lib.path.PathPlannerPath;
 import com.pathplanner.lib.util.FileVersionException;
 
-import ca.frc6390.athena.controllers.DebouncedController;
+import ca.frc6390.athena.controllers.EnhancedXboxController;
 import ca.frc6390.athena.core.RobotIMU;
 import ca.frc6390.athena.core.RobotLocalization;
 import ca.frc6390.athena.core.RobotVision;
@@ -49,7 +49,7 @@ public class RobotContainer {
   // public final Superstructure superstructure = new Superstructure(climber);
   
   // public final RobotLocalization localization = new RobotLocalization(driveTrain, Constants.DriveTrain.LOCALIZATION_CONFIG);
-  private final DebouncedController driverController = new DebouncedController(0);
+  private final EnhancedXboxController driverController = new EnhancedXboxController(0);
 
   public RobotContainer() {
     // localization.configurePathPlanner(Constants.DriveTrain.PATHPLANNER_TRANSLATION_PID, DriveTrain.PATHPLANNER_ROTATION_PID);
@@ -74,13 +74,16 @@ public class RobotContainer {
     // driverController.leftBumper.whileTrue(() -> elevator.setMotors(0.1)).onFalse(elevator::stop);
 
 
-    driverController.a.onTrue(() -> elevator.getStateMachine().setGoalState(Elevator.ElevatorState.L1));
+    driverController.a.onTrue(() -> System.out.println("YEEEEEEEEET"));
     driverController.b.onTrue(() -> elevator.getStateMachine().setGoalState(Elevator.ElevatorState.L2));
     driverController.x.onTrue(() -> elevator.getStateMachine().setGoalState(Elevator.ElevatorState.L3));
     driverController.y.onTrue(() -> elevator.getStateMachine().setGoalState(Elevator.ElevatorState.L4));
     driverController.rightBumper.onTrue(() -> elevator.getStateMachine().setGoalState(Elevator.ElevatorState.Home));
     driverController.leftBumper.onTrue(() -> elevator.getStateMachine().setGoalState(Elevator.ElevatorState.Feeder));
     //35.7
+
+    driverController.pov.down.whileTrue(() -> System.out.println("YEEEEEEEEET"));
+    
 
     // driverController.leftBumper.onTrue(new Climb(climber, STATE.HOME));
     // driverController.rightBumper.whileTrue(new Climb(climber, STATE.CLIMB));

@@ -14,10 +14,9 @@ import javax.sound.sampled.Port;
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.commands.PathPlannerAuto;
 import com.pathplanner.lib.controllers.PPHolonomicDriveController;
-import com.revrobotics.Rev2mDistanceSensor.Unit;
 
 import au.grapplerobotics.LaserCan;
-import ca.frc6390.athena.controllers.DebouncedController;
+import ca.frc6390.athena.controllers.EnhancedXboxController;
 import ca.frc6390.athena.core.RobotLocalization;
 import ca.frc6390.athena.core.RobotVision;
 import ca.frc6390.athena.drivetrains.swerve.SwerveDrivetrain;
@@ -43,7 +42,7 @@ public class AlignTets extends Command {
   
   public LimeLight limelight; 
   public SwerveDrivetrain drivetrain;
-  public DebouncedController cont; 
+  public EnhancedXboxController cont; 
   public boolean closeEnough;
   public boolean isDone;
   public ChassisSpeeds speeds;
@@ -71,7 +70,7 @@ public class AlignTets extends Command {
     }
   }
   
-  public AlignTets(LimeLight limeLight, SwerveDrivetrain drivetrain, DebouncedController cont, ALIGNMODE mode, RobotLocalization localization) {
+  public AlignTets(LimeLight limeLight, SwerveDrivetrain drivetrain, EnhancedXboxController cont, ALIGNMODE mode, RobotLocalization localization) {
     this.drivetrain = drivetrain; 
     this.cont = cont;
     this.localization = localization;
@@ -79,7 +78,7 @@ public class AlignTets extends Command {
     this.mode = mode;
   }
 
-  public AlignTets(LimeLight limeLight, SwerveDrivetrain drivetrain, DebouncedController cont, ALIGNMODE mode, RobotLocalization localization, int tagNum) {
+  public AlignTets(LimeLight limeLight, SwerveDrivetrain drivetrain, EnhancedXboxController cont, ALIGNMODE mode, RobotLocalization localization, int tagNum) {
     this.drivetrain = drivetrain; 
     this.cont = cont;
     limelight = limeLight;
