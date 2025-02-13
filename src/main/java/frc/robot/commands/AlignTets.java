@@ -89,7 +89,7 @@ public class AlignTets extends Command {
       if(((int)limelight.getAprilTagID()) == runTag) {
       helper.gatherData();
       speeds = helper.calculateSpeeds(mode, true);
-      if(limelight.getTargetArea() > 12){
+      if(limelight.getTargetArea() > 10){
         closeEnough = true;
       }
       }

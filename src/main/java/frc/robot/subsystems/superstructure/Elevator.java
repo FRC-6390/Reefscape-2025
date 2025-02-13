@@ -5,6 +5,7 @@
 package frc.robot.subsystems.superstructure;
 
 import com.ctre.phoenix6.StatusSignal;
+import com.ctre.phoenix6.configs.CurrentLimitsConfigs;
 import com.ctre.phoenix6.hardware.CANcoder;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.NeutralModeValue;
@@ -16,6 +17,7 @@ import edu.wpi.first.math.controller.ElevatorFeedforward;
 import edu.wpi.first.math.controller.ProfiledPIDController;
 import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.AngularVelocity;
+import edu.wpi.first.units.measure.Current;
 import edu.wpi.first.units.measure.Voltage;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
@@ -88,13 +90,17 @@ public class Elevator extends SubsystemBase{
     
     leftMotor.setNeutralMode(NeutralModeValue.Brake);
     rightMotor.setNeutralMode(NeutralModeValue.Brake);
+    CurrentLimitsConfigs currentLimitsConfigs = new CurrentLimitsConfigs().withStatorCurrentLimit(40);
+    currentLimitsConfigs.StatorCurrentLimitEnable = true;
+    leftMotor.getConfigurator().apply(currentLimitsConfigs);
+    rightMotor.getConfigurator().apply(currentLimitsConfigs);
 
     //CONTROL SYSTEM SETUP
     controller = Constants.Elevator.CONTORLLER;
-    controller.setIntegratorRange(-1, 1);
+    controller.setIntegratorRange(-1.5, 1.5);
     controller.setTolerance(0.2);
     controller.reset(getHeightFromFloor());
-
+    feedforward = Constants.Elevator.FEEDFORWARD;
     stateMachine = new StateMachine<ElevatorState>(ElevatorState.Home, controller::atSetpoint);
 
   }
@@ -151,9 +157,12 @@ public class Elevator extends SubsystemBase{
       tab.addString("Setpoint", () -> stateMachine.getGoalState().name()).withPosition(3, 1);
       tab.addDouble("SetpoitnValue", () -> stateMachine.getGoalState().getSetpoint());
       tab.addString("Next State", () -> stateMachine.getNextState().name()).withPosition(4, 1);
+      tab.addDouble("Fused Controller Output", () -> controller.calculate(getHeightFromFloor(),stateMachine.getGoalState().getSetpoint()) + feedforward.calculate(controller.getSetpoint().velocity) / 12);
       tab.addDouble("PID Output", () -> controller.calculate(getHeightFromFloor(), stateMachine.getGoalState().getSetpoint())).withPosition(5, 1);
+      tab.addDouble("Feedforward Output", () -> feedforward.calculate(controller.getSetpoint().velocity));
       tab.addBoolean("State Changer", stateMachine.getChangeStateSupplier()).withPosition(6, 1);
-
+      tab.addDouble("Profiled Pos Setpoint",() -> controller.getSetpoint().position);
+      tab.addDouble("Profiled Vel Setpoint",() -> controller.getSetpoint().velocity);
       return tab;
   }
 

@@ -3,14 +3,18 @@ package frc.robot.utils;
 import ca.frc6390.athena.core.RobotLocalization;
 import ca.frc6390.athena.drivetrains.swerve.SwerveDrivetrain;
 import ca.frc6390.athena.filters.FilterList;
+import ca.frc6390.athena.filters.FilteredValue;
 import ca.frc6390.athena.sensors.camera.limelight.LimeLight;
 import ca.frc6390.athena.sensors.camera.limelight.LimeLight.PoseEstimateType;
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.controller.PIDController;
+import edu.wpi.first.math.controller.ProfiledPIDController;
 import edu.wpi.first.math.filter.MedianFilter;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
+import edu.wpi.first.math.trajectory.TrapezoidProfile.Constraints;
+import frc.robot.Constants;
 import frc.robot.commands.AlignTets.ALIGNMODE;
 
 public class AutoAlignHelper 
@@ -32,15 +36,16 @@ public class AutoAlignHelper
  public double yVelocity;
  public double rotationalVelocity;
  public PIDController controller = new PIDController(0.025, 0, 0);
- public PIDController xController = new PIDController(0.065, 0, 0.0001);
+ public ProfiledPIDController xController = new ProfiledPIDController(0.065, 0, 0.0001, new Constraints(4, 2));
  public PIDController xController2 = new PIDController(1.2, 0,0);
-
+ public FilterList xError = new FilterList().addMedianFilter(30);
 
  public AutoAlignHelper(LimeLight limeLight, RobotLocalization localization, SwerveDrivetrain drivetrain)
  {
     this.limeLight = limeLight;
     this.drivetrain = drivetrain;
     this.localization = localization;
+    xError = new FilteredValue(() -> xController.getPositionError()).addMedianFilter(25);
  }
 
  public void gatherData()
@@ -53,6 +58,7 @@ public class AutoAlignHelper
     Pose2d pos = limeLight.getPoseEstimate(PoseEstimateType.TARGET_POSE_ROBOT_SPACE).getPose();
     botpose = new Pose2d(-x.calculate(pos.getX()), -y.calculate(pos.getY()), pos.getRotation());
     xMeasurement = limeLight.getTargetHorizontalOffset();
+    
 }
 public double getThetatMeasurement()
 {
@@ -84,7 +90,10 @@ public ChassisSpeeds calculateSpeeds(ALIGNMODE mode, boolean hasCorrectTag)
     {
       xVelocity = mode.get() * xController.calculate(getXMeasurement(), 0);
       rotationalVelocity = -controller.calculate(getThetatMeasurement(), 0);
-      yVelocity = mode.get();
+      double error = Math.abs(xError.calculate(xController.getPositionError()));
+      
+      yVelocity = mode.get() * (error <=  5 ? 0.5:1);
+      System.out.println(error);
     }
     else
     {
