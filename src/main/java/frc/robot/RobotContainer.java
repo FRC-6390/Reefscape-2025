@@ -35,7 +35,6 @@ import frc.robot.commands.AlignTets;
 import frc.robot.commands.AlignTets.ALIGNMODE;
 // import frc.robot.commands.AprilTagAlign;
 import frc.robot.commands.Climb;
-import frc.robot.commands.DriveToGoal;
 // import frc.robot.commands.AprilTagAlign.ALIGNMODE;
 import frc.robot.subsystems.Superstructure;
 import frc.robot.subsystems.superstructure.Climber;
