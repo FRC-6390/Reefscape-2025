@@ -12,7 +12,7 @@ import ca.frc6390.athena.sensors.camera.limelight.LimeLight;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.utils.AutoAlignHelper;
-public class AlignTets extends Command {
+public class AutoAlign extends Command {
   
   public LimeLight limelight; 
   public SwerveDrivetrain drivetrain;
@@ -44,7 +44,7 @@ public class AlignTets extends Command {
     }
   }
   
-  public AlignTets(LimeLight limeLight, SwerveDrivetrain drivetrain, EnhancedXboxController cont, ALIGNMODE mode, RobotLocalization localization) {
+  public AutoAlign(LimeLight limeLight, SwerveDrivetrain drivetrain, EnhancedXboxController cont, ALIGNMODE mode, RobotLocalization localization) {
     this.drivetrain = drivetrain; 
     this.cont = cont;
     this.localization = localization;
@@ -52,7 +52,7 @@ public class AlignTets extends Command {
     this.mode = mode;
   }
 
-  public AlignTets(LimeLight limeLight, SwerveDrivetrain drivetrain, EnhancedXboxController cont, ALIGNMODE mode, RobotLocalization localization, int tagNum) {
+  public AutoAlign(LimeLight limeLight, SwerveDrivetrain drivetrain, EnhancedXboxController cont, ALIGNMODE mode, RobotLocalization localization, int tagNum) {
     this.drivetrain = drivetrain; 
     this.cont = cont;
     limelight = limeLight;

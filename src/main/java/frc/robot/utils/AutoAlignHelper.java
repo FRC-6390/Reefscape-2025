@@ -15,7 +15,7 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.trajectory.TrapezoidProfile.Constraints;
 import frc.robot.Constants;
-import frc.robot.commands.AlignTets.ALIGNMODE;
+import frc.robot.commands.AutoAlign.ALIGNMODE;
 
 public class AutoAlignHelper 
 {
