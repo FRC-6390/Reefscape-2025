@@ -2,16 +2,19 @@ package frc.robot;
 
 import com.pathplanner.lib.config.PIDConstants;
 
+import ca.frc6390.athena.core.RobotBase.RobotBaseConfig;
+import ca.frc6390.athena.core.RobotDrivetrain.RobotDriveTrainIDs.DrivetrainIDs;
 import ca.frc6390.athena.core.RobotLocalization.RobotLocalizationConfig;
-import ca.frc6390.athena.drivetrains.swerve.SwerveHelpers;
-import ca.frc6390.athena.drivetrains.swerve.SwerveModule.SwerveModuleConfig;
-import ca.frc6390.athena.drivetrains.swerve.modules.SDSModules;
-import ca.frc6390.athena.drivetrains.swerve.modules.SDSModules.SDSMK4i;
-import ca.frc6390.athena.drivetrains.swerve.modules.SDSModules.SDSMotor;
+import ca.frc6390.athena.core.RobotVision.RobotVisionConfig;
+import ca.frc6390.athena.devices.Encoder.EncoderType;
+import ca.frc6390.athena.devices.IMU.IMUType;
+import ca.frc6390.athena.devices.MotorController.Motor;
+import ca.frc6390.athena.drivetrains.swerve.SwerveDrivetrain;
+import ca.frc6390.athena.drivetrains.swerve.SwerveDrivetrain.SwerveDrivetrainConfig;
+import ca.frc6390.athena.drivetrains.swerve.modules.SwerveVendorSDS;
 import edu.wpi.first.math.controller.ElevatorFeedforward;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.controller.ProfiledPIDController;
-import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.trajectory.TrapezoidProfile.Constraints;
 import edu.wpi.first.math.util.Units;
 
@@ -19,37 +22,33 @@ public interface Constants {
     
     public interface DriveTrain {
         double TRACKWIDTH_METERS = Units.inchesToMeters(18.375); 
-        double WHEELBASE_METERS = Units.inchesToMeters(18.375);
 
         String CANBUS = "can";
-        SDSModules MODULE = new SDSModules(SDSMotor.KRAKEN_X60, SDSMK4i.L3, CANBUS);
-        PIDController ROTATION_PID = new PIDController(0.5 , 0,0);
-    
-        PIDController DRIFT_PID = new PIDController(1.5, 0, 0);
 
-        int PIGEON_ID = 20;
-        //LF,FR,BL,BR
-        int[] DRIVE_IDS = {1,2,3,4};
-        int[] ROTATION_IDS = {5,6,7,8};
-        int[] ENCODER_IDS = {9,10,11,12};
         // SAM OFFSETS
         // double[] ENCODER_OFFSETS = {0.697,3.123,2.445,-0.851};
         // PATRICK OFFSETS
-        double[] ENCODER_OFFSETS = {2.284,-1.942,1.0952,2.376};
+        double[] ENCODER_OFFSETS = {-0.608,-0.009,-0.889,-0.365};
         
+        SwerveDrivetrainConfig DRIVETRAIN_CONFIG = new SwerveDrivetrainConfig(IMUType.CTREPigeon2, true)
+                                                    .sameModule(SwerveVendorSDS.MK4i.L1.config(Motor.FALCON_500,EncoderType.CTRECANcoder))
+                                                    .setModulueLocations(TRACKWIDTH_METERS)
+                                                    .setRotationPID(new PIDController(0.5 , 0,0))
+                                                    .setIDs(DrivetrainIDs.SWERVE_CHASSIS_STANDARD)
+                                                    .setOffsets(ENCODER_OFFSETS)
+                                                    .setCanbus(CANBUS)
+                                                    .setDriftCorrectionPID(new PIDController(1.5, 0, 0))
+                                                    .setDriftActivationSpeed(0.01);
 
-        Translation2d[] MODULE_LOCATIONS = SwerveHelpers.generateModuleLocations(TRACKWIDTH_METERS, WHEELBASE_METERS);
-        SwerveModuleConfig[] MODULE_CONFIGS = MODULE.generateConfigs(MODULE_LOCATIONS, DRIVE_IDS, ROTATION_IDS, ROTATION_PID, ENCODER_IDS, ENCODER_OFFSETS);
+        RobotLocalizationConfig LOCALIZATION_CONFIG = new RobotLocalizationConfig().setPathPlannerPID(new PIDConstants(5,0,0), new PIDConstants(5,0,0)).setVisionEnabled(false);
 
-        String[] LIMELIGHTS = {"limelight-driver", "limelight-tag"};
-        RobotLocalizationConfig LOCALIZATION_CONFIG = new RobotLocalizationConfig(0.1, 0.1, 0.001);
-
-        PIDConstants PATHPLANNER_TRANSLATION_PID = new PIDConstants(5,0,0);
-        PIDConstants PATHPLANNER_ROTATION_PID = new PIDConstants(5,0,0);
+        RobotBaseConfig<SwerveDrivetrain> ROBOT_BASE = RobotBaseConfig.swerve(DRIVETRAIN_CONFIG)
+                                                                      .setLocalization(LOCALIZATION_CONFIG)
+                                                                      .setVision(RobotVisionConfig.limelight("limelight-driver", "limelight-tag"));
     }
 
     public interface Controllers {
-        double THETA_DEADZONE = 0.1;      
+        double STICK_DEADZONE = 0.1;      
     }
     public interface Climber {
         int LIMIT_SWITCH = 1;

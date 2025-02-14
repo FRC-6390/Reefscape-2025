@@ -1,5 +1,6 @@
 package frc.robot.utils;
 
+import ca.frc6390.athena.core.RobotDrivetrain;
 import ca.frc6390.athena.core.RobotLocalization;
 import ca.frc6390.athena.drivetrains.swerve.SwerveDrivetrain;
 import ca.frc6390.athena.filters.FilterList;
@@ -28,7 +29,7 @@ public class AutoAlignHelper
  public ChassisSpeeds speeds;
  public double thetaMeasurement = 0;
  public Pose2d lastRobotPose2d = new Pose2d();
- public SwerveDrivetrain drivetrain;
+ public RobotDrivetrain drivetrain;
  public MedianFilter filter = new MedianFilter(10);
  public FilterList x = new FilterList().addMedianFilter(10);
  public FilterList y = new FilterList().addMedianFilter(50);
@@ -40,7 +41,7 @@ public class AutoAlignHelper
  public PIDController xController2 = new PIDController(1.2, 0,0);
  public FilterList xError = new FilterList().addMedianFilter(30);
 
- public AutoAlignHelper(LimeLight limeLight, RobotLocalization localization, SwerveDrivetrain drivetrain)
+ public AutoAlignHelper(LimeLight limeLight, RobotLocalization localization, RobotDrivetrain drivetrain)
  {
     this.limeLight = limeLight;
     this.drivetrain = drivetrain;

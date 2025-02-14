@@ -6,8 +6,9 @@ package frc.robot.commands;
 
 import au.grapplerobotics.LaserCan;
 import ca.frc6390.athena.controllers.EnhancedXboxController;
+import ca.frc6390.athena.core.RobotDrivetrain;
 import ca.frc6390.athena.core.RobotLocalization;
-import ca.frc6390.athena.drivetrains.swerve.SwerveDrivetrain;
+import ca.frc6390.athena.core.RobotSpeeds.SpeedSource;
 import ca.frc6390.athena.sensors.camera.limelight.LimeLight;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -15,7 +16,7 @@ import frc.robot.utils.AutoAlignHelper;
 public class AutoAlign extends Command {
   
   public LimeLight limelight; 
-  public SwerveDrivetrain drivetrain;
+  public RobotDrivetrain drivetrain;
   public EnhancedXboxController cont; 
   public boolean closeEnough;
   public boolean isDone;
@@ -44,7 +45,7 @@ public class AutoAlign extends Command {
     }
   }
   
-  public AutoAlign(LimeLight limeLight, SwerveDrivetrain drivetrain, EnhancedXboxController cont, ALIGNMODE mode, RobotLocalization localization) {
+  public AutoAlign(LimeLight limeLight, RobotDrivetrain drivetrain, EnhancedXboxController cont, ALIGNMODE mode, RobotLocalization localization) {
     this.drivetrain = drivetrain; 
     this.cont = cont;
     this.localization = localization;
@@ -52,7 +53,7 @@ public class AutoAlign extends Command {
     this.mode = mode;
   }
 
-  public AutoAlign(LimeLight limeLight, SwerveDrivetrain drivetrain, EnhancedXboxController cont, ALIGNMODE mode, RobotLocalization localization, int tagNum) {
+  public AutoAlign(LimeLight limeLight, RobotDrivetrain drivetrain, EnhancedXboxController cont, ALIGNMODE mode, RobotLocalization localization, int tagNum) {
     this.drivetrain = drivetrain; 
     this.cont = cont;
     limelight = limeLight;
@@ -85,6 +86,7 @@ public class AutoAlign extends Command {
       if(!hasSet){
         hasSet = true;
         runTag = ((int)limelight.getAprilTagID());
+        drivetrain.getRobotSpeeds().enableSpeeds(SpeedSource.AUTO, false);
       }
       if(((int)limelight.getAprilTagID()) == runTag) {
       helper.gatherData();
@@ -104,14 +106,15 @@ public class AutoAlign extends Command {
       if(closeEnough  && las.getMeasurement().status == LaserCan.LASERCAN_STATUS_VALID_MEASUREMENT && las.getMeasurement().distance_mm < 32){
         isDone = true;
       } 
-      drivetrain.getRobotSpeeds().setAutoSpeeds(speeds);
+      drivetrain.getRobotSpeeds().setFeedbackSpeeds(speeds);
     }
   }
 
   @Override
   public void end(boolean interrupted) 
   {
-    drivetrain.getRobotSpeeds().setAutoSpeeds(new ChassisSpeeds(0,0,0));
+    drivetrain.getRobotSpeeds().enableSpeeds(SpeedSource.AUTO, true);
+    drivetrain.getRobotSpeeds().stopFeedbackSpeeds();
     System.out.println("Done!");
   }
 
