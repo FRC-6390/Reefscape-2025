@@ -49,7 +49,7 @@ public interface Constants {
     }
 
     public interface Controllers {
-        double THETA_DEADZONE = 0.1;      
+        double THETA_DEADZONE = 0.15;      
     }
     public interface Climber {
         int LIMIT_SWITCH = 1;
