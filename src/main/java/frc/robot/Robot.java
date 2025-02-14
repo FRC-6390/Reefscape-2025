@@ -14,7 +14,6 @@ public class Robot extends TimedRobot {
 
   public Robot() {  
     m_robotContainer = new RobotContainer();
-    m_robotContainer.localization.configurePathPlanner(Constants.DriveTrain.PATHPLANNER_TRANSLATION_PID, Constants.DriveTrain.PATHPLANNER_ROTATION_PID);
     m_autonomousCommand = m_robotContainer.getAutonomousCommand();
     }
 
