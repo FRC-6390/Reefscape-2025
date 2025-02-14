@@ -28,6 +28,8 @@ import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.robot.Constants.DriveTrain;
+import frc.robot.commands.AutoAlign;
+import frc.robot.commands.AutoAlign.ALIGNMODE;
 // import frc.robot.commands.AprilTagAlign;
 import frc.robot.commands.Climb;
 // import frc.robot.commands.AprilTagAlign.ALIGNMODE;
@@ -60,7 +62,7 @@ public class RobotContainer {
     // AutoCommands.registerCommand("ElevatorState.Feeder", () -> elevator.getStateMachine().setGoalState(Elevator.ElevatorState.Feeder), elevator);
 
     // elevator.shuffleboard("Elevator");
-    // NamedCommands.registerCommand("Align", new AprilTagAlign(robotBase.getVision().getCamera("limelight-driver"), robotBase.getDrivetrain(), driverController,ALIGNMODE.REEF));
+    NamedCommands.registerCommand("Align", new AutoAlign(robotBase.getVision().getCamera("limelight-driver"), robotBase.getDrivetrain(), driverController,ALIGNMODE.REEF, robotBase.getLocalization()));
     // NamedCommands.registerCommand("AlignFeeder", new AprilTagAlign(robotBase.getVision().getCamera("limelight-tag"), robotBase.getDrivetrain(), driverController, ALIGNMODE.FEEDER));
    
   }
@@ -68,8 +70,8 @@ public class RobotContainer {
   private void configureBindings() 
   {
 
-    // driverController.start.onTrue(new InstantCommand(() -> driveTrain.getIMU().setYaw(0)));
-    // driverController.b.whileTrue(new AlignTets(vision.getCamera("limelight-driver"), driveTrain, driverController, frc.robot.commands.AlignTets.ALIGNMODE.REEF, localization));
+    driverController.start.onTrue(new InstantCommand(() -> robotBase.getDrivetrain().getIMU().setYaw(0)));
+    driverController.b.whileTrue(new AutoAlign(robotBase.getVision().getCamera("limelight-driver"), robotBase.getDrivetrain(), driverController, frc.robot.commands.AutoAlign.ALIGNMODE.REEF, robotBase.getLocalization()));
 
     // driverController.rightBumper.whileTrue(() -> elevator.setMotors(-0.05)).onFalse(elevator::stop);
     // driverController.leftBumper.whileTrue(() -> elevator.setMotors(0.1)).onFalse(elevator::stop);
