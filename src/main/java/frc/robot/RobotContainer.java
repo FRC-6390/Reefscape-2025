@@ -28,7 +28,6 @@ import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.robot.Constants.DriveTrain;
-
 // import frc.robot.commands.AprilTagAlign;
 import frc.robot.commands.Climb;
 // import frc.robot.commands.AprilTagAlign.ALIGNMODE;
@@ -91,7 +90,7 @@ public class RobotContainer {
   // ChassisSpeeds.fromFieldRelativeSpeeds(speeds, null);
   }
   public Command getAutonomousCommand() {
-    return Commands.none();
-    // return new PathPlannerAuto("LeftSide");
+    // return Commands.none();
+    return new PathPlannerAuto("Test");
   }
 }

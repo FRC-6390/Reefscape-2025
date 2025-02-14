@@ -48,7 +48,7 @@ public interface Constants {
     }
 
     public interface Controllers {
-        double STICK_DEADZONE = 0.1;      
+        double STICK_DEADZONE = 0.15;      
     }
     public interface Climber {
         int LIMIT_SWITCH = 1;

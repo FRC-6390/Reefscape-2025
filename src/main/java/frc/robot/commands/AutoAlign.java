@@ -11,6 +11,7 @@ import ca.frc6390.athena.core.RobotLocalization;
 import ca.frc6390.athena.core.RobotSpeeds.SpeedSource;
 import ca.frc6390.athena.sensors.camera.limelight.LimeLight;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.utils.AutoAlignHelper;
 public class AutoAlign extends Command {
@@ -84,11 +85,13 @@ public class AutoAlign extends Command {
     if(limelight.hasValidTarget()){
       
       if(!hasSet){
+        drivetrain.getRobotSpeeds().enableSpeeds(SpeedSource.AUTO, false);
         hasSet = true;
         runTag = ((int)limelight.getAprilTagID());
         drivetrain.getRobotSpeeds().enableSpeeds(SpeedSource.AUTO, false);
       }
       if(((int)limelight.getAprilTagID()) == runTag) {
+      
       helper.gatherData();
       speeds = helper.calculateSpeeds(mode, true);
       if(limelight.getTargetArea() > 10){
@@ -103,7 +106,7 @@ public class AutoAlign extends Command {
       speeds = helper.calculateSpeeds(mode, false);
     }
     if(hasSet) {
-      if(closeEnough  && las.getMeasurement().status == LaserCan.LASERCAN_STATUS_VALID_MEASUREMENT && las.getMeasurement().distance_mm < 32){
+      if(closeEnough  && las.getMeasurement().status == LaserCan.LASERCAN_STATUS_VALID_MEASUREMENT && las.getMeasurement().distance_mm < 100){
         isDone = true;
       } 
       drivetrain.getRobotSpeeds().setFeedbackSpeeds(speeds);
