@@ -27,12 +27,22 @@ public interface Constants {
 
         // SAM OFFSETS
         // double[] ENCODER_OFFSETS = {0.697,3.123,2.445,-0.851};
-        // PATRICK OFFSETS
-        double[] ENCODER_OFFSETS = {-0.366943359375, -0.7001953125,-0.176513671875,-0.38476562499999994};
+
+        // OLD PATRICK OFFSETS
+        double[] ENCODER_OFFSETS = {0.366943359375, 0.7001953125,0.176513671875,0.38476562499999994};
+
+        // NEW PATRICK OFFSETS
+        // double[] ENCODER_OFFSETS = {0,0,0,0};
+        
+        //OTHER WAY
+        // double[] ENCODER_OFFSETS = {-0.86669921875, -0.19970703125,-0.67333984375,-0.880126953125};
+        
+        //REQUIRES INVERSION OF TWO MOTORS
+        // double[] ENCODER_OFFSETS = {-0.366943359375, -0.19970703125,-0.176513671875,-0.880126953125};
         
         SwerveDrivetrainConfig DRIVETRAIN_CONFIG = new SwerveDrivetrainConfig(IMUType.CTREPigeon2, true)
                                                     .sameModule(SwerveVendorSDS.MK4i.L3.config(Motor.KRAKEN_X60,EncoderType.CTRECANcoder))
-                                                    .setModulueLocations(TRACKWIDTH_METERS)
+                                                    .setModuleLocations(TRACKWIDTH_METERS)
                                                     .setRotationPID(new PIDController(0.5 , 0,0))
                                                     .setIDs(DrivetrainIDs.SWERVE_CHASSIS_STANDARD)
                                                     .setOffsets(ENCODER_OFFSETS)

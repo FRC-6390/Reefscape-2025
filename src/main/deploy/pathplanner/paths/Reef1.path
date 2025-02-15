@@ -54,13 +54,13 @@
   },
   "goalEndState": {
     "velocity": 0,
-    "rotation": 118.2287761813696
+    "rotation": -57.27876537096302
   },
   "reversed": false,
   "folder": "Preloads",
   "idealStartingState": {
     "velocity": 0,
-    "rotation": -0.0
+    "rotation": 180.0
   },
   "useDefaultConstraints": false
 }

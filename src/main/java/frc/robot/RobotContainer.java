@@ -93,8 +93,8 @@ public class RobotContainer {
   // ChassisSpeeds.fromFieldRelativeSpeeds(speeds, null);
   }
   public Command getAutonomousCommand() {
-    return Commands.none();
-    // return new PathPlannerAuto("New Auto");
+    // return Commands.none();
+    return new PathPlannerAuto("LeftSide");
     // PathPlannerPath exampleChoreoTraj = null;
     // try {
     //   exampleChoreoTraj = PathPlannerPath.fromChoreoTrajectory("R");
