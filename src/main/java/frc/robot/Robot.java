@@ -4,6 +4,7 @@
 
 package frc.robot;
 
+import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
@@ -19,6 +20,8 @@ public class Robot extends TimedRobot {
 
   @Override
   public void robotPeriodic() {
+    m_robotContainer.robotBase.getLocalization().update();
+    System.out.println(m_robotContainer.robotBase.getLocalization().getFieldPose());
     CommandScheduler.getInstance().run();
   }
 
@@ -26,7 +29,10 @@ public class Robot extends TimedRobot {
   public void robotInit() {}
 
   @Override
-  public void disabledInit() {}
+  public void disabledInit() 
+  {
+    // m_robotContainer.elevator.reset(elevator.getHeight());
+  }
 
   @Override
   public void disabledPeriodic() {}
@@ -36,6 +42,7 @@ public class Robot extends TimedRobot {
 
   @Override
   public void autonomousInit() {
+    // m_robotContainer.elevator.reset(elevator.getHeight());
     if (m_autonomousCommand != null) {
       m_autonomousCommand.schedule();
     }
@@ -49,6 +56,8 @@ public class Robot extends TimedRobot {
 
   @Override
   public void teleopInit() {
+    m_robotContainer.robotBase.getDrivetrain().getRobotSpeeds().setAutoSpeeds(new ChassisSpeeds());
+    // m_robotContainer.elevator.reset(elevator.getHeight());
     if (m_autonomousCommand != null) {
       m_autonomousCommand.cancel();
     }
@@ -62,6 +71,7 @@ public class Robot extends TimedRobot {
 
   @Override
   public void testInit() {
+    // m_robotContainer.elevator.reset(elevator.getHeight());
     CommandScheduler.getInstance().cancelAll();
   }
 

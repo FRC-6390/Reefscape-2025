@@ -13,6 +13,7 @@ import ca.frc6390.athena.sensors.camera.limelight.LimeLight;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import frc.robot.utils.AutoAlignHelper;
 public class AutoAlign extends Command {
   
@@ -27,12 +28,14 @@ public class AutoAlign extends Command {
   public RobotLocalization localization;
   public ALIGNMODE mode;
   public AutoAlignHelper helper;
+  public Command event;
   private LaserCan las = new LaserCan(59);
+  public double distToTrigger;
 
   public enum ALIGNMODE
   {
-    FEEDER(1),
-    REEF(-1);
+    FEEDER(-1),
+    REEF(1);
 
     double num;
     private ALIGNMODE(double num)
@@ -59,11 +62,27 @@ public class AutoAlign extends Command {
     this.cont = cont;
     limelight = limeLight;
     this.mode = mode;
-    runTag = tagNum;
-    if(runTag == tagNum)
-    {
-    hasSet = true;
-    }
+    limelight.setPriorityID(tagNum);
+  }
+
+  public AutoAlign(LimeLight limeLight, RobotDrivetrain drivetrain, EnhancedXboxController cont, ALIGNMODE mode, RobotLocalization localization, int tagNum, Command event, double distToTrigger) {
+    this.drivetrain = drivetrain; 
+    this.cont = cont;
+    limelight = limeLight;
+    this.mode = mode;
+    limelight.setPriorityID(tagNum);
+    this.distToTrigger = distToTrigger;
+    this.event = event;
+  }
+
+  
+  public AutoAlign(LimeLight limeLight, RobotDrivetrain drivetrain, EnhancedXboxController cont, ALIGNMODE mode, RobotLocalization localization, Command event, double distToTrigger) {
+    this.drivetrain = drivetrain; 
+    this.cont = cont;
+    limelight = limeLight;
+    this.mode = mode;
+    this.distToTrigger = distToTrigger;
+    this.event = event;
   }
 
   @Override
@@ -109,6 +128,10 @@ public class AutoAlign extends Command {
       if(closeEnough  && las.getMeasurement().status == LaserCan.LASERCAN_STATUS_VALID_MEASUREMENT && las.getMeasurement().distance_mm < 100){
         isDone = true;
       } 
+      if(las.getMeasurement().status == LaserCan.LASERCAN_STATUS_VALID_MEASUREMENT &&  las.getMeasurement().distance_mm < distToTrigger)
+      {
+        CommandScheduler.getInstance().schedule(event);
+      }
       drivetrain.getRobotSpeeds().setFeedbackSpeeds(speeds);
     }
   }
@@ -118,6 +141,7 @@ public class AutoAlign extends Command {
   {
     drivetrain.getRobotSpeeds().enableSpeeds(SpeedSource.AUTO, true);
     drivetrain.getRobotSpeeds().stopFeedbackSpeeds();
+    limelight.setPriorityID(-1);
     System.out.println("Done!");
   }
 

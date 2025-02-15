@@ -37,8 +37,8 @@ public interface Constants {
                                                     .setIDs(DrivetrainIDs.SWERVE_CHASSIS_STANDARD)
                                                     .setOffsets(ENCODER_OFFSETS)
                                                     .setCanbus(CANBUS)
-                                                    .setDriftCorrectionPID(new PIDController(1.5, 0, 0))
-                                                    .setDriftActivationSpeed(0.01);
+                                                    .setDriftCorrectionPID(new PIDController(0, 0, 0))
+                                                    .setDriftActivationSpeed(0.0);
 
         RobotLocalizationConfig LOCALIZATION_CONFIG = new RobotLocalizationConfig().setPathPlannerPID(new PIDConstants(5,0,0), new PIDConstants(5,0,0)).setVisionEnabled(false);
 

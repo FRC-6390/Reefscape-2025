@@ -19,6 +19,7 @@ import com.pathplanner.lib.util.FileVersionException;
 import ca.frc6390.athena.commands.AutoCommands;
 import ca.frc6390.athena.controllers.EnhancedXboxController;
 import ca.frc6390.athena.core.RobotBase;
+import ca.frc6390.athena.core.RobotLocalization;
 import ca.frc6390.athena.drivetrains.swerve.SwerveDrivetrain;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
@@ -48,10 +49,10 @@ public class RobotContainer {
                                                               .setLeftInverted(true)
                                                               .setSticksDeadzone(Constants.Controllers.STICK_DEADZONE)
                                                               .setLeftSlewrate(3.5);
-
+  // public RobotLocalization localization = robotBase.getLocalization();
   public RobotContainer() {
     configureBindings();
-
+    driverController.leftY.setInverted(false);
     robotBase.getDrivetrain().setDriveCommand(driverController);
 
     // AutoCommands.registerCommand("ElevatorState.L1", () -> elevator.getStateMachine().setGoalState(Elevator.ElevatorState.L1), elevator);
@@ -92,7 +93,16 @@ public class RobotContainer {
   // ChassisSpeeds.fromFieldRelativeSpeeds(speeds, null);
   }
   public Command getAutonomousCommand() {
-    // return Commands.none();
-    return new PathPlannerAuto("Test");
+    return Commands.none();
+    // return new PathPlannerAuto("New Auto");
+    // PathPlannerPath exampleChoreoTraj = null;
+    // try {
+    //   exampleChoreoTraj = PathPlannerPath.fromChoreoTrajectory("R");
+    //   robotBase.getLocalization().resetFieldPose(exampleChoreoTraj.getStartingHolonomicPose().get());
+    // } catch (FileVersionException | IOException | ParseException e) {
+    //   // TODO Auto-generated catch block
+    //   e.printStackTrace();
+    // }
+    // return AutoBuilder.followPath(exampleChoreoTraj);
   }
 }
