@@ -22,15 +22,15 @@ public class ReefScoringPos {
         K(19, 6),
         L(19, 6);
     
-        private final int apriltagIdRed;
-        private final int apriltagIdBlue;
+        private final long apriltagIdRed;
+        private final long apriltagIdBlue;
     
-        ReefPole(int apriltagIdBlue, int apriltagIdRed) {
+        ReefPole(long apriltagIdBlue, long apriltagIdRed) {
             this.apriltagIdRed = apriltagIdRed;
             this.apriltagIdBlue = apriltagIdBlue;
         }
     
-        public int getApriltagId(Alliance team) {
+        public long getApriltagId(Alliance team) {
             switch (team) {
                 case Red:
                     return apriltagIdRed;
@@ -62,7 +62,7 @@ public class ReefScoringPos {
         return side;
     }
 
-    public int getApriltagId(Alliance team) {
+    public long getApriltagId(Alliance team) {
         return side.getApriltagId(team);
     }
 
