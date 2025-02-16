@@ -76,7 +76,7 @@ public class RobotContainer {
   private void configureBindings() 
   {
 
-    driverController.start.onTrue(new InstantCommand(() -> robotBase.getDrivetrain().getIMU().setYaw(0)));
+    driverController.start.onTrue(new InstantCommand(() -> robotBase.getDrivetrain().getIMU().setYaw(0))).after(3).onTrue(() -> robotBase.getLocalization().resetFieldPose(0, 0, 0));
     driverController.b.whileTrue(new AutoAlign(robotBase.getVision().getCamera("limelight-driver"), robotBase.getDrivetrain(), driverController, frc.robot.commands.AutoAlign.ALIGNMODE.REEF, robotBase.getLocalization(), 19));
     driverController.a.whileTrue(new AutoAlign(robotBase.getVision().getCamera("limelight-driver"), robotBase.getDrivetrain(), driverController, frc.robot.commands.AutoAlign.ALIGNMODE.REEF, robotBase.getLocalization(), 18));
     // driverController.a.whileTrue(() -> effector.setMotors(1)).onFalse(() -> effector.setMotors(0));
@@ -104,7 +104,7 @@ public class RobotContainer {
     // return new PathPlannerAuto("Choreo");
     PathPlannerPath exampleChoreoTraj = null;
     try {
-      exampleChoreoTraj = PathPlannerPath.fromChoreoTrajectory("R");
+      exampleChoreoTraj = PathPlannerPath.fromChoreoTrajectory("TEST");
       robotBase.getLocalization().resetFieldPose(exampleChoreoTraj.getStartingHolonomicPose().get());
     } catch (FileVersionException | IOException | ParseException e) {
       // TODO Auto-generated catch block
