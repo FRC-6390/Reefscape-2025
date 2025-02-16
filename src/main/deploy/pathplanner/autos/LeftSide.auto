@@ -5,22 +5,21 @@
     "data": {
       "commands": [
         {
-          "type": "deadline",
+          "type": "path",
           "data": {
-            "commands": [
-              {
-                "type": "named",
-                "data": {
-                  "name": "AlignSide2"
-                }
-              },
-              {
-                "type": "path",
-                "data": {
-                  "pathName": "Reef2"
-                }
-              }
-            ]
+            "pathName": "Reef2"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "AlignSide2"
+          }
+        },
+        {
+          "type": "wait",
+          "data": {
+            "waitTime": 1.0
           }
         },
         {
@@ -30,53 +29,21 @@
           }
         },
         {
-          "type": "deadline",
-          "data": {
-            "commands": [
-              {
-                "type": "named",
-                "data": {
-                  "name": "AlignSide1"
-                }
-              },
-              {
-                "type": "path",
-                "data": {
-                  "pathName": "FeederToSide1"
-                }
-              }
-            ]
-          }
-        },
-        {
           "type": "path",
           "data": {
-            "pathName": "Side1ToFeeder"
+            "pathName": "FeederToSide1"
           }
         },
         {
-          "type": "deadline",
+          "type": "named",
           "data": {
-            "commands": [
-              {
-                "type": "named",
-                "data": {
-                  "name": "AlignSide1"
-                }
-              },
-              {
-                "type": "path",
-                "data": {
-                  "pathName": "FeederToSide1"
-                }
-              }
-            ]
+            "name": "AlignSide1"
           }
         },
         {
-          "type": "path",
+          "type": "wait",
           "data": {
-            "pathName": "Side1ToFeeder"
+            "waitTime": 1.0
           }
         }
       ]

@@ -25,10 +25,10 @@ public class AutoAlign extends Command {
   public ChassisSpeeds speeds;
   public int runTag;
   public int tagNum = -1;
-
   public boolean hasSet;
   public RobotLocalization localization;
   public ALIGNMODE mode;
+  public static boolean idling = false;
   public AutoAlignHelper helper;
   public Command event;
   private LaserCan las = new LaserCan(59);
@@ -69,17 +69,6 @@ public class AutoAlign extends Command {
     this.tagNum = tagNum;
   }
 
-  // public AutoAlign(LimeLight limeLight, RobotDrivetrain drivetrain, EnhancedXboxController cont, ALIGNMODE mode, RobotLocalization localization, int tagNum, Command event, double distToTrigger) {
-  //   this.drivetrain = drivetrain; 
-  //   this.cont = cont;
-  //   limelight = limeLight;
-  //   this.localization = localization;
-  //   this.tagNum  =tagNum;
-  //   this.mode = mode;
-  //   this.distToTrigger = distToTrigger;
-  //   this.event = event;
-  // }
-
   @Override
   public void initialize() 
   {
@@ -96,7 +85,8 @@ public class AutoAlign extends Command {
   @Override
   public void execute() 
   {
-    SmartDashboard.putNumber("Distance", las.getMeasurement().distance_mm);
+    if(!idling)
+    {
     SmartDashboard.putBoolean("Distance Valid", las.getMeasurement().status == LaserCan.LASERCAN_STATUS_VALID_MEASUREMENT);
     SmartDashboard.putBoolean("Close Enough", closeEnough);
     SmartDashboard.putNumber("Run Tag", runTag);
@@ -119,20 +109,36 @@ public class AutoAlign extends Command {
       if(limelight.getTargetArea() > 10){
         closeEnough = true;
       }
+      if(las.getMeasurement().status == LaserCan.LASERCAN_STATUS_VALID_MEASUREMENT && las.getMeasurement().distance_mm < 500)
+      {
+        helper.setP(0.025);
+      }
       }
       else{
-        drivetrain.getRobotSpeeds().enableSpeeds(SpeedSource.AUTO, true);
+        // drivetrain.getRobotSpeeds().enableSpeeds(SpeedSource.AUTO, true);
         // speeds = helper.calculateSpeeds(mode, false);
+        speeds = new ChassisSpeeds(-mode.get(), 0,0);
       }
     }
     else{
-      drivetrain.getRobotSpeeds().enableSpeeds(SpeedSource.AUTO, true);
+      // drivetrain.getRobotSpeeds().enableSpeeds(SpeedSource.AUTO, true);
       // speeds = helper.calculateSpeeds(mode, false);
+      // speeds = new ChassisSpeeds();
+      speeds = new ChassisSpeeds(-mode.get(), 0,0);
     }
     if(hasSet) {
+      if(las.getMeasurement() != null)
+      {
       if(closeEnough  && las.getMeasurement().status == LaserCan.LASERCAN_STATUS_VALID_MEASUREMENT && las.getMeasurement().distance_mm < 120){
         isDone = true;
       } 
+      }
+      else
+      {
+        if(closeEnough){
+          isDone = true;
+        } 
+      }
 
       if(las.getMeasurement().status == LaserCan.LASERCAN_STATUS_VALID_MEASUREMENT)
       {
@@ -143,7 +149,15 @@ public class AutoAlign extends Command {
       }
       drivetrain.getRobotSpeeds().setFeedbackSpeeds(speeds);
     }
+    else{
+      drivetrain.getRobotSpeeds().setFeedbackSpeeds(new ChassisSpeeds(-mode.get() / 2,0,0));
+    }
   }
+    else
+    {
+      System.out.println("Idling");
+    }
+}
 
   @Override
   public void end(boolean interrupted) 

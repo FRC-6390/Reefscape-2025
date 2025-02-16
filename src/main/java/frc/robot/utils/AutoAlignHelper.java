@@ -62,6 +62,11 @@ public class AutoAlignHelper
     xMeasurement = limeLight.getTargetHorizontalOffset();
     
 }
+
+public void setP(double newP)
+{
+ xController.setP(newP);
+}
 public double getThetatMeasurement()
 {
     return thetaMeasurement;

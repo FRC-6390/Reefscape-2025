@@ -23,7 +23,7 @@ public class Robot extends TimedRobot {
 
   @Override
   public void robotPeriodic() {
-    System.out.println(m_robotContainer.robotBase.getLocalization().getFieldPose());
+    // System.out.println(m_robotContainer.robotBase.getLocalization().getFieldPose());
     CommandScheduler.getInstance().run();
   }
 
