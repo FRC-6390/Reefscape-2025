@@ -86,12 +86,25 @@ public Pose2d getTargetPoseRobotSpace()
 {
     return botpose;
 }
+
+public void reset()
+{
+  thetaMeasurement = 0;
+  xMeasurement = 0;
+  xVelocity= 0;
+  yVelocity = 0;
+  botpose = new Pose2d();
+  lastRobotPose2d = new Pose2d();
+  lastRobotYaw = new Rotation2d();
+  lastYaw = new Rotation2d();
+}
+
 public ChassisSpeeds calculateSpeeds(ALIGNMODE mode, boolean hasCorrectTag)
 {
     if(hasCorrectTag)
     {
       xVelocity = mode.get() * xController.calculate(getXMeasurement(), 0);
-      rotationalVelocity = controller.calculate(getThetatMeasurement(), 0);
+      rotationalVelocity = -controller.calculate(getThetatMeasurement(), 0);
       double error = Math.abs(xError.calculate(xController.getPositionError()));
       double multiplier = 0;
       if(error < 10 && error >= 8)
@@ -106,19 +119,12 @@ public ChassisSpeeds calculateSpeeds(ALIGNMODE mode, boolean hasCorrectTag)
       {
         multiplier = 0.75;
       }
-      else if(error < 4 && error >= 3)
+      else if(error < 4 && error >= 0)
       {
-        multiplier = 1;
+        multiplier = 2;
       }
-      else if(error < 3 && error >= 2)
-      {
-        multiplier = 1.2;
-      }
-      else if(error < 2 && error >= 0)
-      {
-        multiplier = 1.8;
-      }
-      yVelocity = -mode.get() * multiplier;
+     
+      yVelocity = mode.get() * multiplier;
       System.out.println(error);
     }
     else

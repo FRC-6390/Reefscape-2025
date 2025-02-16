@@ -19,10 +19,10 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
 
 public class EndEffector extends SubsystemBase {
-  public TalonFX leftMotor;
-  public TalonFX rightMotor;
+  public TalonFX motor;
+  // public TalonFX rightMotor;
   public CANcoder encoder;
-  public GenericLimitSwitch limitSwitch;
+  // public GenericLimitSwitch limitSwitch;
   public PIDController controller;
 
   public StateMachine<State> stateMachine;
@@ -51,10 +51,10 @@ public class EndEffector extends SubsystemBase {
   /** Creates a new EndEffector. */
   public EndEffector() 
   {
-    leftMotor = new TalonFX(Constants.EndEffector.LEFT_MOTOR, Constants.EndEffector.CANBUS);
-    rightMotor = new TalonFX(Constants.EndEffector.RIGHT_MOTOR, Constants.EndEffector.CANBUS);
+    motor = new TalonFX(Constants.EndEffector.MOTOR, Constants.EndEffector.CANBUS);
+    // rightMotor = new TalonFX(Constants.EndEffector.RIGHT_MOTOR, Constants.EndEffector.CANBUS);
     encoder = new CANcoder(Constants.EndEffector.ENCODER, Constants.EndEffector.CANBUS);
-    limitSwitch = new GenericLimitSwitch(Constants.EndEffector.LIMIT_SWITCH);
+    // limitSwitch = new GenericLimitSwitch(Constants.EndEffector.LIMIT_SWITCH);
 
     getAbsolutePosition = encoder.getAbsolutePosition();
 
@@ -62,11 +62,11 @@ public class EndEffector extends SubsystemBase {
     controller.enableContinuousInput(0, 90);
     controller.setTolerance(1);
 
-    leftMotor.getConfigurator().apply(new TalonFXConfiguration());
-    rightMotor.getConfigurator().apply(new TalonFXConfiguration());
+    motor.getConfigurator().apply(new TalonFXConfiguration());
+    // rightMotor.getConfigurator().apply(new TalonFXConfiguration());
 
-    leftMotor.setNeutralMode(NeutralModeValue.Brake);
-    rightMotor.setNeutralMode(NeutralModeValue.Brake);
+    motor.setNeutralMode(NeutralModeValue.Brake);
+    // rightMotor.setNeutralMode(NeutralModeValue.Brake);
 
     CANcoderConfiguration config = new CANcoderConfiguration();
     config.MagnetSensor.AbsoluteSensorDiscontinuityPoint = 1;
@@ -77,12 +77,12 @@ public class EndEffector extends SubsystemBase {
 
   public void setMotors(double speed)
   {
-    if(limitSwitch.isPressed() && speed > 0)
-    {
-      speed = 0;
-    }
-    leftMotor.set(speed);
-    rightMotor.set(-speed);
+    // if(limitSwitch.isPressed() && speed > 0)
+    // {
+    //   speed = 0;
+    // }
+    motor.set(speed);
+    // rightMotor.set(-speed);
   }
 
   public StateMachine<State> getStateMachine()
@@ -91,8 +91,8 @@ public class EndEffector extends SubsystemBase {
   }
 
   public void stopMotors() {
-    leftMotor.stopMotor();
-    rightMotor.stopMotor();
+    motor.stopMotor();
+    // rightMotor.stopMotor();
   }
 
   public double getPosition() {
@@ -105,11 +105,11 @@ public class EndEffector extends SubsystemBase {
 
   public void update()
   {
-    switch (stateMachine.getGoalState()) {
-      case Left, Right, RightL4, LeftL4, Home, StartConfiguration:
-      double speed = -controller.calculate(getAngle().getDegrees(), stateMachine.getGoalState().getSetpoint());
-      setMotors(speed);
-    }
+    // switch (stateMachine.getGoalState()) {
+    //   case Left, Right, RightL4, LeftL4, Home, StartConfiguration:
+    //   double speed = -controller.calculate(getAngle().getDegrees(), stateMachine.getGoalState().getSetpoint());
+    //   setMotors(speed);
+    // }
   }
 
   public ShuffleboardTab shuffleboard(String tab) {
@@ -117,12 +117,12 @@ public class EndEffector extends SubsystemBase {
   }
 
   public ShuffleboardTab shuffleboard(ShuffleboardTab tab) {
-    tab.addBoolean("Limit Switch", limitSwitch::isPressed).withPosition(1,1);
-    tab.addString("Setpoint", () -> stateMachine.getGoalState().name()).withPosition(2,1);
-    tab.addNumber("PID Output", () -> controller.calculate(getAngle().getDegrees(), stateMachine.getGoalState().getSetpoint())).withPosition(3,1);
-    tab.addNumber("Angle", () -> getAngle().getDegrees()).withPosition(4,1);
+    // tab.addBoolean("Limit Switch", limitSwitch::isPressed).withPosition(1,1);
+    // tab.addString("Setpoint", () -> stateMachine.getGoalState().name()).withPosition(2,1);
+    // tab.addNumber("PID Output", () -> controller.calculate(getAngle().getDegrees(), stateMachine.getGoalState().getSetpoint())).withPosition(3,1);
+    // tab.addNumber("Angle", () -> getAngle().getDegrees()).withPosition(4,1);
     tab.addNumber("Rotations", this::getPosition).withPosition(4,1);
-    tab.addString("Next State", () -> stateMachine.getNextState().name()).withPosition(5, 1);
+    // tab.addString("Next State", () -> stateMachine.getNextState().name()).withPosition(5, 1);
 
     return tab;
   }
@@ -135,6 +135,7 @@ public class EndEffector extends SubsystemBase {
   @Override
   public void periodic() {
       refresh();
+      
       update();
   }
 }

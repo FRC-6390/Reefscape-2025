@@ -40,17 +40,20 @@ public interface Constants {
         //REQUIRES INVERSION OF TWO MOTORS
         // double[] ENCODER_OFFSETS = {-0.366943359375, -0.19970703125,-0.176513671875,-0.880126953125};
         
-        SwerveDrivetrainConfig DRIVETRAIN_CONFIG = new SwerveDrivetrainConfig(IMUType.CTREPigeon2, true)
+        SwerveDrivetrainConfig DRIVETRAIN_CONFIG = new SwerveDrivetrainConfig(IMUType.CTREPigeon2, false)
                                                     .sameModule(SwerveVendorSDS.MK4i.L3.config(Motor.KRAKEN_X60,EncoderType.CTRECANcoder))
                                                     .setModuleLocations(TRACKWIDTH_METERS)
                                                     .setRotationPID(new PIDController(0.5 , 0,0))
                                                     .setIDs(DrivetrainIDs.SWERVE_CHASSIS_STANDARD)
                                                     .setOffsets(ENCODER_OFFSETS)
                                                     .setCanbus(CANBUS)
+                                                    .setDriveInverted(false)
+                                                    .setFieldRelative(false)
                                                     .setDriftCorrectionPID(new PIDController(0, 0, 0))
+                                                    
                                                     .setDriftActivationSpeed(0.0);
 
-        RobotLocalizationConfig LOCALIZATION_CONFIG = new RobotLocalizationConfig().setPathPlannerPID(new PIDConstants(5,0,0), new PIDConstants(5,0,0)).setVisionEnabled(false);
+        RobotLocalizationConfig LOCALIZATION_CONFIG = new RobotLocalizationConfig().setAutoPlannerPID(new PIDConstants(5,0,0), new PIDConstants(2,0,0)).setVisionEnabled(false);
 
         RobotBaseConfig<SwerveDrivetrain> ROBOT_BASE = RobotBaseConfig.swerve(DRIVETRAIN_CONFIG)
                                                                       .setLocalization(LOCALIZATION_CONFIG)
@@ -63,7 +66,7 @@ public interface Constants {
     public interface Climber {
         int LIMIT_SWITCH = 1;
         int ENCODER = 40;
-        int LEFT_MOTOR = 21;
+        int LEFT_MOTOR = 31;
         int RIGHT_MOTOR = 30;
         double ENCODER_OFFSET = 0;
         double ENCODER_GEAR_RATIO = 4d/1d;
@@ -97,11 +100,11 @@ public interface Constants {
     public interface EndEffector {
         int LIMIT_SWITCH = 1;
         int ENCODER = 40;
-        int LEFT_MOTOR = 21;
-        int RIGHT_MOTOR = 30;
+        int MOTOR = 31;
+        // int RIGHT_MOTOR = 30;
         double ENCODER_OFFSET = 0;
         double ENCODER_GEAR_RATIO = 1d/1d; //from motors 125d/1d;
-        String CANBUS = "can";
+        String CANBUS = "rio";
         PIDController CONTORLLER = new PIDController(0.015, 0, 0);
 
     }

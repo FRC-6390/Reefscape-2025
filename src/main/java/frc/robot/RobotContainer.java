@@ -37,22 +37,24 @@ import frc.robot.commands.Climb;
 import frc.robot.subsystems.Superstructure;
 import frc.robot.subsystems.superstructure.Climber;
 import frc.robot.subsystems.superstructure.Elevator;
+import frc.robot.subsystems.superstructure.EndEffector;
 
 public class RobotContainer {
 
   public final RobotBase<SwerveDrivetrain> robotBase = Constants.DriveTrain.ROBOT_BASE.create().shuffleboard();
   // public final Climber climber = new Climber();
+  // public final EndEffector effector = new EndEffector();
   // public final Elevator elevator = new Elevator();
   // public final Elevator elevator = new Elevator();
   // public final Superstructure superstructure = new Superstructure(climber);
   private final EnhancedXboxController driverController = new EnhancedXboxController(0)
-                                                              .setLeftInverted(true)
+                                                              .setLeftInverted(false)
                                                               .setSticksDeadzone(Constants.Controllers.STICK_DEADZONE)
                                                               .setLeftSlewrate(3.5);
   // public RobotLocalization localization = robotBase.getLocalization();
   public RobotContainer() {
+    // effector.shuffleboard("ENd Eggects");
     configureBindings();
-    driverController.leftY.setInverted(false);
     robotBase.getDrivetrain().setDriveCommand(driverController);
 
     // AutoCommands.registerCommand("ElevatorState.L1", () -> elevator.getStateMachine().setGoalState(Elevator.ElevatorState.L1), elevator);
@@ -63,7 +65,10 @@ public class RobotContainer {
     // AutoCommands.registerCommand("ElevatorState.Feeder", () -> elevator.getStateMachine().setGoalState(Elevator.ElevatorState.Feeder), elevator);
 
     // elevator.shuffleboard("Elevator");
-    NamedCommands.registerCommand("Align", new AutoAlign(robotBase.getVision().getCamera("limelight-driver"), robotBase.getDrivetrain(), driverController,ALIGNMODE.REEF, robotBase.getLocalization()));
+    // NamedCommands.registerCommand("AlignSide2", new AutoAlign(robotBase.getVision().getCamera("limelight-driver"), robotBase.getDrivetrain(), driverController,ALIGNMODE.REEF, robotBase.getLocalization(), 20));
+    // NamedCommands.registerCommand("AlignSide1", new AutoAlign(robotBase.getVision().getCamera("limelight-driver"), robotBase.getDrivetrain(), driverController,ALIGNMODE.REEF, robotBase.getLocalization(), 19));
+    
+    
     // NamedCommands.registerCommand("AlignFeeder", new AprilTagAlign(robotBase.getVision().getCamera("limelight-tag"), robotBase.getDrivetrain(), driverController, ALIGNMODE.FEEDER));
    
   }
@@ -72,8 +77,10 @@ public class RobotContainer {
   {
 
     driverController.start.onTrue(new InstantCommand(() -> robotBase.getDrivetrain().getIMU().setYaw(0)));
-    driverController.b.whileTrue(new AutoAlign(robotBase.getVision().getCamera("limelight-driver"), robotBase.getDrivetrain(), driverController, frc.robot.commands.AutoAlign.ALIGNMODE.REEF, robotBase.getLocalization()));
-
+    driverController.b.whileTrue(new AutoAlign(robotBase.getVision().getCamera("limelight-driver"), robotBase.getDrivetrain(), driverController, frc.robot.commands.AutoAlign.ALIGNMODE.REEF, robotBase.getLocalization(), 19));
+    driverController.a.whileTrue(new AutoAlign(robotBase.getVision().getCamera("limelight-driver"), robotBase.getDrivetrain(), driverController, frc.robot.commands.AutoAlign.ALIGNMODE.REEF, robotBase.getLocalization(), 18));
+    // driverController.a.whileTrue(() -> effector.setMotors(1)).onFalse(() -> effector.setMotors(0));
+    // driverController.b.whileTrue(() -> effector.setMotors(-1)).onFalse(() -> effector.setMotors(0));
     // driverController.rightBumper.whileTrue(() -> elevator.setMotors(-0.05)).onFalse(elevator::stop);
     // driverController.leftBumper.whileTrue(() -> elevator.setMotors(0.1)).onFalse(elevator::stop);
 

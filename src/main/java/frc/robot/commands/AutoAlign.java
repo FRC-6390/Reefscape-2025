@@ -24,6 +24,7 @@ public class AutoAlign extends Command {
   public boolean isDone;
   public ChassisSpeeds speeds;
   public int runTag;
+  public int tagNum = -1;
   public boolean hasSet;
   public RobotLocalization localization;
   public ALIGNMODE mode;
@@ -34,8 +35,8 @@ public class AutoAlign extends Command {
 
   public enum ALIGNMODE
   {
-    FEEDER(-1),
-    REEF(1);
+    FEEDER(1),
+    REEF(-1);
 
     double num;
     private ALIGNMODE(double num)
@@ -55,35 +56,28 @@ public class AutoAlign extends Command {
     this.localization = localization;
     limelight = limeLight;
     this.mode = mode;
-  }
+    this.tagNum = -1;
+    }
 
   public AutoAlign(LimeLight limeLight, RobotDrivetrain drivetrain, EnhancedXboxController cont, ALIGNMODE mode, RobotLocalization localization, int tagNum) {
     this.drivetrain = drivetrain; 
     this.cont = cont;
     limelight = limeLight;
+    this.localization = localization;
     this.mode = mode;
-    limelight.setPriorityID(tagNum);
+    this.tagNum = tagNum;
   }
 
-  public AutoAlign(LimeLight limeLight, RobotDrivetrain drivetrain, EnhancedXboxController cont, ALIGNMODE mode, RobotLocalization localization, int tagNum, Command event, double distToTrigger) {
-    this.drivetrain = drivetrain; 
-    this.cont = cont;
-    limelight = limeLight;
-    this.mode = mode;
-    limelight.setPriorityID(tagNum);
-    this.distToTrigger = distToTrigger;
-    this.event = event;
-  }
-
-  
-  public AutoAlign(LimeLight limeLight, RobotDrivetrain drivetrain, EnhancedXboxController cont, ALIGNMODE mode, RobotLocalization localization, Command event, double distToTrigger) {
-    this.drivetrain = drivetrain; 
-    this.cont = cont;
-    limelight = limeLight;
-    this.mode = mode;
-    this.distToTrigger = distToTrigger;
-    this.event = event;
-  }
+  // public AutoAlign(LimeLight limeLight, RobotDrivetrain drivetrain, EnhancedXboxController cont, ALIGNMODE mode, RobotLocalization localization, int tagNum, Command event, double distToTrigger) {
+  //   this.drivetrain = drivetrain; 
+  //   this.cont = cont;
+  //   limelight = limeLight;
+  //   this.localization = localization;
+  //   this.tagNum  =tagNum;
+  //   this.mode = mode;
+  //   this.distToTrigger = distToTrigger;
+  //   this.event = event;
+  // }
 
   @Override
   public void initialize() 
@@ -92,21 +86,29 @@ public class AutoAlign extends Command {
     hasSet = false;
     isDone =false;
     speeds = new ChassisSpeeds();
-    runTag = -1;
+    runTag = tagNum;
     helper = new AutoAlignHelper(limelight, localization, drivetrain);
+    helper.reset();
   }
 
 
   @Override
   public void execute() 
   {
-    System.out.println("Executing");
+    SmartDashboard.putNumber("Distance", las.getMeasurement().distance_mm);
+    SmartDashboard.putBoolean("Distance Valid", las.getMeasurement().status == LaserCan.LASERCAN_STATUS_VALID_MEASUREMENT);
+    SmartDashboard.putBoolean("Close Enough", closeEnough);
+    SmartDashboard.putNumber("Run Tag", runTag);
+    SmartDashboard.putBoolean("Has Set", hasSet);
     if(limelight.hasValidTarget()){
       
       if(!hasSet){
         drivetrain.getRobotSpeeds().enableSpeeds(SpeedSource.AUTO, false);
         hasSet = true;
+        if(runTag == -1)
+        {
         runTag = ((int)limelight.getAprilTagID());
+        }
         drivetrain.getRobotSpeeds().enableSpeeds(SpeedSource.AUTO, false);
       }
       if(((int)limelight.getAprilTagID()) == runTag) {
@@ -125,7 +127,7 @@ public class AutoAlign extends Command {
       speeds = helper.calculateSpeeds(mode, false);
     }
     if(hasSet) {
-      if(closeEnough  && las.getMeasurement().status == LaserCan.LASERCAN_STATUS_VALID_MEASUREMENT && las.getMeasurement().distance_mm < 100){
+      if(closeEnough  && las.getMeasurement().status == LaserCan.LASERCAN_STATUS_VALID_MEASUREMENT && las.getMeasurement().distance_mm < 120){
         isDone = true;
       } 
       if(las.getMeasurement().status == LaserCan.LASERCAN_STATUS_VALID_MEASUREMENT &&  las.getMeasurement().distance_mm < distToTrigger)
@@ -141,7 +143,6 @@ public class AutoAlign extends Command {
   {
     drivetrain.getRobotSpeeds().enableSpeeds(SpeedSource.AUTO, true);
     drivetrain.getRobotSpeeds().stopFeedbackSpeeds();
-    limelight.setPriorityID(-1);
     System.out.println("Done!");
   }
 

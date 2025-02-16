@@ -5,9 +5,22 @@
     "data": {
       "commands": [
         {
-          "type": "path",
+          "type": "deadline",
           "data": {
-            "pathName": "Reef2"
+            "commands": [
+              {
+                "type": "named",
+                "data": {
+                  "name": "AlignSide2"
+                }
+              },
+              {
+                "type": "path",
+                "data": {
+                  "pathName": "Reef2"
+                }
+              }
+            ]
           }
         },
         {
@@ -17,9 +30,28 @@
           }
         },
         {
+          "type": "deadline",
+          "data": {
+            "commands": [
+              {
+                "type": "named",
+                "data": {
+                  "name": "AlignSide1"
+                }
+              },
+              {
+                "type": "path",
+                "data": {
+                  "pathName": "FeederToSide1"
+                }
+              }
+            ]
+          }
+        },
+        {
           "type": "path",
           "data": {
-            "pathName": "FeederToSide1"
+            "pathName": "Side1ToFeeder"
           }
         }
       ]
