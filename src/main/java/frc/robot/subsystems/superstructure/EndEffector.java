@@ -25,10 +25,10 @@ public class EndEffector extends SubsystemBase {
   // public GenericLimitSwitch limitSwitch;
   public PIDController controller;
 
-  public StateMachine<State> stateMachine;
+  public StateMachine<EndEffectorState> stateMachine;
   public StatusSignal<Angle> getAbsolutePosition;
 
-  public enum State implements SetpointProvider
+  public enum EndEffectorState implements SetpointProvider
   {
       StartConfiguration(35),
       Home(0),
@@ -38,7 +38,7 @@ public class EndEffector extends SubsystemBase {
       RightL4(-35);
 
       private double angle;
-      private State(double angle)
+      private EndEffectorState(double angle)
       {
         this.angle = angle;
       }
@@ -72,7 +72,7 @@ public class EndEffector extends SubsystemBase {
     config.MagnetSensor.AbsoluteSensorDiscontinuityPoint = 1;
     encoder.getConfigurator().apply(config);
 
-    stateMachine = new StateMachine<State>(State.Home, controller::atSetpoint);
+    stateMachine = new StateMachine<EndEffectorState>(EndEffectorState.Home, controller::atSetpoint);
   }
 
   public void setMotors(double speed)
@@ -85,7 +85,7 @@ public class EndEffector extends SubsystemBase {
     // rightMotor.set(-speed);
   }
 
-  public StateMachine<State> getStateMachine()
+  public StateMachine<EndEffectorState> getStateMachine()
   {
     return stateMachine;
   }

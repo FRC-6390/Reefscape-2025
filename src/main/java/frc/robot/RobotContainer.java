@@ -68,7 +68,6 @@ public class RobotContainer {
     NamedCommands.registerCommand("AlignSide2", new AutoAlign(robotBase.getVision().getCamera("limelight-driver"), robotBase.getDrivetrain(), driverController,ALIGNMODE.REEF, robotBase.getLocalization(), 20));
     NamedCommands.registerCommand("AlignSide1", new AutoAlign(robotBase.getVision().getCamera("limelight-driver"), robotBase.getDrivetrain(), driverController,ALIGNMODE.REEF, robotBase.getLocalization(), 19));
     
-    
     // NamedCommands.registerCommand("AlignFeeder", new AprilTagAlign(robotBase.getVision().getCamera("limelight-tag"), robotBase.getDrivetrain(), driverController, ALIGNMODE.FEEDER));
    
   }

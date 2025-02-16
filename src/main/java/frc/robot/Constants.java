@@ -12,11 +12,20 @@ import ca.frc6390.athena.devices.MotorController.Motor;
 import ca.frc6390.athena.drivetrains.swerve.SwerveDrivetrain;
 import ca.frc6390.athena.drivetrains.swerve.SwerveDrivetrain.SwerveDrivetrainConfig;
 import ca.frc6390.athena.drivetrains.swerve.modules.SwerveVendorSDS;
+import ca.frc6390.athena.mechanisms.ElevatorMechanism.StatefulElevatorMechanism;
+import ca.frc6390.athena.mechanisms.Mechanism;
+import ca.frc6390.athena.mechanisms.Mechanism.MechanismConfig;
+import ca.frc6390.athena.mechanisms.Mechanism.StatefulMechanism;
+import ca.frc6390.athena.mechanisms.TurretMechanism.StatefulTurretMechanism;
 import edu.wpi.first.math.controller.ElevatorFeedforward;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.controller.ProfiledPIDController;
+import edu.wpi.first.math.controller.SimpleMotorFeedforward;
 import edu.wpi.first.math.trajectory.TrapezoidProfile.Constraints;
 import edu.wpi.first.math.util.Units;
+import frc.robot.subsystems.superstructure.Climber.ClimberState;
+import frc.robot.subsystems.superstructure.Elevator.ElevatorState;
+import frc.robot.subsystems.superstructure.EndEffector.EndEffectorState;
 
 public interface Constants {
     
@@ -72,6 +81,18 @@ public interface Constants {
         double ENCODER_GEAR_RATIO = 4d/1d;
         String CANBUS = "can";
         PIDController CONTORLLER = new PIDController(0.015, 0, 0);
+
+
+        MechanismConfig<StatefulMechanism<ClimberState>> CLIMBER_CONFIG = MechanismConfig.statefulGeneric(ClimberState.Home)
+                                                                                        .addMotors(Motor.KRAKEN_X60, 30,-31)
+                                                                                        .setEncoder(EncoderType.CTRECANcoder, 40)
+                                                                                        .setEncoderGearRatio(4d/1d)
+                                                                                        .setEncoderConversion(360)
+                                                                                        .setEncoderOffset(0)
+                                                                                        .setCanbus(CANBUS)
+                                                                                        .setPID(0.015, 0, 0)
+                                                                                        .addLowerLimitSwitch(0, 0, true);
+
     }
 
     public interface Elevator {
@@ -95,6 +116,15 @@ public interface Constants {
 
         // ProfiledPIDController CONTORLLER = new ProfiledPIDController(0.11, 0.0095, 0, new Constraints(0.5, 0), 5);
         // ElevatorFeedforward FEEDFORWARD = new ElevatorFeedforward(0, 0.04, 2.67,0.006666667);
+
+        MechanismConfig<StatefulElevatorMechanism<ElevatorState>> ELEVATOR_CONFIG = MechanismConfig.statefulElevator(new ElevatorFeedforward(0, 0.17, 0.377,0.78), ElevatorState.StartConfiguration)
+                                                                                    .addMotors(Motor.KRAKEN_X60, 20,21)
+                                                                                    .setEncoder(EncoderType.CTRECANcoder, 23)
+                                                                                    .setCanbus(CANBUS)
+                                                                                    .setEncoderGearRatio(1d/1d)
+                                                                                    .setEncoderConversion(2d)
+                                                                                    .setProfiledPID(0.11, 0.01, 0, new Constraints(60, 18))
+                                                                                    .addLowerLimitSwitch(0, 0, true);
     }
 
     public interface EndEffector {
@@ -107,6 +137,27 @@ public interface Constants {
         String CANBUS = "rio";
         PIDController CONTORLLER = new PIDController(0.015, 0, 0);
 
+        MechanismConfig<StatefulTurretMechanism<EndEffectorState>> ENDEFFECTOR_CONFIG = MechanismConfig.statefulTurret(new SimpleMotorFeedforward(0, 0,0,0), EndEffectorState.StartConfiguration)
+                                                                                    .addMotor(Motor.KRAKEN_X60, 31)
+                                                                                    .setEncoder(EncoderType.CTRECANcoder, 40)
+                                                                                    .setCanbus(CANBUS)
+                                                                                    .setEncoderGearRatio(1d/1d)
+                                                                                    .setEncoderConversion(360d)
+                                                                                    .setEncoderOffset(0)
+                                                                                    .setUseEncoderAbsolute(true)
+                                                                                    .setProfiledPID(0,0,0, new Constraints(0, 0));
+
+        MechanismConfig<Mechanism> SCORER_CONFIG = MechanismConfig.generic()
+                                                                    .addMotor(Motor.KRAKEN_X60, 32)
+                                                                    .setCanbus(CANBUS);
+
+
+        MechanismConfig<Mechanism> ALGEA_CONFIG = MechanismConfig.generic()
+                                                                    .addMotor(Motor.KRAKEN_X60, 33)
+                                                                    .setCanbus(CANBUS)
+                                                                    .setEncoderFromMotor(32)
+                                                                    .addUpperLimitSwitch(2, 0, true);      
+                                                                                                                                          
     }
 
    

@@ -14,15 +14,15 @@ public class Superstructure {
   
   /** Creates a new Superstructure. */
   StateMachine<Elevator.ElevatorState> elevator;
-  StateMachine<Climber.State> climber;
-  StateMachine<EndEffector.State> endEffector;
+  StateMachine<Climber.ClimberState> climber;
+  StateMachine<EndEffector.EndEffectorState> endEffector;
 
   public Superstructure(Climber climber) 
   {
     this.climber = climber.getStateMachine();
   }
 
-  public InstantCommand setClimber(Climber.State state){
+  public InstantCommand setClimber(Climber.ClimberState state){
     return new InstantCommand(() -> climberStateManager(state));
   }
 
@@ -30,16 +30,16 @@ public class Superstructure {
     return new InstantCommand(() -> elevatorStateManager(state));
   }
 
-  public InstantCommand setEndEffectir(EndEffector.State state){
+  public InstantCommand setEndEffectir(EndEffector.EndEffectorState state){
     return new InstantCommand(() -> endEffectorStateManager(state));
   }
 
-  public void climberStateManager(Climber.State state){
+  public void climberStateManager(Climber.ClimberState state){
     switch (state) {
       case Climb:
         elevatorStateManager(Elevator.ElevatorState.L2);
-        endEffectorStateManager(EndEffector.State.Home);
-        climber.setGoalState(state, () -> elevator.atState(Elevator.ElevatorState.L2) && endEffector.atState(EndEffector.State.Home));
+        endEffectorStateManager(EndEffector.EndEffectorState.Home);
+        climber.setGoalState(state, () -> elevator.atState(Elevator.ElevatorState.L2) && endEffector.atState(EndEffector.EndEffectorState.Home));
         break;
       case Home:
         climber.setGoalState(state);
@@ -50,20 +50,20 @@ public class Superstructure {
   public void elevatorStateManager(Elevator.ElevatorState state){
     switch (state) {
       case Home, Feeder, StartConfiguration:
-        climberStateManager(Climber.State.Home);
-        endEffectorStateManager(EndEffector.State.Home);
-        elevator.setGoalState(state, () -> !climber.atState(Climber.State.Climb) && endEffector.atState(EndEffector.State.Home));
+        climberStateManager(Climber.ClimberState.Home);
+        endEffectorStateManager(EndEffector.EndEffectorState.Home);
+        elevator.setGoalState(state, () -> !climber.atState(Climber.ClimberState.Climb) && endEffector.atState(EndEffector.EndEffectorState.Home));
         break;
       case L1:
-        climberStateManager(Climber.State.Home);
-        elevator.setGoalState(state, () -> !climber.atState(Climber.State.Climb));
+        climberStateManager(Climber.ClimberState.Home);
+        elevator.setGoalState(state, () -> !climber.atState(Climber.ClimberState.Climb));
         break;
       case L2, L3, L4:
         elevator.setGoalState(state);
     }
   }
 
-  public void endEffectorStateManager(EndEffector.State state){
+  public void endEffectorStateManager(EndEffector.EndEffectorState state){
     switch (state) {
       case StartConfiguration:
         elevatorStateManager(Elevator.ElevatorState.L1);
