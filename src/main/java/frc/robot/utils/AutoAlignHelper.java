@@ -38,7 +38,7 @@ public class AutoAlignHelper
  public double yVelocity;
  public double rotationalVelocity;
  public PIDController controller = new PIDController(0.025, 0, 0);
- public ProfiledPIDController xController = new ProfiledPIDController(0.075, 0, 0.0001, new Constraints(4, 2));
+ public ProfiledPIDController xController = new ProfiledPIDController(0.05, 0, 0.0001, new Constraints(4, 2));
  public PIDController xController2 = new PIDController(1.2, 0,0);
  public FilterList xError = new FilterList().addMedianFilter(30);
 
@@ -129,10 +129,12 @@ public ChassisSpeeds calculateSpeeds(ALIGNMODE mode, boolean hasCorrectTag)
     }
     else
     {
+
         yVelocity = xController2.calculate(localization.getRelativePose().getX(),getTargetPoseRobotSpace().getX());
         xVelocity = xController2.calculate(localization.getRelativePose().getY(),getTargetPoseRobotSpace().getY());
         double rot = getLastRobotYaw().getDegrees() + getLastYaw().getDegrees();
         rotationalVelocity = controller.calculate(MathUtil.angleModulus(drivetrain.getIMU().getYaw().getRadians()) * 180/Math.PI, rot);
+      
     }
     speeds = new ChassisSpeeds(yVelocity, xVelocity, rotationalVelocity * 0.5);
     SmartDashboard.putNumberArray("Speeds",new Double[]{yVelocity, xVelocity, rotationalVelocity});

@@ -53,6 +53,31 @@
           "data": {
             "pathName": "Side1ToFeeder"
           }
+        },
+        {
+          "type": "deadline",
+          "data": {
+            "commands": [
+              {
+                "type": "named",
+                "data": {
+                  "name": "AlignSide1"
+                }
+              },
+              {
+                "type": "path",
+                "data": {
+                  "pathName": "FeederToSide1"
+                }
+              }
+            ]
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "Side1ToFeeder"
+          }
         }
       ]
     }

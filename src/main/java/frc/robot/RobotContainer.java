@@ -65,8 +65,8 @@ public class RobotContainer {
     // AutoCommands.registerCommand("ElevatorState.Feeder", () -> elevator.getStateMachine().setGoalState(Elevator.ElevatorState.Feeder), elevator);
 
     // elevator.shuffleboard("Elevator");
-    // NamedCommands.registerCommand("AlignSide2", new AutoAlign(robotBase.getVision().getCamera("limelight-driver"), robotBase.getDrivetrain(), driverController,ALIGNMODE.REEF, robotBase.getLocalization(), 20));
-    // NamedCommands.registerCommand("AlignSide1", new AutoAlign(robotBase.getVision().getCamera("limelight-driver"), robotBase.getDrivetrain(), driverController,ALIGNMODE.REEF, robotBase.getLocalization(), 19));
+    NamedCommands.registerCommand("AlignSide2", new AutoAlign(robotBase.getVision().getCamera("limelight-driver"), robotBase.getDrivetrain(), driverController,ALIGNMODE.REEF, robotBase.getLocalization(), 20));
+    NamedCommands.registerCommand("AlignSide1", new AutoAlign(robotBase.getVision().getCamera("limelight-driver"), robotBase.getDrivetrain(), driverController,ALIGNMODE.REEF, robotBase.getLocalization(), 19));
     
     
     // NamedCommands.registerCommand("AlignFeeder", new AprilTagAlign(robotBase.getVision().getCamera("limelight-tag"), robotBase.getDrivetrain(), driverController, ALIGNMODE.FEEDER));
@@ -101,15 +101,15 @@ public class RobotContainer {
   }
   public Command getAutonomousCommand() {
     // return Commands.none();
-    return new PathPlannerAuto("LeftSide");
-    // PathPlannerPath exampleChoreoTraj = null;
-    // try {
-    //   exampleChoreoTraj = PathPlannerPath.fromChoreoTrajectory("R");
-    //   robotBase.getLocalization().resetFieldPose(exampleChoreoTraj.getStartingHolonomicPose().get());
-    // } catch (FileVersionException | IOException | ParseException e) {
-    //   // TODO Auto-generated catch block
-    //   e.printStackTrace();
-    // }
-    // return AutoBuilder.followPath(exampleChoreoTraj);
+    // return new PathPlannerAuto("Choreo");
+    PathPlannerPath exampleChoreoTraj = null;
+    try {
+      exampleChoreoTraj = PathPlannerPath.fromChoreoTrajectory("R");
+      robotBase.getLocalization().resetFieldPose(exampleChoreoTraj.getStartingHolonomicPose().get());
+    } catch (FileVersionException | IOException | ParseException e) {
+      // TODO Auto-generated catch block
+      e.printStackTrace();
+    }
+    return AutoBuilder.followPath(exampleChoreoTraj);
   }
 }
