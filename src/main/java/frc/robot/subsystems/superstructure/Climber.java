@@ -72,7 +72,7 @@ public class Climber extends SubsystemBase{
 
   public void setMotors(double speed)
   {
-    if(limitSwitch.getAsBoolean() && speed > 0)
+    if(limitSwitch.isPressed() && speed > 0)
     {
       speed = 0;
     }
@@ -104,7 +104,7 @@ public class Climber extends SubsystemBase{
   }
 
   public ShuffleboardTab shuffleboard(ShuffleboardTab tab) {
-    tab.addBoolean("Limit Switch", limitSwitch::getAsBoolean).withPosition(1,1);
+    tab.addBoolean("Limit Switch", limitSwitch::isPressed).withPosition(1,1);
     tab.addString("Setpoint", () -> stateMachine.getGoalState().name()).withPosition(2,1);
     tab.addNumber("PID Output", () -> controller.calculate(getAngle().getDegrees(), stateMachine.getGoalState().getSetpoint())).withPosition(3,1);
     tab.addNumber("Angle", () -> getAngle().getDegrees()).withPosition(4,1);

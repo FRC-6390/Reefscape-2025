@@ -84,15 +84,15 @@ public interface Constants {
         PIDController CONTORLLER = new PIDController(0.015, 0, 0);
 
 
-        MechanismConfig<StatefulMechanism<ClimberState>> CLIMBER_CONFIG = MechanismConfig.statefulGeneric(ClimberState.Home)
-                                                                                        .addMotors(Motor.KRAKEN_X60, 30,-31)
-                                                                                        .setEncoder(EncoderType.CTRECANcoder, 40)
-                                                                                        .setEncoderGearRatio(4d/1d)
-                                                                                        .setEncoderConversion(360)
-                                                                                        .setEncoderOffset(0)
-                                                                                        .setCanbus(CANBUS)
-                                                                                        .setPID(0.015, 0, 0)
-                                                                                        .addLowerLimitSwitch(0, 0, true);
+        // MechanismConfig<StatefulMechanism<ClimberState>> CLIMBER_CONFIG = MechanismConfig.statefulGeneric(ClimberState.Home)
+        //                                                                                 .addMotors(Motor.KRAKEN_X60, 30,-31)
+        //                                                                                 .setEncoder(EncoderType.CTRECANcoder, 40)
+        //                                                                                 .setEncoderGearRatio(4d/1d)
+        //                                                                                 .setEncoderConversion(360)
+        //                                                                                 .setEncoderOffset(0)
+        //                                                                                 .setCanbus(CANBUS)
+        //                                                                                 .setPID(0.015, 0, 0)
+        //                                                                                 .addLowerLimitSwitch(0, 0, true);
 
     }
 
@@ -118,14 +118,14 @@ public interface Constants {
         // ProfiledPIDController CONTORLLER = new ProfiledPIDController(0.11, 0.0095, 0, new Constraints(0.5, 0), 5);
         // ElevatorFeedforward FEEDFORWARD = new ElevatorFeedforward(0, 0.04, 2.67,0.006666667);
 
-        MechanismConfig<StatefulElevatorMechanism<ElevatorState>> ELEVATOR_CONFIG = MechanismConfig.statefulElevator(new ElevatorFeedforward(0, 0.17, 0.377,0.78), ElevatorState.StartConfiguration)
-                                                                                    .addMotors(Motor.KRAKEN_X60, 20,21)
-                                                                                    .setEncoder(EncoderType.CTRECANcoder, 23)
-                                                                                    .setCanbus(CANBUS)
-                                                                                    .setEncoderGearRatio(1d/1d)
-                                                                                    .setEncoderConversion(2d)
-                                                                                    .setProfiledPID(0.11, 0.01, 0, new Constraints(60, 18))
-                                                                                    .addLowerLimitSwitch(0, 0, true);
+        // MechanismConfig<StatefulElevatorMechanism<ElevatorState>> ELEVATOR_CONFIG = MechanismConfig.statefulElevator(new ElevatorFeedforward(0, 0.17, 0.377,0.78), ElevatorState.StartConfiguration)
+        //                                                                             .addMotors(Motor.KRAKEN_X60, 20,21)
+        //                                                                             .setEncoder(EncoderType.CTRECANcoder, 23)
+        //                                                                             .setCanbus(CANBUS)
+        //                                                                             .setEncoderGearRatio(1d/1d)
+        //                                                                             .setEncoderConversion(2d)
+        //                                                                             .setProfiledPID(0.11, 0.01, 0, new Constraints(60, 18))
+        //                                                                             .addLowerLimitSwitch(0, 0, true);
     }
 
     public interface EndEffector {
@@ -153,11 +153,11 @@ public interface Constants {
                                                                     .setCanbus(CANBUS);
 
 
-        MechanismConfig<Mechanism> ALGEA_CONFIG = MechanismConfig.generic()
-                                                                    .addMotor(Motor.KRAKEN_X60, 33)
-                                                                    .setCanbus(CANBUS)
-                                                                    .setEncoderFromMotor(32)
-                                                                    .addUpperLimitSwitch(2, 0, true);      
+        // MechanismConfig<Mechanism> ALGEA_CONFIG = MechanismConfig.generic()
+        //                                                             .addMotor(Motor.KRAKEN_X60, 33)
+        //                                                             .setCanbus(CANBUS)
+        //                                                             .setEncoderFromMotor(32)
+        //                                                             .addUpperLimitSwitch(2, 0, true);      
                                                                                                                                           
     }
 

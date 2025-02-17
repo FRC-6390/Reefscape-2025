@@ -85,7 +85,7 @@ public class Elevator extends SubsystemBase{
     }
 
     lowerlimitSwitch = new GenericLimitSwitch(Constants.Elevator.LIMIT_SWITCH);
-    lowerlimitSwitch.whileTrue(new InstantCommand(() -> {encoder.setPosition(0); stop();}));
+    lowerlimitSwitch.getTrigger().onTrue(new InstantCommand(() -> {encoder.setPosition(0); stop();}));
     
     leftMotor.setNeutralMode(NeutralModeValue.Brake);
     rightMotor.setNeutralMode(NeutralModeValue.Brake);
@@ -132,7 +132,7 @@ public class Elevator extends SubsystemBase{
   public void setMotors(double speed)
   {
     
-    if (lowerlimitSwitch.getAsBoolean() && speed < 0){
+    if (lowerlimitSwitch.isPressed() && speed < 0){
       speed = 0;
     }
     //negative is up, this makes negative down
@@ -150,7 +150,7 @@ public class Elevator extends SubsystemBase{
   }
 
   public ShuffleboardTab shuffleboard(ShuffleboardTab tab) {
-      tab.addBoolean("Lower Limit", () -> lowerlimitSwitch.getAsBoolean());
+      tab.addBoolean("Lower Limit", () -> lowerlimitSwitch.isPressed());
       tab.addDouble("Elevator Height", this::getHeight).withPosition(1, 1);
       tab.addDouble("Elevator Height From Floor Inches", this::getHeightFromFloor).withPosition(2, 1);
       tab.addString("Setpoint", () -> stateMachine.getGoalState().name()).withPosition(3, 1);
