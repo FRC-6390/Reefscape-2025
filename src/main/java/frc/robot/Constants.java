@@ -15,6 +15,7 @@ import ca.frc6390.athena.drivetrains.swerve.modules.SwerveVendorSDS;
 import ca.frc6390.athena.mechanisms.Mechanism;
 import ca.frc6390.athena.mechanisms.Mechanism.MechanismConfig;
 import ca.frc6390.athena.mechanisms.TurretMechanism.StatefulTurretMechanism;
+import ca.frc6390.athena.sensors.camera.limelight.LimeLight.PoseEstimateWithLatencyType;
 import edu.wpi.first.math.controller.ElevatorFeedforward;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.controller.ProfiledPIDController;
@@ -58,7 +59,7 @@ public interface Constants {
                                                     
                                                     .setDriftActivationSpeed(0.0);
 
-        RobotLocalizationConfig LOCALIZATION_CONFIG = new RobotLocalizationConfig().setVision(0, 0, 0).setAutoPlannerPID(new PIDConstants(5,0,0), new PIDConstants(2,0,0)).setVisionEnabled(false);
+        RobotLocalizationConfig LOCALIZATION_CONFIG = new RobotLocalizationConfig().setPoseEstimateOrigin(PoseEstimateWithLatencyType.BOT_POSE_MT2_BLUE).setVision(0.3, 0.3, 9999).setAutoPlannerPID(new PIDConstants(5,0,0), new PIDConstants(2,0,0)).setVisionEnabled(true);
 
         RobotBaseConfig<SwerveDrivetrain> ROBOT_BASE = RobotBaseConfig.swerve(DRIVETRAIN_CONFIG)
                                                                       .setLocalization(LOCALIZATION_CONFIG)
