@@ -13,14 +13,19 @@ public class ReefScoringPos {
         
         A(18, 7, new Translation2d(1,1), new Translation2d(1,1)),
         B(18, 7, new Translation2d(1,1), new Translation2d(1,1)),
+
         C(17, 8, new Translation2d(1,1), new Translation2d(1,1)),
         D(17, 8, new Translation2d(1,1), new Translation2d(1,1)),
+
         E(22, 9, new Translation2d(1,1), new Translation2d(1,1)),
         F(22, 9, new Translation2d(1,1), new Translation2d(1,1)),
+
         G(21, 10, new Translation2d(1,1), new Translation2d(1,1)),
         H(21, 10, new Translation2d(1,1), new Translation2d(1,1)),
+
         I(20, 11, new Translation2d(1,1), new Translation2d(1,1)),
         J(20, 11, new Translation2d(1,1), new Translation2d(1,1)),
+        
         K(19, 6, new Translation2d(1,1), new Translation2d(1,1)),
         L(19, 6, new Translation2d(1,1), new Translation2d(1,1));
     
