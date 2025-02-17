@@ -41,6 +41,7 @@ import frc.robot.subsystems.Superstructure;
 import frc.robot.subsystems.superstructure.Climber;
 import frc.robot.subsystems.superstructure.Elevator;
 import frc.robot.subsystems.superstructure.EndEffector;
+import frc.robot.utils.ReefScoringPos.ReefPole;
 
 public class RobotContainer {
 
@@ -85,6 +86,8 @@ public class RobotContainer {
   {
     driverController.start.onTrue(new InstantCommand(() -> robotBase.getDrivetrain().getIMU().setYaw(0)));
     driverController.b.whileTrue(Commands.sequence(new InstantCommand(() -> AutoAlign.idling = false), new AutoAlign("limelight-driver", robotBase,ALIGNMODE.REEF,19)));
+    driverController.x.whileTrue(() -> robotBase.getCameraFacing(ReefPole.A.getTranslation()));
+
   }
   public Command getAutonomousCommand() {
     return new PathPlannerAuto("LeftSide");
