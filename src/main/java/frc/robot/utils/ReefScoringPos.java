@@ -1,5 +1,6 @@
 package frc.robot.utils;
 
+import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 
 public class ReefScoringPos {
@@ -28,6 +29,17 @@ public class ReefScoringPos {
         ReefPole(long apriltagIdBlue, long apriltagIdRed) {
             this.apriltagIdRed = apriltagIdRed;
             this.apriltagIdBlue = apriltagIdBlue;
+        }
+
+        public long getApriltagId() {
+            switch (DriverStation.getAlliance().get()) {
+                case Red:
+                    return apriltagIdRed;
+                case Blue:
+                    return apriltagIdBlue;
+                default:
+                    throw new IllegalArgumentException("Unknown team:");
+            }
         }
     
         public long getApriltagId(Alliance team) {
@@ -61,6 +73,11 @@ public class ReefScoringPos {
     public ReefPole getSide() {
         return side;
     }
+
+    public long getApriltagId() {
+        return side.getApriltagId();
+    }
+
 
     public long getApriltagId(Alliance team) {
         return side.getApriltagId(team);
