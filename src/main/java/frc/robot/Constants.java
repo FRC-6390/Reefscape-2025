@@ -15,6 +15,7 @@ import ca.frc6390.athena.drivetrains.swerve.modules.SwerveVendorSDS;
 import ca.frc6390.athena.mechanisms.Mechanism;
 import ca.frc6390.athena.mechanisms.Mechanism.MechanismConfig;
 import ca.frc6390.athena.mechanisms.TurretMechanism.StatefulTurretMechanism;
+import ca.frc6390.athena.sensors.camera.limelight.LimelightConfig;
 import ca.frc6390.athena.sensors.camera.limelight.LimeLight.PoseEstimateWithLatencyType;
 import edu.wpi.first.math.controller.ElevatorFeedforward;
 import edu.wpi.first.math.controller.PIDController;
@@ -63,7 +64,7 @@ public interface Constants {
 
         RobotBaseConfig<SwerveDrivetrain> ROBOT_BASE = RobotBaseConfig.swerve(DRIVETRAIN_CONFIG)
                                                                       .setLocalization(LOCALIZATION_CONFIG)
-                                                                      .setVision(RobotVisionConfig.limelight("limelight-driver", "limelight-tag"));
+                                                                      .setVision(RobotVisionConfig.limelight(new LimelightConfig("limelight-driver").setAngleRelativeToForwards(0),new LimelightConfig("limelight-tag").setAngleRelativeToForwards(180)));
     }
 
     public interface Controllers {
