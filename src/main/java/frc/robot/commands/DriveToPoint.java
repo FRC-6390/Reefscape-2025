@@ -46,7 +46,7 @@ public class DriveToPoint extends Command {
   {
     double xSpeed = xController.calculate(localization.getFieldPose().getX(), startPose.getX());
     double ySpeed = yController.calculate(localization.getFieldPose().getY(), startPose.getY());
-    double thetaSpeed = rotationController.calculate(localization.getPose().getRotation().getDegrees(), startPose.getRotation().getDegrees());
+    double thetaSpeed = rotationController.calculate(localization.getFieldPose().getRotation().getDegrees(), startPose.getRotation().getDegrees());
     
     ChassisSpeeds chassisSpeeds = ChassisSpeeds.fromFieldRelativeSpeeds(ySpeed, xSpeed, thetaSpeed, drivetrain.getIMU().getVirtualAxis("auto"));
 

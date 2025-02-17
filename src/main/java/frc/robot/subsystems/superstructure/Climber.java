@@ -25,15 +25,15 @@ public class Climber extends SubsystemBase{
   public GenericLimitSwitch limitSwitch;
   public PIDController controller;
 
-  public StateMachine<State> stateMachine;
+  public StateMachine<ClimberState> stateMachine;
   public StatusSignal<Angle> getAbsolutePosition;
 
-  public enum State implements SetpointProvider
+  public enum ClimberState implements SetpointProvider
   {
       Home(0),
       Climb(45);
       private double angle;
-      private State(double angle)
+      private ClimberState(double angle)
       {
       this.angle = angle;
       }
@@ -67,12 +67,12 @@ public class Climber extends SubsystemBase{
     config.MagnetSensor.AbsoluteSensorDiscontinuityPoint = 1;
     encoder.getConfigurator().apply(config);
 
-    stateMachine = new StateMachine<State>(State.Home, controller::atSetpoint);
+    stateMachine = new StateMachine<ClimberState>(ClimberState.Home, controller::atSetpoint);
   }
 
   public void setMotors(double speed)
   {
-    if(limitSwitch.isPressed() && speed > 0)
+    if(limitSwitch.getAsBoolean() && speed > 0)
     {
       speed = 0;
     }
@@ -80,7 +80,7 @@ public class Climber extends SubsystemBase{
     rightMotor.set(-speed);
   }
 
-  public StateMachine<State> getStateMachine()
+  public StateMachine<ClimberState> getStateMachine()
   {
     return stateMachine;
   }
@@ -104,7 +104,7 @@ public class Climber extends SubsystemBase{
   }
 
   public ShuffleboardTab shuffleboard(ShuffleboardTab tab) {
-    tab.addBoolean("Limit Switch", limitSwitch::isPressed).withPosition(1,1);
+    tab.addBoolean("Limit Switch", limitSwitch::getAsBoolean).withPosition(1,1);
     tab.addString("Setpoint", () -> stateMachine.getGoalState().name()).withPosition(2,1);
     tab.addNumber("PID Output", () -> controller.calculate(getAngle().getDegrees(), stateMachine.getGoalState().getSetpoint())).withPosition(3,1);
     tab.addNumber("Angle", () -> getAngle().getDegrees()).withPosition(4,1);

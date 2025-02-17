@@ -11,9 +11,9 @@ import frc.robot.subsystems.superstructure.Climber;
 public class Climb extends Command {
   /** Creates a new Climb. */
   public Superstructure superstructure;
-  public Climber.State state;
+  public Climber.ClimberState state;
   
-  public Climb(Superstructure superstructure, Climber.State state) {
+  public Climb(Superstructure superstructure, Climber.ClimberState state) {
     this.superstructure = superstructure;
     this.state = state;
     // Use addRequirements() here to declare subsystem dependencies.
