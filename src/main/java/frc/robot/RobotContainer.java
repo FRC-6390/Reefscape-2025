@@ -73,8 +73,8 @@ public class RobotContainer {
     robotBase.getDrivetrain().setDriveCommand(driverController);
 
     // NamedCommands.registerCommand("Blank",Commands.none());
-    NamedCommands.registerCommand("AlignSide1", Commands.sequence(Commands.print("ALIGNSIDE1"),new AutoAlign(robotBase.getVision().getCamera("limelight-driver"), robotBase.getDrivetrain(), driverController,ALIGNMODE.REEF, robotBase.getLocalization(), 19), new InstantCommand(() -> robotBase.getLocalization().resetFieldPose(5.131,5.134))));
-    NamedCommands.registerCommand("AlignSide2", Commands.sequence(Commands.print("ALIGNSIDE1"),new AutoAlign(robotBase.getVision().getCamera("limelight-driver"), robotBase.getDrivetrain(), driverController,ALIGNMODE.REEF, robotBase.getLocalization(), 20), new InstantCommand(() -> robotBase.getLocalization().resetFieldPose(5.131,5.134))));
+    NamedCommands.registerCommand("AlignSide1", Commands.sequence(Commands.print("ALIGNSIDE1"),new AutoAlign("limelight-driver", robotBase, ALIGNMODE.REEF, 19), new InstantCommand(() -> robotBase.getLocalization().resetFieldPose(5.131,5.134))));
+    NamedCommands.registerCommand("AlignSide2", Commands.sequence(Commands.print("ALIGNSIDE1"),new AutoAlign("limelight-driver", robotBase, ALIGNMODE.REEF, 20), new InstantCommand(() -> robotBase.getLocalization().resetFieldPose(5.131,5.134))));
     
     // new EventTrigger("StopAlign").onTrue(Commands.sequence(new InstantCommand(() -> AutoAlign.idling = true), Commands.print("STOP")));
     // new EventTrigger("StartAlign").onTrue(Commands.sequence(new InstantCommand(() -> AutoAlign.idling = false), Commands.print("START")));
@@ -84,7 +84,7 @@ public class RobotContainer {
   private void configureBindings() 
   {
     driverController.start.onTrue(new InstantCommand(() -> robotBase.getDrivetrain().getIMU().setYaw(0)));
-    driverController.b.whileTrue(Commands.sequence(new InstantCommand(() -> AutoAlign.idling = false), new AutoAlign(robotBase.getVision().getCamera("limelight-driver"), robotBase.getDrivetrain(), driverController, frc.robot.commands.AutoAlign.ALIGNMODE.REEF, robotBase.getLocalization(),19)));
+    driverController.b.whileTrue(Commands.sequence(new InstantCommand(() -> AutoAlign.idling = false), new AutoAlign("limelight-driver", robotBase,ALIGNMODE.REEF,19)));
   }
   public Command getAutonomousCommand() {
     return new PathPlannerAuto("LeftSide");

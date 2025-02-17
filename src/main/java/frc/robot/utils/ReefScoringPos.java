@@ -49,11 +49,11 @@ public class ReefScoringPos {
             }
         }
 
-        public Translation2d getPose() {
-            return getPose(DriverStation.getAlliance().get());
+        public Translation2d getTranslation() {
+            return getTranslation(DriverStation.getAlliance().get());
          }
      
-         public Translation2d getPose(Alliance team) {
+         public Translation2d getTranslation(Alliance team) {
              switch (team) {
                  case Red:
                      return redPose;
@@ -93,11 +93,11 @@ public class ReefScoringPos {
         return side.getApriltagId(team);
     }
 
-    public Translation2d getPose() {
-        return side.getPose();
+    public Translation2d getTranslation() {
+        return side.getTranslation();
     }
 
-    public Translation2d getPose(Alliance team) {
-        return side.getPose(team);
+    public Translation2d getTranslation(Alliance team) {
+        return side.getTranslation(team);
     }
 }

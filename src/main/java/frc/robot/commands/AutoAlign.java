@@ -5,7 +5,7 @@
 package frc.robot.commands;
 
 import au.grapplerobotics.LaserCan;
-import ca.frc6390.athena.controllers.EnhancedXboxController;
+import ca.frc6390.athena.core.RobotBase;
 import ca.frc6390.athena.core.RobotDrivetrain;
 import ca.frc6390.athena.core.RobotLocalization;
 import ca.frc6390.athena.core.RobotSpeeds.SpeedSource;
@@ -15,16 +15,16 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import frc.robot.utils.AutoAlignHelper;
+import frc.robot.utils.ReefScoringPos.ReefPole;
 public class AutoAlign extends Command {
   
   public LimeLight limelight; 
   public RobotDrivetrain<?> drivetrain;
-  public EnhancedXboxController cont; 
   public boolean closeEnough;
   public boolean isDone;
   public ChassisSpeeds speeds;
-  public int runTag;
-  public int tagNum = -1;
+  public long runTag;
+  public long tagNum = -1;
   public boolean hasSet;
   public RobotLocalization localization;
   public ALIGNMODE mode;
@@ -50,21 +50,23 @@ public class AutoAlign extends Command {
       return num;
     }
   }
-  
-  public AutoAlign(LimeLight limeLight, RobotDrivetrain<?> drivetrain, EnhancedXboxController cont, ALIGNMODE mode, RobotLocalization localization) {
-    this.drivetrain = drivetrain; 
-    this.cont = cont;
-    this.localization = localization;
-    limelight = limeLight;
-    this.mode = mode;
-    this.tagNum = -1;
-    }
 
-  public AutoAlign(LimeLight limeLight, RobotDrivetrain<?> drivetrain, EnhancedXboxController cont, ALIGNMODE mode, RobotLocalization localization, int tagNum) {
-    this.drivetrain = drivetrain; 
-    this.cont = cont;
-    limelight = limeLight;
-    this.localization = localization;
+  public AutoAlign(RobotBase<?> base, ReefPole pole) {
+    this(base.getCameraFacing(pole.getTranslation()), base, ALIGNMODE.REEF, pole.getApriltagId());
+  }
+  
+  public AutoAlign(String limelight, RobotBase<?> base, ALIGNMODE mode) {
+    this(limelight, base, mode, -1);
+  }
+
+  public AutoAlign(String limelight, RobotBase<?> base, ALIGNMODE mode, long tagNum) {
+    this(base.getVision().getCamera(limelight), base, mode, -1);
+  }
+
+  public AutoAlign(LimeLight limelight, RobotBase<?> base, ALIGNMODE mode, long tagNum) {
+    this.drivetrain = base.getDrivetrain(); 
+    this.limelight = limelight;
+    this.localization = base.getLocalization();
     this.mode = mode;
     this.tagNum = tagNum;
   }
@@ -98,11 +100,11 @@ public class AutoAlign extends Command {
         hasSet = true;
         if(runTag == -1)
         {
-        runTag = ((int)limelight.getAprilTagID());
+        runTag = limelight.getAprilTagID();
         }
         drivetrain.getRobotSpeeds().enableSpeeds(SpeedSource.AUTO, false);
       }
-      if(((int)limelight.getAprilTagID()) == runTag) {
+      if(limelight.getAprilTagID() == runTag) {
       drivetrain.getRobotSpeeds().enableSpeeds(SpeedSource.AUTO, false);
       helper.gatherData();
       speeds = helper.calculateSpeeds(mode, true);
