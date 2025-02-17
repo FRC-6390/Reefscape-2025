@@ -11,23 +11,23 @@ public class ReefScoringPos {
 
      public enum ReefPole {
         
-        A(18, 7, new Translation2d(1,1), new Translation2d(1,1)),
-        B(18, 7, new Translation2d(1,1), new Translation2d(1,1)),
+        A(18, 7, new Translation2d(14.3,4), new Translation2d(3.2, 4)),
+        B(18, 7, new Translation2d(14.3,4), new Translation2d(3.2,4)),
 
-        C(17, 8, new Translation2d(1,1), new Translation2d(1,1)),
-        D(17, 8, new Translation2d(1,1), new Translation2d(1,1)),
+        C(17, 8, new Translation2d(13.7,5.1), new Translation2d(3.8,3)),
+        D(17, 8, new Translation2d(13.7,5.1), new Translation2d(3.8,3)),
 
-        E(22, 9, new Translation2d(1,1), new Translation2d(1,1)),
-        F(22, 9, new Translation2d(1,1), new Translation2d(1,1)),
+        E(22, 9, new Translation2d(12.4,5.1), new Translation2d(5.1,2.9)),
+        F(22, 9, new Translation2d(12.4,5.1), new Translation2d(5.1,2.9)),
 
-        G(21, 10, new Translation2d(1,1), new Translation2d(1,1)),
-        H(21, 10, new Translation2d(1,1), new Translation2d(1,1)),
+        G(21, 10, new Translation2d(11.8,4), new Translation2d(5.8,4)),
+        H(21, 10, new Translation2d(11.8,4), new Translation2d(5.8,4)),
 
-        I(20, 11, new Translation2d(1,1), new Translation2d(1,1)),
-        J(20, 11, new Translation2d(1,1), new Translation2d(1,1)),
+        I(20, 11, new Translation2d(12.4,3), new Translation2d(5.1,5.1)),
+        J(20, 11, new Translation2d(12.4,3), new Translation2d(5.1,5.1)),
         
-        K(19, 6, new Translation2d(1,1), new Translation2d(1,1)),
-        L(19, 6, new Translation2d(1,1), new Translation2d(1,1));
+        K(19, 6, new Translation2d(13.7,3), new Translation2d(3.8,5)),
+        L(19, 6, new Translation2d(13.7,3), new Translation2d(3.8,5));
     
         private final long apriltagIdRed, apriltagIdBlue;
         private final Translation2d redPose, bluePose;
