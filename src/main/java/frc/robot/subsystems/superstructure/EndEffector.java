@@ -9,7 +9,6 @@ import com.ctre.phoenix6.signals.NeutralModeValue;
 
 import ca.frc6390.athena.mechanisms.StateMachine;
 import ca.frc6390.athena.mechanisms.StateMachine.SetpointProvider;
-import ca.frc6390.athena.sensors.limitswitch.GenericLimitSwitch;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.math.controller.PIDController;
@@ -20,9 +19,7 @@ import frc.robot.Constants;
 
 public class EndEffector extends SubsystemBase {
   public TalonFX motor;
-  // public TalonFX rightMotor;
   public CANcoder encoder;
-  // public GenericLimitSwitch limitSwitch;
   public PIDController controller;
 
   public StateMachine<EndEffectorState> stateMachine;
@@ -52,9 +49,7 @@ public class EndEffector extends SubsystemBase {
   public EndEffector() 
   {
     motor = new TalonFX(Constants.EndEffector.MOTOR, Constants.EndEffector.CANBUS);
-    // rightMotor = new TalonFX(Constants.EndEffector.RIGHT_MOTOR, Constants.EndEffector.CANBUS);
     encoder = new CANcoder(Constants.EndEffector.ENCODER, Constants.EndEffector.CANBUS);
-    // limitSwitch = new GenericLimitSwitch(Constants.EndEffector.LIMIT_SWITCH);
 
     getAbsolutePosition = encoder.getAbsolutePosition();
 
@@ -63,10 +58,8 @@ public class EndEffector extends SubsystemBase {
     controller.setTolerance(1);
 
     motor.getConfigurator().apply(new TalonFXConfiguration());
-    // rightMotor.getConfigurator().apply(new TalonFXConfiguration());
 
     motor.setNeutralMode(NeutralModeValue.Brake);
-    // rightMotor.setNeutralMode(NeutralModeValue.Brake);
 
     CANcoderConfiguration config = new CANcoderConfiguration();
     config.MagnetSensor.AbsoluteSensorDiscontinuityPoint = 1;
@@ -77,12 +70,7 @@ public class EndEffector extends SubsystemBase {
 
   public void setMotors(double speed)
   {
-    // if(limitSwitch.isPressed() && speed > 0)
-    // {
-    //   speed = 0;
-    // }
     motor.set(speed);
-    // rightMotor.set(-speed);
   }
 
   public StateMachine<EndEffectorState> getStateMachine()
@@ -92,7 +80,6 @@ public class EndEffector extends SubsystemBase {
 
   public void stopMotors() {
     motor.stopMotor();
-    // rightMotor.stopMotor();
   }
 
   public double getPosition() {

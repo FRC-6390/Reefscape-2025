@@ -18,7 +18,7 @@ import frc.robot.utils.AutoAlignHelper;
 public class AutoAlign extends Command {
   
   public LimeLight limelight; 
-  public RobotDrivetrain drivetrain;
+  public RobotDrivetrain<?> drivetrain;
   public EnhancedXboxController cont; 
   public boolean closeEnough;
   public boolean isDone;
@@ -51,7 +51,7 @@ public class AutoAlign extends Command {
     }
   }
   
-  public AutoAlign(LimeLight limeLight, RobotDrivetrain drivetrain, EnhancedXboxController cont, ALIGNMODE mode, RobotLocalization localization) {
+  public AutoAlign(LimeLight limeLight, RobotDrivetrain<?> drivetrain, EnhancedXboxController cont, ALIGNMODE mode, RobotLocalization localization) {
     this.drivetrain = drivetrain; 
     this.cont = cont;
     this.localization = localization;
@@ -60,7 +60,7 @@ public class AutoAlign extends Command {
     this.tagNum = -1;
     }
 
-  public AutoAlign(LimeLight limeLight, RobotDrivetrain drivetrain, EnhancedXboxController cont, ALIGNMODE mode, RobotLocalization localization, int tagNum) {
+  public AutoAlign(LimeLight limeLight, RobotDrivetrain<?> drivetrain, EnhancedXboxController cont, ALIGNMODE mode, RobotLocalization localization, int tagNum) {
     this.drivetrain = drivetrain; 
     this.cont = cont;
     limelight = limeLight;

@@ -4,13 +4,9 @@
 
 package frc.robot;
 
-import edu.wpi.first.math.geometry.Pose2d;
-import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
-import edu.wpi.first.wpilibj2.command.Commands;
 
 public class Robot extends TimedRobot {
   private Command m_autonomousCommand;
@@ -18,13 +14,10 @@ public class Robot extends TimedRobot {
 
   public Robot() {  
     m_robotContainer = new RobotContainer();
-    // m_robotContainer.robotBase.getLocalization().resetFieldPose(new Pose2d(0,0,Rotation2d.fromDegrees(-180)));
-    // m_autonomousCommand = m_robotContainer.getAutonomousCommand();
-    }
+  }
 
   @Override
   public void robotPeriodic() {
-    // System.out.println(m_robotContainer.robotBase.getLocalization().getFieldPose());
     CommandScheduler.getInstance().run();
   }
 
@@ -34,7 +27,7 @@ public class Robot extends TimedRobot {
   @Override
   public void disabledInit() 
   {
-    // m_robotContainer.elevator.reset(elevator.getHeight());
+
   }
 
   @Override
@@ -46,7 +39,6 @@ public class Robot extends TimedRobot {
   @Override
   public void autonomousInit() {
     m_autonomousCommand = m_robotContainer.getAutonomousCommand();
-    // m_robotContainer.elevator.reset(elevator.getHeight());
     if (m_autonomousCommand != null) {
       m_autonomousCommand.schedule();
     }
@@ -60,8 +52,7 @@ public class Robot extends TimedRobot {
 
   @Override
   public void teleopInit() {
-    m_robotContainer.robotBase.getDrivetrain().getRobotSpeeds().setAutoSpeeds(new ChassisSpeeds());
-    // m_robotContainer.elevator.reset(elevator.getHeight());
+    m_robotContainer.robotBase.getDrivetrain().getRobotSpeeds().stopAutoSpeeds();
     if (m_autonomousCommand != null) {
       m_autonomousCommand.cancel();
     }
@@ -75,7 +66,6 @@ public class Robot extends TimedRobot {
 
   @Override
   public void testInit() {
-    // m_robotContainer.elevator.reset(elevator.getHeight());
     CommandScheduler.getInstance().cancelAll();
   }
 

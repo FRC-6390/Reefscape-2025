@@ -12,11 +12,8 @@ import ca.frc6390.athena.devices.MotorController.Motor;
 import ca.frc6390.athena.drivetrains.swerve.SwerveDrivetrain;
 import ca.frc6390.athena.drivetrains.swerve.SwerveDrivetrain.SwerveDrivetrainConfig;
 import ca.frc6390.athena.drivetrains.swerve.modules.SwerveVendorSDS;
-import ca.frc6390.athena.sensors.camera.limelight.LimeLight.PoseEstimateWithLatencyType;
-import ca.frc6390.athena.mechanisms.ElevatorMechanism.StatefulElevatorMechanism;
 import ca.frc6390.athena.mechanisms.Mechanism;
 import ca.frc6390.athena.mechanisms.Mechanism.MechanismConfig;
-import ca.frc6390.athena.mechanisms.Mechanism.StatefulMechanism;
 import ca.frc6390.athena.mechanisms.TurretMechanism.StatefulTurretMechanism;
 import edu.wpi.first.math.controller.ElevatorFeedforward;
 import edu.wpi.first.math.controller.PIDController;
@@ -24,8 +21,6 @@ import edu.wpi.first.math.controller.ProfiledPIDController;
 import edu.wpi.first.math.controller.SimpleMotorFeedforward;
 import edu.wpi.first.math.trajectory.TrapezoidProfile.Constraints;
 import edu.wpi.first.math.util.Units;
-import frc.robot.subsystems.superstructure.Climber.ClimberState;
-import frc.robot.subsystems.superstructure.Elevator.ElevatorState;
 import frc.robot.subsystems.superstructure.EndEffector.EndEffectorState;
 
 public interface Constants {
@@ -159,25 +154,5 @@ public interface Constants {
         //                                                             .setEncoderFromMotor(32)
         //                                                             .addUpperLimitSwitch(2, 0, true);      
                                                                                                                                           
-    }
-
-   
-
-    public interface FieldElements {
-
-        enum ReefAprilTag {
-            Red(-1),
-            Blue(-1);
-            double pos;
-            private ReefAprilTag(double pos){
-                this.pos = pos;
-            }
-
-
-            public double getPosition() {
-                return pos;
-            }
-        }
-
     }
 }
