@@ -11,18 +11,6 @@
           }
         },
         {
-          "type": "named",
-          "data": {
-            "name": "AlignSide2"
-          }
-        },
-        {
-          "type": "wait",
-          "data": {
-            "waitTime": 1.0
-          }
-        },
-        {
           "type": "path",
           "data": {
             "pathName": "Side2ToFeeder"
@@ -32,18 +20,6 @@
           "type": "path",
           "data": {
             "pathName": "FeederToSide1"
-          }
-        },
-        {
-          "type": "named",
-          "data": {
-            "name": "AlignSide1"
-          }
-        },
-        {
-          "type": "wait",
-          "data": {
-            "waitTime": 1.0
           }
         }
       ]
