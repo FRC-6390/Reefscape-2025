@@ -66,6 +66,7 @@ public class RobotContainer {
   public final RobotBase<SwerveDrivetrain> robotBase = Constants.DriveTrain.ROBOT_BASE.create().shuffleboard();
   private final EnhancedXboxController driverController = new EnhancedXboxController(0)
                                                               .setLeftInverted(false)
+                                                              .setRightInverted(true)
                                                               .setSticksDeadzone(Constants.Controllers.STICK_DEADZONE)
                                                               .setLeftSlewrate(3.5);
   public RobotContainer() 
@@ -84,10 +85,16 @@ public class RobotContainer {
 
   private void configureBindings() 
   {
-    driverController.start.onTrue(new InstantCommand(() -> robotBase.getDrivetrain().getIMU().setYaw(0)));
+    driverController.start.onTrue(() -> robotBase.getDrivetrain().getIMU().setYaw(0)).after(3).onTrue(() -> robotBase.getLocalization().resetFieldPose(0,0,0));
     driverController.b.whileTrue(Commands.sequence(new InstantCommand(() -> AutoAlign.idling = false), new AutoAlign("limelight-driver", robotBase,ALIGNMODE.REEF,19)));
     driverController.x.whileTrue(() -> robotBase.getCameraFacing(ReefPole.A.getTranslation()));
 
+    try {
+      driverController.a.onTrue(AutoBuilder.pathfindThenFollowPath(PathPlannerPath.fromPathFile("Side1"), new PathConstraints(2, 1.5, 540, 720)));
+    } catch (FileVersionException | IOException | ParseException e) {
+      // TODO Auto-generated catch block
+      e.printStackTrace();
+    }
   }
   public Command getAutonomousCommand() {
     return new PathPlannerAuto("LeftSide");
