@@ -33,10 +33,7 @@ import edu.wpi.first.wpilibj2.command.button.Trigger;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.robot.Constants.DriveTrain;
 import frc.robot.commands.AutoAlign;
-import frc.robot.commands.AutoAlign.ALIGNMODE;
-// import frc.robot.commands.AprilTagAlign;
 import frc.robot.commands.Climb;
-// import frc.robot.commands.AprilTagAlign.ALIGNMODE;
 import frc.robot.subsystems.Superstructure;
 import frc.robot.subsystems.superstructure.Climber;
 import frc.robot.subsystems.superstructure.Elevator;
@@ -75,8 +72,8 @@ public class RobotContainer {
     robotBase.getDrivetrain().setDriveCommand(driverController);
 
     // NamedCommands.registerCommand("Blank",Commands.none());
-    NamedCommands.registerCommand("AlignSide1", Commands.sequence(Commands.print("ALIGNSIDE1"),new AutoAlign("limelight-driver", robotBase, ALIGNMODE.REEF, 19)));
-    NamedCommands.registerCommand("AlignSide2", Commands.sequence(Commands.print("ALIGNSIDE1"),new AutoAlign("limelight-driver", robotBase, ALIGNMODE.REEF, 20)));
+    NamedCommands.registerCommand("AlignSide1", Commands.sequence(Commands.print("ALIGNSIDE1"),new AutoAlign("limelight-driver", robotBase, 19)));
+    NamedCommands.registerCommand("AlignSide2", Commands.sequence(Commands.print("ALIGNSIDE1"),new AutoAlign("limelight-driver", robotBase, 20)));
     
     // new EventTrigger("StopAlign").onTrue(Commands.sequence(new InstantCommand(() -> AutoAlign.idling = true), Commands.print("STOP")));
     // new EventTrigger("StartAlign").onTrue(Commands.sequence(new InstantCommand(() -> AutoAlign.idling = false), Commands.print("START")));
@@ -86,8 +83,8 @@ public class RobotContainer {
   private void configureBindings() 
   {
     driverController.start.onTrue(() -> robotBase.getDrivetrain().getIMU().setYaw(0)).after(3).onTrue(() -> robotBase.getLocalization().resetFieldPose(0,0,0));
-    driverController.b.whileTrue(Commands.sequence(new InstantCommand(() -> AutoAlign.idling = false), new AutoAlign("limelight-driver", robotBase,ALIGNMODE.REEF,19)));
-    driverController.x.whileTrue(() -> robotBase.getCameraFacing(ReefPole.A.getTranslation()));
+    driverController.b.whileTrue(Commands.sequence(new InstantCommand(() -> AutoAlign.idling = false), new AutoAlign("limelight-driver", robotBase,19)));
+    driverController.x.whileTrue(() -> System.out.println(robotBase.getCameraFacing(ReefPole.A.getTranslation()).config.table()));
 
     try {
       driverController.a.onTrue(AutoBuilder.pathfindThenFollowPath(PathPlannerPath.fromPathFile("Side1"), new PathConstraints(2, 1.5, 540, 720)));

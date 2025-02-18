@@ -15,7 +15,6 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.trajectory.TrapezoidProfile.Constraints;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
-import frc.robot.commands.AutoAlign.ALIGNMODE;
 
 public class AutoAlignHelper 
 {
@@ -102,12 +101,12 @@ public void reset()
   lastYaw = new Rotation2d();
 }
 
-public ChassisSpeeds calculateSpeeds(ALIGNMODE mode, boolean hasCorrectTag)
+public ChassisSpeeds calculateSpeeds(LimeLight ll, boolean hasCorrectTag)
 {
     if(hasCorrectTag)
     {
-      xVelocity = mode.get() * xController.calculate(getXMeasurement(), 0);
-      rotationalVelocity = -controller.calculate(getThetatMeasurement(), 0);
+      xVelocity = ll.config.getAngleCos() * xController.calculate(getXMeasurement(), 0);
+      rotationalVelocity = controller.calculate(getThetatMeasurement(), 0);
       double error = Math.abs(xError.calculate(xController.getPositionError()));
       double multiplier = 0;
       if(error < 10 && error >= 8)
@@ -127,7 +126,7 @@ public ChassisSpeeds calculateSpeeds(ALIGNMODE mode, boolean hasCorrectTag)
         multiplier = 2;
       }
      
-      yVelocity = mode.get() * multiplier;
+      yVelocity = ll.config.getAngleCos() * multiplier;
       System.out.println(error);
     }
     else
@@ -136,11 +135,12 @@ public ChassisSpeeds calculateSpeeds(ALIGNMODE mode, boolean hasCorrectTag)
         yVelocity = xController2.calculate(localization.getRelativePose().getX(),getTargetPoseRobotSpace().getX());
         xVelocity = xController2.calculate(localization.getRelativePose().getY(),getTargetPoseRobotSpace().getY());
         double rot = getLastRobotYaw().getDegrees() + getLastYaw().getDegrees();
-        rotationalVelocity = controller.calculate(MathUtil.angleModulus(drivetrain.getIMU().getYaw().getRadians()) * 180/Math.PI, rot);
+        rotationalVelocity = -controller.calculate(MathUtil.angleModulus(drivetrain.getIMU().getYaw().getRadians()) * 180/Math.PI, rot);
       
     }
     speeds = new ChassisSpeeds(yVelocity, xVelocity, rotationalVelocity * 0.5);
     SmartDashboard.putNumberArray("Speeds",new Double[]{yVelocity, xVelocity, rotationalVelocity});
     return speeds;
 }
+
 }

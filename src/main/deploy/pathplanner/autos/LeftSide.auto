@@ -21,6 +21,12 @@
           "data": {
             "pathName": "FeederToSide1"
           }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "Side1ToFeeder"
+          }
         }
       ]
     }

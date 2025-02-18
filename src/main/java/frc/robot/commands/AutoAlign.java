@@ -27,47 +27,28 @@ public class AutoAlign extends Command {
   public long tagNum = -1;
   public boolean hasSet;
   public RobotLocalization localization;
-  public ALIGNMODE mode;
   public static boolean idling = false;
   public AutoAlignHelper helper;
   public Command event;
   private LaserCan las = new LaserCan(59);
   public double distToTrigger;
 
-  public enum ALIGNMODE
-  {
-    FEEDER(1),
-    REEF(-1);
-
-    double num;
-    private ALIGNMODE(double num)
-    {
-      this.num = num;
-    } 
-
-    public double get()
-    {
-      return num;
-    }
-  }
-
   public AutoAlign(RobotBase<?> base, ReefPole pole) {
-    this(base.getCameraFacing(pole.getTranslation()), base, ALIGNMODE.REEF, pole.getApriltagId());
+    this(base.getCameraFacing(pole.getTranslation()), base, pole.getApriltagId());
   }
   
-  public AutoAlign(String limelight, RobotBase<?> base, ALIGNMODE mode) {
-    this(limelight, base, mode, -1);
+  public AutoAlign(String limelight, RobotBase<?> base) {
+    this(limelight, base, -1);
   }
 
-  public AutoAlign(String limelight, RobotBase<?> base, ALIGNMODE mode, long tagNum) {
-    this(base.getVision().getCamera(limelight), base, mode, -1);
+  public AutoAlign(String limelight, RobotBase<?> base, long tagNum) {
+    this(base.getVision().getCamera(limelight), base, -1);
   }
 
-  public AutoAlign(LimeLight limelight, RobotBase<?> base, ALIGNMODE mode, long tagNum) {
+  public AutoAlign(LimeLight limelight, RobotBase<?> base, long tagNum) {
     this.drivetrain = base.getDrivetrain(); 
     this.limelight = limelight;
     this.localization = base.getLocalization();
-    this.mode = mode;
     this.tagNum = tagNum;
   }
 
@@ -107,7 +88,7 @@ public class AutoAlign extends Command {
       if(limelight.getAprilTagID() == runTag) {
       drivetrain.getRobotSpeeds().enableSpeeds(SpeedSource.AUTO, false);
       helper.gatherData();
-      speeds = helper.calculateSpeeds(mode, true);
+      speeds = helper.calculateSpeeds(limelight,true);
       if(limelight.getTargetArea() > 10){
         closeEnough = true;
       }
@@ -119,14 +100,14 @@ public class AutoAlign extends Command {
       else{
         // drivetrain.getRobotSpeeds().enableSpeeds(SpeedSource.AUTO, true);
         // speeds = helper.calculateSpeeds(mode, false);
-        speeds = new ChassisSpeeds(-mode.get(), 0,0);
+        speeds = new ChassisSpeeds(0, 0,0);
       }
     }
     else{
       // drivetrain.getRobotSpeeds().enableSpeeds(SpeedSource.AUTO, true);
       // speeds = helper.calculateSpeeds(mode, false);
       // speeds = new ChassisSpeeds();
-      speeds = new ChassisSpeeds(-mode.get(), 0,0);
+      speeds = new ChassisSpeeds(-limelight.config.getAngleCos(), 0,0);
     }
     if(hasSet) {
       if(las.getMeasurement() != null)
@@ -152,7 +133,7 @@ public class AutoAlign extends Command {
       drivetrain.getRobotSpeeds().setFeedbackSpeeds(speeds);
     }
     else{
-      drivetrain.getRobotSpeeds().setFeedbackSpeeds(new ChassisSpeeds(-mode.get() / 2,0,0));
+      drivetrain.getRobotSpeeds().setFeedbackSpeeds(new ChassisSpeeds(-limelight.config.getAngleCos() / 2,0,0));
     }
   }
     else

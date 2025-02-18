@@ -64,7 +64,7 @@ public interface Constants {
 
         RobotBaseConfig<SwerveDrivetrain> ROBOT_BASE = RobotBaseConfig.swerve(DRIVETRAIN_CONFIG)
                                                                       .setLocalization(LOCALIZATION_CONFIG)
-                                                                      .setVision(RobotVisionConfig.limelight(new LimelightConfig("limelight-driver").setAngleRelativeToForwards(0),new LimelightConfig("limelight-tag").setAngleRelativeToForwards(180)));
+                                                                      .setVision(RobotVisionConfig.limelight(new LimelightConfig("limelight-driver").setAngleRelativeToForwards(180),new LimelightConfig("limelight-tag").setAngleRelativeToForwards(0)));
     }
 
     public interface Controllers {
