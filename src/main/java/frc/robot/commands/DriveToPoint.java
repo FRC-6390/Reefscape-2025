@@ -4,13 +4,20 @@
 
 package frc.robot.commands;
 
+import com.pathplanner.lib.auto.AutoBuilder;
+import com.pathplanner.lib.path.PathPlannerPath;
+
+import ca.frc6390.athena.core.RobotBase;
 import ca.frc6390.athena.core.RobotLocalization;
 import ca.frc6390.athena.drivetrains.swerve.SwerveDrivetrain;
+import ca.frc6390.athena.sensors.camera.limelight.LimeLight;
 import edu.wpi.first.math.controller.ProfiledPIDController;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.trajectory.TrapezoidProfile.Constraints;
+import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj2.command.Command;
+import frc.robot.utils.ReefScoringPos.ReefPole;
 
 public class DriveToPoint extends Command {
   public RobotLocalization localization;
@@ -18,16 +25,22 @@ public class DriveToPoint extends Command {
   public ProfiledPIDController xController = new ProfiledPIDController(0, 0, 0, new Constraints(0, 0));
   public ProfiledPIDController yController = new ProfiledPIDController(0, 0, 0, new Constraints(0, 0));;
   public ProfiledPIDController rotationController = new ProfiledPIDController(0, 0, 0, new Constraints(0, 0));;
-  public SwerveDrivetrain drivetrain;
-  public boolean shouldResetPose;
-  public Pose2d startPose;
+  public RobotBase<?> robotBase;
   public boolean isDone;
+  public LimeLight limeLight;
+  public LimeLight limeLight2;
+  public PathPlannerPath sideA;
+  public PathPlannerPath sideC;
+  public PathPlannerPath sideE;
+  public PathPlannerPath sideG;
+  public PathPlannerPath sideI;
+  public PathPlannerPath sideK;
 
-  public DriveToPoint(RobotLocalization localization, SwerveDrivetrain drivetrain, Pose2d goal, Pose2d startPose, boolean shouldResetPose) {
+  
+
+  public DriveToPoint(RobotLocalization localization, RobotBase<?> robotBase, Pose2d goal) {
     this.localization = localization;
-    this.drivetrain = drivetrain;
-    this.shouldResetPose = shouldResetPose;
-    this.startPose = startPose;
+    this.robotBase = robotBase;
     isDone = false;
   }
 
@@ -35,25 +48,40 @@ public class DriveToPoint extends Command {
   public void initialize() 
   {
     isDone = false;
-    if(shouldResetPose)
-    {
-    localization.resetFieldPose(startPose);
-    }
+    limeLight = robotBase.getVision().getCamera("limelight-driver");
+    limeLight2 = robotBase.getVision().getCamera("limelight-tag");
   }
 
   @Override
   public void execute() 
   {
-    double xSpeed = xController.calculate(localization.getFieldPose().getX(), startPose.getX());
-    double ySpeed = yController.calculate(localization.getFieldPose().getY(), startPose.getY());
-    double thetaSpeed = rotationController.calculate(localization.getFieldPose().getRotation().getDegrees(), startPose.getRotation().getDegrees());
-    
-    ChassisSpeeds chassisSpeeds = ChassisSpeeds.fromFieldRelativeSpeeds(ySpeed, xSpeed, thetaSpeed, drivetrain.getIMU().getVirtualAxis("auto"));
 
-    drivetrain.getRobotSpeeds().setFeedbackSpeeds(chassisSpeeds);   
-    if(xController.atGoal() &&  yController.atGoal() && rotationController.atGoal())
+    if(limeLight.hasValidTarget() || limeLight2.hasValidTarget())
     {
-      isDone = true;
+      if(limeLight.getAprilTagID() == ReefPole.A.getApriltagId() || limeLight2.getAprilTagID() == ReefPole.A.getApriltagId())
+      {
+        AutoBuilder.followPath(ReefPole.A.getPath());
+      }
+      else if(limeLight.getAprilTagID() == ReefPole.C.getApriltagId() || limeLight2.getAprilTagID() == ReefPole.C.getApriltagId())
+      {
+        AutoBuilder.followPath(ReefPole.C.getPath());
+      }
+      else if(limeLight.getAprilTagID() == ReefPole.E.getApriltagId()|| limeLight2.getAprilTagID() == ReefPole.E.getApriltagId())
+      {
+        AutoBuilder.followPath(ReefPole.E.getPath());
+      }
+      else if(limeLight.getAprilTagID() == ReefPole.G.getApriltagId()|| limeLight2.getAprilTagID() == ReefPole.G.getApriltagId())
+      {
+        AutoBuilder.followPath(ReefPole.G.getPath());
+      }
+      else if(limeLight.getAprilTagID() == ReefPole.I.getApriltagId()|| limeLight2.getAprilTagID() == ReefPole.I.getApriltagId())
+      {
+        AutoBuilder.followPath(ReefPole.I.getPath());
+      }
+      else if(limeLight.getAprilTagID() == ReefPole.K.getApriltagId()|| limeLight2.getAprilTagID() == ReefPole.K.getApriltagId())
+      {
+        AutoBuilder.followPath(ReefPole.K.getPath());
+      }
     }
   }
 

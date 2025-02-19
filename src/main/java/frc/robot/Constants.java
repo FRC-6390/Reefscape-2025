@@ -24,6 +24,7 @@ import edu.wpi.first.math.controller.SimpleMotorFeedforward;
 import edu.wpi.first.math.trajectory.TrapezoidProfile.Constraints;
 import edu.wpi.first.math.util.Units;
 import frc.robot.subsystems.superstructure.EndEffector.EndEffectorState;
+import frc.robot.utils.ReefScoringPos.ReefPole;
 
 public interface Constants {
     
