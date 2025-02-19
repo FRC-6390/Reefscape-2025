@@ -30,7 +30,7 @@ public class AutoAlign extends Command {
   public static boolean idling = false;
   public AutoAlignHelper helper;
   public Command event;
-  private LaserCan las = new LaserCan(59);
+  private LaserCan las;
   public double distToTrigger;
 
   public AutoAlign(RobotBase<?> base, ReefPole pole) {
@@ -45,11 +45,12 @@ public class AutoAlign extends Command {
     this(base.getVision().getCamera(limelight), base, -1);
   }
 
-  public AutoAlign(LimeLight limelight, RobotBase<?> base, long tagNum) {
+  public AutoAlign(LimeLight limelight, RobotBase<?> base, LaserCan las ,long tagNum) {
     this.drivetrain = base.getDrivetrain(); 
     this.limelight = limelight;
     this.localization = base.getLocalization();
     this.tagNum = tagNum;
+    this.las = las;
   }
 
   @Override

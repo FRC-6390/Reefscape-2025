@@ -63,6 +63,39 @@ public class ReefScoringPos {
             }
         }
 
+        public static ReefPole getPoleFromID(int id)
+        {
+            switch (id) {
+                case 6:
+                    return ReefPole.K;  
+                case 19:
+                    return ReefPole.K;
+                case 7:
+                    return ReefPole.A;  
+                case 18:
+                    return ReefPole.A;
+                case 8:
+                    return ReefPole.C;  
+                case 17:
+                    return ReefPole.C;
+                case 9:
+                    return ReefPole.E;  
+                case 22:
+                    return ReefPole.E;
+                case 10:
+                    return ReefPole.G;  
+                case 21:
+                    return ReefPole.G;
+                case 11:
+                    return ReefPole.I;  
+                case 20:
+                    return ReefPole.I;
+
+                default:
+                    return null;
+            }
+        }
+
         public Translation2d getTranslation() {
             return getTranslation(DriverStation.getAlliance().get());
          }
