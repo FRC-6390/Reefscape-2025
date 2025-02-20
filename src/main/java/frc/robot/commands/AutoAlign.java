@@ -33,16 +33,16 @@ public class AutoAlign extends Command {
   private LaserCan las;
   public double distToTrigger;
 
-  public AutoAlign(RobotBase<?> base, ReefPole pole) {
-    this(base.getCameraFacing(pole.getTranslation()), base, pole.getApriltagId());
+  public AutoAlign(RobotBase<?> base, LaserCan las, ReefPole pole) {
+    this(base.getCameraFacing(pole.getTranslation()), base, las, pole.getApriltagId());
   }
   
-  public AutoAlign(String limelight, RobotBase<?> base) {
-    this(limelight, base, -1);
+  public AutoAlign(String limelight, RobotBase<?> base, LaserCan las) {
+    this(limelight, base, las, -1);
   }
 
-  public AutoAlign(String limelight, RobotBase<?> base, long tagNum) {
-    this(base.getVision().getCamera(limelight), base, -1);
+  public AutoAlign(String limelight, RobotBase<?> base, LaserCan las, long tagNum) {
+    this(base.getVision().getCamera(limelight), base, las, -1);
   }
 
   public AutoAlign(LimeLight limelight, RobotBase<?> base, LaserCan las ,long tagNum) {

@@ -17,6 +17,7 @@ import com.pathplanner.lib.path.PathConstraints;
 import com.pathplanner.lib.path.PathPlannerPath;
 import com.pathplanner.lib.util.FileVersionException;
 
+import au.grapplerobotics.LaserCan;
 import ca.frc6390.athena.commands.AutoCommands;
 import ca.frc6390.athena.controllers.EnhancedXboxController;
 import ca.frc6390.athena.core.RobotBase;
@@ -42,38 +43,22 @@ import frc.robot.utils.ReefScoringPos.ReefPole;
 
 public class RobotContainer {
 
-  public enum SIDES {
-    SIDE1(new Pose2d()),
-    SIDE2(new Pose2d()),
-    SIDE3(new Pose2d()),
-    SIDE4(new Pose2d()),
-    SIDE5(new Pose2d()),
-    SIDE6(new Pose2d());
-
-    Pose2d pos;
-    private SIDES(Pose2d pos){
-        this.pos = pos;
-    }
-
-    public Pose2d getPose() {
-      return pos;
-    }
-}
-
+  public final LaserCan las = new LaserCan(59);
   public final RobotBase<SwerveDrivetrain> robotBase = Constants.DriveTrain.ROBOT_BASE.create().shuffleboard();
   private final EnhancedXboxController driverController = new EnhancedXboxController(0)
                                                               .setLeftInverted(false)
                                                               .setRightInverted(true)
                                                               .setSticksDeadzone(Constants.Controllers.STICK_DEADZONE)
                                                               .setLeftSlewrate(3.5);
-  public RobotContainer() 
+ 
+                                                              public RobotContainer() 
   {
     configureBindings();
     robotBase.getDrivetrain().setDriveCommand(driverController);
 
     // NamedCommands.registerCommand("Blank",Commands.none());
-    NamedCommands.registerCommand("AlignSide1", Commands.sequence(Commands.print("ALIGNSIDE1"),new AutoAlign("limelight-driver", robotBase, 19)));
-    NamedCommands.registerCommand("AlignSide2", Commands.sequence(Commands.print("ALIGNSIDE1"),new AutoAlign("limelight-driver", robotBase, 20)));
+    NamedCommands.registerCommand("AlignSide1", Commands.sequence(Commands.print("ALIGNSIDE1"),new AutoAlign("limelight-driver", robotBase, las, 19)));
+    NamedCommands.registerCommand("AlignSide2", Commands.sequence(Commands.print("ALIGNSIDE1"),new AutoAlign("limelight-driver", robotBase, las, 20)));
     
     // new EventTrigger("StopAlign").onTrue(Commands.sequence(new InstantCommand(() -> AutoAlign.idling = true), Commands.print("STOP")));
     // new EventTrigger("StartAlign").onTrue(Commands.sequence(new InstantCommand(() -> AutoAlign.idling = false), Commands.print("START")));
@@ -83,7 +68,7 @@ public class RobotContainer {
   private void configureBindings() 
   {
     driverController.start.onTrue(() -> robotBase.getDrivetrain().getIMU().setYaw(0)).after(3).onTrue(() -> robotBase.getLocalization().resetFieldPose(0,0,0));
-    driverController.b.whileTrue(Commands.sequence(new InstantCommand(() -> AutoAlign.idling = false), new AutoAlign("limelight-driver", robotBase,19)));
+    driverController.b.whileTrue(Commands.sequence(new InstantCommand(() -> AutoAlign.idling = false), new AutoAlign("limelight-driver", robotBase, las, 19)));
     driverController.x.whileTrue(() -> System.out.println(robotBase.getCameraFacing(ReefPole.A.getTranslation()).config.table()));
 
     try {
