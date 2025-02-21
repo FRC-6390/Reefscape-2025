@@ -5,6 +5,7 @@
 package frc.robot.commands;
 
 import com.pathplanner.lib.auto.AutoBuilder;
+import com.pathplanner.lib.path.PathConstraints;
 import com.pathplanner.lib.path.PathPlannerPath;
 
 import ca.frc6390.athena.core.RobotBase;
@@ -17,24 +18,24 @@ import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.trajectory.TrapezoidProfile.Constraints;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import frc.robot.utils.ReefScoringPos.ReefLevel;
 import frc.robot.utils.ReefScoringPos.ReefPole;
 
 public class DriveToPoint extends Command {
-  public RobotLocalization localization;
-  public Pose2d goal;
   public RobotBase<?> robotBase;
   public LimeLight limeLight;
+  public boolean isDone;
   
 
-  public DriveToPoint(RobotLocalization localization, RobotBase<?> robotBase, Pose2d goal) {
-    this.localization = localization;
+  public DriveToPoint(RobotBase<?> robotBase) {
     this.robotBase = robotBase;
   }
 
   @Override
   public void initialize() 
   {
+    isDone = false;
     limeLight = robotBase.getCameraFacing(ReefPole.A.getTranslation());
   }
 
@@ -43,15 +44,20 @@ public class DriveToPoint extends Command {
   {
     if(limeLight.hasValidTarget())
     {
-      AutoBuilder.followPath(ReefPole.getPoleFromID((int)limeLight.getAprilTagID()).getPath());
+      isDone = true;
+
     }
   }
 
   @Override
-  public void end(boolean interrupted) {}
+  public void end(boolean interrupted) 
+  {
+    CommandScheduler.getInstance().schedule(AutoBuilder.followPath(ReefPole.getPoleFromID((int)limeLight.getAprilTagID()).getPath()));
+
+  }
 
   @Override
   public boolean isFinished() {
-    return false;
+    return isDone;
   }
 }

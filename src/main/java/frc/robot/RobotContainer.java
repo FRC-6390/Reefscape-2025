@@ -35,6 +35,8 @@ import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.robot.Constants.DriveTrain;
 import frc.robot.commands.AutoAlign;
 import frc.robot.commands.Climb;
+import frc.robot.commands.DriveToPoint;
+import frc.robot.commands.PassiveAlign;
 import frc.robot.subsystems.Superstructure;
 import frc.robot.subsystems.superstructure.Climber;
 import frc.robot.subsystems.superstructure.Elevator;
@@ -68,15 +70,10 @@ public class RobotContainer {
   private void configureBindings() 
   {
     driverController.start.onTrue(() -> robotBase.getDrivetrain().getIMU().setYaw(0)).after(3).onTrue(() -> robotBase.getLocalization().resetFieldPose(0,0,0));
-    driverController.b.whileTrue(Commands.sequence(new InstantCommand(() -> AutoAlign.idling = false), new AutoAlign("limelight-driver", robotBase, las, 19)));
-    driverController.x.whileTrue(() -> System.out.println(robotBase.getCameraFacing(ReefPole.A.getTranslation()).config.table()));
-
-    try {
-      driverController.a.onTrue(AutoBuilder.pathfindThenFollowPath(PathPlannerPath.fromPathFile("Side1"), new PathConstraints(2, 1.5, 540, 720)));
-    } catch (FileVersionException | IOException | ParseException e) {
-      // TODO Auto-generated catch block
-      e.printStackTrace();
-    }
+   driverController.x.whileTrue(() -> System.out.println(robotBase.getCameraFacing(ReefPole.A.getTranslation()).config.table()));
+    driverController.y.toggleOnTrue(new PassiveAlign(robotBase));
+    driverController.a.onTrue(new DriveToPoint(robotBase));
+    
   }
   public Command getAutonomousCommand() {
     return new PathPlannerAuto("Choreo");

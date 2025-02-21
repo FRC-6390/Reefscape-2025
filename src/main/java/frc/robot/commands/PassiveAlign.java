@@ -7,7 +7,10 @@ package frc.robot.commands;
 import ca.frc6390.athena.core.RobotBase;
 import ca.frc6390.athena.core.RobotLocalization;
 import ca.frc6390.athena.drivetrains.swerve.SwerveDrivetrain;
+import ca.frc6390.athena.filters.FilterList;
 import ca.frc6390.athena.sensors.camera.limelight.LimeLight;
+import ca.frc6390.athena.sensors.camera.limelight.LimeLight.PoseEstimateType;
+import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.utils.AutoAlignHelper;
@@ -20,11 +23,12 @@ public class PassiveAlign extends Command {
   public RobotLocalization localization;
   public AutoAlignHelper helper;
   public RobotBase<?> base;
+  public PIDController controller = new PIDController(0.025, 0, 0);
+  public FilterList a = new FilterList().addMedianFilter(10);
   /** Creates a new PassiveAlign. */
   public PassiveAlign(RobotBase<?> base) {
     this.base = base;
     this.localization = base.getLocalization();
-    
     // Use addRequirements() here to declare subsystem dependencies.
   }
 
@@ -33,6 +37,7 @@ public class PassiveAlign extends Command {
   public void initialize() 
   {
     limeLight = base.getCameraFacing(ReefPole.A.getTranslation());
+    helper = new AutoAlignHelper(limeLight, localization, base.getDrivetrain());
   }
 
   // Called every time the scheduler runs while the command is scheduled.
@@ -41,16 +46,9 @@ public class PassiveAlign extends Command {
   {
     if(limeLight.hasValidTarget())
     {
-      if(limeLight.getTargetHorizontalOffset() > 15)
-      {
-        ChassisSpeeds speeds = helper.calculateSpeeds(limeLight, true);
-        base.getDrivetrain().getRobotSpeeds().setFeedbackSpeeds(new ChassisSpeeds(0,0,speeds.omegaRadiansPerSecond));
+      double r =  controller.calculate(-a.calculate(limeLight.getPoseEstimate(PoseEstimateType.TARGET_POSE_ROBOT_SPACE).getRaw()[4]));   
+      base.getDrivetrain().getRobotSpeeds().setFeedbackSpeeds(0,0,r);
       }
-      else{
-        ChassisSpeeds speeds = helper.calculateSpeeds(limeLight, true);
-        base.getDrivetrain().getRobotSpeeds().setFeedbackSpeeds(new ChassisSpeeds(0,speeds.vyMetersPerSecond,speeds.omegaRadiansPerSecond));    
-      }
-     }
     
   }
 
