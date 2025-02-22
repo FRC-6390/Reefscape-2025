@@ -96,10 +96,14 @@ public interface Constants {
     }
 
     public interface Elevator {
-        String CANBUS = "rio";
+        String CANBUS = "can";
         int ENCODER = 23;
-        int LEFT_MOTOR = 20;
-        int RIGHT_MOTOR = 21;
+        //PATRICK IDS
+        int LEFT_MOTOR = 24;
+        int RIGHT_MOTOR = 26;
+
+        // int LEFT_MOTOR = 20;
+        // int RIGHT_MOTOR = 21;
         double GEAR_DIAMETER_INCHES = 2d;
         double OFFSET_FROM_FLOOR = 0;
         double ENCODER_GEAR_RATIO = 1d/1d;
@@ -130,26 +134,29 @@ public interface Constants {
     public interface EndEffector {
         int LIMIT_SWITCH = 1;
         int ENCODER = 40;
+        
+
         int MOTOR = 31;
+        int ROLLER = 20;
         // int RIGHT_MOTOR = 30;
         double ENCODER_OFFSET = 0;
         double ENCODER_GEAR_RATIO = 1d/1d; //from motors 125d/1d;
-        String CANBUS = "rio";
+        String CANBUS = "can";
         PIDController CONTORLLER = new PIDController(0.015, 0, 0);
 
-        MechanismConfig<StatefulTurretMechanism<EndEffectorState>> ENDEFFECTOR_CONFIG = MechanismConfig.statefulTurret(new SimpleMotorFeedforward(0, 0,0,0), EndEffectorState.StartConfiguration)
-                                                                                    .addMotor(Motor.KRAKEN_X60, 31)
-                                                                                    .setEncoder(EncoderType.CTRECANcoder, 40)
-                                                                                    .setCanbus(CANBUS)
-                                                                                    .setEncoderGearRatio(1d/1d)
-                                                                                    .setEncoderConversion(360d)
-                                                                                    .setEncoderOffset(0)
-                                                                                    .setUseEncoderAbsolute(true)
-                                                                                    .setProfiledPID(0,0,0, new Constraints(0, 0));
+        // MechanismConfig<StatefulTurretMechanism<EndEffectorState>> ENDEFFECTOR_CONFIG = MechanismConfig.statefulTurret(new SimpleMotorFeedforward(0, 0,0,0), EndEffectorState.StartConfiguration)
+        //                                                                             .addMotor(Motor.KRAKEN_X60, 31)
+        //                                                                             .setEncoder(EncoderType.CTRECANcoder, 40)
+        //                                                                             .setCanbus(CANBUS)
+        //                                                                             .setEncoderGearRatio(1d/1d)
+        //                                                                             .setEncoderConversion(360d)
+        //                                                                             .setEncoderOffset(0)
+        //                                                                             .setUseEncoderAbsolute(true)
+        //                                                                             .setProfiledPID(0,0,0, new Constraints(0, 0));
 
-        MechanismConfig<Mechanism> SCORER_CONFIG = MechanismConfig.generic()
-                                                                    .addMotor(Motor.KRAKEN_X60, 32)
-                                                                    .setCanbus(CANBUS);
+        // MechanismConfig<Mechanism> SCORER_CONFIG = MechanismConfig.generic()
+                                                                    // .addMotor(Motor.KRAKEN_X60, 32)
+                                                                    // .setCanbus(CANBUS);
 
 
         // MechanismConfig<Mechanism> ALGEA_CONFIG = MechanismConfig.generic()

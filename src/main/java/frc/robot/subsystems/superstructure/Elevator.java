@@ -71,7 +71,8 @@ public class Elevator extends SubsystemBase{
 
   public Elevator() 
   {
-   encoder = new CANcoder(Constants.Elevator.ENCODER, Constants.Elevator.CANBUS);
+  //SHOULD REMEMBER TO UNCOMMENT
+  //  encoder = new CANcoder(Constants.Elevator.ENCODER, Constants.Elevator.CANBUS);
    leftMotor = new TalonFX(Constants.Elevator.LEFT_MOTOR, Constants.Elevator.CANBUS);
    rightMotor = new TalonFX(Constants.Elevator.RIGHT_MOTOR, Constants.Elevator.CANBUS);
   
@@ -81,11 +82,13 @@ public class Elevator extends SubsystemBase{
       gear_ratio = Constants.Elevator.ENCODER_GEAR_RATIO;
     }else{
       getPosition = leftMotor.getRotorPosition();
+      getVelocity = leftMotor.getRotorVelocity();
       gear_ratio = Constants.Elevator.MOTOR_GEAR_RATIO;
     }
 
-    lowerlimitSwitch = new GenericLimitSwitch(Constants.Elevator.LIMIT_SWITCH);
-    lowerlimitSwitch.onTrue(new InstantCommand(() -> {encoder.setPosition(0); stop();}));
+    //SHOULD UNCOMMENT
+    // lowerlimitSwitch = new GenericLimitSwitch(Constants.Elevator.LIMIT_SWITCH);
+    // lowerlimitSwitch.onTrue(new InstantCommand(() -> {encoder.setPosition(0); stop();}));
     
     leftMotor.setNeutralMode(NeutralModeValue.Brake);
     rightMotor.setNeutralMode(NeutralModeValue.Brake);
@@ -106,7 +109,8 @@ public class Elevator extends SubsystemBase{
   //POSITION IN INCHES
   public double getHeight()
   {
-    return -(getPosition.getValueAsDouble() / gear_ratio) * Math.PI *  Constants.Elevator.GEAR_DIAMETER_INCHES;
+    //SHOULD BE NEGATIVE
+    return (getPosition.getValueAsDouble() / gear_ratio) * Math.PI *  Constants.Elevator.GEAR_DIAMETER_INCHES;
   }
 
   public double getVel()
@@ -131,14 +135,15 @@ public class Elevator extends SubsystemBase{
   //MOVES ELEVATOR UP OR DOWN
   public void setMotors(double speed)
   {
-    
-    if (lowerlimitSwitch.getAsBoolean() && speed < 0){
-      speed = 0;
-    }
+    //SHOULD UNCOMMENT
+    // if (lowerlimitSwitch.getAsBoolean() && speed < 0){
+      // speed = 0;
+    // }
     //negative is up, this makes negative down
-    speed = -speed;
-    leftMotor.set(speed);
-    rightMotor.set(speed);
+    //SHOULD BE SPEED = -SPEED
+    speed = speed;
+    // leftMotor.set(speed);
+    // rightMotor.set(speed);
   }
   
   public void stop() {
@@ -150,7 +155,7 @@ public class Elevator extends SubsystemBase{
   }
 
   public ShuffleboardTab shuffleboard(ShuffleboardTab tab) {
-      tab.addBoolean("Lower Limit", lowerlimitSwitch::getAsBoolean);
+      // tab.addBoolean("Lower Limit", lowerlimitSwitch::getAsBoolean);
       tab.addDouble("Elevator Height", this::getHeight).withPosition(1, 1);
       tab.addDouble("Elevator Height From Floor Inches", this::getHeightFromFloor).withPosition(2, 1);
       tab.addString("Setpoint", () -> stateMachine.getGoalState().name()).withPosition(3, 1);
@@ -190,29 +195,3 @@ public class Elevator extends SubsystemBase{
     update();
   }
 }
-
-
-
-
-
-
-
-
-
-  // routine = 
-    //   new SysIdRoutine(
-    //       // Empty config defaults to 1 volt/second ramp rate and 7 volt step voltage.
-    //       new SysIdRoutine.Config(),
-    //       new SysIdRoutine.Mechanism(
-    //           // Tell SysId how to plumb the driving voltage to the motor(s).
-    //           this::voltageDrive,
-    //           // Tell SysId how to record a frame of data for each motor on the mechanism being
-    //           // characterized.
-    //           log -> {
-    //             // Record a frame for the shooter motor.
-    //             log.motor("left-motor")
-    //                 .voltage(leftMotor.getMotorVoltage().getValue())
-    //                 .linearVelocity(LinearVelocity.ofBaseUnits(getVel(), Units.InchesPerSecond))
-    //                 .linearPosition(Distance.ofBaseUnits(getHeight(), Units.Inches));
-    //           },
-    //           this));

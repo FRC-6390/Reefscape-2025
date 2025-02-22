@@ -5,6 +5,7 @@
 package frc.robot;
 
 import java.io.IOException;
+import java.security.PublicKey;
 
 import org.json.simple.parser.ParseException;
 
@@ -33,19 +34,25 @@ import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.robot.Constants.DriveTrain;
-import frc.robot.commands.AutoAlign;
-import frc.robot.commands.Climb;
-import frc.robot.commands.DriveToPoint;
-import frc.robot.commands.PassiveAlign;
+import frc.robot.commands.auto.AutoAlign;
+import frc.robot.commands.auto.DriveToPoint;
+import frc.robot.commands.auto.PassiveAlign;
+import frc.robot.commands.mechanisms.Elevate;
 import frc.robot.subsystems.Superstructure;
 import frc.robot.subsystems.superstructure.Climber;
 import frc.robot.subsystems.superstructure.Elevator;
 import frc.robot.subsystems.superstructure.EndEffector;
+import frc.robot.subsystems.superstructure.Elevator.ElevatorState;
+import frc.robot.subsystems.superstructure.EndEffector.EndEffectorState;
 import frc.robot.utils.ReefScoringPos.ReefPole;
 
 public class RobotContainer {
 
   public final LaserCan las = new LaserCan(59);
+  public Elevator elevator = new Elevator();
+  public Climber climber = new Climber();
+  public EndEffector effector = new EndEffector();
+  public Superstructure superstructure = new Superstructure(climber, elevator, effector);
   public final RobotBase<SwerveDrivetrain> robotBase = Constants.DriveTrain.ROBOT_BASE.create().shuffleboard();
   private final EnhancedXboxController driverController = new EnhancedXboxController(0)
                                                               .setLeftInverted(false)
@@ -53,29 +60,34 @@ public class RobotContainer {
                                                               .setSticksDeadzone(Constants.Controllers.STICK_DEADZONE)
                                                               .setLeftSlewrate(3.5);
  
-                                                              public RobotContainer() 
+  public RobotContainer() 
   {
     configureBindings();
     robotBase.getDrivetrain().setDriveCommand(driverController);
+    elevator.shuffleboard("Elevator");
+    climber.shuffleboard("Climber");
+    effector.shuffleboard("Effector");
 
-    // NamedCommands.registerCommand("Blank",Commands.none());
-    NamedCommands.registerCommand("AlignSide1", Commands.sequence(Commands.print("ALIGNSIDE1"),new AutoAlign("limelight-driver", robotBase, las, 19)));
-    NamedCommands.registerCommand("AlignSide2", Commands.sequence(Commands.print("ALIGNSIDE1"),new AutoAlign("limelight-driver", robotBase, las, 20)));
+    NamedCommands.registerCommand("L4", superstructure.setElevator(ElevatorState.L4));
+    NamedCommands.registerCommand("L3", superstructure.setElevator(ElevatorState.L3));
+    NamedCommands.registerCommand("L2", superstructure.setElevator(ElevatorState.L2));
+    NamedCommands.registerCommand("L1", superstructure.setElevator(ElevatorState.L1));
+    NamedCommands.registerCommand("Feeder", superstructure.setElevator(ElevatorState.Feeder));
+    NamedCommands.registerCommand("Home", superstructure.setElevator(ElevatorState.Home));
+    NamedCommands.registerCommand("StartConfiguration", superstructure.setElevator(ElevatorState.StartConfiguration)); 
     
-    // new EventTrigger("StopAlign").onTrue(Commands.sequence(new InstantCommand(() -> AutoAlign.idling = true), Commands.print("STOP")));
-    // new EventTrigger("StartAlign").onTrue(Commands.sequence(new InstantCommand(() -> AutoAlign.idling = false), Commands.print("START")));
-
   }
 
   private void configureBindings() 
   {
     driverController.start.onTrue(() -> robotBase.getDrivetrain().getIMU().setYaw(0)).after(3).onTrue(() -> robotBase.getLocalization().resetFieldPose(0,0,0));
-   driverController.x.whileTrue(() -> System.out.println(robotBase.getCameraFacing(ReefPole.A.getTranslation()).config.table()));
-    driverController.y.toggleOnTrue(new PassiveAlign(robotBase));
-    driverController.a.onTrue(new DriveToPoint(robotBase));
-    
+    driverController.y.toggleOnTrue(new PassiveAlign(robotBase, las, driverController));
+    driverController.a.onTrue(new DriveToPoint(robotBase , las));
+    driverController.b.onTrue(new AutoAlign(robotBase.getCameraFacing(ReefPole.A.getTranslation()).config.table(),robotBase , las));
+    driverController.leftBumper.onTrue(new Elevate(ElevatorState.L4, las, superstructure, robotBase));
   }
   public Command getAutonomousCommand() {
+    
     return new PathPlannerAuto("Choreo");
   }
 }

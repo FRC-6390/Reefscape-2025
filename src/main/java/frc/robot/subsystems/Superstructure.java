@@ -16,10 +16,14 @@ public class Superstructure {
   StateMachine<Elevator.ElevatorState> elevator;
   StateMachine<Climber.ClimberState> climber;
   StateMachine<EndEffector.EndEffectorState> endEffector;
+  public EndEffector effector;
 
-  public Superstructure(Climber climber) 
+  public Superstructure(Climber climber, Elevator elevator, EndEffector effector) 
   {
     this.climber = climber.getStateMachine();
+    this.effector= effector;
+    this.elevator = elevator.getStateMachine();
+    this.endEffector = effector.getStateMachine();
   }
 
   public InstantCommand setClimber(Climber.ClimberState state){
@@ -75,5 +79,8 @@ public class Superstructure {
         endEffector.setGoalState(state, () -> !elevator.atState(Elevator.ElevatorState.Home));
         break;
     }
+  }
+  public void ejectPiece(double speed){
+    effector.setRollers(speed);
   }
 }
