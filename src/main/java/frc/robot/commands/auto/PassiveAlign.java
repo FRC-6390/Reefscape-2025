@@ -10,16 +10,22 @@ import ca.frc6390.athena.core.RobotBase;
 import ca.frc6390.athena.core.RobotLocalization;
 import ca.frc6390.athena.drivetrains.swerve.SwerveDrivetrain;
 import ca.frc6390.athena.filters.FilterList;
+import ca.frc6390.athena.filters.FilteredValue;
 import ca.frc6390.athena.sensors.camera.limelight.LimeLight;
 import ca.frc6390.athena.sensors.camera.limelight.LimeLight.PoseEstimateType;
+import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.controller.ProfiledPIDController;
 import edu.wpi.first.math.filter.LinearFilter;
+import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.trajectory.TrapezoidProfile.Constraints;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.utils.AutoAlignHelper;
+import frc.robot.utils.ReefScoringPos;
 import frc.robot.utils.ReefScoringPos.ReefPole;
 
 /* You should consider using the more terse Command factories API instead https://docs.wpilib.org/en/stable/docs/software/commandbased/organizing-command-based.html#defining-commands */
@@ -29,21 +35,24 @@ public class PassiveAlign extends Command {
   public RobotLocalization localization;
   public AutoAlignHelper helper;
   public LaserCan las;
-  public EnhancedXboxController drcontroller;
   public RobotBase<?> base;
-  public PIDController controller = new PIDController(0.025, 0, 0);
-  public PIDController rController = new PIDController(0.1, 0, 0);
- public ProfiledPIDController xController = new ProfiledPIDController(0.01, 0, 0.0, new Constraints(2, 1.5));
-  public FilterList a = new FilterList().addMedianFilter(1);
-  LinearFilter filter = LinearFilter.movingAverage(5);
-  public FilterList b = new FilterList().addMovingAverage(10);
+  public ProfiledPIDController rController = new ProfiledPIDController(1.2, 0, 0.0, new Constraints(1, 1));
+  public ProfiledPIDController xController = new ProfiledPIDController(0.06, 0, 0.0, new Constraints(50, 75));
+  public FilteredValue rotationFiltered;
+  public FilteredValue xOffsetFiltered;
   
   /** Creates a new PassiveAlign. */
-  public PassiveAlign(RobotBase<?> base, LaserCan las, EnhancedXboxController drcontroller) {
+  public PassiveAlign(RobotBase<?> base, LaserCan las) {
     this.base = base;
     this.localization = base.getLocalization();
     this.las = las;
-    this.drcontroller= drcontroller;
+    rController.enableContinuousInput(-Math.PI, Math.PI);
+    rotationFiltered =  new FilteredValue(() -> limeLight.getPoseEstimate(PoseEstimateType.TARGET_POSE_ROBOT_SPACE).getRaw()[4])
+                        .addMovingAverage(10)
+                        .addMedianFilter(15);
+    xOffsetFiltered =  new FilteredValue(() -> limeLight.getTargetHorizontalOffset())
+                        .addMovingAverage(5);
+
     // Use addRequirements() here to declare subsystem dependencies.
   }
 
@@ -53,6 +62,8 @@ public class PassiveAlign extends Command {
   {
     limeLight = base.getCameraFacing(ReefPole.A.getTranslation());
     helper = new AutoAlignHelper(limeLight, localization, base.getDrivetrain());
+    xController.reset(0);
+    rController.reset(0);
   }
 
   // Called every time the scheduler runs while the command is scheduled.
@@ -61,11 +72,25 @@ public class PassiveAlign extends Command {
   {
     if(limeLight.hasValidTarget())
     {
-      double r =  controller.calculate(-filter.calculate(a.calculate(limeLight.getPoseEstimate(PoseEstimateType.TARGET_POSE_ROBOT_SPACE).getRaw()[4])), 0);   
-      double l = b.calculate(-limeLight.getTargetHorizontalOffset()); //limeLight.getPoseEstimate(PoseEstimateType.BOT_POSE_TARGET_SPACE).getPose().getY()
-      double x = xController.calculate(l, 0);
-      SmartDashboard.putNumber("AHH", l);
-      base.getDrivetrain().getRobotSpeeds().setFeedbackSpeeds(0,x,0);
+
+      Pose2d fieldPose = localization.getFieldPose();
+      long id = limeLight.getAprilTagID();
+
+      ReefPole pole = ReefPole.getPoleFromID(id);
+
+      Rotation2d targetPose = pole.getRotation().plus(limeLight.config.getRotationRelativeToForwards());
+     
+      
+      double r = rController.calculate(fieldPose.getRotation().getRadians(), MathUtil.angleModulus(targetPose.getRadians()));   
+      double x = limeLight.config.getAngleCos() * xController.calculate(xOffsetFiltered.getFiltered(),0);
+      base.getDrivetrain().getRobotSpeeds().setFeedbackSpeeds(0,x,r);
+      
+      SmartDashboard.putString("target", pole.name());
+      SmartDashboard.putNumber("target angle", targetPose.getDegrees());
+      SmartDashboard.putNumber("current angle", fieldPose.getRotation().getDegrees());
+
+      SmartDashboard.putNumber("xOffsetFiltered", xOffsetFiltered.get());
+
       // if(limeLight.getTargetHorizontalOffset() < 50 && las.getMeasurement().status == LaserCan.LASERCAN_STATUS_VALID_MEASUREMENT)
       // {
       //   if(las.getMeasurement().distance_mm <  2000)
@@ -83,7 +108,9 @@ public class PassiveAlign extends Command {
 
   // Called once the command ends or is interrupted.
   @Override
-  public void end(boolean interrupted) {}
+  public void end(boolean interrupted) {
+    base.getDrivetrain().getRobotSpeeds().stopFeedbackSpeeds();
+  }
 
   // Returns true when the command should end.
   @Override

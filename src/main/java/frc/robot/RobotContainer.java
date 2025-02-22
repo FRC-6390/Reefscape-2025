@@ -64,27 +64,27 @@ public class RobotContainer {
   {
     configureBindings();
     robotBase.getDrivetrain().setDriveCommand(driverController);
-    elevator.shuffleboard("Elevator");
-    climber.shuffleboard("Climber");
-    effector.shuffleboard("Effector");
+    // elevator.shuffleboard("Elevator");
+    // climber.shuffleboard("Climber");
+    // effector.shuffleboard("Effector");
 
-    NamedCommands.registerCommand("L4", superstructure.setElevator(ElevatorState.L4));
-    NamedCommands.registerCommand("L3", superstructure.setElevator(ElevatorState.L3));
-    NamedCommands.registerCommand("L2", superstructure.setElevator(ElevatorState.L2));
-    NamedCommands.registerCommand("L1", superstructure.setElevator(ElevatorState.L1));
-    NamedCommands.registerCommand("Feeder", superstructure.setElevator(ElevatorState.Feeder));
-    NamedCommands.registerCommand("Home", superstructure.setElevator(ElevatorState.Home));
-    NamedCommands.registerCommand("StartConfiguration", superstructure.setElevator(ElevatorState.StartConfiguration)); 
+    // NamedCommands.registerCommand("L4", superstructure.setElevator(ElevatorState.L4));
+    // NamedCommands.registerCommand("L3", superstructure.setElevator(ElevatorState.L3));
+    // NamedCommands.registerCommand("L2", superstructure.setElevator(ElevatorState.L2));
+    // NamedCommands.registerCommand("L1", superstructure.setElevator(ElevatorState.L1));
+    // NamedCommands.registerCommand("Feeder", superstructure.setElevator(ElevatorState.Feeder));
+    // NamedCommands.registerCommand("Home", superstructure.setElevator(ElevatorState.Home));
+    // NamedCommands.registerCommand("StartConfiguration", superstructure.setElevator(ElevatorState.StartConfiguration)); 
     
   }
 
   private void configureBindings() 
   {
     driverController.start.onTrue(() -> robotBase.getDrivetrain().getIMU().setYaw(0)).after(3).onTrue(() -> robotBase.getLocalization().resetFieldPose(0,0,0));
-    driverController.y.toggleOnTrue(new PassiveAlign(robotBase, las, driverController));
-    driverController.a.onTrue(new DriveToPoint(robotBase , las));
-    driverController.b.onTrue(new AutoAlign(robotBase.getCameraFacing(ReefPole.A.getTranslation()).config.table(),robotBase , las));
-    driverController.leftBumper.onTrue(new Elevate(ElevatorState.L4, las, superstructure, robotBase));
+    driverController.y.toggleOnTrue(new PassiveAlign(robotBase, las));
+    // // driverController.a.onTrue(new DriveToPoint(robotBase , las));
+    // // driverController.b.onTrue(new AutoAlign(robotBase.getCameraFacing(ReefPole.A.getTranslation()).config.table(),robotBase , las));
+    // driverController.leftBumper.onTrue(new Elevate(ElevatorState.L4, las, superstructure, robotBase));
   }
   public Command getAutonomousCommand() {
     

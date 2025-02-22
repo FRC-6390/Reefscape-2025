@@ -7,6 +7,8 @@ import org.json.simple.parser.ParseException;
 import com.pathplanner.lib.path.PathPlannerPath;
 import com.pathplanner.lib.util.FileVersionException;
 
+import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
@@ -18,34 +20,35 @@ public class ReefScoringPos {
 
      public enum ReefPole {
         
-        A(18, 7, new Translation2d(14.3,4), new Translation2d(3.2, 4), "SideA"),
-        B(18, 7, new Translation2d(14.3,4), new Translation2d(3.2,4), "SideA"),
+        A(18, 7, new Pose2d(14.3,4, Rotation2d.fromDegrees(180)), new Pose2d(3.2, 4,  Rotation2d.fromDegrees(0)), "SideA"),
+        B(18, 7, new Pose2d(14.3,4, Rotation2d.fromDegrees(180)), new Pose2d(3.2,4, Rotation2d.fromDegrees(0)), "SideA"),
 
-        C(17, 8, new Translation2d(13.7,5.1), new Translation2d(3.8,3), "SideC"),
-        D(17, 8, new Translation2d(13.7,5.1), new Translation2d(3.8,3), "SideC"),
+        C(17, 8, new Pose2d(13.7,5.1,  Rotation2d.fromDegrees(-120)), new Pose2d(3.8,3, Rotation2d.fromDegrees(60)), "SideC"),
+        D(17, 8, new Pose2d(13.7,5.1,  Rotation2d.fromDegrees(-120)), new Pose2d(3.8,3, Rotation2d.fromDegrees(60)), "SideC"),
 
-        E(22, 9, new Translation2d(12.4,5.1), new Translation2d(5.1,2.9), "SideE"),
-        F(22, 9, new Translation2d(12.4,5.1), new Translation2d(5.1,2.9), "SideE"),
+        E(22, 9, new Pose2d(12.4,5.1,  Rotation2d.fromDegrees(-60)), new Pose2d(5.1,2.9,  Rotation2d.fromDegrees(120)), "SideE"),
+        F(22, 9, new Pose2d(12.4,5.1,  Rotation2d.fromDegrees(-60)), new Pose2d(5.1,2.9,  Rotation2d.fromDegrees(120)), "SideE"),
 
-        G(21, 10, new Translation2d(11.8,4), new Translation2d(5.8,4), "SideG"),
-        H(21, 10, new Translation2d(11.8,4), new Translation2d(5.8,4), "SideG"),
+        G(21, 10, new Pose2d(11.8,4, Rotation2d.fromDegrees(0)), new Pose2d(5.8,4, Rotation2d.fromDegrees(180)), "SideG"),
+        H(21, 10, new Pose2d(11.8,4, Rotation2d.fromDegrees(0)), new Pose2d(5.8,4, Rotation2d.fromDegrees(180)), "SideG"),
 
-        I(20, 11, new Translation2d(12.4,3), new Translation2d(5.1,5.1), "SideI"),
-        J(20, 11, new Translation2d(12.4,3), new Translation2d(5.1,5.1), "SideI"),
+        I(20, 11, new Pose2d(12.4,3, Rotation2d.fromDegrees(60)), new Pose2d(5.1,5.1,  Rotation2d.fromDegrees(-120)), "SideI"),
+        J(20, 11, new Pose2d(12.4,3, Rotation2d.fromDegrees(60)), new Pose2d(5.1,5.1,  Rotation2d.fromDegrees(-120)), "SideI"),
         
-        K(19, 6, new Translation2d(13.7,3), new Translation2d(3.8,5), "SideK"),
-        L(19, 6, new Translation2d(13.7,3), new Translation2d(3.8,5), "SideK");
+        K(19, 6, new Pose2d(13.7,3, Rotation2d.fromDegrees(120)), new Pose2d(3.8,5, Rotation2d.fromDegrees(-60)), "SideK"),
+        L(19, 6, new Pose2d(13.7,3, Rotation2d.fromDegrees(120)), new Pose2d(3.8,5, Rotation2d.fromDegrees(-60)), "SideK");
     
         private final long apriltagIdRed, apriltagIdBlue;
-        private final Translation2d redPose, bluePose;
+        private final Pose2d redPose, bluePose;
         private final String path;
     
-        ReefPole(long apriltagIdBlue, long apriltagIdRed, Translation2d redPose, Translation2d bluePose, String path) {
+        ReefPole(long apriltagIdBlue, long apriltagIdRed, Pose2d redPose, Pose2d bluePose, String path) {
             this.apriltagIdRed = apriltagIdRed;
             this.apriltagIdBlue = apriltagIdBlue;
             this.redPose = redPose;
             this.bluePose = bluePose;
             this.path = path;
+
         }
 
         public long getApriltagId() {
@@ -63,31 +66,25 @@ public class ReefScoringPos {
             }
         }
 
-        public static ReefPole getPoleFromID(int id)
+        public static ReefPole getPoleFromID(long id)
         {
-            switch (id) {
+            switch ((int)id) {
                 case 6:
-                    return ReefPole.K;  
                 case 19:
                     return ReefPole.K;
                 case 7:
-                    return ReefPole.A;  
                 case 18:
                     return ReefPole.A;
                 case 8:
-                    return ReefPole.C;  
                 case 17:
                     return ReefPole.C;
                 case 9:
-                    return ReefPole.E;  
                 case 22:
                     return ReefPole.E;
                 case 10:
-                    return ReefPole.G;  
                 case 21:
                     return ReefPole.G;
                 case 11:
-                    return ReefPole.I;  
                 case 20:
                     return ReefPole.I;
 
@@ -101,6 +98,22 @@ public class ReefScoringPos {
          }
      
          public Translation2d getTranslation(Alliance team) {
+            return getPose2d(team).getTranslation();
+         }
+
+         public Rotation2d getRotation() {
+            return getRotation(DriverStation.getAlliance().get());
+         }
+     
+         public Rotation2d getRotation(Alliance team) {
+            return getPose2d(team).getRotation();
+         }
+
+         public Pose2d getPose2d() {
+            return getPose2d(DriverStation.getAlliance().get());
+         }
+     
+         public Pose2d getPose2d(Alliance team) {
              switch (team) {
                  case Red:
                      return redPose;
@@ -157,5 +170,21 @@ public class ReefScoringPos {
 
     public Translation2d getTranslation(Alliance team) {
         return side.getTranslation(team);
+    }
+
+    public Rotation2d getRotation() {
+        return side.getRotation();
+    }
+
+    public Rotation2d getRotation(Alliance team) {
+        return side.getRotation(team);
+    }
+
+    public Pose2d getPose2d() {
+        return side.getPose2d();
+    }
+
+    public Pose2d getPose2d(Alliance team) {
+        return side.getPose2d(team);
     }
 }
