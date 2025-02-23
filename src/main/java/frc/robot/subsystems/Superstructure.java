@@ -9,12 +9,14 @@ import edu.wpi.first.wpilibj2.command.InstantCommand;
 import frc.robot.subsystems.superstructure.Climber;
 import frc.robot.subsystems.superstructure.Elevator;
 import frc.robot.subsystems.superstructure.EndEffector;
+import frc.robot.subsystems.superstructure.EndEffector.AlgaeExtensionState;
 
 public class Superstructure {
   
   /** Creates a new Superstructure. */
   StateMachine<Elevator.ElevatorState> elevator;
   StateMachine<Climber.ClimberState> climber;
+  StateMachine<EndEffector.AlgaeExtensionState> algaeMachine;
   StateMachine<EndEffector.EndEffectorState> endEffector;
   public EndEffector effector;
 
@@ -24,6 +26,7 @@ public class Superstructure {
     this.effector= effector;
     this.elevator = elevator.getStateMachine();
     this.endEffector = effector.getStateMachine();
+    this.algaeMachine = effector.getAlgaeStateMachine();
   }
 
   public InstantCommand setClimber(Climber.ClimberState state){
@@ -38,6 +41,10 @@ public class Superstructure {
     return new InstantCommand(() -> endEffectorStateManager(state));
   }
 
+  public InstantCommand setAlgaeMachine(EndEffector.AlgaeExtensionState state){
+    return new InstantCommand(() -> algaeStateManager(state));
+  }
+
   public void climberStateManager(Climber.ClimberState state){
     switch (state) {
       case Climb:
@@ -49,6 +56,11 @@ public class Superstructure {
         climber.setGoalState(state);
         break;
     }
+  }
+
+  public void algaeStateManager(AlgaeExtensionState state)
+  {
+    algaeMachine.setGoalState(state);
   }
 
   public void elevatorStateManager(Elevator.ElevatorState state){
@@ -80,6 +92,7 @@ public class Superstructure {
         break;
     }
   }
+  
   public void ejectPiece(double speed){
     effector.setRollers(speed);
   }

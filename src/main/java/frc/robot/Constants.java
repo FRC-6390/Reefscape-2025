@@ -137,6 +137,7 @@ public interface Constants {
         
 
         int MOTOR = 31;
+        int ALGAE_MOTOR = 32;
         
         int ROLLER = 20;
         // int RIGHT_MOTOR = 30;

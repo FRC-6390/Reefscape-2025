@@ -37,7 +37,7 @@ public class PassiveAlign extends Command {
   public LaserCan las;
   public RobotBase<?> base;
   public ProfiledPIDController rController = new ProfiledPIDController(1.2, 0, 0.0, new Constraints(1, 1));
-  // public ProfiledPIDController xController = new ProfiledPIDController(0.06, 0, 0.0, new Constraints(50, 75));
+  public PIDController controller = new PIDController(0.025, 0, 0);
   public ProfiledPIDController xController = new ProfiledPIDController(1, 0, 0.0, new Constraints(4, 3));
 
   public FilteredValue rotationFiltered;
@@ -75,35 +75,37 @@ public class PassiveAlign extends Command {
     if(limeLight.hasValidTarget())
     {
 
-      Pose2d fieldPose = localization.getFieldPose();
-      long id = limeLight.getAprilTagID();
+      double r = -controller.calculate(rotationFiltered.get(), 0);
+      base.getDrivetrain().getRobotSpeeds().setFeedbackSpeeds(0,0,r);
+      // Pose2d fieldPose = localization.getFieldPose();
+      // long id = limeLight.getAprilTagID();
 
-      ReefPole pole = ReefPole.getPoleFromID(id);
+      // ReefPole pole = ReefPole.getPoleFromID(id);
 
-      Rotation2d targetPose = new Rotation2d();
-      Translation2d translation2d = new Translation2d();
+      // Rotation2d targetPose = new Rotation2d();
+      // Translation2d translation2d = new Translation2d();
       
-      if(pole != null)
-      {
-      targetPose = pole.getRotation().plus(limeLight.config.getRotationRelativeToForwards());
-      translation2d = pole.getTranslation();
-      }
+      // if(pole != null)
+      // {
+      // targetPose = pole.getRotation().plus(limeLight.config.getRotationRelativeToForwards());
+      // translation2d = pole.getTranslation();
+      // }
       
-      // double r = rController.calculate(fieldPose.getRotation().getRadians(), MathUtil.angleModulus(targetPose.getRadians()));   
-      double x = xController.calculate(fieldPose.getX(),translation2d.getX());
-      double y = -xController.calculate(fieldPose.getY(),translation2d.getY());
-      base.getDrivetrain().getRobotSpeeds().setFeedbackSpeeds(ChassisSpeeds.fromFieldRelativeSpeeds(new ChassisSpeeds(x,-y, 0), base.getLocalization().getFieldPose().getRotation()));
+      // // double r = rController.calculate(fieldPose.getRotation().getRadians(), MathUtil.angleModulus(targetPose.getRadians()));   
+      // double x = xController.calculate(fieldPose.getX(),translation2d.getX());
+      // double y = -xController.calculate(fieldPose.getY(),translation2d.getY());
+      // base.getDrivetrain().getRobotSpeeds().setFeedbackSpeeds(ChassisSpeeds.fromFieldRelativeSpeeds(new ChassisSpeeds(x,-y, 0), base.getLocalization().getFieldPose().getRotation()));
       
-      if(pole != null)
-      {
-      SmartDashboard.putString("target", pole.name());
-      }
-      SmartDashboard.putNumber("target angle", targetPose.getDegrees());
-      SmartDashboard.putNumber("current angle", fieldPose.getRotation().getDegrees());
-      SmartDashboard.putNumber("target pose X", translation2d.getX());
-      SmartDashboard.putNumber("current pose X", fieldPose.getX());
+      // if(pole != null)
+      // {
+      // SmartDashboard.putString("target", pole.name());
+      // }
+      // SmartDashboard.putNumber("target angle", targetPose.getDegrees());
+      // SmartDashboard.putNumber("current angle", fieldPose.getRotation().getDegrees());
+      // SmartDashboard.putNumber("target pose X", translation2d.getX());
+      // SmartDashboard.putNumber("current pose X", fieldPose.getX());
 
-      SmartDashboard.putNumber("xOffsetFiltered", xOffsetFiltered.get());
+      // SmartDashboard.putNumber("xOffsetFiltered", xOffsetFiltered.get());
 
       // if(limeLight.getTargetHorizontalOffset() < 50 && las.getMeasurement().status == LaserCan.LASERCAN_STATUS_VALID_MEASUREMENT)
       // {
