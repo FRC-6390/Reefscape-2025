@@ -26,7 +26,12 @@ import ca.frc6390.athena.core.RobotLocalization;
 import ca.frc6390.athena.drivetrains.swerve.SwerveDrivetrain;
 import ca.frc6390.athena.mechanisms.StateMachine.SetpointProvider;
 import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.DriverStation.Alliance;
+import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
@@ -48,6 +53,52 @@ import frc.robot.utils.ReefScoringPos.ReefPole;
 
 public class RobotContainer {
 
+  public enum AUTOS {
+        
+        LEFTSIDE(new PathPlannerAuto("Choreo"));
+        
+        private final PathPlannerAuto auto;
+    
+        AUTOS(PathPlannerAuto auto){
+            this.auto = auto;
+        }
+
+        public PathPlannerAuto getAuto()
+        {
+          return this.auto;
+        }
+    }
+
+    public enum PATHS {
+        
+      SIDEA("SideA"),
+      SIDEC("SideC"),
+      SIDEE("SideE"),
+      SIDEG("SideG"),
+      SIDEI("SideI"),
+      SIDEK("SideK");
+
+      
+      private PathPlannerPath path;
+      private final String pathName;
+      
+        
+      PATHS(String pathName){
+        this.pathName = pathName;
+        try {
+          this.path = PathPlannerPath.fromPathFile(pathName);
+        } catch (FileVersionException | IOException | ParseException e) {
+            e.printStackTrace();
+            this.path =null;
+          }
+      }
+
+      public PathPlannerPath getPath()
+      {
+        return path;
+      }
+  }
+
   public final LaserCan las = new LaserCan(59);
   public Elevator elevator = new Elevator();
   public Climber climber = new Climber();
@@ -59,16 +110,19 @@ public class RobotContainer {
                                                               .setRightInverted(true)
                                                               .setSticksDeadzone(Constants.Controllers.STICK_DEADZONE)
                                                               .setLeftSlewrate(3.5);
- 
+  public SendableChooser<AUTOS> chooser = new SendableChooser<>();
+
   public RobotContainer() 
   {
     configureBindings();
     robotBase.getDrivetrain().setDriveCommand(driverController);
-    // elevator.shuffleboard("Elevator");
-    // climber.shuffleboard("Climber");
-    // effector.shuffleboard("Effector");
+    chooser.addOption("LEFT SIDE", AUTOS.LEFTSIDE);
+    SmartDashboard.putData(chooser);
+    elevator.shuffleboard("Elevator");
+    climber.shuffleboard("Climber");
+    effector.shuffleboard("Effector");
 
-    // NamedCommands.registerCommand("L4", superstructure.setElevator(ElevatorState.L4));
+    NamedCommands.registerCommand("L4", new Elevate(ElevatorState.L4, las, superstructure, robotBase));
     // NamedCommands.registerCommand("L3", superstructure.setElevator(ElevatorState.L3));
     // NamedCommands.registerCommand("L2", superstructure.setElevator(ElevatorState.L2));
     // NamedCommands.registerCommand("L1", superstructure.setElevator(ElevatorState.L1));
@@ -82,12 +136,12 @@ public class RobotContainer {
   {
     driverController.start.onTrue(() -> robotBase.getDrivetrain().getIMU().setYaw(0)).after(3).onTrue(() -> robotBase.getLocalization().resetFieldPose(0,0,0));
     driverController.y.toggleOnTrue(new PassiveAlign(robotBase, las));
-    // // driverController.a.onTrue(new DriveToPoint(robotBase , las));
-    // // driverController.b.onTrue(new AutoAlign(robotBase.getCameraFacing(ReefPole.A.getTranslation()).config.table(),robotBase , las));
-    // driverController.leftBumper.onTrue(new Elevate(ElevatorState.L4, las, superstructure, robotBase));
+    driverController.a.onTrue(new DriveToPoint(robotBase , las));
+    // driverController.b.onTrue(new AutoAlign(robotBase.getCameraFacing(ReefPole.A.getTranslation()).config.table(),robotBase , las));
+    driverController.leftBumper.onTrue(new Elevate(ElevatorState.L4, las, superstructure, robotBase));
   }
-  public Command getAutonomousCommand() {
-    
-    return new PathPlannerAuto("Choreo");
+  public Command getAutonomousCommand() 
+  {
+   return chooser.getSelected().getAuto(); 
   }
 }

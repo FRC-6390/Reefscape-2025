@@ -103,7 +103,7 @@ public class Elevator extends SubsystemBase{
     controller.setTolerance(0.2);
     controller.reset(getHeightFromFloor());
     feedforward = Constants.Elevator.FEEDFORWARD;
-    stateMachine = new StateMachine<ElevatorState>(ElevatorState.Home, controller::atSetpoint);
+    stateMachine = new StateMachine<ElevatorState>(ElevatorState.StartConfiguration, controller::atSetpoint);
 
   }
   //POSITION IN INCHES
@@ -142,8 +142,8 @@ public class Elevator extends SubsystemBase{
     //negative is up, this makes negative down
     //SHOULD BE SPEED = -SPEED
     speed = speed;
-    // leftMotor.set(speed);
-    // rightMotor.set(speed);
+    leftMotor.set(speed);
+    rightMotor.set(speed);
   }
   
   public void stop() {

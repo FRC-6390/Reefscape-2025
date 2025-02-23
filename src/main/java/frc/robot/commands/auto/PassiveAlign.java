@@ -37,7 +37,9 @@ public class PassiveAlign extends Command {
   public LaserCan las;
   public RobotBase<?> base;
   public ProfiledPIDController rController = new ProfiledPIDController(1.2, 0, 0.0, new Constraints(1, 1));
-  public ProfiledPIDController xController = new ProfiledPIDController(0.06, 0, 0.0, new Constraints(50, 75));
+  // public ProfiledPIDController xController = new ProfiledPIDController(0.06, 0, 0.0, new Constraints(50, 75));
+  public ProfiledPIDController xController = new ProfiledPIDController(1, 0, 0.0, new Constraints(4, 3));
+
   public FilteredValue rotationFiltered;
   public FilteredValue xOffsetFiltered;
   
@@ -78,16 +80,28 @@ public class PassiveAlign extends Command {
 
       ReefPole pole = ReefPole.getPoleFromID(id);
 
-      Rotation2d targetPose = pole.getRotation().plus(limeLight.config.getRotationRelativeToForwards());
-     
+      Rotation2d targetPose = new Rotation2d();
+      Translation2d translation2d = new Translation2d();
       
-      double r = rController.calculate(fieldPose.getRotation().getRadians(), MathUtil.angleModulus(targetPose.getRadians()));   
-      double x = limeLight.config.getAngleCos() * xController.calculate(xOffsetFiltered.getFiltered(),0);
-      base.getDrivetrain().getRobotSpeeds().setFeedbackSpeeds(0,x,r);
+      if(pole != null)
+      {
+      targetPose = pole.getRotation().plus(limeLight.config.getRotationRelativeToForwards());
+      translation2d = pole.getTranslation();
+      }
       
+      // double r = rController.calculate(fieldPose.getRotation().getRadians(), MathUtil.angleModulus(targetPose.getRadians()));   
+      double x = xController.calculate(fieldPose.getX(),translation2d.getX());
+      double y = -xController.calculate(fieldPose.getY(),translation2d.getY());
+      base.getDrivetrain().getRobotSpeeds().setFeedbackSpeeds(ChassisSpeeds.fromFieldRelativeSpeeds(new ChassisSpeeds(x,-y, 0), base.getLocalization().getFieldPose().getRotation()));
+      
+      if(pole != null)
+      {
       SmartDashboard.putString("target", pole.name());
+      }
       SmartDashboard.putNumber("target angle", targetPose.getDegrees());
       SmartDashboard.putNumber("current angle", fieldPose.getRotation().getDegrees());
+      SmartDashboard.putNumber("target pose X", translation2d.getX());
+      SmartDashboard.putNumber("current pose X", fieldPose.getX());
 
       SmartDashboard.putNumber("xOffsetFiltered", xOffsetFiltered.get());
 

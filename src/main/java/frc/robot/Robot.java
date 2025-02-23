@@ -56,6 +56,7 @@ public class Robot extends TimedRobot {
   @Override
   public void teleopInit() {
     m_robotContainer.robotBase.getDrivetrain().getRobotSpeeds().stopAutoSpeeds();
+    
     if (m_autonomousCommand != null) {
       m_autonomousCommand.cancel();
     }

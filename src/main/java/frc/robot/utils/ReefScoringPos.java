@@ -12,6 +12,7 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
+import frc.robot.RobotContainer.PATHS;
 
 public class ReefScoringPos {
 
@@ -20,29 +21,29 @@ public class ReefScoringPos {
 
      public enum ReefPole {
         
-        A(18, 7, new Pose2d(14.3,4, Rotation2d.fromDegrees(180)), new Pose2d(3.2, 4,  Rotation2d.fromDegrees(0)), "SideA"),
-        B(18, 7, new Pose2d(14.3,4, Rotation2d.fromDegrees(180)), new Pose2d(3.2,4, Rotation2d.fromDegrees(0)), "SideA"),
+        A(18, 7, new Pose2d(14.3,4, Rotation2d.fromDegrees(180)), new Pose2d(3.2, 4,  Rotation2d.fromDegrees(0)), PATHS.SIDEA),
+        B(18, 7, new Pose2d(14.3,4, Rotation2d.fromDegrees(180)), new Pose2d(3.2,4, Rotation2d.fromDegrees(0)), PATHS.SIDEA),
 
-        C(17, 8, new Pose2d(13.7,5.1,  Rotation2d.fromDegrees(-120)), new Pose2d(3.8,3, Rotation2d.fromDegrees(60)), "SideC"),
-        D(17, 8, new Pose2d(13.7,5.1,  Rotation2d.fromDegrees(-120)), new Pose2d(3.8,3, Rotation2d.fromDegrees(60)), "SideC"),
+        C(17, 8, new Pose2d(13.7,5.1,  Rotation2d.fromDegrees(-120)), new Pose2d(3.8,3, Rotation2d.fromDegrees(60)), PATHS.SIDEC),
+        D(17, 8, new Pose2d(13.7,5.1,  Rotation2d.fromDegrees(-120)), new Pose2d(3.8,3, Rotation2d.fromDegrees(60)), PATHS.SIDEC),
 
-        E(22, 9, new Pose2d(12.4,5.1,  Rotation2d.fromDegrees(-60)), new Pose2d(5.1,2.9,  Rotation2d.fromDegrees(120)), "SideE"),
-        F(22, 9, new Pose2d(12.4,5.1,  Rotation2d.fromDegrees(-60)), new Pose2d(5.1,2.9,  Rotation2d.fromDegrees(120)), "SideE"),
+        E(22, 9, new Pose2d(12.4,5.1,  Rotation2d.fromDegrees(-60)), new Pose2d(5.1,2.9,  Rotation2d.fromDegrees(120)), PATHS.SIDEE),
+        F(22, 9, new Pose2d(12.4,5.1,  Rotation2d.fromDegrees(-60)), new Pose2d(5.1,2.9,  Rotation2d.fromDegrees(120)), PATHS.SIDEE),
 
-        G(21, 10, new Pose2d(11.8,4, Rotation2d.fromDegrees(0)), new Pose2d(5.8,4, Rotation2d.fromDegrees(180)), "SideG"),
-        H(21, 10, new Pose2d(11.8,4, Rotation2d.fromDegrees(0)), new Pose2d(5.8,4, Rotation2d.fromDegrees(180)), "SideG"),
+        G(21, 10, new Pose2d(11.8,4, Rotation2d.fromDegrees(0)), new Pose2d(5.8,4, Rotation2d.fromDegrees(180)), PATHS.SIDEG),
+        H(21, 10, new Pose2d(11.8,4, Rotation2d.fromDegrees(0)), new Pose2d(5.8,4, Rotation2d.fromDegrees(180)), PATHS.SIDEG),
 
-        I(20, 11, new Pose2d(12.4,3, Rotation2d.fromDegrees(60)), new Pose2d(5.1,5.1,  Rotation2d.fromDegrees(-120)), "SideI"),
-        J(20, 11, new Pose2d(12.4,3, Rotation2d.fromDegrees(60)), new Pose2d(5.1,5.1,  Rotation2d.fromDegrees(-120)), "SideI"),
+        I(20, 11, new Pose2d(12.4,3, Rotation2d.fromDegrees(60)), new Pose2d(5.1,5.1,  Rotation2d.fromDegrees(-120)), PATHS.SIDEI),
+        J(20, 11, new Pose2d(12.4,3, Rotation2d.fromDegrees(60)), new Pose2d(5.1,5.1,  Rotation2d.fromDegrees(-120)), PATHS.SIDEI),
         
-        K(19, 6, new Pose2d(13.7,3, Rotation2d.fromDegrees(120)), new Pose2d(3.8,5, Rotation2d.fromDegrees(-60)), "SideK"),
-        L(19, 6, new Pose2d(13.7,3, Rotation2d.fromDegrees(120)), new Pose2d(3.8,5, Rotation2d.fromDegrees(-60)), "SideK");
+        K(19, 6, new Pose2d(13.7,3, Rotation2d.fromDegrees(120)), new Pose2d(3.8,5, Rotation2d.fromDegrees(-60)), PATHS.SIDEK),
+        L(19, 6, new Pose2d(13.7,3, Rotation2d.fromDegrees(120)), new Pose2d(3.8,5, Rotation2d.fromDegrees(-60)), PATHS.SIDEK);
     
         private final long apriltagIdRed, apriltagIdBlue;
         private final Pose2d redPose, bluePose;
-        private final String path;
+        private final PATHS path;
     
-        ReefPole(long apriltagIdBlue, long apriltagIdRed, Pose2d redPose, Pose2d bluePose, String path) {
+        ReefPole(long apriltagIdBlue, long apriltagIdRed, Pose2d redPose, Pose2d bluePose, PATHS path) {
             this.apriltagIdRed = apriltagIdRed;
             this.apriltagIdBlue = apriltagIdBlue;
             this.redPose = redPose;
@@ -126,13 +127,7 @@ public class ReefScoringPos {
 
          public PathPlannerPath getPath()
          {
-            try {
-                return PathPlannerPath.fromPathFile(path);
-            } catch (FileVersionException | IOException | ParseException e) {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
-                return null;
-            }
+           return path.getPath();
          }
     }
 

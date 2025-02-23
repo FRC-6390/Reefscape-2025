@@ -56,8 +56,8 @@ public class DriveToPoint extends Command {
   @Override
   public void end(boolean interrupted) 
   {
-    if(ReefPole.getPoleFromID((int)limeLight.getAprilTagID()) != null){
-    CommandScheduler.getInstance().schedule(new SequentialCommandGroup(AutoBuilder.followPath(ReefPole.getPoleFromID((int)limeLight.getAprilTagID()).getPath()), new AutoAlign(limeLight.config.table(),robotBase, las)));
+    if(ReefPole.getPoleFromID(limeLight.getAprilTagID()) != null){
+    CommandScheduler.getInstance().schedule(new SequentialCommandGroup(AutoBuilder.followPath(ReefPole.getPoleFromID(limeLight.getAprilTagID()).getPath())));
     
     }
 

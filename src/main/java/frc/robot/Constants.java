@@ -61,7 +61,7 @@ public interface Constants {
                                                     
                                                     .setDriftActivationSpeed(0.0);
 
-        RobotLocalizationConfig LOCALIZATION_CONFIG = new RobotLocalizationConfig().setSlipThresh(0.2).setPoseEstimateOrigin(PoseEstimateWithLatencyType.BOT_POSE_MT2_BLUE).setVision(0.2, 0.2, 9999).setAutoPlannerPID(new PIDConstants(5,0,0), new PIDConstants(2,0,0)).setVisionEnabled(true);
+        RobotLocalizationConfig LOCALIZATION_CONFIG = new RobotLocalizationConfig().setVisionMultitag(0.5, 0.5, 99999).setSlipThresh(0.2).setPoseEstimateOrigin(PoseEstimateWithLatencyType.BOT_POSE_MT2_BLUE).setVision(0.5, 0.5, 9999).setAutoPlannerPID(new PIDConstants(5,0,0), new PIDConstants(2,0,0)).setVisionEnabled(true);
 
         RobotBaseConfig<SwerveDrivetrain> ROBOT_BASE = RobotBaseConfig.swerve(DRIVETRAIN_CONFIG)
                                                                       .setLocalization(LOCALIZATION_CONFIG)
@@ -137,6 +137,7 @@ public interface Constants {
         
 
         int MOTOR = 31;
+        
         int ROLLER = 20;
         // int RIGHT_MOTOR = 30;
         double ENCODER_OFFSET = 0;
