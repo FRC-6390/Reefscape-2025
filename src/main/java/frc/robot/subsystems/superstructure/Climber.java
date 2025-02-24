@@ -18,15 +18,15 @@ import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
 public class Climber extends SubsystemBase{
-  public TalonFX leftMotor;
-  public TalonFX rightMotor;
-  public CANcoder encoder;
+  // public TalonFX leftMotor;
+  // public TalonFX rightMotor;
+  // public CANcoder encoder;
   
-  public GenericLimitSwitch limitSwitch;
+  // public GenericLimitSwitch limitSwitch;
   public PIDController controller;
 
   public StateMachine<ClimberState> stateMachine;
-  public StatusSignal<Angle> getAbsolutePosition = new StatusSignal<>(null, null, null);
+  // public StatusSignal<Angle> getAbsolutePosition = new StatusSignal<>(null, null, null);
 
   public enum ClimberState implements SetpointProvider
   {
@@ -46,26 +46,26 @@ public class Climber extends SubsystemBase{
   /** Creates a new Climber. */
   public Climber() 
   {
-    leftMotor = new TalonFX(Constants.Climber.LEFT_MOTOR, Constants.Climber.CANBUS);
-    rightMotor = new TalonFX(Constants.Climber.RIGHT_MOTOR, Constants.Climber.CANBUS);
-    encoder = new CANcoder(Constants.Climber.ENCODER, Constants.Climber.CANBUS);
-    limitSwitch = new GenericLimitSwitch(Constants.Climber.LIMIT_SWITCH);
+    // leftMotor = new TalonFX(Constants.Climber.LEFT_MOTOR, Constants.Climber.CANBUS);
+    // rightMotor = new TalonFX(Constants.Climber.RIGHT_MOTOR, Constants.Climber.CANBUS);
+    // encoder = new CANcoder(Constants.Climber.ENCODER, Constants.Climber.CANBUS);
+    // limitSwitch = new GenericLimitSwitch(Constants.Climber.LIMIT_SWITCH);
 
-    getAbsolutePosition = encoder.getAbsolutePosition();
+    // getAbsolutePosition = encoder.getAbsolutePosition();
 
     controller = Constants.Climber.CONTORLLER;
     controller.enableContinuousInput(0, 90);
     controller.setTolerance(1);
 
-    leftMotor.getConfigurator().apply(new TalonFXConfiguration());
-    rightMotor.getConfigurator().apply(new TalonFXConfiguration());
+    // leftMotor.getConfigurator().apply(new TalonFXConfiguration());
+    // rightMotor.getConfigurator().apply(new TalonFXConfiguration());
 
-    leftMotor.setNeutralMode(NeutralModeValue.Brake);
-    rightMotor.setNeutralMode(NeutralModeValue.Brake);
+    // leftMotor.setNeutralMode(NeutralModeValue.Brake);
+    // rightMotor.setNeutralMode(NeutralModeValue.Brake);
 
     CANcoderConfiguration config = new CANcoderConfiguration();
     config.MagnetSensor.AbsoluteSensorDiscontinuityPoint = 1;
-    encoder.getConfigurator().apply(config);
+    // encoder.getConfigurator().apply(config);
 
     stateMachine = new StateMachine<ClimberState>(ClimberState.Home, this::test);
   }
@@ -76,12 +76,12 @@ public class Climber extends SubsystemBase{
   }
   public void setMotors(double speed)
   {
-    if(limitSwitch.getAsBoolean() && speed > 0)
+    // if(limitSwitch.getAsBoolean() && speed > 0)
     {
-      speed = 0;
+      // speed = 0;
     }
-    leftMotor.set(speed);
-    rightMotor.set(-speed);
+    // leftMotor.set(speed);
+    // rightMotor.set(-speed);
   }
 
   public StateMachine<ClimberState> getStateMachine()
@@ -90,8 +90,8 @@ public class Climber extends SubsystemBase{
   }
 
   public void stopMotors() {
-    leftMotor.stopMotor();
-    rightMotor.stopMotor();
+    // leftMotor.stopMotor();
+    // rightMotor.stopMotor();
   }
 
   public void update()
@@ -108,7 +108,7 @@ public class Climber extends SubsystemBase{
   }
 
   public ShuffleboardTab shuffleboard(ShuffleboardTab tab) {
-    tab.addBoolean("Limit Switch", limitSwitch::getAsBoolean).withPosition(1,1);
+    // tab.addBoolean("Limit Switch", limitSwitch::getAsBoolean).withPosition(1,1);
     tab.addString("Setpoint", () -> stateMachine.getGoalState().name()).withPosition(2,1);
     tab.addNumber("PID Output", () -> controller.calculate(getAngle().getDegrees(), stateMachine.getGoalState().getSetpoint())).withPosition(3,1);
     tab.addNumber("Angle", () -> getAngle().getDegrees()).withPosition(4,1);
@@ -119,7 +119,8 @@ public class Climber extends SubsystemBase{
   }
 
   public double getPosition() {
-    return getAbsolutePosition.getValueAsDouble();
+    return 0;
+    // return getAbsolutePosition.getValueAsDouble();
   }
 
   public Rotation2d getAngle() {
@@ -127,7 +128,7 @@ public class Climber extends SubsystemBase{
   }
 
   public void refresh(){
-    getAbsolutePosition.refresh();
+    // getAbsolutePosition.refresh();
     stateMachine.update();
   }
 

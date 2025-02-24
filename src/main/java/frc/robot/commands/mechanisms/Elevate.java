@@ -8,6 +8,8 @@ import au.grapplerobotics.LaserCan;
 import ca.frc6390.athena.controllers.DelayedOutput;
 import ca.frc6390.athena.core.RobotBase;
 import ca.frc6390.athena.sensors.camera.limelight.LimeLight;
+import ca.frc6390.athena.sensors.camera.limelight.LimeLight.PoseEstimateType;
+import ca.frc6390.athena.sensors.camera.limelight.LimeLight.PoseEstimateWithLatencyType;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -24,12 +26,11 @@ public class Elevate extends Command {
   public LimeLight limeLight;
   public LaserCan las;
   public RobotBase<?> base;
-  public double xOffset;
   public boolean hasSeen;
-  public double area;
   public Translation2d translation = new Translation2d();
   public DelayedOutput output;
   public double dist;
+  public double distToTag;
   
   /** Creates a new Elevate. */
   public Elevate(ElevatorState state,LaserCan las, Superstructure superstructure, RobotBase<?> base) {
@@ -52,9 +53,8 @@ public class Elevate extends Command {
     
     // output = new DelayedOutput(this::closeEnough, 0.25);
     hasSeen = false;
-    xOffset = 0;
     dist = 99999;
-    area = 0;
+    distToTag = 9999;
   }
 
   public boolean closeEnough()
@@ -75,56 +75,55 @@ public class Elevate extends Command {
   @Override
   public void execute() 
   {
-    SmartDashboard.putNumber("Tag Area", area);
     SmartDashboard.putNumber("Las", las.getMeasurement().distance_mm);
-    SmartDashboard.putNumber("Offset", xOffset);
-    SmartDashboard.putBoolean("haSeen", hasSeen);
+  
+    SmartDashboard.putNumber("DistToTag", distToTag);
 
-    if(limeLight.config.table() == "limelight-driver")
-    {
-      if(state.equals(ElevatorState.L4))
-      {
-        superstructure.endEffectorStateManager(EndEffectorState.LeftL4);
-      }
-      else
-      {
-        superstructure.endEffectorStateManager(EndEffectorState.Left);
-      }
-    }
-    if(limeLight.config.table() == "limelight-tag")
-    {
-      if(state.equals(ElevatorState.L4))
-      {
-        superstructure.endEffectorStateManager(EndEffectorState.RightL4);
-      }
-      else
-      {
-        superstructure.endEffectorStateManager(EndEffectorState.Right);
-      }
-    }
+    // if(limeLight.config.table() == "limelight-driver")
+    // {
+    //   if(state.equals(ElevatorState.L4))
+    //   {
+    //     superstructure.endEffectorStateManager(EndEffectorState.LeftL4);
+    //   }
+    //   else
+    //   {
+    //     superstructure.endEffectorStateManager(EndEffectorState.Left);
+    //   }
+    // }
+    // if(limeLight.config.table() == "limelight-tag")
+    // {
+    //   if(state.equals(ElevatorState.L4))
+    //   {
+    //     superstructure.endEffectorStateManager(EndEffectorState.RightL4);
+    //   }
+    //   else
+    //   {
+    //     superstructure.endEffectorStateManager(EndEffectorState.Right);
+    //   }
+    // }
 
     if(limeLight.hasValidTarget())
     {
-      xOffset = limeLight.getTargetHorizontalOffset();
-      area = limeLight.getTargetArea();
       if(ReefPole.getPoleFromID((int)limeLight.getAprilTagID()) != null)
       {
       translation = ReefPole.getPoleFromID((int)limeLight.getAprilTagID()).getTranslation();
+      distToTag = Math.abs(limeLight.getPoseEstimate(PoseEstimateType.BOT_POSE_TARGET_SPACE).getPose().getY());
       }
-      if(!hasSeen)
-      { 
-        hasSeen = true;
+      else
+      {
+        distToTag = 9999;
       }
     }
+    
 
     if(las.getMeasurement() != null)
     {
-    if(hasSeen && las.getMeasurement().status == LaserCan.LASERCAN_STATUS_VALID_MEASUREMENT && las.getMeasurement().distance_mm < 800)
+    if(distToTag < 0.35 && las.getMeasurement().status == LaserCan.LASERCAN_STATUS_VALID_MEASUREMENT && las.getMeasurement().distance_mm < 800)
     {
       superstructure.elevatorStateManager(state);
       hasSeen = false;      
     }
-    else if(las.getMeasurement().status == LaserCan.LASERCAN_STATUS_VALID_MEASUREMENT && las.getMeasurement().distance_mm > 800)
+    else if(distToTag > 0.35 || las.getMeasurement().status != LaserCan.LASERCAN_STATUS_VALID_MEASUREMENT || las.getMeasurement().distance_mm > 800)
     {
       superstructure.elevatorStateManager(ElevatorState.Feeder);
     }

@@ -157,11 +157,10 @@ public class RobotContainer {
     driverController.rightStick.toggleOnTrue(new PassiveAlign(robotBase, las));
 
     //AUTO ALIGN (RIGHT BUMPER)
-    driverController.rightBumper.onTrue(new DriveToPoint(robotBase , las));
+    driverController.rightBumper.whileTrue(new DriveToPoint(robotBase , las));
 
     //EJECT PIECE MANUALLY
-    driverController.leftBumper.onTrue(new InstantCommand(() -> superstructure.ejectPiece(1)));
-    driverController.leftBumper.onFalse(new InstantCommand(() -> superstructure.ejectPiece(0)));
+    driverController.leftBumper.onTrue(() -> superstructure.ejectPiece(1)).onFalse(() -> superstructure.ejectPiece(0));
 
     //SCORING COMMANDS
     driverController.a.onTrue(Commands.sequence(new InstantCommand(() -> CommandScheduler.getInstance().cancel(l2, l3, l4)), l1));
@@ -180,16 +179,16 @@ public class RobotContainer {
     //----------------------------------------------------------DRIVER 2---------------------------------------------------------------//
 
     //ELEVATOR OVERRIDE
-    driverController.a.onTrue(Commands.sequence(new InstantCommand(() -> CommandScheduler.getInstance().cancel(l1, l2, l3, l4)), superstructure.setElevator(ElevatorState.L1)));
-    driverController.b.onTrue(Commands.sequence(new InstantCommand(() -> CommandScheduler.getInstance().cancel(l1, l2, l3, l4)),superstructure.setElevator(ElevatorState.L2)));
-    driverController.y.onTrue(Commands.sequence(new InstantCommand(() -> CommandScheduler.getInstance().cancel(l1, l2, l3, l4)),superstructure.setElevator(ElevatorState.L3)));
-    driverController.x.onTrue(Commands.sequence(new InstantCommand(() -> CommandScheduler.getInstance().cancel(l1, l2, l3, l4)),superstructure.setElevator(ElevatorState.L4)));
+    driverController2.a.onTrue(Commands.sequence(new InstantCommand(() -> CommandScheduler.getInstance().cancel(l1, l2, l3, l4)), superstructure.setElevator(ElevatorState.L1)));
+    driverController2.b.onTrue(Commands.sequence(new InstantCommand(() -> CommandScheduler.getInstance().cancel(l1, l2, l3, l4)),superstructure.setElevator(ElevatorState.L2)));
+    driverController2.y.onTrue(Commands.sequence(new InstantCommand(() -> CommandScheduler.getInstance().cancel(l1, l2, l3, l4)),superstructure.setElevator(ElevatorState.L3)));
+    driverController2.x.onTrue(Commands.sequence(new InstantCommand(() -> CommandScheduler.getInstance().cancel(l1, l2, l3, l4)),superstructure.setElevator(ElevatorState.L4)));
 
     //EFFECTOR OVERRIDE
-    driverController.a.onTrue(Commands.sequence(new InstantCommand(() -> CommandScheduler.getInstance().cancel(l1, l2, l3, l4)), superstructure.setEndEffectir(EndEffectorState.Left)));
-    driverController.b.onTrue(Commands.sequence(new InstantCommand(() -> CommandScheduler.getInstance().cancel(l1, l2, l3, l4)),superstructure.setEndEffectir(EndEffectorState.LeftL4)));
-    driverController.y.onTrue(Commands.sequence(new InstantCommand(() -> CommandScheduler.getInstance().cancel(l1, l2, l3, l4)),superstructure.setEndEffectir(EndEffectorState.Right)));
-    driverController.x.onTrue(Commands.sequence(new InstantCommand(() -> CommandScheduler.getInstance().cancel(l1, l2, l3, l4)),superstructure.setEndEffectir(EndEffectorState.RightL4)));
+    driverController2.a.onTrue(Commands.sequence(new InstantCommand(() -> CommandScheduler.getInstance().cancel(l1, l2, l3, l4)), superstructure.setEndEffectir(EndEffectorState.Left)));
+    driverController2.b.onTrue(Commands.sequence(new InstantCommand(() -> CommandScheduler.getInstance().cancel(l1, l2, l3, l4)),superstructure.setEndEffectir(EndEffectorState.LeftL4)));
+    driverController2.y.onTrue(Commands.sequence(new InstantCommand(() -> CommandScheduler.getInstance().cancel(l1, l2, l3, l4)),superstructure.setEndEffectir(EndEffectorState.Right)));
+    driverController2.x.onTrue(Commands.sequence(new InstantCommand(() -> CommandScheduler.getInstance().cancel(l1, l2, l3, l4)),superstructure.setEndEffectir(EndEffectorState.RightL4)));
 
     
   }

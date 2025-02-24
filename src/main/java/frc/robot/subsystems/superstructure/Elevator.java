@@ -54,7 +54,7 @@ public class Elevator extends SubsystemBase{
     L2(10),
     L3(20),
     L4(30),
-    Feeder(14);
+    Feeder(0);
 
 
     double pos;
