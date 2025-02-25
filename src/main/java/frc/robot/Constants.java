@@ -37,7 +37,7 @@ public interface Constants {
         // double[] ENCODER_OFFSETS = {0.697,3.123,2.445,-0.851};
 
         // OLD PATRICK OFFSETS
-        double[] ENCODER_OFFSETS = {0.366943359375, 0.7001953125,0.176513671875,0.38476562499999994};
+        double[] ENCODER_OFFSETS = {0.7294921875, 0.599609375,0.6860351562500001, 0.8649902343749999};
 
         // NEW PATRICK OFFSETS
         // double[] ENCODER_OFFSETS = {0,0,0,0};
@@ -49,13 +49,17 @@ public interface Constants {
         // double[] ENCODER_OFFSETS = {-0.366943359375, -0.19970703125,-0.176513671875,-0.880126953125};
         
         SwerveDrivetrainConfig DRIVETRAIN_CONFIG = new SwerveDrivetrainConfig(IMUType.CTREPigeon2, false)
-                                                    .sameModule(SwerveVendorSDS.MK4i.L3.config(Motor.KRAKEN_X60,EncoderType.CTRECANcoder))
+                                                    .custom(
+                                                            SwerveVendorSDS.MK4n.L1_PLUS.config(Motor.KRAKEN_X60, EncoderType.CTRECANcoder).setPID(new PIDController(0.45,0,0)), 
+                                                            SwerveVendorSDS.MK4n.L1_PLUS.config(Motor.KRAKEN_X60,EncoderType.CTRECANcoder).setPID(new PIDController(0.45, 0, 0)), 
+                                                            SwerveVendorSDS.MK4i.L1_PLUS.config(Motor.KRAKEN_X60,EncoderType.CTRECANcoder).setPID(new PIDController(0.5 , 0,0)), 
+                                                            SwerveVendorSDS.MK4i.L1_PLUS.config(Motor.KRAKEN_X60,EncoderType.CTRECANcoder).setPID(new PIDController(0.5 , 0,0))
+                                                            )   
                                                     .setModuleLocations(TRACKWIDTH_METERS)
-                                                    .setRotationPID(new PIDController(0.5 , 0,0))
                                                     .setIDs(DrivetrainIDs.SWERVE_CHASSIS_STANDARD)
                                                     .setOffsets(ENCODER_OFFSETS)
                                                     .setCanbus(CANBUS)
-                                                    .setDriveInverted(false)
+                                                    .setDriveInverted(true)
                                                     .setFieldRelative(false)
                                                     .setDriftCorrectionPID(new PIDController(0, 0, 0))
                                                     
@@ -66,7 +70,7 @@ public interface Constants {
         RobotBaseConfig<SwerveDrivetrain> ROBOT_BASE = RobotBaseConfig.swerve(DRIVETRAIN_CONFIG)
                                                                       .setLocalization(LOCALIZATION_CONFIG)
                                                                       
-                                                                      .setVision(RobotVisionConfig.limelight(new LimelightConfig("limelight-driver").setAngleRelativeToForwards(180),new LimelightConfig("limelight-tag").setAngleRelativeToForwards(0)));
+                                                                      .setVision(RobotVisionConfig.limelight(new LimelightConfig("limelight-left").setAngleRelativeToForwards(-90),new LimelightConfig("limelight-right").setAngleRelativeToForwards(90)));
     }
 
     public interface Controllers {
@@ -98,14 +102,11 @@ public interface Constants {
     public interface Elevator {
         String CANBUS = "can";
         int ENCODER = 23;
-        //PATRICK IDS
-        int LEFT_MOTOR = 24;
-        int RIGHT_MOTOR = 26;
 
-        // int LEFT_MOTOR = 20;
-        // int RIGHT_MOTOR = 21;
+        int LEFT_MOTOR = 20;
+        int RIGHT_MOTOR = 21;
         double GEAR_DIAMETER_INCHES = 2d;
-        double OFFSET_FROM_FLOOR = 0;
+        double OFFSET_FROM_FLOOR = 24;
         double ENCODER_GEAR_RATIO = 1d/1d;
         double MOTOR_GEAR_RATIO = 6d/1d;
         int LIMIT_SWITCH = 0;
@@ -140,11 +141,13 @@ public interface Constants {
         int ALGAE_MOTOR = 32;
         
         int ROLLER = 20;
-        // int RIGHT_MOTOR = 30;
-        double ENCODER_OFFSET = 0;
+        int RIGHT_MOTOR = 30;
+        // double ENCODER_OFFSET = 0.551025390625;
+        double ENCODER_OFFSET = 0.997314453125;
         double ENCODER_GEAR_RATIO = 1d/1d; //from motors 125d/1d;
         String CANBUS = "can";
         PIDController CONTORLLER = new PIDController(0.015, 0, 0);
+        int CANDLE_ID = 77;
 
         // MechanismConfig<StatefulTurretMechanism<EndEffectorState>> ENDEFFECTOR_CONFIG = MechanismConfig.statefulTurret(new SimpleMotorFeedforward(0, 0,0,0), EndEffectorState.StartConfiguration)
         //                                                                             .addMotor(Motor.KRAKEN_X60, 31)

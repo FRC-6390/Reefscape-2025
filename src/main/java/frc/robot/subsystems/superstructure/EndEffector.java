@@ -1,5 +1,6 @@
 package frc.robot.subsystems.superstructure;
 
+import com.ctre.phoenix.led.CANdle;
 import com.ctre.phoenix6.StatusSignal;
 import com.ctre.phoenix6.configs.CANcoderConfiguration;
 import com.ctre.phoenix6.configs.MagnetSensorConfigs;
@@ -26,22 +27,23 @@ public class EndEffector extends SubsystemBase {
 
   //EJECTOR STUFF
   public TalonFX roller;
-  // public DigitalInput beamBreakLeft, beamBreakRight, beamBreakCenter;
+  public DigitalInput beamBreakLeft, beamBreakRight, beamBreakCenter;
   public double rollerSpeed = 0;
+  public CANdle candle;
 
   //ALGAE STUFF
-  // public TalonFX algaeExtender;
-  // public boolean atSetpoint = false;
-  // public GenericLimitSwitch limitSwitchAlgae;
+  public TalonFX algaeExtender;
+  public boolean atSetpoint = false;
+  public GenericLimitSwitch limitSwitchAlgae;
   public StateMachine<AlgaeExtensionState> algStateMachine;
-  // public StatusSignal<Angle> getPosition = new StatusSignal<>(null, null, null);
+  public StatusSignal<Angle> getPosition = new StatusSignal<>(null, null, null);
   
   //ROTATOR STUFF
-  // public TalonFX motor;
-  // public CANcoder encoder;
-  // public PIDController controller;
+  public TalonFX motor;
+  public CANcoder encoder;
+  public PIDController controller;
   public StateMachine<EndEffectorState> stateMachine;
-  // public StatusSignal<Angle> getAbsolutePosition = new StatusSignal<>(null, null, null);
+  public StatusSignal<Angle> getAbsolutePosition = new StatusSignal<>(null, null, null);
 
   public enum EndEffectorState implements SetpointProvider
   {
@@ -86,58 +88,54 @@ public class EndEffector extends SubsystemBase {
   public EndEffector() 
   {
     //ROTATOR STUFF
-      // motor = new TalonFX(Constants.EndEffector.MOTOR, Constants.EndEffector.CANBUS);
-        CANcoder encoder = new CANcoder(Constants.EndEffector.ENCODER, Constants.EndEffector.CANBUS);
+      motor = new TalonFX(Constants.EndEffector.MOTOR, Constants.EndEffector.CANBUS);
+      encoder = new CANcoder(Constants.EndEffector.ENCODER, Constants.EndEffector.CANBUS);
+      
 
-         // getAbsolutePosition = encoder.getAbsolutePosition();
+      getAbsolutePosition = encoder.getAbsolutePosition();
 
-      // motor.getConfigurator().apply(new TalonFXConfiguration());
-      // motor.setNeutralMode(NeutralModeValue.Brake);
+      motor.getConfigurator().apply(new TalonFXConfiguration());
+      motor.setNeutralMode(NeutralModeValue.Brake);
 
       CANcoderConfiguration config = new CANcoderConfiguration();
       config.MagnetSensor.AbsoluteSensorDiscontinuityPoint = 1;
 
-      // encoder.getConfigurator().apply(config);
+      encoder.getConfigurator().apply(config);
 
-      // controller = Constants.EndEffector.CONTORLLER;
-      // controller.enableContinuousInput(0, 90);
-      // controller.setTolerance(1);
+      controller = Constants.EndEffector.CONTORLLER;
+      controller.enableContinuousInput(0, 90);
+      controller.setTolerance(1);
 
-      stateMachine = new StateMachine<EndEffectorState>(EndEffectorState.Home, this::test);
+      stateMachine = new StateMachine<EndEffectorState>(EndEffectorState.Home, controller::atSetpoint);
 
     //EJECTOR STUFF
-      roller = new TalonFX(Constants.EndEffector.ROLLER, Constants.EndEffector.CANBUS);
-      // beamBreakLeft = new DigitalInput(1);
-      // beamBreakCenter = new DigitalInput(0);
-      // beamBreakRight = new DigitalInput(2);
+      // roller = new TalonFX(Constants.EndEffector.ROLLER, Constants.EndEffector.CANBUS);
+      beamBreakLeft = new DigitalInput(1);
+      beamBreakCenter = new DigitalInput(0);
+      beamBreakRight = new DigitalInput(2);
+      candle = new CANdle(Constants.EndEffector.CANDLE_ID, Constants.EndEffector.CANBUS);
 
     //ALGAE EXTENSION STUFF
-      // limitSwitchAlgae = new GenericLimitSwitch(Constants.EndEffector.LIMIT_SWITCH);
-      // algaeExtender = new TalonFX(Constants.EndEffector.ALGAE_MOTOR);
+      limitSwitchAlgae = new GenericLimitSwitch(Constants.EndEffector.LIMIT_SWITCH);
+      algaeExtender = new TalonFX(Constants.EndEffector.ALGAE_MOTOR);
 
-      // getPosition = algaeExtender.getRotorPosition();
+      getPosition = algaeExtender.getRotorPosition();
 
-      // algaeExtender.getConfigurator().apply(new TalonFXConfiguration());
-      // algaeExtender.setNeutralMode(NeutralModeValue.Brake);
+      algaeExtender.getConfigurator().apply(new TalonFXConfiguration());
+      algaeExtender.setNeutralMode(NeutralModeValue.Brake);
 
       algStateMachine = new StateMachine<AlgaeExtensionState>(AlgaeExtensionState.Home, this::algaeAtSetpoint);
-      // algaeExtender.setPosition(0);
+      algaeExtender.setPosition(0);
   }
-
-  public boolean test()
-  {
-    return true;
-  }
-
 
   public void setMotors(double speed)
   {
-    // motor.set(speed);
+    motor.set(speed);
   }
 
   public void setExtension(double speed)
   {
-    // algaeExtender.set(speed);
+    algaeExtender.set(speed);
   }
 
   public void setRollers(double speed)
@@ -155,27 +153,26 @@ public class EndEffector extends SubsystemBase {
     return algStateMachine;
   }
   public void stopMotors() {
-    // motor.stopMotor();
+    motor.stopMotor();
   }
 
   public double getPosition() {
-    // return getAbsolutePosition.getValueAsDouble();
-    return 0;
+    return getAbsolutePosition.getValueAsDouble();
+    // return 0;
   }
 
   public Rotation2d getAngle() {
-    return Rotation2d.fromRotations(getPosition() / Constants.EndEffector.ENCODER_GEAR_RATIO).minus(Rotation2d.fromDegrees(Constants.EndEffector.ENCODER_OFFSET));
+    return Rotation2d.fromRotations(getPosition() / Constants.EndEffector.ENCODER_GEAR_RATIO).minus(Rotation2d.fromRotations(Constants.EndEffector.ENCODER_OFFSET));
   }
 
   public boolean algaeAtSetpoint()
   {
-    // return atSetpoint;
-    return true;
+    return atSetpoint;
   }
 
   public void setAlgaeEncoder(double rotations)
   {
-    // algaeExtender.setPosition(0);
+    algaeExtender.setPosition(0);
   }
 
 
@@ -214,7 +211,15 @@ public class EndEffector extends SubsystemBase {
     // }
     
     // //ROLLER STUFF
-    roller.set(rollerSpeed);
+    // roller.set(rollerSpeed);
+    if(beamBreakCenter.get() && beamBreakLeft.get() && beamBreakRight.get())
+    {
+      candle.setLEDs(0, 255, 0);
+    }
+    else
+    {
+      candle.setLEDs(255, 0, 0);
+    }
   }
 
 
@@ -223,18 +228,21 @@ public class EndEffector extends SubsystemBase {
   }
 
   public ShuffleboardTab shuffleboard(ShuffleboardTab tab) {
-    // tab.addBoolean("Limit Switch", limitSwitchAlgae::getAsBoolean).withPosition(1,1);
+    tab.addBoolean("Limit Switch", limitSwitchAlgae::getAsBoolean).withPosition(1,1);
     tab.addString("State", () -> stateMachine.getGoalState().name()).withPosition(2,1);
-    // tab.addNumber("PID Output", () -> controller.calculate(getAngle().getDegrees(), stateMachine.getGoalState().getSetpoint())).withPosition(3,1);
+    tab.addNumber("PID Output", () -> controller.calculate(getAngle().getDegrees(), stateMachine.getGoalState().getSetpoint())).withPosition(3,1);
     tab.addNumber("Angle", () -> getAngle().getDegrees()).withPosition(4,1);
     tab.addNumber("Rotations", this::getPosition).withPosition(4,1);
     tab.addString("Next State", () -> stateMachine.getNextState().name()).withPosition(5, 1);
-
+    tab.add("BeamBreakLeft", beamBreakLeft.get());
+    tab.add("BeamBreakRight", beamBreakRight.get());
+    tab.add("BeamBreakCenter", beamBreakCenter.get());
+    
     return tab;
   }
 
   public void refresh(){
-    // getAbsolutePosition.refresh();
+    getAbsolutePosition.refresh();
     stateMachine.update();
   }
 

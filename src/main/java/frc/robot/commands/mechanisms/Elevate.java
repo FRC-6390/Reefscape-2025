@@ -28,7 +28,7 @@ public class Elevate extends Command {
   public RobotBase<?> base;
   public boolean hasSeen;
   public Translation2d translation = new Translation2d();
-  public DelayedOutput output;
+  
   public double dist;
   public double distToTag;
   
@@ -48,8 +48,7 @@ public class Elevate extends Command {
   {
     limeLight = base.getCameraFacing(ReefPole.A.getTranslation());
     
-    output =  new DelayedOutput(this::closeEnough, 0.85
-    );
+   
     
     // output = new DelayedOutput(this::closeEnough, 0.25);
     hasSeen = false;
@@ -57,19 +56,7 @@ public class Elevate extends Command {
     distToTag = 9999;
   }
 
-  public boolean closeEnough()
-  {
-    dist = base.getLocalization().getFieldPose().getTranslation().getDistance(translation);
   
-    if(dist < 0.3)
-    {
-      return true;
-    }
-    else
-    {
-      return false;
-    }
-  }
 
   // Called every time the scheduler runs while the command is scheduled.
   @Override
@@ -79,29 +66,31 @@ public class Elevate extends Command {
   
     SmartDashboard.putNumber("DistToTag", distToTag);
 
-    // if(limeLight.config.table() == "limelight-driver")
-    // {
-    //   if(state.equals(ElevatorState.L4))
-    //   {
-    //     superstructure.endEffectorStateManager(EndEffectorState.LeftL4);
-    //   }
-    //   else
-    //   {
-    //     superstructure.endEffectorStateManager(EndEffectorState.Left);
-    //   }
-    // }
-    // if(limeLight.config.table() == "limelight-tag")
-    // {
-    //   if(state.equals(ElevatorState.L4))
-    //   {
-    //     superstructure.endEffectorStateManager(EndEffectorState.RightL4);
-    //   }
-    //   else
-    //   {
-    //     superstructure.endEffectorStateManager(EndEffectorState.Right);
-    //   }
-    // }
+    //END EFFECTOR AUTOMATION
+    if(limeLight.config.table() == "limelight-left")
+    {
+      if(state.equals(ElevatorState.L4))
+      {
+        superstructure.endEffectorStateManager(EndEffectorState.LeftL4);
+      }
+      else
+      {
+        superstructure.endEffectorStateManager(EndEffectorState.Left);
+      }
+    }
+    if(limeLight.config.table() == "limelight-right")
+    {
+      if(state.equals(ElevatorState.L4))
+      {
+        superstructure.endEffectorStateManager(EndEffectorState.RightL4);
+      }
+      else
+      {
+        superstructure.endEffectorStateManager(EndEffectorState.Right);
+      }
+    }
 
+    //DATA GATHERING
     if(limeLight.hasValidTarget())
     {
       if(ReefPole.getPoleFromID((int)limeLight.getAprilTagID()) != null)
@@ -114,8 +103,8 @@ public class Elevate extends Command {
         distToTag = 9999;
       }
     }
-    
 
+    //ELEVATOR AUTOMATION
     if(las.getMeasurement() != null)
     {
     if(distToTag < 0.35 && las.getMeasurement().status == LaserCan.LASERCAN_STATUS_VALID_MEASUREMENT && las.getMeasurement().distance_mm < 800)
@@ -129,14 +118,7 @@ public class Elevate extends Command {
     }
     }
 
-    if(output.getAsBoolean())
-    {
-      superstructure.ejectPiece(1);
-    }
-    else
-    {
-      superstructure.ejectPiece(0);
-    }
+    
   }
   
 

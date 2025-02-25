@@ -10,14 +10,18 @@ import com.ctre.phoenix6.hardware.CANcoder;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 
+import ca.frc6390.athena.core.RobotBase;
 import ca.frc6390.athena.mechanisms.StateMachine;
 import ca.frc6390.athena.mechanisms.StateMachine.SetpointProvider;
 import ca.frc6390.athena.sensors.limitswitch.GenericLimitSwitch;
 import edu.wpi.first.math.controller.ElevatorFeedforward;
 import edu.wpi.first.math.controller.ProfiledPIDController;
+import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.units.measure.Voltage;
+import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
@@ -25,6 +29,7 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 
 import frc.robot.Constants;
+import frc.robot.RobotContainer;
 
 public class Elevator extends SubsystemBase{
   /** Creates a new Climber. */
@@ -54,7 +59,8 @@ public class Elevator extends SubsystemBase{
     L2(10),
     L3(20),
     L4(30),
-    Feeder(0);
+    Feeder(0),
+    Climb(35);
 
 
     double pos;
@@ -71,11 +77,10 @@ public class Elevator extends SubsystemBase{
 
   public Elevator() 
   {
-  //SHOULD REMEMBER TO UNCOMMENT
-  //  encoder = new CANcoder(Constants.Elevator.ENCODER, Constants.Elevator.CANBUS);
+   encoder = new CANcoder(Constants.Elevator.ENCODER, Constants.Elevator.CANBUS);
    leftMotor = new TalonFX(Constants.Elevator.LEFT_MOTOR, Constants.Elevator.CANBUS);
    rightMotor = new TalonFX(Constants.Elevator.RIGHT_MOTOR, Constants.Elevator.CANBUS);
-  
+   
     if (encoder != null) {
       getPosition = encoder.getPosition();
       getVelocity = encoder.getVelocity();
@@ -86,9 +91,8 @@ public class Elevator extends SubsystemBase{
       gear_ratio = Constants.Elevator.MOTOR_GEAR_RATIO;
     }
 
-    //SHOULD UNCOMMENT
-    // lowerlimitSwitch = new GenericLimitSwitch(Constants.Elevator.LIMIT_SWITCH);
-    // lowerlimitSwitch.onTrue(new InstantCommand(() -> {encoder.setPosition(0); stop();}));
+    lowerlimitSwitch = new GenericLimitSwitch(Constants.Elevator.LIMIT_SWITCH);
+    lowerlimitSwitch.onTrue(new InstantCommand(() -> {encoder.setPosition(0); stop();}));
     
     leftMotor.setNeutralMode(NeutralModeValue.Brake);
     rightMotor.setNeutralMode(NeutralModeValue.Brake);
@@ -109,8 +113,7 @@ public class Elevator extends SubsystemBase{
   //POSITION IN INCHES
   public double getHeight()
   {
-    //SHOULD BE NEGATIVE
-    return (getPosition.getValueAsDouble() / gear_ratio) * Math.PI *  Constants.Elevator.GEAR_DIAMETER_INCHES;
+    return -(getPosition.getValueAsDouble() / gear_ratio) * Math.PI *  Constants.Elevator.GEAR_DIAMETER_INCHES;
   }
 
   public double getVel()
@@ -135,13 +138,12 @@ public class Elevator extends SubsystemBase{
   //MOVES ELEVATOR UP OR DOWN
   public void setMotors(double speed)
   {
-    //SHOULD UNCOMMENT
-    // if (lowerlimitSwitch.getAsBoolean() && speed < 0){
-      // speed = 0;
-    // }
+    if (lowerlimitSwitch.getAsBoolean() && speed < 0){
+      speed = 0;
+    }
     //negative is up, this makes negative down
-    //SHOULD BE SPEED = -SPEED
-    speed = speed;
+   
+    speed = -speed;
     leftMotor.set(speed);
     rightMotor.set(speed);
   }
@@ -155,7 +157,7 @@ public class Elevator extends SubsystemBase{
   }
 
   public ShuffleboardTab shuffleboard(ShuffleboardTab tab) {
-      // tab.addBoolean("Lower Limit", lowerlimitSwitch::getAsBoolean);
+      tab.addBoolean("Lower Limit", lowerlimitSwitch::getAsBoolean);
       tab.addDouble("Elevator Height", this::getHeight).withPosition(1, 1);
       tab.addDouble("Elevator Height From Floor Inches", this::getHeightFromFloor).withPosition(2, 1);
       tab.addString("Setpoint", () -> stateMachine.getGoalState().name()).withPosition(3, 1);
@@ -176,13 +178,17 @@ public class Elevator extends SubsystemBase{
     stateMachine.update();
   }
 
+  
+
+
   public void update()
   {
+    
     switch (stateMachine.getGoalState()) {
       case Home:
         setMotors(-0.1);
         break;
-      case Feeder, L1, L2, L3, L4, StartConfiguration:
+      case Feeder, L1, L2, L3, L4, StartConfiguration, Climb:
         double speed = controller.calculate(getHeightFromFloor(),stateMachine.getGoalState().getSetpoint()) + feedforward.calculate(controller.getSetpoint().velocity) / 12;
         setMotors(speed);
     }
