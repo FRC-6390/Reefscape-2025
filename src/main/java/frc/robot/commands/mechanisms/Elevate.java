@@ -24,7 +24,9 @@ public class Elevate extends Command {
   public ElevatorState state;
   public Superstructure superstructure;
   public LimeLight limeLight;
-  public LaserCan las;
+  public LaserCan lasLeft;
+  public LaserCan lasRight;
+  public LaserCan currentLas;
   public RobotBase<?> base;
   public boolean hasSeen;
   public Translation2d translation = new Translation2d();
@@ -33,11 +35,12 @@ public class Elevate extends Command {
   public double distToTag;
   
   /** Creates a new Elevate. */
-  public Elevate(ElevatorState state,LaserCan las, Superstructure superstructure, RobotBase<?> base) {
+  public Elevate(ElevatorState state,LaserCan lasLeft, LaserCan lasRight, Superstructure superstructure, RobotBase<?> base) {
     this.base = base;
     this.state = state;
     this.superstructure = superstructure;
-    this.las =las;
+    this.lasLeft = lasLeft;
+    this.lasRight = lasRight;
    
     // Use addRequirements() here to declare subsystem dependencies.
   }
@@ -62,13 +65,16 @@ public class Elevate extends Command {
   @Override
   public void execute() 
   {
-    SmartDashboard.putNumber("Las", las.getMeasurement().distance_mm);
-  
+    SmartDashboard.putNumber("Las Left", lasLeft.getMeasurement().distance_mm);
+    SmartDashboard.putNumber("Las Right", lasRight.getMeasurement().distance_mm);
+    SmartDashboard.putString("Camera Facing", limeLight.config.table());
+    SmartDashboard.putNumber("Laser Facing", currentLas.getMeasurement().distance_mm);
     SmartDashboard.putNumber("DistToTag", distToTag);
 
     //END EFFECTOR AUTOMATION
     if(limeLight.config.table() == "limelight-left")
     {
+      currentLas = lasLeft;
       if(state.equals(ElevatorState.L4))
       {
         superstructure.endEffectorStateManager(EndEffectorState.LeftL4);
@@ -80,6 +86,7 @@ public class Elevate extends Command {
     }
     if(limeLight.config.table() == "limelight-right")
     {
+      currentLas = lasRight;
       if(state.equals(ElevatorState.L4))
       {
         superstructure.endEffectorStateManager(EndEffectorState.RightL4);
@@ -105,14 +112,14 @@ public class Elevate extends Command {
     }
 
     //ELEVATOR AUTOMATION
-    if(las.getMeasurement() != null)
+    if(currentLas.getMeasurement() != null)
     {
-    if(distToTag < 0.35 && las.getMeasurement().status == LaserCan.LASERCAN_STATUS_VALID_MEASUREMENT && las.getMeasurement().distance_mm < 800)
+    if(distToTag < 0.35 && currentLas.getMeasurement().status == LaserCan.LASERCAN_STATUS_VALID_MEASUREMENT && currentLas.getMeasurement().distance_mm < 800)
     {
       superstructure.elevatorStateManager(state);
       hasSeen = false;      
     }
-    else if(distToTag > 0.35 || las.getMeasurement().status != LaserCan.LASERCAN_STATUS_VALID_MEASUREMENT || las.getMeasurement().distance_mm > 800)
+    else if(distToTag > 0.35 || currentLas.getMeasurement().status != LaserCan.LASERCAN_STATUS_VALID_MEASUREMENT || currentLas.getMeasurement().distance_mm > 800)
     {
       superstructure.elevatorStateManager(ElevatorState.Feeder);
     }

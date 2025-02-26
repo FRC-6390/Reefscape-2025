@@ -45,6 +45,7 @@ import frc.robot.commands.auto.DriveToPoint;
 import frc.robot.commands.auto.PassiveAlign;
 import frc.robot.commands.mechanisms.Elevate;
 import frc.robot.subsystems.Superstructure;
+import frc.robot.subsystems.superstructure.CANdleSubsystem;
 import frc.robot.subsystems.superstructure.Elevator;
 import frc.robot.subsystems.superstructure.EndEffector;
 import frc.robot.subsystems.superstructure.Elevator.ElevatorState;
@@ -100,11 +101,14 @@ public class RobotContainer {
       }
   }
 
-  public final LaserCan las = new LaserCan(59);
+  public final LaserCan las = new LaserCan(1);
+  public final LaserCan las2 = new LaserCan(0);
   public Elevator elevator = new Elevator();
   public EndEffector effector = new EndEffector();
+  
   public final RobotBase<SwerveDrivetrain> robotBase = Constants.DriveTrain.ROBOT_BASE.create().shuffleboard();
   public Superstructure superstructure = new Superstructure(elevator, effector, robotBase);
+  public CANdleSubsystem candle = new CANdleSubsystem(effector, robotBase, superstructure);
   private final EnhancedXboxController driverController = new EnhancedXboxController(0)
                                                               .setLeftInverted(false)
                                                               .setRightInverted(true)
@@ -125,11 +129,10 @@ public class RobotContainer {
   public RobotContainer() 
   {
     configureBindings();
-    robotBase.getDrivetrain().setDriveCommand(driverController);
+    // robotBase.getDrivetrain().setDriveCommand(driverController);
     chooser.addOption("LEFT SIDE", AUTOS.LEFTSIDE);
     SmartDashboard.putData(chooser);
-    // elevator.shuffleboard("Elevator");
-    // climber.shuffleboard("Climber");
+    elevator.shuffleboard("Elevator");
     effector.shuffleboard("Effector");
 
     // NamedCommands.registerCommand("L4", new Elevate(ElevatorState.L4, las, superstructure, robotBase));
@@ -144,14 +147,19 @@ public class RobotContainer {
 
   private void configureBindings() 
   {
-
-    // driverController.rightBumper.whileTrue(() -> effector.setMotors(0.1)).onFalse(() -> effector.setMotors(0));
-    // driverController.leftBumper.whileTrue(() -> effector.setMotors(-0.1)).onFalse(() -> effector.setMotors(0));
+    driverController.leftBumper.whileTrue(() -> elevator.setMotors(0.75)).onFalse(() -> elevator.setMotors(0));
+    driverController.rightBumper.whileTrue(() -> elevator.setMotors(-0.75)).onFalse(() -> elevator.setMotors(0));
+    // driverController.a.onTrue(superstructure.setAlgaeMachine(AlgaeExtensionState.Extended));
+    // driverController.b.onTrue(superstructure.setAlgaeMachine(AlgaeExtensionState.Home));
+    // driverController.a.onTrue(superstructure.setElevator(ElevatorState.L1));
+    // driverController.b.onTrue(superstructure.setElevator(ElevatorState.L2));
+    // driverController.y.onTrue(superstructure.setElevator(ElevatorState.L3));
+    // driverController.x.onTrue(superstructure.setElevator(ElevatorState.L4));
 
     //----------------------------------------------------------DRIVER 1---------------------------------------------------------------//
 
     //RESET ODOMETRY
-    // driverController.start.onTrue(() -> robotBase.getDrivetrain().getIMU().setYaw(0)).after(3).onTrue(() -> robotBase.getLocalization().resetFieldPose(0,0,0));
+    driverController.start.onTrue(() -> robotBase.getDrivetrain().getIMU().setYaw(0)).after(3).onTrue(() -> robotBase.getLocalization().resetFieldPose(new Pose2d(ReefPole.K.getTranslation(), Rotation2d.fromDegrees(90))));
     
     // //PASSIVE ALIGN (RIGHT STICK)
     // driverController.rightStick.toggleOnTrue(new PassiveAlign(robotBase, las));

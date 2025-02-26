@@ -65,7 +65,7 @@ public interface Constants {
                                                     
                                                     .setDriftActivationSpeed(0.0);
 
-        RobotLocalizationConfig LOCALIZATION_CONFIG = new RobotLocalizationConfig().setVisionMultitag(0.5, 0.5, 99999).setSlipThresh(0.2).setPoseEstimateOrigin(PoseEstimateWithLatencyType.BOT_POSE_MT2_BLUE).setVision(0.5, 0.5, 9999).setAutoPlannerPID(new PIDConstants(5,0,0), new PIDConstants(2,0,0)).setVisionEnabled(true);
+        RobotLocalizationConfig LOCALIZATION_CONFIG = new RobotLocalizationConfig().setVisionMultitag(0.5, 0.5, 99999).setSlipThresh(0.2).setPoseEstimateOrigin(PoseEstimateWithLatencyType.BOT_POSE_MT2_BLUE).setVision(0.5, 0.5, 9999).setAutoPlannerPID(new PIDConstants(5,0,0), new PIDConstants(2,0,0)).setVisionEnabled(false);
 
         RobotBaseConfig<SwerveDrivetrain> ROBOT_BASE = RobotBaseConfig.swerve(DRIVETRAIN_CONFIG)
                                                                       .setLocalization(LOCALIZATION_CONFIG)
@@ -105,11 +105,11 @@ public interface Constants {
 
         int LEFT_MOTOR = 20;
         int RIGHT_MOTOR = 21;
-        double GEAR_DIAMETER_INCHES = 2d;
+        double GEAR_DIAMETER_INCHES = 3d;
         double OFFSET_FROM_FLOOR = 24;
         double ENCODER_GEAR_RATIO = 1d/1d;
         double MOTOR_GEAR_RATIO = 6d/1d;
-        int LIMIT_SWITCH = 0;
+        int LIMIT_SWITCH = 5;
         //MAX ACCEL WAS 15
         ProfiledPIDController CONTORLLER = new ProfiledPIDController(0.11, 0.01, 0, new Constraints(60, 18));
         ElevatorFeedforward FEEDFORWARD = new ElevatorFeedforward(0, 0.17, 0.377,0.78);
@@ -133,21 +133,22 @@ public interface Constants {
     }
 
     public interface EndEffector {
-        int LIMIT_SWITCH = 1;
+        int LIMIT_SWITCH = 3;
         int ENCODER = 40;
         
 
         int MOTOR = 31;
         int ALGAE_MOTOR = 32;
         
-        int ROLLER = 20;
-        int RIGHT_MOTOR = 30;
+        int ROLLER = 33;
         // double ENCODER_OFFSET = 0.551025390625;
-        double ENCODER_OFFSET = 0.997314453125;
+        double ENCODER_OFFSET = -0.045654296875;
         double ENCODER_GEAR_RATIO = 1d/1d; //from motors 125d/1d;
         String CANBUS = "can";
         PIDController CONTORLLER = new PIDController(0.015, 0, 0);
-        int CANDLE_ID = 77;
+        // PIDController CONTORLLER = new PIDController(0.005, 0, 0);
+
+        int CANDLE_ID = 22;
 
         // MechanismConfig<StatefulTurretMechanism<EndEffectorState>> ENDEFFECTOR_CONFIG = MechanismConfig.statefulTurret(new SimpleMotorFeedforward(0, 0,0,0), EndEffectorState.StartConfiguration)
         //                                                                             .addMotor(Motor.KRAKEN_X60, 31)

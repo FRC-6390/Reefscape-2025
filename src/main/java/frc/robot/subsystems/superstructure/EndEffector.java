@@ -1,8 +1,12 @@
 package frc.robot.subsystems.superstructure;
 
 import com.ctre.phoenix.led.CANdle;
+import com.ctre.phoenix.led.CANdleConfiguration;
+import com.ctre.phoenix.led.CANdle.LEDStripType;
+import com.ctre.phoenix.led.CANdle.VBatOutputMode;
 import com.ctre.phoenix6.StatusSignal;
 import com.ctre.phoenix6.configs.CANcoderConfiguration;
+import com.ctre.phoenix6.configs.CurrentLimitsConfigs;
 import com.ctre.phoenix6.configs.MagnetSensorConfigs;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.hardware.CANcoder;
@@ -12,6 +16,7 @@ import com.revrobotics.spark.config.MAXMotionConfig;
 
 import ca.frc6390.athena.mechanisms.StateMachine;
 import ca.frc6390.athena.mechanisms.StateMachine.SetpointProvider;
+import ca.frc6390.athena.sensors.beambreak.IRBeamBreak;
 import ca.frc6390.athena.sensors.limitswitch.GenericLimitSwitch;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.units.measure.Angle;
@@ -20,6 +25,7 @@ import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.motorcontrol.Talon;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
 
@@ -27,7 +33,8 @@ public class EndEffector extends SubsystemBase {
 
   //EJECTOR STUFF
   public TalonFX roller;
-  public DigitalInput beamBreakLeft, beamBreakRight, beamBreakCenter;
+  IRBeamBreak beamBreakLeft;
+    public IRBeamBreak beamBreakRight, beamBreakCenter;
   public double rollerSpeed = 0;
   public CANdle candle;
 
@@ -35,8 +42,9 @@ public class EndEffector extends SubsystemBase {
   public TalonFX algaeExtender;
   public boolean atSetpoint = false;
   public GenericLimitSwitch limitSwitchAlgae;
+  public PIDController algaController;
   public StateMachine<AlgaeExtensionState> algStateMachine;
-  public StatusSignal<Angle> getPosition = new StatusSignal<>(null, null, null);
+  public StatusSignal<Angle> getExtenderPosition = new StatusSignal<>(null, null, null);
   
   //ROTATOR STUFF
   public TalonFX motor;
@@ -47,10 +55,10 @@ public class EndEffector extends SubsystemBase {
 
   public enum EndEffectorState implements SetpointProvider
   {
-      StartConfiguration(35),
+      StartConfiguration(0),
       Home(0),
-      Left(35),
-      Right(-35),
+      Left(25),
+      Right(-25),
       LeftL4(35),
       RightL4(-35);
 
@@ -103,29 +111,41 @@ public class EndEffector extends SubsystemBase {
       encoder.getConfigurator().apply(config);
 
       controller = Constants.EndEffector.CONTORLLER;
-      controller.enableContinuousInput(0, 90);
       controller.setTolerance(1);
 
       stateMachine = new StateMachine<EndEffectorState>(EndEffectorState.Home, controller::atSetpoint);
 
     //EJECTOR STUFF
-      // roller = new TalonFX(Constants.EndEffector.ROLLER, Constants.EndEffector.CANBUS);
-      beamBreakLeft = new DigitalInput(1);
-      beamBreakCenter = new DigitalInput(0);
-      beamBreakRight = new DigitalInput(2);
+      roller = new TalonFX(Constants.EndEffector.ROLLER, Constants.EndEffector.CANBUS);
+      beamBreakLeft = new IRBeamBreak(1);
+      beamBreakCenter = new IRBeamBreak(0);
+      beamBreakRight = new IRBeamBreak(2);
       candle = new CANdle(Constants.EndEffector.CANDLE_ID, Constants.EndEffector.CANBUS);
+      CANdleConfiguration configuration = new CANdleConfiguration();
+      configuration.stripType = LEDStripType.GRB;
+      configuration.statusLedOffWhenActive = false;
+      configuration.disableWhenLOS = false;
+      configuration.brightnessScalar = 1;
+      configuration.vBatOutputMode = VBatOutputMode.Modulated;
+      configuration.v5Enabled = true;
+      candle.configAllSettings(configuration, 100);
 
     //ALGAE EXTENSION STUFF
       limitSwitchAlgae = new GenericLimitSwitch(Constants.EndEffector.LIMIT_SWITCH);
-      algaeExtender = new TalonFX(Constants.EndEffector.ALGAE_MOTOR);
+      algaeExtender = new TalonFX(Constants.EndEffector.ALGAE_MOTOR, Constants.EndEffector.CANBUS);
 
-      getPosition = algaeExtender.getRotorPosition();
+      getExtenderPosition = algaeExtender.getRotorPosition();
 
       algaeExtender.getConfigurator().apply(new TalonFXConfiguration());
       algaeExtender.setNeutralMode(NeutralModeValue.Brake);
-
+      CurrentLimitsConfigs limit = new CurrentLimitsConfigs();
+      limit = limit.withStatorCurrentLimit(40);
+      algaeExtender.getConfigurator().apply(limit);
+      algaController = new PIDController(0.1, 0, 0);
+      algaController.setTolerance(0.3);
       algStateMachine = new StateMachine<AlgaeExtensionState>(AlgaeExtensionState.Home, this::algaeAtSetpoint);
       algaeExtender.setPosition(0);
+      limitSwitchAlgae.whileTrue(() -> algaeExtender.setPosition(AlgaeExtensionState.Extended.getSetpoint()));
   }
 
   public void setMotors(double speed)
@@ -157,8 +177,8 @@ public class EndEffector extends SubsystemBase {
   }
 
   public double getPosition() {
-    return getAbsolutePosition.getValueAsDouble();
-    // return 0;
+    return -getAbsolutePosition.getValueAsDouble();
+   
   }
 
   public Rotation2d getAngle() {
@@ -167,7 +187,14 @@ public class EndEffector extends SubsystemBase {
 
   public boolean algaeAtSetpoint()
   {
-    return atSetpoint;
+    if(algStateMachine.getGoalState().equals(AlgaeExtensionState.Home)) 
+    {
+    return algaController.atSetpoint();
+    }
+    else
+    {
+      return algaController.atSetpoint() && limitSwitchAlgae.getAsBoolean();
+    }
   }
 
   public void setAlgaeEncoder(double rotations)
@@ -178,48 +205,36 @@ public class EndEffector extends SubsystemBase {
 
   public void update()
   {
-    //ROTATOR STUFF
-    // switch (stateMachine.getGoalState()) {
-    //   case Left, Right, RightL4, LeftL4, Home, StartConfiguration:
-    //   double speed = -controller.calculate(getAngle().getDegrees(), stateMachine.getGoalState().getSetpoint());
-    //   setMotors(speed);
-    // }
+    if(limitSwitchAlgae.getAsBoolean())
+    {
+      algaeExtender.setPosition(EndEffector.AlgaeExtensionState.Extended.getSetpoint());
+    }
 
-    // //EXTENSION STUFF
-    // switch (algStateMachine.getGoalState()) 
-    // {
-    //   case Home:
-    //     if(Math.abs(getPosition.getValueAsDouble()) > 0.3)
-    //     {
-    //     setMotors(-0.3);  
-    //     }
-    //     else{
-    //       atSetpoint = true;
-    //     }   
-    //     break; 
-    //   case Extended:
-    //     if(limitSwitchAlgae.getAsBoolean() == false)
-    //     {
-    //     setMotors(0.3);
-    //     }
-    //     else {
-             //setMotors(0.1);
-    //       atSetpoint = true;
-    //     }
-    //   default:
-    //     break;
-    // }
+    //ROTATOR STUFF
+    switch (stateMachine.getGoalState()) {
+      case Left, Right, RightL4, LeftL4, Home, StartConfiguration:
+      double speed = controller.calculate(getAngle().getDegrees(), stateMachine.getGoalState().getSetpoint());
+      setMotors(speed);
+    }
+
+    //EXTENSION STUFF
+    switch (algStateMachine.getGoalState()) 
+    {
+      case Home:
+        setExtension(algaController.calculate(getExtenderPosition.getValueAsDouble(),AlgaeExtensionState.Home.getSetpoint()));
+        break; 
+      case Extended:
+        double spd = Math.abs(algaController.calculate(getExtenderPosition.getValueAsDouble(),AlgaeExtensionState.Extended.getSetpoint()));
+        SmartDashboard.putNumber("EEEEH", spd);
+        setExtension(spd + 0.1);
+        
+      default:
+        break;
+    }
     
     // //ROLLER STUFF
-    // roller.set(rollerSpeed);
-    if(beamBreakCenter.get() && beamBreakLeft.get() && beamBreakRight.get())
-    {
-      candle.setLEDs(0, 255, 0);
-    }
-    else
-    {
-      candle.setLEDs(255, 0, 0);
-    }
+    roller.set(rollerSpeed);
+   
   }
 
 
@@ -234,15 +249,23 @@ public class EndEffector extends SubsystemBase {
     tab.addNumber("Angle", () -> getAngle().getDegrees()).withPosition(4,1);
     tab.addNumber("Rotations", this::getPosition).withPosition(4,1);
     tab.addString("Next State", () -> stateMachine.getNextState().name()).withPosition(5, 1);
-    tab.add("BeamBreakLeft", beamBreakLeft.get());
-    tab.add("BeamBreakRight", beamBreakRight.get());
-    tab.add("BeamBreakCenter", beamBreakCenter.get());
+    tab.addNumber("Next State Angle", () -> stateMachine.getNextState().getSetpoint()).withPosition(5, 1);
+    tab.addNumber("Algae", () -> getExtenderPosition.getValueAsDouble()).withPosition(5, 1);
+    tab.addNumber("AlgaeOutput", () -> algaController.calculate(AlgaeExtensionState.Extended.getSetpoint())).withPosition(5, 1);
+    tab.addString("Algae State", () -> algStateMachine.getNextState().name()).withPosition(5, 1);
+
+
+    tab.addBoolean("BeamBreakLeft", () -> beamBreakLeft.getAsBoolean());
+    tab.addBoolean("BeamBreakRight", () -> beamBreakRight.getAsBoolean());
+    tab.addBoolean("BeamBreakCenter", () -> beamBreakCenter.getAsBoolean());
     
     return tab;
   }
 
   public void refresh(){
     getAbsolutePosition.refresh();
+    getExtenderPosition.refresh();
+    algStateMachine.update();
     stateMachine.update();
   }
 

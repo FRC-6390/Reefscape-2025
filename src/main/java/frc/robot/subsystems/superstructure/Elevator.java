@@ -53,14 +53,14 @@ public class Elevator extends SubsystemBase{
   
   public enum ElevatorState implements SetpointProvider {
     //ELEVATOR HEIGHT FROM FLOOR IN INCHES
-    StartConfiguration(0),
-    Home(0),
-    L1(6),
-    L2(10),
-    L3(20),
-    L4(30),
-    Feeder(0),
-    Climb(35);
+    StartConfiguration(Constants.Elevator.OFFSET_FROM_FLOOR),
+    Home(Constants.Elevator.OFFSET_FROM_FLOOR),
+    L1(Constants.Elevator.OFFSET_FROM_FLOOR),
+    L2(36),
+    L3(51),
+    L4(59),
+    Feeder(Constants.Elevator.OFFSET_FROM_FLOOR),
+    Climb(Constants.Elevator.OFFSET_FROM_FLOOR + 2);
 
 
     double pos;
@@ -96,7 +96,8 @@ public class Elevator extends SubsystemBase{
     
     leftMotor.setNeutralMode(NeutralModeValue.Brake);
     rightMotor.setNeutralMode(NeutralModeValue.Brake);
-    CurrentLimitsConfigs currentLimitsConfigs = new CurrentLimitsConfigs().withStatorCurrentLimit(40);
+
+    CurrentLimitsConfigs currentLimitsConfigs = new CurrentLimitsConfigs().withStatorCurrentLimit(52.5);
     currentLimitsConfigs.StatorCurrentLimitEnable = true;
     leftMotor.getConfigurator().apply(currentLimitsConfigs);
     rightMotor.getConfigurator().apply(currentLimitsConfigs);
@@ -107,7 +108,7 @@ public class Elevator extends SubsystemBase{
     controller.setTolerance(0.2);
     controller.reset(getHeightFromFloor());
     feedforward = Constants.Elevator.FEEDFORWARD;
-    stateMachine = new StateMachine<ElevatorState>(ElevatorState.StartConfiguration, controller::atSetpoint);
+    stateMachine = new StateMachine<ElevatorState>(ElevatorState.Home, controller::atSetpoint);
 
   }
   //POSITION IN INCHES
@@ -184,14 +185,14 @@ public class Elevator extends SubsystemBase{
   public void update()
   {
     
-    switch (stateMachine.getGoalState()) {
-      case Home:
-        setMotors(-0.1);
-        break;
-      case Feeder, L1, L2, L3, L4, StartConfiguration, Climb:
-        double speed = controller.calculate(getHeightFromFloor(),stateMachine.getGoalState().getSetpoint()) + feedforward.calculate(controller.getSetpoint().velocity) / 12;
-        setMotors(speed);
-    }
+    // switch (stateMachine.getGoalState()) {
+    //   case Home:
+    //     setMotors(-0.1);
+    //     break;
+    //   case Feeder, L1, L2, L3, L4, StartConfiguration, Climb:
+    //     double speed = controller.calculate(getHeightFromFloor(),stateMachine.getGoalState().getSetpoint()) + feedforward.calculate(controller.getSetpoint().velocity) / 12;
+    //     setMotors(speed);
+    // }
     
   }
 

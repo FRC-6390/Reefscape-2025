@@ -11,6 +11,7 @@ import ca.frc6390.athena.sensors.camera.limelight.LimeLight;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import frc.robot.subsystems.superstructure.Elevator;
 import frc.robot.subsystems.superstructure.Elevator.ElevatorState;
@@ -97,34 +98,28 @@ public class Superstructure {
   }
 
   public void endEffectorStateManager(EndEffector.EndEffectorState state){
-    switch (state) {
-      case StartConfiguration:
-        elevatorStateManager(Elevator.ElevatorState.L1);
-        endEffector.setGoalState(state, () -> elevator.atState(Elevator.ElevatorState.L1));
-      case Home:
-        endEffector.setGoalState(state);
-        break;
-      case Left, LeftL4, Right, RightL4:
-        endEffector.setGoalState(state, () -> !elevator.atState(Elevator.ElevatorState.Home));
-        break;
-    }
+    endEffector.setGoalState(state);
+    // switch (state) {
+    //   case StartConfiguration, Home, Left, LeftL4, Right, RightL4:
+    //     System.out.println("STATECahenge");
+    //     endEffector.setGoalState(state);
+    //     break;
+    //   default:
+    //     System.out.println("State Not FOund");
+    // }
   }
   
   public void ejectPiece(double speed)
   {
-    if(output.getAsBoolean())
+    SmartDashboard.putString("LL", base.getCameraFacing(ReefPole.A.getTranslation()).config.table());
+    if(base.getCameraFacing(ReefPole.A.getTranslation()).config.table() == "limelight-left")
     {
-      effector.setRollers(speed);
+      effector.setRollers(Math.abs(speed));
     }
-    else
+    else if(base.getCameraFacing(ReefPole.A.getTranslation()).config.table() == "limelight-right")
     {
-      effector.setRollers(0);
-    } 
-  }
-
-  public void forceEject(double speed)
-  {
-    effector.setRollers(speed);
+      effector.setRollers(-Math.abs(speed));
+    }
   }
 
   public Translation2d getCage()
