@@ -63,7 +63,8 @@ public class ReefScoringPos {
                 case Blue:
                     return apriltagIdBlue;
                 default:
-                    throw new IllegalArgumentException("Unknown team: " + team);
+                    DriverStation.reportError("Cant Find Team!!!", new IllegalArgumentException("Unknown team: " + team).getStackTrace());
+                    return -1;
             }
         }
 
@@ -95,7 +96,7 @@ public class ReefScoringPos {
         }
 
         public Translation2d getTranslation() {
-            return getTranslation(DriverStation.getAlliance().get());
+            return getTranslation(DriverStation.getAlliance().orElse(Alliance.Blue));
          }
      
          public Translation2d getTranslation(Alliance team) {
@@ -103,7 +104,7 @@ public class ReefScoringPos {
          }
 
          public Rotation2d getRotation() {
-            return getRotation(DriverStation.getAlliance().get());
+            return getRotation(DriverStation.getAlliance().orElse(Alliance.Blue));
          }
      
          public Rotation2d getRotation(Alliance team) {
@@ -111,7 +112,7 @@ public class ReefScoringPos {
          }
 
          public Pose2d getPose2d() {
-            return getPose2d(DriverStation.getAlliance().get());
+            return getPose2d(DriverStation.getAlliance().orElse(Alliance.Blue));
          }
      
          public Pose2d getPose2d(Alliance team) {
@@ -121,7 +122,8 @@ public class ReefScoringPos {
                  case Blue:
                      return bluePose;
                  default:
-                     throw new IllegalArgumentException("Unknown team: " + team);
+                     DriverStation.reportError("Cant Find Team!!!", new IllegalArgumentException("Unknown team: " + team).getStackTrace());
+                     return null;
              }
          }
 

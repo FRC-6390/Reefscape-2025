@@ -104,11 +104,11 @@ public class RobotContainer {
   public final LaserCan las = new LaserCan(1);
   public final LaserCan las2 = new LaserCan(0);
   public Elevator elevator = new Elevator();
-  public EndEffector effector = new EndEffector();
+  // public EndEffector effector = new EndEffector();
   
   public final RobotBase<SwerveDrivetrain> robotBase = Constants.DriveTrain.ROBOT_BASE.create().shuffleboard();
-  public Superstructure superstructure = new Superstructure(elevator, effector, robotBase);
-  public CANdleSubsystem candle = new CANdleSubsystem(effector, robotBase, superstructure);
+  // public Superstructure superstructure = new Superstructure(elevator, effector, robotBase);
+  // public CANdleSubsystem candle = new CANdleSubsystem(effector, robotBase, superstructure);
   private final EnhancedXboxController driverController = new EnhancedXboxController(0)
                                                               .setLeftInverted(false)
                                                               .setRightInverted(true)
@@ -133,7 +133,7 @@ public class RobotContainer {
     chooser.addOption("LEFT SIDE", AUTOS.LEFTSIDE);
     SmartDashboard.putData(chooser);
     elevator.shuffleboard("Elevator");
-    effector.shuffleboard("Effector");
+    // effector.shuffleboard("Effector");
 
     // NamedCommands.registerCommand("L4", new Elevate(ElevatorState.L4, las, superstructure, robotBase));
     // NamedCommands.registerCommand("L3", new Elevate(ElevatorState.L3, las, superstructure, robotBase) );
@@ -147,8 +147,8 @@ public class RobotContainer {
 
   private void configureBindings() 
   {
-    driverController.leftBumper.whileTrue(() -> elevator.setMotors(0.75)).onFalse(() -> elevator.setMotors(0));
-    driverController.rightBumper.whileTrue(() -> elevator.setMotors(-0.75)).onFalse(() -> elevator.setMotors(0));
+    driverController.leftBumper.whileTrue(() -> elevator.setMotors(1)).onFalse(() -> elevator.setMotors(0));
+    driverController.rightBumper.whileTrue(() -> elevator.setMotors(-0.1)).onFalse(() -> elevator.setMotors(0));
     // driverController.a.onTrue(superstructure.setAlgaeMachine(AlgaeExtensionState.Extended));
     // driverController.b.onTrue(superstructure.setAlgaeMachine(AlgaeExtensionState.Home));
     // driverController.a.onTrue(superstructure.setElevator(ElevatorState.L1));
@@ -160,7 +160,9 @@ public class RobotContainer {
 
     //RESET ODOMETRY
     driverController.start.onTrue(() -> robotBase.getDrivetrain().getIMU().setYaw(0)).after(3).onTrue(() -> robotBase.getLocalization().resetFieldPose(new Pose2d(ReefPole.K.getTranslation(), Rotation2d.fromDegrees(90))));
-    
+    driverController.pov.up.onTrue(() -> elevator.setCurrentLimit(elevator.getCurrentLimit()+0.5));
+    driverController.pov.down.onTrue(() -> elevator.setCurrentLimit(elevator.getCurrentLimit()-0.5));
+
     // //PASSIVE ALIGN (RIGHT STICK)
     // driverController.rightStick.toggleOnTrue(new PassiveAlign(robotBase, las));
 

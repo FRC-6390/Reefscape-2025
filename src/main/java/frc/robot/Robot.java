@@ -21,7 +21,7 @@ public class Robot extends TimedRobot {
   @Override
   public void robotPeriodic() {
     CommandScheduler.getInstance().run();
-    SmartDashboard.putBoolean("Correct Pose", m_robotContainer.superstructure.closeEnough());
+    // SmartDashboard.putBoolean("Correct Pose", m_robotContainer.superstructure.closeEnough());
     // SmartDashboard.putNumber("Las",m_robotContainer.las.getMeasurement().distance_mm);
   }
 

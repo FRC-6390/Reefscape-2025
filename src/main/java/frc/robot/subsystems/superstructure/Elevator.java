@@ -74,6 +74,7 @@ public class Elevator extends SubsystemBase{
     }
 }
 
+double current = 52.5;
 
   public Elevator() 
   {
@@ -97,7 +98,7 @@ public class Elevator extends SubsystemBase{
     leftMotor.setNeutralMode(NeutralModeValue.Brake);
     rightMotor.setNeutralMode(NeutralModeValue.Brake);
 
-    CurrentLimitsConfigs currentLimitsConfigs = new CurrentLimitsConfigs().withStatorCurrentLimit(52.5);
+    CurrentLimitsConfigs currentLimitsConfigs = new CurrentLimitsConfigs().withStatorCurrentLimit(current);
     currentLimitsConfigs.StatorCurrentLimitEnable = true;
     leftMotor.getConfigurator().apply(currentLimitsConfigs);
     rightMotor.getConfigurator().apply(currentLimitsConfigs);
@@ -111,6 +112,22 @@ public class Elevator extends SubsystemBase{
     stateMachine = new StateMachine<ElevatorState>(ElevatorState.Home, controller::atSetpoint);
 
   }
+
+  public double getCurrentLimit(){
+    return current;
+  }
+  
+  public void setCurrentLimit(double current)
+  {
+    this.current = current;
+
+    CurrentLimitsConfigs currentLimitsConfigs = new CurrentLimitsConfigs().withStatorCurrentLimit(current);
+    currentLimitsConfigs.StatorCurrentLimitEnable = true;
+    leftMotor.getConfigurator().apply(currentLimitsConfigs);
+    rightMotor.getConfigurator().apply(currentLimitsConfigs);
+  }
+
+
   //POSITION IN INCHES
   public double getHeight()
   {
@@ -170,6 +187,8 @@ public class Elevator extends SubsystemBase{
       tab.addBoolean("State Changer", stateMachine.getChangeStateSupplier()).withPosition(6, 1);
       tab.addDouble("Profiled Pos Setpoint",() -> controller.getSetpoint().position);
       tab.addDouble("Profiled Vel Setpoint",() -> controller.getSetpoint().velocity);
+      tab.addDouble("Motor Current Limit",this::getCurrentLimit);
+
       return tab;
   }
 

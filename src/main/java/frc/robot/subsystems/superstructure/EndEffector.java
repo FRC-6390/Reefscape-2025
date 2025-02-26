@@ -202,7 +202,6 @@ public class EndEffector extends SubsystemBase {
     algaeExtender.setPosition(0);
   }
 
-
   public void update()
   {
     if(limitSwitchAlgae.getAsBoolean())
