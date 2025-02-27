@@ -10,18 +10,14 @@ import com.ctre.phoenix6.hardware.CANcoder;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 
-import ca.frc6390.athena.core.RobotBase;
 import ca.frc6390.athena.mechanisms.StateMachine;
 import ca.frc6390.athena.mechanisms.StateMachine.SetpointProvider;
 import ca.frc6390.athena.sensors.limitswitch.GenericLimitSwitch;
 import edu.wpi.first.math.controller.ElevatorFeedforward;
 import edu.wpi.first.math.controller.ProfiledPIDController;
-import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.units.measure.Voltage;
-import edu.wpi.first.wpilibj.DriverStation;
-import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
@@ -29,12 +25,9 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 
 import frc.robot.Constants;
-import frc.robot.RobotContainer;
 
 public class Elevator extends SubsystemBase{
   /** Creates a new Climber. */
-
- 
   public CANcoder encoder;
   public TalonFX leftMotor;
   public TalonFX rightMotor;
@@ -53,14 +46,11 @@ public class Elevator extends SubsystemBase{
   
   public enum ElevatorState implements SetpointProvider {
     //ELEVATOR HEIGHT FROM FLOOR IN INCHES
-    StartConfiguration(Constants.Elevator.OFFSET_FROM_FLOOR),
     Home(Constants.Elevator.OFFSET_FROM_FLOOR),
     L1(Constants.Elevator.OFFSET_FROM_FLOOR),
-    L2(36),
-    L3(51),
-    L4(59),
-    Feeder(Constants.Elevator.OFFSET_FROM_FLOOR),
-    Climb(Constants.Elevator.OFFSET_FROM_FLOOR + 2);
+    L2(32),
+    L3(48),
+    L4(72);
 
 
     double pos;
@@ -74,7 +64,8 @@ public class Elevator extends SubsystemBase{
     }
 }
 
-double current = 48;
+double current = 40;
+double nudge = 0;
 
   public Elevator() 
   {
@@ -162,8 +153,8 @@ double current = 48;
     //negative is up, this makes negative down
    
     speed = -speed;
-    // leftMotor.set(speed);
-    // rightMotor.set(speed);
+    leftMotor.set(speed);
+    rightMotor.set(speed);
   }
   
   public void stop() {
@@ -192,26 +183,32 @@ double current = 48;
       return tab;
   }
 
+  public void nudge(double inches){
+    this.nudge += inches;
+  }
+
+  public void resetNudge(){
+    this.nudge = 0;
+  }
+
   public void refresh(){
     getPosition.refresh();
     getVelocity.refresh();
     stateMachine.update();
   }
 
-  
-
-
   public void update()
   {
     
-    // switch (stateMachine.getGoalState()) {
-    //   case Home:
-    //     setMotors(-0.1);
-    //     break;
-    //   case Feeder, L1, L2, L3, L4, StartConfiguration, Climb:
-    //     double speed = controller.calculate(getHeightFromFloor(),stateMachine.getGoalState().getSetpoint()) + feedforward.calculate(controller.getSetpoint().velocity) / 12;
-    //     setMotors(speed);
-    // }
+    switch (stateMachine.getGoalState()) {
+      case Home:
+        setMotors(-0.1);
+        resetNudge();
+        break;
+      case L1, L2, L3, L4:
+        double speed = controller.calculate(getHeightFromFloor(),stateMachine.getGoalState().getSetpoint() + nudge) + feedforward.calculate(controller.getSetpoint().velocity) / 12;
+        setMotors(speed);
+    }
     
   }
 

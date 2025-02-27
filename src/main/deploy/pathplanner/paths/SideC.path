@@ -3,25 +3,25 @@
   "waypoints": [
     {
       "anchor": {
-        "x": 3.460142045454545,
-        "y": 2.2450710227272723
+        "x": 3.2607102272727273,
+        "y": 2.2650142045454538
       },
       "prevControl": null,
       "nextControl": {
-        "x": 3.5336635076639253,
-        "y": 2.4840157749077605
+        "x": 3.334231689482108,
+        "y": 2.503958956725942
       },
       "isLocked": false,
       "linkedName": null
     },
     {
       "anchor": {
-        "x": 3.8490340909090905,
-        "y": 2.953053977272727
+        "x": 3.699460227272727,
+        "y": 2.9829687499999995
       },
       "prevControl": {
-        "x": 3.7320621608043325,
-        "y": 2.7321069981859614
+        "x": 3.582488297167969,
+        "y": 2.762021770913234
       },
       "nextControl": null,
       "isLocked": false,
@@ -42,13 +42,13 @@
   },
   "goalEndState": {
     "velocity": 0,
-    "rotation": -121.32869286780412
+    "rotation": -31.168822870166128
   },
   "reversed": false,
   "folder": "Teleop Pathing",
   "idealStartingState": {
     "velocity": 0,
-    "rotation": -120.41108126712537
+    "rotation": -31.00739382714955
   },
   "useDefaultConstraints": false
 }

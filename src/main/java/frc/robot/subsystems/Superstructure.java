@@ -14,9 +14,10 @@ import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import frc.robot.subsystems.superstructure.Elevator;
-import frc.robot.subsystems.superstructure.Elevator.ElevatorState;
 import frc.robot.subsystems.superstructure.EndEffector;
 import frc.robot.subsystems.superstructure.EndEffector.AlgaeExtensionState;
+import frc.robot.subsystems.superstructure.EndEffector.EjectorState;
+import frc.robot.subsystems.superstructure.EndEffector.EndEffectorState;
 import frc.robot.utils.ReefScoringPos.ReefPole;
 
 public class Superstructure {
@@ -45,7 +46,7 @@ public class Superstructure {
 
   public boolean closeEnough()
   {
-    LimeLight ll = base.getCameraFacing(ReefPole.A.getTranslation());
+    LimeLight ll = base.getCameraFacing(ReefPole.getCenterReef());
     SmartDashboard.putNumber("Dist", dist);
 
    
@@ -90,7 +91,7 @@ public class Superstructure {
     return new InstantCommand(() -> elevatorStateManager(state));
   }
 
-  public InstantCommand setEndEffectir(EndEffector.EndEffectorState state){
+  public InstantCommand setEndEffector(EndEffector.EndEffectorState state){
     return new InstantCommand(() -> endEffectorStateManager(state));
   }
 
@@ -106,8 +107,9 @@ public class Superstructure {
 
   public void elevatorStateManager(Elevator.ElevatorState state){
     switch (state) {
-      case Home, Feeder, StartConfiguration, Climb:
+      case Home:
         endEffectorStateManager(EndEffector.EndEffectorState.Home);
+        algaeStateManager(AlgaeExtensionState.Home);
         elevator.setGoalState(state, () -> endEffector.atState(EndEffector.EndEffectorState.Home));
         break;
       case L1:
@@ -124,14 +126,14 @@ public class Superstructure {
   
   public void ejectPiece(double speed)
   {
-    SmartDashboard.putString("LL", base.getCameraFacing(ReefPole.A.getTranslation()).config.table());
-    if(base.getCameraFacing(ReefPole.A.getTranslation()).config.table() == "limelight-left")
+    SmartDashboard.putString("LL", base.getCameraFacing(ReefPole.getCenterReef()).config.table());
+    if(base.getCameraFacing(ReefPole.getCenterReef()).config.table() == "limelight-left")
     {
-      effector.setRollers(Math.abs(speed));
+      effector.ejectStateMachine.setGoalState(EjectorState.Left);
     }
-    else if(base.getCameraFacing(ReefPole.A.getTranslation()).config.table() == "limelight-right")
+    else if(base.getCameraFacing(ReefPole.getCenterReef()).config.table() == "limelight-right")
     {
-      effector.setRollers(-Math.abs(speed));
+      effector.ejectStateMachine.setGoalState(EjectorState.Right);
     }
   }
 
@@ -148,13 +150,5 @@ public class Superstructure {
     }
   }
   
-  //CLIMB AUTOMATION
-  public void automateClimb()
-  {
-    
-    if(Math.abs(base.getLocalization().getFieldPose().getTranslation().getDistance(getCage()))< 2.25)
-    {
-      setElevator(ElevatorState.Climb);
-    }
-  }
+  
 }

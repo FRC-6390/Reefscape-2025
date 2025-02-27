@@ -1,18 +1,13 @@
 package frc.robot.utils;
 
-import java.io.IOException;
-
-import org.json.simple.parser.ParseException;
-
 import com.pathplanner.lib.path.PathPlannerPath;
-import com.pathplanner.lib.util.FileVersionException;
-
 import ca.frc6390.athena.sensors.camera.limelight.LimeLight;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
+import frc.robot.Robot;
 import frc.robot.RobotContainer.PATHS;
 
 public class ReefScoringPos {
@@ -55,6 +50,18 @@ public class ReefScoringPos {
 
         public long getApriltagId() {
            return getApriltagId(DriverStation.getAlliance().get());
+        }
+
+        public static Translation2d getCenterReef()
+        {
+            if(DriverStation.getAlliance().orElse(Robot.isSimulation() ? Alliance.Blue : null).equals(Alliance.Blue))
+            {
+                return new Translation2d(4.477, 4);
+            }
+            else
+            {
+                return new Translation2d(13.063, 4);
+            }
         }
     
         public long getApriltagId(Alliance team) {
@@ -139,7 +146,7 @@ public class ReefScoringPos {
         }
 
         public Translation2d getTranslation() {
-            return getTranslation(DriverStation.getAlliance().orElse(Alliance.Blue));
+            return getTranslation(DriverStation.getAlliance().orElse(Robot.isSimulation() ? Alliance.Blue : null));
          }
      
          public Translation2d getTranslation(Alliance team) {
@@ -147,7 +154,7 @@ public class ReefScoringPos {
          }
 
          public Rotation2d getRotation() {
-            return getRotation(DriverStation.getAlliance().orElse(Alliance.Blue));
+            return getRotation(DriverStation.getAlliance().orElse(Robot.isSimulation() ? Alliance.Blue : null));
          }
      
          public Rotation2d getRotation(Alliance team) {
@@ -155,7 +162,7 @@ public class ReefScoringPos {
          }
 
          public Pose2d getPose2d() {
-            return getPose2d(DriverStation.getAlliance().orElse(Alliance.Blue));
+            return getPose2d(DriverStation.getAlliance().orElse(Robot.isSimulation() ? Alliance.Blue : null));
          }
      
          public Pose2d getPose2d(Alliance team) {

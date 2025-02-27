@@ -76,9 +76,9 @@ public interface Constants {
         RobotBaseConfig<SwerveDrivetrain> ROBOT_BASE = RobotBaseConfig.swerve(DRIVETRAIN_CONFIG)
                                                                       .setLocalization(LOCALIZATION_CONFIG)
                                                                     //   .setVision(RobotVisionConfig.blank().addLimeLights(new LimeLightConfig("limelight-left").setYawRelativeToForwards(-90)));
-                                                                    .setVision(RobotVisionConfig.blank().addPhotonVision(new PhotonVisionConfig("OV9281", new Transform3d(-0.23495,0.9017,-0.1778, new Rotation3d()),PoseStrategy.MULTI_TAG_PNP_ON_COPROCESSOR)).addLimeLights(new LimeLightConfig("limelight-left").setYawRelativeToForwards(-90),new LimeLightConfig("limelight-right").setYawRelativeToForwards(90)));
+                                                                    // .setVision(RobotVisionConfig.blank().addPhotonVision(new PhotonVisionConfig("OV9281", new Transform3d(-0.23495,0.9017,-0.1778, new Rotation3d()),PoseStrategy.MULTI_TAG_PNP_ON_COPROCESSOR)).addLimeLights(new LimeLightConfig("limelight-left").setYawRelativeToForwards(-90),new LimeLightConfig("limelight-right").setYawRelativeToForwards(90)));
 
-                                                                    //   .setVision(RobotVisionConfig.blank().addLimeLights(new LimeLightConfig("limelight-left").setYawRelativeToForwards(-90),new LimeLightConfig("limelight-right").setYawRelativeToForwards(90)));
+                                                                      .setVision(RobotVisionConfig.blank().addLimeLights(new LimeLightConfig("limelight-left").setYawRelativeToForwards(-90),new LimeLightConfig("limelight-right").setYawRelativeToForwards(90)));
     }
 
     public interface Controllers {
@@ -119,8 +119,8 @@ public interface Constants {
         double MOTOR_GEAR_RATIO = 6d/1d;
         int LIMIT_SWITCH = 5;
         //MAX ACCEL WAS 15
-        ProfiledPIDController CONTORLLER = new ProfiledPIDController(0.11, 0.01, 0, new Constraints(60, 18));
-        ElevatorFeedforward FEEDFORWARD = new ElevatorFeedforward(0, 0.17, 0.377,0.78);
+        ProfiledPIDController CONTORLLER = new ProfiledPIDController(0.06, 0.01, 0, new Constraints(50, 10));
+        ElevatorFeedforward FEEDFORWARD = new ElevatorFeedforward(0, 0.208, 0.02,0.0);
         
         // ProfiledPIDController CONTORLLER = new ProfiledPIDController(0.11, 0, 0, new Constraints(60, 30));
         // ElevatorFeedforward FEEDFORWARD = new ElevatorFeedforward(0, 0.129, 0.377,0.75);
@@ -150,7 +150,7 @@ public interface Constants {
         
         int ROLLER = 33;
         // double ENCODER_OFFSET = 0.551025390625;
-        double ENCODER_OFFSET = -0.045654296875;
+        double ENCODER_OFFSET = -0.044921875;
         double ENCODER_GEAR_RATIO = 1d/1d; //from motors 125d/1d;
         String CANBUS = "can";
         PIDController CONTORLLER = new PIDController(0.015, 0, 0);

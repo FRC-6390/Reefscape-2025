@@ -4,7 +4,6 @@
 
 package frc.robot;
 
-import au.grapplerobotics.CanBridge;
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -23,7 +22,7 @@ public class Robot extends TimedRobot {
     CommandScheduler.getInstance().run();
     // SmartDashboard.putBoolean("Correct Pose", m_robotContainer.superstructure.closeEnough());
     SmartDashboard.putNumber("Las Left",m_robotContainer.lasLeft.getMeasurement().distance_mm);
-    SmartDashboard.putNumber("Las Right",m_robotContainer.lasLeft.getMeasurement().distance_mm);
+    SmartDashboard.putNumber("Las Right",m_robotContainer.lasRight.getMeasurement().distance_mm);
 
   }
 
