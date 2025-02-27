@@ -22,13 +22,15 @@ public class Robot extends TimedRobot {
   public void robotPeriodic() {
     CommandScheduler.getInstance().run();
     // SmartDashboard.putBoolean("Correct Pose", m_robotContainer.superstructure.closeEnough());
-    // SmartDashboard.putNumber("Las",m_robotContainer.las.getMeasurement().distance_mm);
+    SmartDashboard.putNumber("Las Left",m_robotContainer.lasLeft.getMeasurement().distance_mm);
+    SmartDashboard.putNumber("Las Right",m_robotContainer.lasLeft.getMeasurement().distance_mm);
+
   }
 
   @Override
   public void robotInit() 
   {
-    CanBridge.runTCP();
+    // CanBridge.runTCP();
   }
 
   @Override
@@ -60,7 +62,7 @@ public class Robot extends TimedRobot {
   @Override
   public void teleopInit() {
     m_robotContainer.robotBase.getDrivetrain().getRobotSpeeds().stopAutoSpeeds();
-    
+    m_robotContainer.elevator.controller.reset(m_robotContainer.elevator.getHeightFromFloor());
     if (m_autonomousCommand != null) {
       m_autonomousCommand.cancel();
     }

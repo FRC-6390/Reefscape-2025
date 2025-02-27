@@ -74,7 +74,7 @@ public class Elevator extends SubsystemBase{
     }
 }
 
-double current = 52.5;
+double current = 48;
 
   public Elevator() 
   {
@@ -162,8 +162,8 @@ double current = 52.5;
     //negative is up, this makes negative down
    
     speed = -speed;
-    leftMotor.set(speed);
-    rightMotor.set(speed);
+    // leftMotor.set(speed);
+    // rightMotor.set(speed);
   }
   
   public void stop() {

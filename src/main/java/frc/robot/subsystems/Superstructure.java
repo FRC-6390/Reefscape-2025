@@ -25,6 +25,7 @@ public class Superstructure {
   StateMachine<Elevator.ElevatorState> elevator;
   StateMachine<EndEffector.AlgaeExtensionState> algaeMachine;
   StateMachine<EndEffector.EndEffectorState> endEffector;
+  public Translation2d translation;
   public EndEffector effector;
   public RobotBase<?> base;
   public DelayedOutput output;
@@ -45,15 +46,30 @@ public class Superstructure {
   public boolean closeEnough()
   {
     LimeLight ll = base.getCameraFacing(ReefPole.A.getTranslation());
-    ReefPole pole = ReefPole.getPoleFromID(ll.getAprilTagID());
-    Translation2d translation = new Translation2d(9999,999);
+    SmartDashboard.putNumber("Dist", dist);
+
+   
+
+    if(ll != null)
+    {
+    ReefPole pole = ReefPole.getPoleFromID(ll.getAprilTagID(), ll);
+
     if(pole != null)
     {
-      translation = pole.getTranslation();
+    translation = pole.getTranslation();
+    if(translation != null)
+    {
+    SmartDashboard.putNumber("Translation X", pole.getTranslation().getX());
+    SmartDashboard.putNumber("Translation Y", pole.getTranslation().getY());
+    SmartDashboard.putNumber("ID", pole.getApriltagId());
+    SmartDashboard.putNumber("LL ID", ll.getAprilTagID());
     }
+    }
+    if(translation != null)
+    {
     dist = Math.abs(base.getLocalization().getFieldPose().getTranslation().getDistance(translation));
-  
-    if(dist < 0.3)
+    } 
+    if(dist < 0.2)
     {
       return true;
     }
@@ -61,6 +77,11 @@ public class Superstructure {
     {
       return false;
     }
+  }
+  else
+  {
+    return false;
+  }
   }
 
 
@@ -99,14 +120,6 @@ public class Superstructure {
 
   public void endEffectorStateManager(EndEffector.EndEffectorState state){
     endEffector.setGoalState(state);
-    // switch (state) {
-    //   case StartConfiguration, Home, Left, LeftL4, Right, RightL4:
-    //     System.out.println("STATECahenge");
-    //     endEffector.setGoalState(state);
-    //     break;
-    //   default:
-    //     System.out.println("State Not FOund");
-    // }
   }
   
   public void ejectPiece(double speed)

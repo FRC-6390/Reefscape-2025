@@ -57,10 +57,10 @@ public class EndEffector extends SubsystemBase {
   {
       StartConfiguration(0),
       Home(0),
-      Left(25),
-      Right(-25),
-      LeftL4(35),
-      RightL4(-35);
+      Left(-25),
+      Right(25),
+      LeftL4(-35),
+      RightL4(35);
 
       private double angle;
       private EndEffectorState(double angle)
@@ -139,7 +139,7 @@ public class EndEffector extends SubsystemBase {
       algaeExtender.getConfigurator().apply(new TalonFXConfiguration());
       algaeExtender.setNeutralMode(NeutralModeValue.Brake);
       CurrentLimitsConfigs limit = new CurrentLimitsConfigs();
-      limit = limit.withStatorCurrentLimit(40);
+      limit = limit.withStatorCurrentLimit(20);
       algaeExtender.getConfigurator().apply(limit);
       algaController = new PIDController(0.1, 0, 0);
       algaController.setTolerance(0.3);

@@ -42,7 +42,7 @@ public class AutoAlign extends Command {
   }
 
   public AutoAlign(String limelight, RobotBase<?> base, LaserCan las, long tagNum) {
-    this(base.getVision().getCamera(limelight), base, las, -1);
+    this(base.getVision().getLimelight(limelight), base, las, -1);
   }
 
   public AutoAlign(LimeLight limelight, RobotBase<?> base, LaserCan las ,long tagNum) {
@@ -108,7 +108,7 @@ public class AutoAlign extends Command {
       // drivetrain.getRobotSpeeds().enableSpeeds(SpeedSource.AUTO, true);
       // speeds = helper.calculateSpeeds(mode, false);
       // speeds = new ChassisSpeeds();
-      speeds = new ChassisSpeeds(-limelight.config.getAngleCos(), 0,0);
+      speeds = new ChassisSpeeds(-limelight.config.getYawCos(), 0,0);
     }
     if(hasSet) {
       if(las.getMeasurement() != null)
@@ -134,7 +134,7 @@ public class AutoAlign extends Command {
       drivetrain.getRobotSpeeds().setFeedbackSpeeds(speeds);
     }
     else{
-      drivetrain.getRobotSpeeds().setFeedbackSpeeds(new ChassisSpeeds(-limelight.config.getAngleCos() / 2,0,0));
+      drivetrain.getRobotSpeeds().setFeedbackSpeeds(new ChassisSpeeds(-limelight.config.getYawCos() / 2,0,0));
     }
   }
     else
