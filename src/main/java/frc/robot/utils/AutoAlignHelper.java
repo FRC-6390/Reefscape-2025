@@ -105,7 +105,7 @@ public ChassisSpeeds calculateSpeeds(LimeLight ll, boolean hasCorrectTag)
 {
     if(hasCorrectTag)
     {
-      xVelocity = ll.config.getAngleCos() * xController.calculate(getXMeasurement(), 0);
+      xVelocity = ll.config.getYawCos() * xController.calculate(getXMeasurement(), 0);
       rotationalVelocity = controller.calculate(getThetatMeasurement(), 0);
       double error = Math.abs(xError.calculate(xController.getPositionError()));
       double multiplier = 0;
@@ -126,7 +126,7 @@ public ChassisSpeeds calculateSpeeds(LimeLight ll, boolean hasCorrectTag)
         multiplier = 2;
       }
      
-      yVelocity = ll.config.getAngleCos() * multiplier;
+      yVelocity = ll.config.getYawCos() * multiplier;
       System.out.println(error);
     }
     else

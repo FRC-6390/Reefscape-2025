@@ -14,9 +14,10 @@ import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import frc.robot.subsystems.superstructure.Elevator;
-import frc.robot.subsystems.superstructure.Elevator.ElevatorState;
 import frc.robot.subsystems.superstructure.EndEffector;
 import frc.robot.subsystems.superstructure.EndEffector.AlgaeExtensionState;
+import frc.robot.subsystems.superstructure.EndEffector.EjectorState;
+import frc.robot.subsystems.superstructure.EndEffector.EndEffectorState;
 import frc.robot.utils.ReefScoringPos.ReefPole;
 
 public class Superstructure {
@@ -25,6 +26,7 @@ public class Superstructure {
   StateMachine<Elevator.ElevatorState> elevator;
   StateMachine<EndEffector.AlgaeExtensionState> algaeMachine;
   StateMachine<EndEffector.EndEffectorState> endEffector;
+  public Translation2d translation;
   public EndEffector effector;
   public RobotBase<?> base;
   public DelayedOutput output;
@@ -44,16 +46,31 @@ public class Superstructure {
 
   public boolean closeEnough()
   {
-    LimeLight ll = base.getCameraFacing(ReefPole.A.getTranslation());
-    ReefPole pole = ReefPole.getPoleFromID(ll.getAprilTagID());
-    Translation2d translation = new Translation2d(9999,999);
+    LimeLight ll = base.getCameraFacing(ReefPole.getCenterReef());
+    SmartDashboard.putNumber("Dist", dist);
+
+   
+
+    if(ll != null)
+    {
+    ReefPole pole = ReefPole.getPoleFromID(ll.getAprilTagID(), ll);
+
     if(pole != null)
     {
-      translation = pole.getTranslation();
+    translation = pole.getTranslation();
+    if(translation != null)
+    {
+    SmartDashboard.putNumber("Translation X", pole.getTranslation().getX());
+    SmartDashboard.putNumber("Translation Y", pole.getTranslation().getY());
+    SmartDashboard.putNumber("ID", pole.getApriltagId());
+    SmartDashboard.putNumber("LL ID", ll.getAprilTagID());
     }
+    }
+    if(translation != null)
+    {
     dist = Math.abs(base.getLocalization().getFieldPose().getTranslation().getDistance(translation));
-  
-    if(dist < 0.3)
+    } 
+    if(dist < 0.2)
     {
       return true;
     }
@@ -62,6 +79,11 @@ public class Superstructure {
       return false;
     }
   }
+  else
+  {
+    return false;
+  }
+  }
 
 
 
@@ -69,7 +91,7 @@ public class Superstructure {
     return new InstantCommand(() -> elevatorStateManager(state));
   }
 
-  public InstantCommand setEndEffectir(EndEffector.EndEffectorState state){
+  public InstantCommand setEndEffector(EndEffector.EndEffectorState state){
     return new InstantCommand(() -> endEffectorStateManager(state));
   }
 
@@ -85,8 +107,9 @@ public class Superstructure {
 
   public void elevatorStateManager(Elevator.ElevatorState state){
     switch (state) {
-      case Home, Feeder, StartConfiguration, Climb:
+      case Home:
         endEffectorStateManager(EndEffector.EndEffectorState.Home);
+        algaeStateManager(AlgaeExtensionState.Home);
         elevator.setGoalState(state, () -> endEffector.atState(EndEffector.EndEffectorState.Home));
         break;
       case L1:
@@ -99,26 +122,18 @@ public class Superstructure {
 
   public void endEffectorStateManager(EndEffector.EndEffectorState state){
     endEffector.setGoalState(state);
-    // switch (state) {
-    //   case StartConfiguration, Home, Left, LeftL4, Right, RightL4:
-    //     System.out.println("STATECahenge");
-    //     endEffector.setGoalState(state);
-    //     break;
-    //   default:
-    //     System.out.println("State Not FOund");
-    // }
   }
   
   public void ejectPiece(double speed)
   {
-    SmartDashboard.putString("LL", base.getCameraFacing(ReefPole.A.getTranslation()).config.table());
-    if(base.getCameraFacing(ReefPole.A.getTranslation()).config.table() == "limelight-left")
+    SmartDashboard.putString("LL", base.getCameraFacing(ReefPole.getCenterReef()).config.table());
+    if(base.getCameraFacing(ReefPole.getCenterReef()).config.table() == "limelight-left")
     {
-      effector.setRollers(Math.abs(speed));
+      effector.ejectStateMachine.setGoalState(EjectorState.Left);
     }
-    else if(base.getCameraFacing(ReefPole.A.getTranslation()).config.table() == "limelight-right")
+    else if(base.getCameraFacing(ReefPole.getCenterReef()).config.table() == "limelight-right")
     {
-      effector.setRollers(-Math.abs(speed));
+      effector.ejectStateMachine.setGoalState(EjectorState.Right);
     }
   }
 
@@ -135,13 +150,5 @@ public class Superstructure {
     }
   }
   
-  //CLIMB AUTOMATION
-  public void automateClimb()
-  {
-    
-    if(Math.abs(base.getLocalization().getFieldPose().getTranslation().getDistance(getCage()))< 2.25)
-    {
-      setElevator(ElevatorState.Climb);
-    }
-  }
+  
 }

@@ -1,17 +1,13 @@
 package frc.robot.utils;
 
-import java.io.IOException;
-
-import org.json.simple.parser.ParseException;
-
 import com.pathplanner.lib.path.PathPlannerPath;
-import com.pathplanner.lib.util.FileVersionException;
-
+import ca.frc6390.athena.sensors.camera.limelight.LimeLight;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
+import frc.robot.Robot;
 import frc.robot.RobotContainer.PATHS;
 
 public class ReefScoringPos {
@@ -21,23 +17,23 @@ public class ReefScoringPos {
 
      public enum ReefPole {
         
-        A(18, 7, new Pose2d(14.3,4, Rotation2d.fromDegrees(180)), new Pose2d(3.2, 4,  Rotation2d.fromDegrees(0)), PATHS.SIDEA),
-        B(18, 7, new Pose2d(14.3,4, Rotation2d.fromDegrees(180)), new Pose2d(3.2,4, Rotation2d.fromDegrees(0)), PATHS.SIDEA),
+        A(18, 7, new Pose2d(11.757,4.200, Rotation2d.fromDegrees(180)), new Pose2d(3.241, 4.200,  Rotation2d.fromDegrees(0)), PATHS.SIDEA),
+        B(18, 7, new Pose2d(11.776,3.880, Rotation2d.fromDegrees(180)), new Pose2d(3.211,3.880, Rotation2d.fromDegrees(0)), PATHS.SIDEA),
 
-        C(17, 8, new Pose2d(13.7,5.1,  Rotation2d.fromDegrees(-120)), new Pose2d(3.8,3, Rotation2d.fromDegrees(60)), PATHS.SIDEC),
-        D(17, 8, new Pose2d(13.7,5.1,  Rotation2d.fromDegrees(-120)), new Pose2d(3.8,3, Rotation2d.fromDegrees(60)), PATHS.SIDEC),
+        C(17, 8, new Pose2d(12.275,3.033,  Rotation2d.fromDegrees(-120)), new Pose2d(3.699,3.033, Rotation2d.fromDegrees(60)), PATHS.SIDEC),
+        D(17, 8, new Pose2d(12.574,2.863,  Rotation2d.fromDegrees(-120)), new Pose2d(3.969,2.863, Rotation2d.fromDegrees(60)), PATHS.SIDEC),
 
-        E(22, 9, new Pose2d(12.4,5.1,  Rotation2d.fromDegrees(-60)), new Pose2d(5.1,2.9,  Rotation2d.fromDegrees(120)), PATHS.SIDEE),
-        F(22, 9, new Pose2d(12.4,5.1,  Rotation2d.fromDegrees(-60)), new Pose2d(5.1,2.9,  Rotation2d.fromDegrees(120)), PATHS.SIDEE),
+        E(22, 9, new Pose2d(13.561,2.863,  Rotation2d.fromDegrees(-60)), new Pose2d(4.956,2.853,  Rotation2d.fromDegrees(120)), PATHS.SIDEE),
+        F(22, 9, new Pose2d(13.861,2.993,  Rotation2d.fromDegrees(-60)), new Pose2d(5.245,2.993,  Rotation2d.fromDegrees(120)), PATHS.SIDEE),
 
-        G(21, 10, new Pose2d(11.8,4, Rotation2d.fromDegrees(0)), new Pose2d(5.8,4, Rotation2d.fromDegrees(180)), PATHS.SIDEG),
-        H(21, 10, new Pose2d(11.8,4, Rotation2d.fromDegrees(0)), new Pose2d(5.8,4, Rotation2d.fromDegrees(180)), PATHS.SIDEG),
+        G(21, 10, new Pose2d(14.369,3.860, Rotation2d.fromDegrees(0)), new Pose2d(5.754,3.860, Rotation2d.fromDegrees(180)), PATHS.SIDEG),
+        H(21, 10, new Pose2d(14.359,4.200, Rotation2d.fromDegrees(0)), new Pose2d(5.754,4.200, Rotation2d.fromDegrees(180)), PATHS.SIDEG),
 
-        I(20, 11, new Pose2d(12.4,3, Rotation2d.fromDegrees(60)), new Pose2d(5.1,5.1,  Rotation2d.fromDegrees(-120)), PATHS.SIDEI),
-        J(20, 11, new Pose2d(12.4,3, Rotation2d.fromDegrees(60)), new Pose2d(5.1,5.1,  Rotation2d.fromDegrees(-120)), PATHS.SIDEI),
+        I(20, 11, new Pose2d(13.880,5.007, Rotation2d.fromDegrees(60)), new Pose2d(5.285,5.007,  Rotation2d.fromDegrees(-120)), PATHS.SIDEI),
+        J(20, 11, new Pose2d(13.561,5.207, Rotation2d.fromDegrees(60)), new Pose2d(4.986,5.207,  Rotation2d.fromDegrees(-120)), PATHS.SIDEI),
         
-        K(19, 6, new Pose2d(13.7,3, Rotation2d.fromDegrees(120)), new Pose2d(3.8,5, Rotation2d.fromDegrees(-60)), PATHS.SIDEK),
-        L(19, 6, new Pose2d(13.7,3, Rotation2d.fromDegrees(120)), new Pose2d(3.8,5, Rotation2d.fromDegrees(-60)), PATHS.SIDEK);
+        K(19, 6, new Pose2d(12.594,5.187, Rotation2d.fromDegrees(120)), new Pose2d(3.989,5.187, Rotation2d.fromDegrees(-60)), PATHS.SIDEK),
+        L(19, 6, new Pose2d(12.325,5.027, Rotation2d.fromDegrees(120)), new Pose2d(3.719,5.027, Rotation2d.fromDegrees(-60)), PATHS.SIDEK);
     
         private final long apriltagIdRed, apriltagIdBlue;
         private final Pose2d redPose, bluePose;
@@ -55,6 +51,18 @@ public class ReefScoringPos {
         public long getApriltagId() {
            return getApriltagId(DriverStation.getAlliance().get());
         }
+
+        public static Translation2d getCenterReef()
+        {
+            if(DriverStation.getAlliance().orElse(Robot.isSimulation() ? Alliance.Blue : null).equals(Alliance.Blue))
+            {
+                return new Translation2d(4.477, 4);
+            }
+            else
+            {
+                return new Translation2d(13.063, 4);
+            }
+        }
     
         public long getApriltagId(Alliance team) {
             switch (team) {
@@ -63,31 +71,74 @@ public class ReefScoringPos {
                 case Blue:
                     return apriltagIdBlue;
                 default:
-                    throw new IllegalArgumentException("Unknown team: " + team);
+                    DriverStation.reportError("Cant Find Team!!!", new IllegalArgumentException("Unknown team: " + team).getStackTrace());
+                    return -1;
             }
         }
 
-        public static ReefPole getPoleFromID(long id)
+        public static ReefPole getPoleFromID(long id, LimeLight ll)
         {
             switch ((int)id) {
                 case 6:
                 case 19:
-                    return ReefPole.K;
+                    if(ll.config.table() == "limelight-left")
+                    {
+                        return ReefPole.L;
+                    }
+                    else
+                    {
+                        return ReefPole.K;
+                    }
                 case 7:
                 case 18:
+                if(ll.config.table() == "limelight-left")
+                {
+                    return ReefPole.B;
+                }
+                else
+                {
                     return ReefPole.A;
+                }
                 case 8:
                 case 17:
+                if(ll.config.table() == "limelight-left")
+                {
+                    return ReefPole.D;
+                }
+                else
+                {
                     return ReefPole.C;
+                }
                 case 9:
                 case 22:
+                if(ll.config.table() == "limelight-left")
+                {
+                    return ReefPole.F;
+                }
+                else
+                {
                     return ReefPole.E;
+                }
                 case 10:
                 case 21:
+                if(ll.config.table() == "limelight-left")
+                {
+                    return ReefPole.H;
+                }
+                else
+                {
                     return ReefPole.G;
+                }
                 case 11:
                 case 20:
+                if(ll.config.table() == "limelight-left")
+                {
+                    return ReefPole.J;
+                }
+                else
+                {
                     return ReefPole.I;
+                }
 
                 default:
                     return null;
@@ -95,7 +146,7 @@ public class ReefScoringPos {
         }
 
         public Translation2d getTranslation() {
-            return getTranslation(DriverStation.getAlliance().get());
+            return getTranslation(DriverStation.getAlliance().orElse(Robot.isSimulation() ? Alliance.Blue : null));
          }
      
          public Translation2d getTranslation(Alliance team) {
@@ -103,7 +154,7 @@ public class ReefScoringPos {
          }
 
          public Rotation2d getRotation() {
-            return getRotation(DriverStation.getAlliance().get());
+            return getRotation(DriverStation.getAlliance().orElse(Robot.isSimulation() ? Alliance.Blue : null));
          }
      
          public Rotation2d getRotation(Alliance team) {
@@ -111,7 +162,7 @@ public class ReefScoringPos {
          }
 
          public Pose2d getPose2d() {
-            return getPose2d(DriverStation.getAlliance().get());
+            return getPose2d(DriverStation.getAlliance().orElse(Robot.isSimulation() ? Alliance.Blue : null));
          }
      
          public Pose2d getPose2d(Alliance team) {
@@ -121,7 +172,8 @@ public class ReefScoringPos {
                  case Blue:
                      return bluePose;
                  default:
-                     throw new IllegalArgumentException("Unknown team: " + team);
+                     DriverStation.reportError("Cant Find Team!!!", new IllegalArgumentException("Unknown team: " + team).getStackTrace());
+                     return null;
              }
          }
 

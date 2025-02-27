@@ -1,5 +1,7 @@
 package frc.robot;
 
+import org.photonvision.PhotonPoseEstimator.PoseStrategy;
+
 import com.pathplanner.lib.config.PIDConstants;
 
 import ca.frc6390.athena.core.RobotBase.RobotBaseConfig;
@@ -15,12 +17,15 @@ import ca.frc6390.athena.drivetrains.swerve.modules.SwerveVendorSDS;
 import ca.frc6390.athena.mechanisms.Mechanism;
 import ca.frc6390.athena.mechanisms.Mechanism.MechanismConfig;
 import ca.frc6390.athena.mechanisms.TurretMechanism.StatefulTurretMechanism;
-import ca.frc6390.athena.sensors.camera.limelight.LimelightConfig;
+import ca.frc6390.athena.sensors.camera.limelight.LimeLightConfig;
 import ca.frc6390.athena.sensors.camera.limelight.LimeLight.PoseEstimateWithLatencyType;
+import ca.frc6390.athena.sensors.camera.photonvision.PhotonVisionConfig;
 import edu.wpi.first.math.controller.ElevatorFeedforward;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.controller.ProfiledPIDController;
 import edu.wpi.first.math.controller.SimpleMotorFeedforward;
+import edu.wpi.first.math.geometry.Rotation3d;
+import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.trajectory.TrapezoidProfile.Constraints;
 import edu.wpi.first.math.util.Units;
 import frc.robot.subsystems.superstructure.EndEffector.EndEffectorState;
@@ -59,18 +64,21 @@ public interface Constants {
                                                     .setIDs(DrivetrainIDs.SWERVE_CHASSIS_STANDARD)
                                                     .setOffsets(ENCODER_OFFSETS)
                                                     .setCanbus(CANBUS)
-                                                    .setDriveInverted(true)
+                                                    .setDriveInverted(false)
                                                     .setFieldRelative(false)
                                                     .setDriftCorrectionPID(new PIDController(0, 0, 0))
                                                     
-                                                    .setDriftActivationSpeed(0.0);
+                                                    .setDriftActivationSpeed(0.0)
+                                                    .setCurrentLimit(60);
 
-        RobotLocalizationConfig LOCALIZATION_CONFIG = new RobotLocalizationConfig().setVisionMultitag(0.5, 0.5, 99999).setSlipThresh(0.2).setPoseEstimateOrigin(PoseEstimateWithLatencyType.BOT_POSE_MT2_BLUE).setVision(0.5, 0.5, 9999).setAutoPlannerPID(new PIDConstants(5,0,0), new PIDConstants(2,0,0)).setVisionEnabled(false);
+        RobotLocalizationConfig LOCALIZATION_CONFIG = new RobotLocalizationConfig().setSlipThresh(0.2).setVision(0.2, 0.2, 9999).setAutoPlannerPID(new PIDConstants(5,0,0), new PIDConstants(2,0,0)).setVisionEnabled(true);
 
         RobotBaseConfig<SwerveDrivetrain> ROBOT_BASE = RobotBaseConfig.swerve(DRIVETRAIN_CONFIG)
                                                                       .setLocalization(LOCALIZATION_CONFIG)
-                                                                      
-                                                                      .setVision(RobotVisionConfig.limelight(new LimelightConfig("limelight-left").setAngleRelativeToForwards(-90),new LimelightConfig("limelight-right").setAngleRelativeToForwards(90)));
+                                                                    //   .setVision(RobotVisionConfig.blank().addLimeLights(new LimeLightConfig("limelight-left").setYawRelativeToForwards(-90)));
+                                                                    // .setVision(RobotVisionConfig.blank().addPhotonVision(new PhotonVisionConfig("OV9281", new Transform3d(-0.23495,0.9017,-0.1778, new Rotation3d()),PoseStrategy.MULTI_TAG_PNP_ON_COPROCESSOR)).addLimeLights(new LimeLightConfig("limelight-left").setYawRelativeToForwards(-90),new LimeLightConfig("limelight-right").setYawRelativeToForwards(90)));
+
+                                                                      .setVision(RobotVisionConfig.blank().addLimeLights(new LimeLightConfig("limelight-left").setYawRelativeToForwards(-90),new LimeLightConfig("limelight-right").setYawRelativeToForwards(90)));
     }
 
     public interface Controllers {
@@ -111,8 +119,8 @@ public interface Constants {
         double MOTOR_GEAR_RATIO = 6d/1d;
         int LIMIT_SWITCH = 5;
         //MAX ACCEL WAS 15
-        ProfiledPIDController CONTORLLER = new ProfiledPIDController(0.11, 0.01, 0, new Constraints(60, 18));
-        ElevatorFeedforward FEEDFORWARD = new ElevatorFeedforward(0, 0.17, 0.377,0.78);
+        ProfiledPIDController CONTORLLER = new ProfiledPIDController(0.06, 0.01, 0, new Constraints(50, 10));
+        ElevatorFeedforward FEEDFORWARD = new ElevatorFeedforward(0, 0.208, 0.02,0.0);
         
         // ProfiledPIDController CONTORLLER = new ProfiledPIDController(0.11, 0, 0, new Constraints(60, 30));
         // ElevatorFeedforward FEEDFORWARD = new ElevatorFeedforward(0, 0.129, 0.377,0.75);
@@ -142,7 +150,7 @@ public interface Constants {
         
         int ROLLER = 33;
         // double ENCODER_OFFSET = 0.551025390625;
-        double ENCODER_OFFSET = -0.045654296875;
+        double ENCODER_OFFSET = -0.044921875;
         double ENCODER_GEAR_RATIO = 1d/1d; //from motors 125d/1d;
         String CANBUS = "can";
         PIDController CONTORLLER = new PIDController(0.015, 0, 0);

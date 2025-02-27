@@ -5,27 +5,13 @@
 package frc.robot.commands.auto;
 
 import au.grapplerobotics.LaserCan;
-import ca.frc6390.athena.controllers.EnhancedXboxController;
 import ca.frc6390.athena.core.RobotBase;
 import ca.frc6390.athena.core.RobotLocalization;
-import ca.frc6390.athena.drivetrains.swerve.SwerveDrivetrain;
-import ca.frc6390.athena.filters.FilterList;
 import ca.frc6390.athena.filters.FilteredValue;
 import ca.frc6390.athena.sensors.camera.limelight.LimeLight;
 import ca.frc6390.athena.sensors.camera.limelight.LimeLight.PoseEstimateType;
-import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.controller.PIDController;
-import edu.wpi.first.math.controller.ProfiledPIDController;
-import edu.wpi.first.math.filter.LinearFilter;
-import edu.wpi.first.math.geometry.Pose2d;
-import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.math.geometry.Translation2d;
-import edu.wpi.first.math.kinematics.ChassisSpeeds;
-import edu.wpi.first.math.trajectory.TrapezoidProfile.Constraints;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
-import frc.robot.utils.AutoAlignHelper;
-import frc.robot.utils.ReefScoringPos;
 import frc.robot.utils.ReefScoringPos.ReefPole;
 
 /* You should consider using the more terse Command factories API instead https://docs.wpilib.org/en/stable/docs/software/commandbased/organizing-command-based.html#defining-commands */
@@ -58,7 +44,7 @@ public class PassiveAlign extends Command {
   @Override
   public void initialize() 
   {
-    limeLight = base.getCameraFacing(ReefPole.A.getTranslation());
+    limeLight = base.getCameraFacing(ReefPole.getCenterReef());
     
   }
 
