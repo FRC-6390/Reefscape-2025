@@ -129,6 +129,10 @@ public class RobotContainer {
   {
     configureBindings();
     robotBase.getDrivetrain().setDriveCommand(driverController);
+    robotBase.getLocalization().setAutoDrive((rs, chassis) -> {
+      chassis.omegaRadiansPerSecond = -chassis.omegaRadiansPerSecond;
+      rs.setAutoSpeeds(chassis);
+    });
     chooser.addOption("LEFT SIDE", AUTOS.LEFTSIDE);
     // chooser.addOption("RIGHT SIDE", AUTOS.RIGHTSIDE);
     chooser.addOption("TEST", AUTOS.TEST);
