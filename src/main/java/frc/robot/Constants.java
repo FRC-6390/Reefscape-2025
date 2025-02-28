@@ -1,7 +1,5 @@
 package frc.robot;
 
-import org.photonvision.PhotonPoseEstimator.PoseStrategy;
-
 import com.pathplanner.lib.config.PIDConstants;
 
 import ca.frc6390.athena.core.RobotBase.RobotBaseConfig;
@@ -14,22 +12,12 @@ import ca.frc6390.athena.devices.MotorController.Motor;
 import ca.frc6390.athena.drivetrains.swerve.SwerveDrivetrain;
 import ca.frc6390.athena.drivetrains.swerve.SwerveDrivetrain.SwerveDrivetrainConfig;
 import ca.frc6390.athena.drivetrains.swerve.modules.SwerveVendorSDS;
-import ca.frc6390.athena.mechanisms.Mechanism;
-import ca.frc6390.athena.mechanisms.Mechanism.MechanismConfig;
-import ca.frc6390.athena.mechanisms.TurretMechanism.StatefulTurretMechanism;
 import ca.frc6390.athena.sensors.camera.limelight.LimeLightConfig;
-import ca.frc6390.athena.sensors.camera.limelight.LimeLight.PoseEstimateWithLatencyType;
-import ca.frc6390.athena.sensors.camera.photonvision.PhotonVisionConfig;
 import edu.wpi.first.math.controller.ElevatorFeedforward;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.controller.ProfiledPIDController;
-import edu.wpi.first.math.controller.SimpleMotorFeedforward;
-import edu.wpi.first.math.geometry.Rotation3d;
-import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.trajectory.TrapezoidProfile.Constraints;
 import edu.wpi.first.math.util.Units;
-import frc.robot.subsystems.superstructure.EndEffector.EndEffectorState;
-import frc.robot.utils.ReefScoringPos.ReefPole;
 
 public interface Constants {
     
@@ -69,7 +57,7 @@ public interface Constants {
                                                     .setSteerInverted(true)
                                                     .setDriftCorrectionPID(new PIDController(0, 0, 0))
                                                     .setDriftActivationSpeed(0.0)
-                                                    .setCurrentLimit(60);
+                                                    .setCurrentLimit(40);
 //ROT P SHOULD BE 2
         RobotLocalizationConfig LOCALIZATION_CONFIG = new RobotLocalizationConfig().setSlipThresh(0.2).setVision(0.2, 0.2, 9999).setAutoPlannerPID(new PIDConstants(5,0,0), new PIDConstants(0,0,0)).setVisionEnabled(true);
 

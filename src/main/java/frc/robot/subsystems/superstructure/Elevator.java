@@ -22,29 +22,24 @@ import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
-import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
-
 import frc.robot.Constants;
 
 public class Elevator extends SubsystemBase{
-  /** Creates a new Climber. */
-  public CANcoder encoder;
-  public TalonFX leftMotor;
-  public TalonFX rightMotor;
-  public boolean hasSetHome;
-  public GenericLimitSwitch lowerlimitSwitch;
-  public ShuffleboardTab tab;
 
-  public ProfiledPIDController controller;
-  public ElevatorFeedforward feedforward;
+  private final CANcoder encoder;
+  private final TalonFX leftMotor;
+  private final TalonFX rightMotor;
+  private final GenericLimitSwitch lowerlimitSwitch;
 
-  public StateMachine<ElevatorState> stateMachine;
-  public StatusSignal<Angle> getPosition;
-  public StatusSignal<AngularVelocity> getVelocity;
-  public SysIdRoutine routine;
-  public double gear_ratio;
+  private final ProfiledPIDController controller;
+  private final ElevatorFeedforward feedforward;
+
+  private final StateMachine<Double, ElevatorState> stateMachine;
+  private final StatusSignal<Angle> getPosition;
+  private final StatusSignal<AngularVelocity> getVelocity;
+  private double nudge = 0;
   
-  public enum ElevatorState implements SetpointProvider {
+  public enum ElevatorState implements SetpointProvider<Double> {
     //ELEVATOR HEIGHT FROM FLOOR IN INCHES
     Home(Constants.Elevator.OFFSET_FROM_FLOOR),
     L1(Constants.Elevator.OFFSET_FROM_FLOOR),
@@ -64,37 +59,25 @@ public class Elevator extends SubsystemBase{
     }
 
     @Override
-    public double getSetpoint() {
+    public Double getSetpoint() {
       return pos;
     }
 }
 
-double current = 40;
-public double nudge = 0;
-
   public Elevator() 
   {
-   encoder = new CANcoder(Constants.Elevator.ENCODER, Constants.Elevator.CANBUS);
-   leftMotor = new TalonFX(Constants.Elevator.LEFT_MOTOR, Constants.Elevator.CANBUS);
-   rightMotor = new TalonFX(Constants.Elevator.RIGHT_MOTOR, Constants.Elevator.CANBUS);
-   
-    if (encoder != null) {
-      getPosition = encoder.getPosition();
-      getVelocity = encoder.getVelocity();
-      gear_ratio = Constants.Elevator.ENCODER_GEAR_RATIO;
-    }else{
-      getPosition = leftMotor.getRotorPosition();
-      getVelocity = leftMotor.getRotorVelocity();
-      gear_ratio = Constants.Elevator.MOTOR_GEAR_RATIO;
-    }
-
+    encoder = new CANcoder(Constants.Elevator.ENCODER, Constants.Elevator.CANBUS);
+    leftMotor = new TalonFX(Constants.Elevator.LEFT_MOTOR, Constants.Elevator.CANBUS);
+    rightMotor = new TalonFX(Constants.Elevator.RIGHT_MOTOR, Constants.Elevator.CANBUS);
+    getPosition = encoder.getPosition();
+    getVelocity = encoder.getVelocity();
     lowerlimitSwitch = new GenericLimitSwitch(Constants.Elevator.LIMIT_SWITCH);
     lowerlimitSwitch.onTrue(new InstantCommand(() -> {encoder.setPosition(0); stop();}));
     
     leftMotor.setNeutralMode(NeutralModeValue.Brake);
     rightMotor.setNeutralMode(NeutralModeValue.Brake);
 
-    CurrentLimitsConfigs currentLimitsConfigs = new CurrentLimitsConfigs().withStatorCurrentLimit(current);
+    CurrentLimitsConfigs currentLimitsConfigs = new CurrentLimitsConfigs().withStatorCurrentLimit(40);
     currentLimitsConfigs.StatorCurrentLimitEnable = true;
     leftMotor.getConfigurator().apply(currentLimitsConfigs);
     rightMotor.getConfigurator().apply(currentLimitsConfigs);
@@ -105,34 +88,18 @@ public double nudge = 0;
     controller.setTolerance(0.2);
     controller.reset(getHeightFromFloor());
     feedforward = Constants.Elevator.FEEDFORWARD;
-    stateMachine = new StateMachine<ElevatorState>(ElevatorState.Home, controller::atSetpoint);
+    stateMachine = new StateMachine<Double, ElevatorState>(ElevatorState.Home, controller::atSetpoint);
 
   }
 
-  public double getCurrentLimit(){
-    return current;
-  }
-  
-  public void setCurrentLimit(double current)
-  {
-    this.current = current;
-
-    CurrentLimitsConfigs currentLimitsConfigs = new CurrentLimitsConfigs().withStatorCurrentLimit(current);
-    currentLimitsConfigs.StatorCurrentLimitEnable = true;
-    leftMotor.getConfigurator().apply(currentLimitsConfigs);
-    rightMotor.getConfigurator().apply(currentLimitsConfigs);
-  }
-
-
-  //POSITION IN INCHES
   public double getHeight()
   {
-    return -(getPosition.getValueAsDouble() / gear_ratio) * Math.PI *  Constants.Elevator.GEAR_DIAMETER_INCHES;
+    return -(getPosition.getValueAsDouble() / Constants.Elevator.ENCODER_GEAR_RATIO) * Math.PI *  Constants.Elevator.GEAR_DIAMETER_INCHES;
   }
 
   public double getVel()
   {
-    return -(getVelocity.getValueAsDouble() / gear_ratio) * Math.PI *  Constants.Elevator.GEAR_DIAMETER_INCHES;
+    return -(getVelocity.getValueAsDouble() / Constants.Elevator.ENCODER_GEAR_RATIO) * Math.PI *  Constants.Elevator.GEAR_DIAMETER_INCHES;
   }
 
   public double getHeightFromFloor(){
@@ -145,7 +112,7 @@ public double nudge = 0;
     rightMotor.setVoltage(-voltage.magnitude());
   }
 
-  public StateMachine<ElevatorState> getStateMachine() {
+  public StateMachine<Double, ElevatorState> getStateMachine() {
     return stateMachine;
   }
 
@@ -183,8 +150,7 @@ public double nudge = 0;
       tab.addBoolean("State Changer", stateMachine.getChangeStateSupplier()).withPosition(6, 1);
       tab.addDouble("Profiled Pos Setpoint",() -> controller.getSetpoint().position);
       tab.addDouble("Profiled Vel Setpoint",() -> controller.getSetpoint().velocity);
-      tab.addDouble("Nudge",() -> {return nudge;});
-      tab.addDouble("Motor Current Limit",this::getCurrentLimit);
+      tab.addDouble("Nudge",() -> nudge);
 
       return tab;
   }

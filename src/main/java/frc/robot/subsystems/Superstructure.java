@@ -4,9 +4,9 @@
 
 package frc.robot.subsystems;
 
-import ca.frc6390.athena.controllers.DelayedOutput;
 import ca.frc6390.athena.core.RobotBase;
 import ca.frc6390.athena.mechanisms.StateMachine;
+import ca.frc6390.athena.mechanisms.StateMachine.SetpointProvider;
 import ca.frc6390.athena.sensors.camera.limelight.LimeLight;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.wpilibj.DriverStation;
@@ -16,39 +16,64 @@ import edu.wpi.first.wpilibj2.command.InstantCommand;
 import frc.robot.subsystems.superstructure.Elevator;
 import frc.robot.subsystems.superstructure.EndEffector;
 import frc.robot.subsystems.superstructure.Elevator.ElevatorState;
-import frc.robot.subsystems.superstructure.EndEffector.AlgaeExtensionState;
-import frc.robot.subsystems.superstructure.EndEffector.EjectorState;
 import frc.robot.subsystems.superstructure.EndEffector.EndEffectorState;
+import frc.robot.subsystems.superstructure.EndEffector.EndEffectorTuple;
 import frc.robot.utils.ReefScoringPos.ReefPole;
 
 public class Superstructure {
   
   /** Creates a new Superstructure. */
-  StateMachine<Elevator.ElevatorState> elevator;
-  StateMachine<EndEffector.AlgaeExtensionState> algaeMachine;
-  StateMachine<EndEffector.EndEffectorState> endEffector;
-  public Translation2d translation;
-  public EndEffector effector;
-  public RobotBase<?> base;
-  public DelayedOutput output;
-  public double dist;
-  
+  private final StateMachine<Double, ElevatorState> elevator;
+  private final StateMachine<EndEffectorTuple, EndEffectorState> endEffector;
 
-  public Superstructure(Elevator elevator, EndEffector effector, RobotBase<?> base) 
+  private final RobotBase<?> base;
+
+  private double dist;
+  private Translation2d translation;
+
+  public record SuperstructureTuple(EndEffectorState endEffector,  ElevatorState elevator) {}
+    
+    public enum SuperstructureState implements SetpointProvider<SuperstructureTuple>
+    {
+        AlgaeHigh(new SuperstructureTuple(EndEffectorState.AlgaeHigh, ElevatorState.AlgaeHigh)),
+        AlgaeLow(new SuperstructureTuple(EndEffectorState.AlgaeLow, ElevatorState.AlgaeLow)),
+        L4(new SuperstructureTuple(EndEffectorState.L4, ElevatorState.L4)),
+        L3(new SuperstructureTuple(EndEffectorState.L3, ElevatorState.L3)),
+        L2(new SuperstructureTuple(EndEffectorState.L2, ElevatorState.L2)),
+        L1(new SuperstructureTuple(EndEffectorState.L1, ElevatorState.L1)),
+        Home(new SuperstructureTuple(EndEffectorState.Home, ElevatorState.Home));
+
+
+        private SuperstructureTuple states;
+        private SuperstructureState(SuperstructureTuple states)
+        {
+            this.states = states;
+        }
+
+        @Override
+        public SuperstructureTuple getSetpoint()
+        {
+            return states;
+        }
+    }
+
+
+  public Superstructure(Elevator elevator, EndEffector endEffector, RobotBase<?> base) 
   {
-    this.effector= effector;
     this.elevator = elevator.getStateMachine();
+    this.endEffector = endEffector.getStateMachine();
     this.base = base;
-    this.endEffector = effector.getStateMachine();
-    this.algaeMachine = effector.getAlgaeStateMachine();
-    output =  new DelayedOutput(this::closeEnough, 0.85);
+    
     dist = 9999;
   }
 
   public boolean closeEnough()
   {
+
     LimeLight ll = base.getCameraFacing(ReefPole.getCenterReef());
     SmartDashboard.putNumber("Dist", dist);
+
+   
 
     if(ll != null)
     {
@@ -74,30 +99,15 @@ public class Superstructure {
     return new InstantCommand(() -> elevatorStateManager(state));
   }
 
-  public InstantCommand autoEffector(){
-    return new InstantCommand(() -> autoendEffectorStateManager());
-  }
-
-  public InstantCommand setEndEffector(EndEffector.EndEffectorState state){
+  public InstantCommand setEndEffector(EndEffectorState state){
     return new InstantCommand(() -> endEffectorStateManager(state));
-  }
-
-  public InstantCommand setAlgaeMachine(EndEffector.AlgaeExtensionState state){
-    return new InstantCommand(() -> algaeStateManager(state));
-  }
-
-
-  public void algaeStateManager(AlgaeExtensionState state)
-  {
-    algaeMachine.setGoalState(state);
   }
 
   public void elevatorStateManager(Elevator.ElevatorState state){
     switch (state) {
       case Home:
-        endEffectorStateManager(EndEffector.EndEffectorState.Home);
-        algaeStateManager(AlgaeExtensionState.Home);
-        elevator.setGoalState(state, () -> endEffector.atState(EndEffector.EndEffectorState.Home));
+        endEffectorStateManager(EndEffectorState.Home);
+        elevator.setGoalState(state, () -> endEffector.atState(EndEffectorState.Home));
         break;
       case L1, AlgaeHigh, AlgaeLow:
         elevator.setGoalState(state);
@@ -116,34 +126,6 @@ public class Superstructure {
   }
   public void endEffectorStateManager(EndEffector.EndEffectorState state){
     endEffector.setGoalState(state);
-  }
-  public void autoendEffectorStateManager(){
-    if(base.getCameraFacing(ReefPole.getCenterReef()).config.table() == "limelight-left")
-    {
-      endEffectorStateManager(EndEffectorState.LeftL4);
-    }
-    else if(base.getCameraFacing(ReefPole.getCenterReef()).config.table() == "limelight-right")
-    {
-      endEffectorStateManager(EndEffectorState.RightL4);
-    }
-  }
-  
-  public void ejectPiece()
-  {
-    SmartDashboard.putString("LL", base.getCameraFacing(ReefPole.getCenterReef()).config.table());
-    if(base.getCameraFacing(ReefPole.getCenterReef()).config.table() == "limelight-left")
-    {
-      effector.ejectStateMachine.setGoalState(EjectorState.Left);
-    }
-    else if(base.getCameraFacing(ReefPole.getCenterReef()).config.table() == "limelight-right")
-    {
-      effector.ejectStateMachine.setGoalState(EjectorState.Right);
-    }
-  }
-
-  public void forceEject(EjectorState state)
-  {
-    effector.ejectStateMachine.setGoalState(state);
   }
 
   public Translation2d getCage()

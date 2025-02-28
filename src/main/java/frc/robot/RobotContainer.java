@@ -34,10 +34,10 @@ import frc.robot.subsystems.Superstructure;
 import frc.robot.subsystems.superstructure.CANdleSubsystem;
 import frc.robot.subsystems.superstructure.Elevator;
 import frc.robot.subsystems.superstructure.EndEffector;
-import frc.robot.subsystems.superstructure.EndEffector.AlgaeExtensionState;
-import frc.robot.subsystems.superstructure.EndEffector.EjectorState;
 import frc.robot.subsystems.superstructure.EndEffector.EndEffectorState;
 import frc.robot.subsystems.superstructure.Elevator.ElevatorState;
+import frc.robot.subsystems.superstructure.endeffector.Rollers;
+import frc.robot.subsystems.superstructure.endeffector.Rollers.RollerState;
 
 public class RobotContainer {
 
@@ -113,12 +113,13 @@ public class RobotContainer {
 
   public final LaserCan lasLeft = new LaserCan(1);
   public final LaserCan lasRight = new LaserCan(0);
-  public Elevator elevator = new Elevator();
-  public EndEffector effector = new EndEffector();
   
   public final RobotBase<SwerveDrivetrain> robotBase = Constants.DriveTrain.ROBOT_BASE.create().shuffleboard();
+  public Elevator elevator = new Elevator();
+  public EndEffector effector = new EndEffector(robotBase);
   public Superstructure superstructure = new Superstructure(elevator, effector, robotBase);
-  public CANdleSubsystem candle = new CANdleSubsystem(effector, robotBase, superstructure);
+  public CANdleSubsystem candle = new CANdleSubsystem(effector, superstructure);
+
   private final EnhancedXboxController driverController = new EnhancedXboxController(0)
                                                               .setLeftInverted(false)
                                                               .setRightInverted(false)
@@ -205,10 +206,10 @@ public class RobotContainer {
     driverController.leftBumper.whileTrue(() -> superstructure.ejectPiece());
     
     // //SCORING COMMANDS
-    driverController.a.onTrue(Commands.sequence(superstructure.setAlgaeMachine(AlgaeExtensionState.Home),superstructure.setElevator(ElevatorState.Home), superstructure.setEndEffector(EndEffectorState.Home)));
-    driverController.b.onTrue(Commands.sequence(superstructure.setAlgaeMachine(AlgaeExtensionState.Home),superstructure.setElevator(ElevatorState.L2), superstructure.setEndEffector(EndEffectorState.Home)));
-    driverController.x.onTrue(Commands.sequence(superstructure.setAlgaeMachine(AlgaeExtensionState.Home),superstructure.setElevator(ElevatorState.L3), superstructure.setEndEffector(EndEffectorState.Home)));
-    driverController.y.onTrue(Commands.sequence(superstructure.setAlgaeMachine(AlgaeExtensionState.Home),superstructure.setElevator(ElevatorState.L4), superstructure.autoEffector()));
+    driverController.a.onTrue(Commands.sequence(superstructure.setElevator(ElevatorState.Home), superstructure.setEndEffector(EndEffectorState.Home)));
+    driverController.b.onTrue(Commands.sequence(superstructure.setElevator(ElevatorState.L2), superstructure.setEndEffector(EndEffectorState.Home)));
+    driverController.x.onTrue(Commands.sequence(superstructure.setElevator(ElevatorState.L3), superstructure.setEndEffector(EndEffectorState.Home)));
+    driverController.y.onTrue(Commands.sequence(superstructure.setElevator(ElevatorState.L4), superstructure.setEndEffector(EndEffectorState.L4)));
 
     // //ALGAE REMOVAL SEQUENCE
     driverController.pov.up.onTrue(Commands.sequence(superstructure.setAlgaeMachine(AlgaeExtensionState.Extended),superstructure.setElevator(ElevatorState.AlgaeHigh)));
