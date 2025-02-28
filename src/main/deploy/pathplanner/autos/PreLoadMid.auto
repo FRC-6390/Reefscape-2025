@@ -7,6 +7,18 @@
         {
           "type": "path",
           "data": {
+            "pathName": "MIDSTARTPOS"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "RotateToMid"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
             "pathName": "PreLoadMid"
           }
         },

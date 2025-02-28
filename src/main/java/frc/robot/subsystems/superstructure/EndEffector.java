@@ -30,7 +30,7 @@ public class EndEffector extends SubsystemBase {
   //EJECTOR STUFF
   public TalonFX roller;
   public boolean flip = false;
-  IRBeamBreak beamBreakLeft;
+  public IRBeamBreak beamBreakLeft;
     public IRBeamBreak beamBreakRight, beamBreakCenter;
   public CANdle candle;
   public StateMachine<EjectorState> ejectStateMachine;

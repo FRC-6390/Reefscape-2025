@@ -7,6 +7,18 @@
         {
           "type": "path",
           "data": {
+            "pathName": "LEFTSTARTPOS"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "RotateToLeft"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
             "pathName": "PreLoadLeft"
           }
         },

@@ -20,6 +20,7 @@ public class Robot extends TimedRobot {
   @Override
   public void robotPeriodic() {
     CommandScheduler.getInstance().run();
+    m_robotContainer.superstructure.returnAfterScore();
     // SmartDashboard.putBoolean("Correct Pose", m_robotContainer.superstructure.closeEnough());
     SmartDashboard.putNumber("Las Left",m_robotContainer.lasLeft.getMeasurement().distance_mm);
     SmartDashboard.putNumber("Las Right",m_robotContainer.lasRight.getMeasurement().distance_mm);

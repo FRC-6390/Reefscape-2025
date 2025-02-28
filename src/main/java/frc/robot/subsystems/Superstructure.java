@@ -15,6 +15,7 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import frc.robot.subsystems.superstructure.Elevator;
 import frc.robot.subsystems.superstructure.EndEffector;
+import frc.robot.subsystems.superstructure.Elevator.ElevatorState;
 import frc.robot.subsystems.superstructure.EndEffector.AlgaeExtensionState;
 import frc.robot.subsystems.superstructure.EndEffector.EjectorState;
 import frc.robot.subsystems.superstructure.EndEffector.EndEffectorState;
@@ -49,41 +50,23 @@ public class Superstructure {
     LimeLight ll = base.getCameraFacing(ReefPole.getCenterReef());
     SmartDashboard.putNumber("Dist", dist);
 
-   
-
     if(ll != null)
     {
     ReefPole pole = ReefPole.getPoleFromID(ll.getAprilTagID(), ll);
+    if(pole != null && ll.hasValidTarget())
+    {
+    dist = ll.getTargetHorizontalOffset();
+    }
+    }
 
-    if(pole != null)
-    {
-    translation = pole.getTranslation();
-    if(translation != null)
-    {
-    SmartDashboard.putNumber("Translation X", pole.getTranslation().getX());
-    SmartDashboard.putNumber("Translation Y", pole.getTranslation().getY());
-    SmartDashboard.putNumber("ID", pole.getApriltagId());
-    SmartDashboard.putNumber("LL ID", ll.getAprilTagID());
-    }
-    }
-    if(translation != null)
-    {
-    dist = Math.abs(base.getLocalization().getFieldPose().getTranslation().getDistance(translation));
-    } 
-    if(dist < 0.2)
+    if(Math.abs(dist) < 15)
     {
       return true;
     }
-    else
-    {
+    else{
       return false;
-    }
-  }
-  else
-  {
-    return false;
-  }
-  }
+    } 
+}
 
 
 
@@ -124,6 +107,13 @@ public class Superstructure {
     }
   }
 
+  public void returnAfterScore()
+  {
+    if(!effector.beamBreakCenter.getAsBoolean() && !effector.beamBreakRight.getAsBoolean() && !effector.beamBreakLeft.getAsBoolean() && effector.algStateMachine.getGoalState().equals(AlgaeExtensionState.Home))
+    {
+      elevatorStateManager(ElevatorState.Home);
+    }
+  }
   public void endEffectorStateManager(EndEffector.EndEffectorState state){
     endEffector.setGoalState(state);
   }

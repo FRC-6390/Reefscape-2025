@@ -26,6 +26,7 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import frc.robot.commands.auto.DriveToPoint;
 import frc.robot.commands.auto.PassiveAlign;
+import frc.robot.commands.auto.RotateTo;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import frc.robot.commands.mechanisms.Elevate;
@@ -157,32 +158,36 @@ public class RobotContainer {
     // elevator.setDefaultCommand(elevate);
     effector.shuffleboard("Effector");
     
-
-    // NamedCommands.registerCommand("L4", new InstantCommand(() -> elevate.setState(ElevatorState.L4)));
-    // NamedCommands.registerCommand("L1", new InstantCommand(() -> elevate.setState(ElevatorState.L1)));
     NamedCommands.registerCommand("Home", Commands.sequence(Commands.sequence(superstructure.setElevator(ElevatorState.Home), superstructure.setEndEffector(EndEffectorState.Home))));
     NamedCommands.registerCommand("ManualL4", Commands.sequence(superstructure.setElevator(ElevatorState.L4), superstructure.autoEffector()));
     NamedCommands.registerCommand("StartEject", new InstantCommand(() ->superstructure.ejectPiece()));
     NamedCommands.registerCommand("Align", new PassiveAlign(robotBase));
+
+    
+    NamedCommands.registerCommand("RotateToRight",new RotateTo(robotBase,Rotation2d.fromRadians(-0.49333207719329186)));
+    NamedCommands.registerCommand("RotateToLeft", new RotateTo(robotBase,Rotation2d.fromRadians(-2.575148734982150)));
+    NamedCommands.registerCommand("RotateToMid", new RotateTo(robotBase,Rotation2d.fromRadians(-1.601756394242849)));
+
   }
 
   private void configureBindings() 
   {
 
-    // driverController.leftBumper.whileTrue(() -> elevator.setMotors(1)).onFalse(() -> elevator.setMotors(0));
-    // driverController.rightBumper.whileTrue(() -> elevator.setMotors(-0.1)).onFalse(() -> elevator.setMotors(0));
-    
-    // driverController.pov.up.onTrue(() -> elevator.setCurrentLimit(elevator.getCurrentLimit()+0.5));
-    // driverController.pov.down.onTrue(() -> elevator.setCurrentLimit(elevator.getCurrentLimit()-0.5));
+    //TODO
+        //  TEST RETURN TO SCORE
+        //  TEST STRAFE
 
-    // driverController.a.onTrue(superstructure.setAlgaeMachine(AlgaeExtensionState.Extended));
-    // // driverController.b.onTrue(superstructure.setAlgaeMachine(AlgaeExtensionState.Home));
-    // driverController.rightBumper.onTrue(superstructure.setElevator(ElevatorState.Home));
-
-    // driverController.a.onTrue(superstructure.setElevator(ElevatorState.L1));
-    // driverController.b.onTrue(superstructure.setElevator(ElevatorState.L2));
-    // driverController.y.onTrue(superstructure.setElevator(ElevatorState.L3));
-    // driverController.x.onTrue(superstructure.setElevator(ElevatorState.L4));
+        //AUTO TESTING
+          //  REDO OFFSETS, TEST AUTO ON ROBOT CART, CHECK WITH TAG IF LOCALIZATION IS STILL WORKING AFTER
+          // IF NOT
+              //ALTERNATIVE 1
+                //  DURING MATCH, TEST STRAIGHT LINE IN CORRECT START CONFIGURATION
+                //      IF THAT WORKS, NEXT MATCH, START, ROTAT, THEN STRAIGHT LINE 
+              //ALTERNATIVE 2
+                //  TEST PASSIVE ALIGN
+              //ALTERNATIVE 3
+                // TEST STRAFE FOR SECONDS IN AUTO
+          
 
     //----------------------------------------------------------DRIVER 1---------------------------------------------------------------//
 
@@ -190,7 +195,7 @@ public class RobotContainer {
     driverController.start.onTrue(() -> robotBase.getDrivetrain().getIMU().setYaw(0)).after(2).onTrue(() -> robotBase.getLocalization().resetFieldPose(new Pose2d(0,0, Rotation2d.fromDegrees(180))));
 
     //PASSIVE ALIGN 
-    driverController.a.toggleOnTrue(new PassiveAlign(robotBase));
+    // driverController.rightStick.toggleOnTrue(new PassiveAlign(robotBase));
 
     // //AUTO ALIGN (RIGHT BUMPER)
     // driverController.rightBumper.onTrue(new DriveToPoint(robotBase));
@@ -200,59 +205,38 @@ public class RobotContainer {
     driverController.leftBumper.whileTrue(() -> superstructure.ejectPiece());
     
     // //SCORING COMMANDS
-    driverController.a.onTrue(Commands.sequence(superstructure.setElevator(ElevatorState.Home), superstructure.setEndEffector(EndEffectorState.Home)));
-    driverController.b.onTrue(Commands.sequence(superstructure.setElevator(ElevatorState.L2), superstructure.setEndEffector(EndEffectorState.Home)));
-    driverController.x.onTrue(Commands.sequence(superstructure.setElevator(ElevatorState.L3), superstructure.setEndEffector(EndEffectorState.Home)));
-    driverController.y.onTrue(Commands.sequence(superstructure.setElevator(ElevatorState.L4), superstructure.autoEffector()));
+    driverController.a.onTrue(Commands.sequence(superstructure.setAlgaeMachine(AlgaeExtensionState.Home),superstructure.setElevator(ElevatorState.Home), superstructure.setEndEffector(EndEffectorState.Home)));
+    driverController.b.onTrue(Commands.sequence(superstructure.setAlgaeMachine(AlgaeExtensionState.Home),superstructure.setElevator(ElevatorState.L2), superstructure.setEndEffector(EndEffectorState.Home)));
+    driverController.x.onTrue(Commands.sequence(superstructure.setAlgaeMachine(AlgaeExtensionState.Home),superstructure.setElevator(ElevatorState.L3), superstructure.setEndEffector(EndEffectorState.Home)));
+    driverController.y.onTrue(Commands.sequence(superstructure.setAlgaeMachine(AlgaeExtensionState.Home),superstructure.setElevator(ElevatorState.L4), superstructure.autoEffector()));
 
     // //ALGAE REMOVAL SEQUENCE
-    // driverController.pov.left.onTrue( superstructure.setAlgaeMachine(AlgaeExtensionState.Home));
-    // driverController.pov.up.onTrue(Commands.sequence(superstructure.setAlgaeMachine(AlgaeExtensionState.Extended),superstructure.setElevator(ElevatorState.AlgaeHigh)));
-    // driverController.pov.down.onTrue(Commands.sequence(superstructure.setAlgaeMachine(AlgaeExtensionState.Extended),superstructure.setElevator(ElevatorState.AlgaeLow)));
+    driverController.pov.up.onTrue(Commands.sequence(superstructure.setAlgaeMachine(AlgaeExtensionState.Extended),superstructure.setElevator(ElevatorState.AlgaeHigh)));
+    driverController.pov.down.onTrue(Commands.sequence(superstructure.setAlgaeMachine(AlgaeExtensionState.Extended),superstructure.setElevator(ElevatorState.AlgaeLow)));
     
+    //STRAFING
+    driverController.pov.left.whileTrue(() -> robotBase.getDrivetrain().getRobotSpeeds().setFeedbackSpeeds(-0.3,0,0)).onFalse(() -> {robotBase.getDrivetrain().getRobotSpeeds().setFeedbackSpeeds(0,0,0); robotBase.getDrivetrain().getRobotSpeeds().stopFeedbackSpeeds();});
+    driverController.pov.right.whileTrue(() -> robotBase.getDrivetrain().getRobotSpeeds().setFeedbackSpeeds(0.3,0,0)).onFalse(() -> {robotBase.getDrivetrain().getRobotSpeeds().setFeedbackSpeeds(0,0,0); robotBase.getDrivetrain().getRobotSpeeds().stopFeedbackSpeeds();});
+
 
     // //----------------------------------------------------------DRIVER 2---------------------------------------------------------------//
 
 
+    //FLIP EJECTION
+    driverController2.a.onTrue(() -> effector.setFlip(true));
+    driverController2.b.onTrue(() -> effector.setFlip(false));
 
-    // driverController2.a.onTrue(() -> effector.setFlip(true));
-    // driverController2.b.onTrue(() -> effector.setFlip(false));
-
-    // driverController2.x.onTrue(superstructure.setEndEffector(EndEffectorState.LeftL4));
-    // driverController2.y.onTrue(superstructure.setEndEffector(EndEffectorState.RightL4));
-
+    //END EFFECTOR OVERRIDE
+    driverController2.x.onTrue(superstructure.setEndEffector(EndEffectorState.LeftL4));
+    driverController2.y.onTrue(superstructure.setEndEffector(EndEffectorState.RightL4));
     driverController2.rightBumper.onTrue(superstructure.setEndEffector(EndEffectorState.Home));
 
+    //ELEVATOR OVERIDE
     driverController2.pov.left.onTrue(superstructure.setElevator(ElevatorState.Home));
     driverController2.pov.up.onTrue(() -> elevator.nudge(1));
     driverController2.pov.down.onTrue(() -> elevator.nudge(-1));
   
-    driverController2.start.after(2).onTrue(() -> robotBase.getLocalization().resetFieldPose(new Pose2d(0,0,new Rotation2d())));
-
-    driverController.a.whileTrue(() -> robotBase.getDrivetrain().getRobotSpeeds().setFeedbackSpeeds(0.1, 0, 0)).onFalse(() -> robotBase.getDrivetrain().getRobotSpeeds().setFeedbackSpeeds(0, 0, 0));
-    driverController.b.whileTrue(() -> robotBase.getDrivetrain().getRobotSpeeds().setFeedbackSpeeds(-0.1, 0, 0)).onFalse(() -> robotBase.getDrivetrain().getRobotSpeeds().setFeedbackSpeeds(0, 0, 0));
-    driverController.x.whileTrue(() -> robotBase.getDrivetrain().getRobotSpeeds().setFeedbackSpeeds(0, 0.1, 0)).onFalse(() -> robotBase.getDrivetrain().getRobotSpeeds().setFeedbackSpeeds(0, 0, 0));
-    driverController.y.whileTrue(() -> robotBase.getDrivetrain().getRobotSpeeds().setFeedbackSpeeds(0, -0.1, 0)).onFalse(() -> robotBase.getDrivetrain().getRobotSpeeds().setFeedbackSpeeds(0, 0, 0));
-
-
-     // driverController2.a.onTrue(() -> {
-    //   var auto = chooser.getSelected().getAuto();
-
-    //   if (auto != null){
-    //     auto.schedule();
-    //   }
-    
-    // });
-    // driverController2.b.onTrue(() -> {
-    //   var auto = chooser.getSelected().getAuto();
-
-    //   if (auto != null){
-    //     auto.cancel();
-    //   }
-    
-    // });
-  
-    
+    driverController2.start.after(2).onTrue(() -> robotBase.getLocalization().resetFieldPose(new Pose2d(0,0,new Rotation2d())));  
   }
 
   public Command getAutonomousCommand() 
