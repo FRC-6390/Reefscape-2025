@@ -5,6 +5,7 @@
 package frc.robot;
 
 import java.io.IOException;
+
 import org.json.simple.parser.ParseException;
 
 import com.pathplanner.lib.auto.NamedCommands;
@@ -16,21 +17,21 @@ import au.grapplerobotics.LaserCan;
 import ca.frc6390.athena.controllers.EnhancedXboxController;
 import ca.frc6390.athena.core.RobotBase;
 import ca.frc6390.athena.drivetrains.swerve.SwerveDrivetrain;
-import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.Commands;
 import frc.robot.commands.auto.PassiveAlign;
 import frc.robot.commands.auto.RotateTo;
-import edu.wpi.first.wpilibj2.command.Commands;
 import frc.robot.subsystems.Superstructure;
 import frc.robot.subsystems.Superstructure.SuperstructureState;
 import frc.robot.subsystems.superstructure.CANdleSubsystem;
 import frc.robot.subsystems.superstructure.Elevator;
+import frc.robot.subsystems.superstructure.Elevator.ElevatorState;
 import frc.robot.subsystems.superstructure.EndEffector;
 import frc.robot.subsystems.superstructure.EndEffector.EndEffectorState;
-import frc.robot.subsystems.superstructure.Elevator.ElevatorState;
 
 public class RobotContainer {
 
@@ -199,10 +200,10 @@ public class RobotContainer {
     driverController.leftBumper.whileTrue(() -> superstructure.setState(SuperstructureState.Score));
     
     // //SCORING COMMANDS
-    driverController.a.onTrue(Commands.sequence(superstructure.setElevator(ElevatorState.Home), superstructure.setEndEffector(EndEffectorState.Home)));
-    driverController.b.onTrue(Commands.sequence(superstructure.setElevator(ElevatorState.L2), superstructure.setEndEffector(EndEffectorState.Home)));
-    driverController.x.onTrue(Commands.sequence(superstructure.setElevator(ElevatorState.L3), superstructure.setEndEffector(EndEffectorState.Home)));
-    driverController.y.onTrue(Commands.sequence(superstructure.setElevator(ElevatorState.L4), superstructure.setEndEffector(EndEffectorState.L4)));
+    driverController.a.onTrue(superstructure.setElevator(ElevatorState.Home));
+    driverController.b.onTrue(superstructure.setElevator(ElevatorState.L2)).toggleOnFalse(superstructure.setElevator(ElevatorState.Home));
+    driverController.x.onTrue(superstructure.setElevator(ElevatorState.L3)).toggleOnFalse(superstructure.setElevator(ElevatorState.Home));
+    driverController.y.onTrue(superstructure.setElevator(ElevatorState.L4)).toggleOnFalse(superstructure.setElevator(ElevatorState.Home));
 
     // //ALGAE REMOVAL SEQUENCE
     driverController.pov.up.onTrue(superstructure.setState(SuperstructureState.AlgaeHigh));
