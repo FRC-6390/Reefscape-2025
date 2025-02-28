@@ -91,6 +91,10 @@ public class Superstructure {
     return new InstantCommand(() -> elevatorStateManager(state));
   }
 
+  public InstantCommand autoEffector(){
+    return new InstantCommand(() -> autoendEffectorStateManager());
+  }
+
   public InstantCommand setEndEffector(EndEffector.EndEffectorState state){
     return new InstantCommand(() -> endEffectorStateManager(state));
   }
@@ -112,7 +116,7 @@ public class Superstructure {
         algaeStateManager(AlgaeExtensionState.Home);
         elevator.setGoalState(state, () -> endEffector.atState(EndEffector.EndEffectorState.Home));
         break;
-      case L1:
+      case L1, AlgaeHigh, AlgaeLow:
         elevator.setGoalState(state);
         break;
       case L2, L3, L4:
@@ -123,8 +127,18 @@ public class Superstructure {
   public void endEffectorStateManager(EndEffector.EndEffectorState state){
     endEffector.setGoalState(state);
   }
+  public void autoendEffectorStateManager(){
+    if(base.getCameraFacing(ReefPole.getCenterReef()).config.table() == "limelight-left")
+    {
+      endEffectorStateManager(EndEffectorState.LeftL4);
+    }
+    else if(base.getCameraFacing(ReefPole.getCenterReef()).config.table() == "limelight-right")
+    {
+      endEffectorStateManager(EndEffectorState.RightL4);
+    }
+  }
   
-  public void ejectPiece(double speed)
+  public void ejectPiece()
   {
     SmartDashboard.putString("LL", base.getCameraFacing(ReefPole.getCenterReef()).config.table());
     if(base.getCameraFacing(ReefPole.getCenterReef()).config.table() == "limelight-left")
@@ -135,6 +149,11 @@ public class Superstructure {
     {
       effector.ejectStateMachine.setGoalState(EjectorState.Right);
     }
+  }
+
+  public void forceEject(EjectorState state)
+  {
+    effector.ejectStateMachine.setGoalState(state);
   }
 
   public Translation2d getCage()

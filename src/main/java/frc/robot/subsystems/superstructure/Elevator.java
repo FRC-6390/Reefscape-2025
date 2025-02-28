@@ -48,9 +48,14 @@ public class Elevator extends SubsystemBase{
     //ELEVATOR HEIGHT FROM FLOOR IN INCHES
     Home(Constants.Elevator.OFFSET_FROM_FLOOR),
     L1(Constants.Elevator.OFFSET_FROM_FLOOR),
+    AlgaeHigh(58.1164997129706),
+    AlgaeLow(45.1735368151855),
+    //31.5
     L2(32),
+    //47.25
     L3(48),
-    L4(72);
+    //72
+    L4(76);
 
 
     double pos;
@@ -65,7 +70,7 @@ public class Elevator extends SubsystemBase{
 }
 
 double current = 40;
-double nudge = 0;
+public double nudge = 0;
 
   public Elevator() 
   {
@@ -131,7 +136,7 @@ double nudge = 0;
   }
 
   public double getHeightFromFloor(){
-    return getHeight() + Constants.Elevator.OFFSET_FROM_FLOOR;
+    return getHeight() + Constants.Elevator.OFFSET_FROM_FLOOR - nudge;
   }
 
   public void voltageDrive(Voltage voltage)
@@ -178,17 +183,18 @@ double nudge = 0;
       tab.addBoolean("State Changer", stateMachine.getChangeStateSupplier()).withPosition(6, 1);
       tab.addDouble("Profiled Pos Setpoint",() -> controller.getSetpoint().position);
       tab.addDouble("Profiled Vel Setpoint",() -> controller.getSetpoint().velocity);
+      tab.addDouble("Nudge",() -> {return nudge;});
       tab.addDouble("Motor Current Limit",this::getCurrentLimit);
 
       return tab;
   }
 
   public void nudge(double inches){
-    this.nudge += inches;
+    nudge += inches;
   }
 
   public void resetNudge(){
-    this.nudge = 0;
+    nudge = 0;
   }
 
   public void refresh(){
@@ -205,8 +211,8 @@ double nudge = 0;
         setMotors(-0.1);
         resetNudge();
         break;
-      case L1, L2, L3, L4:
-        double speed = controller.calculate(getHeightFromFloor(),stateMachine.getGoalState().getSetpoint() + nudge) + feedforward.calculate(controller.getSetpoint().velocity) / 12;
+      case L1, L2, L3, L4, AlgaeHigh, AlgaeLow:
+        double speed = controller.calculate(getHeightFromFloor(),stateMachine.getGoalState().getSetpoint()) + feedforward.calculate(controller.getSetpoint().velocity) / 12;
         setMotors(speed);
     }
     

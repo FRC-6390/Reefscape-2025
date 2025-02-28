@@ -29,6 +29,7 @@ public class EndEffector extends SubsystemBase {
 
   //EJECTOR STUFF
   public TalonFX roller;
+  public boolean flip = false;
   IRBeamBreak beamBreakLeft;
     public IRBeamBreak beamBreakRight, beamBreakCenter;
   public CANdle candle;
@@ -45,6 +46,7 @@ public class EndEffector extends SubsystemBase {
   //ROTATOR STUFF
   public TalonFX motor;
   public CANcoder encoder;
+  public double nudge = 0;
   public PIDController controller;
   public StateMachine<EndEffectorState> stateMachine;
   public StatusSignal<Angle> getAbsolutePosition = new StatusSignal<>(null, null, null);
@@ -53,10 +55,10 @@ public class EndEffector extends SubsystemBase {
   {
       StartConfiguration(0),
       Home(0),
-      Left(-25),
-      Right(25),
-      LeftL4(-35),
-      RightL4(35);
+      Left(0),
+      Right(0),
+      LeftL4(20),
+      RightL4(-20);
 
       private double angle;
       private EndEffectorState(double angle)
@@ -88,6 +90,15 @@ public class EndEffector extends SubsystemBase {
     }
   }
 
+  public void setNudge(double degrees)
+  {
+    nudge += degrees;
+  }
+
+  public void resetNudge()
+  {
+    nudge = 0;
+  }
   public enum EjectorState implements SetpointProvider
   {
     Right(-1),
@@ -139,6 +150,7 @@ public class EndEffector extends SubsystemBase {
       CANdleConfiguration configuration = new CANdleConfiguration();
       configuration.stripType = LEDStripType.GRB;
       configuration.statusLedOffWhenActive = false;
+      flip = false;
       configuration.disableWhenLOS = false;
       configuration.brightnessScalar = 1;
       configuration.vBatOutputMode = VBatOutputMode.Modulated;
@@ -195,7 +207,7 @@ public class EndEffector extends SubsystemBase {
   }
 
   public Rotation2d getAngle() {
-    return Rotation2d.fromRotations(getPosition() / Constants.EndEffector.ENCODER_GEAR_RATIO).minus(Rotation2d.fromRotations(Constants.EndEffector.ENCODER_OFFSET));
+    return Rotation2d.fromRotations(getPosition() / Constants.EndEffector.ENCODER_GEAR_RATIO).minus(Rotation2d.fromRotations(Constants.EndEffector.ENCODER_OFFSET)).minus(Rotation2d.fromDegrees(nudge));
   }
 
   public boolean algaeAtSetpoint()
@@ -250,7 +262,21 @@ public class EndEffector extends SubsystemBase {
       case Left:
       case Stopped:
       case Right:
-        roller.set(ejectStateMachine.getGoalState().getSetpoint());
+        if(algStateMachine.getGoalState().equals(AlgaeExtensionState.Extended))
+        {
+          roller.set(1);
+        }
+        else
+        {
+          if(!flip)
+          {
+          roller.set(ejectStateMachine.getGoalState().getSetpoint());
+          }
+          else
+          {
+          roller.set(-ejectStateMachine.getGoalState().getSetpoint());
+          }
+        }
         break;
       default:
         break;
@@ -269,6 +295,11 @@ public class EndEffector extends SubsystemBase {
       return shuffleboard(Shuffleboard.getTab(tab));
   }
 
+  public void setFlip(boolean shouldFlip)
+  {
+    flip = shouldFlip;
+  }
+
   public ShuffleboardTab shuffleboard(ShuffleboardTab tab) {
     tab.addBoolean("Limit Switch", limitSwitchAlgae::getAsBoolean).withPosition(1,1);
     tab.addString("State", () -> stateMachine.getGoalState().name()).withPosition(2,1);
@@ -279,6 +310,8 @@ public class EndEffector extends SubsystemBase {
     tab.addNumber("Next State Angle", () -> stateMachine.getNextState().getSetpoint()).withPosition(5, 1);
     tab.addNumber("Algae", () -> getExtenderPosition.getValueAsDouble()).withPosition(5, 1);
     tab.addNumber("AlgaeOutput", () -> algaController.calculate(AlgaeExtensionState.Extended.getSetpoint())).withPosition(5, 1);
+    tab.addBoolean("IsFlipped", () ->  flip).withPosition(5, 1);
+
     tab.addString("Algae State", () -> algStateMachine.getNextState().name()).withPosition(5, 1);
 
 

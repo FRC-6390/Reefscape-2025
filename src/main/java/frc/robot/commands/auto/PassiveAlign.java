@@ -18,52 +18,47 @@ import frc.robot.utils.ReefScoringPos.ReefPole;
 public class PassiveAlign extends Command {
 
   public LimeLight limeLight;
-  public RobotLocalization localization;
-  public LaserCan las;
+ 
   public RobotBase<?> base;
-  public PIDController controller = new PIDController(0.025, 0, 0);
+  public PIDController controller = new PIDController(0.0275, 0, 0);
   
   public FilteredValue rotationFiltered;
-  public FilteredValue xOffsetFiltered;
   
   /** Creates a new PassiveAlign. */
-  public PassiveAlign(RobotBase<?> base, LaserCan las) {
+  public PassiveAlign(RobotBase<?> base) {
     this.base = base;
-    this.localization = base.getLocalization();
-    this.las = las;
-    rotationFiltered =  new FilteredValue(() -> limeLight.getPoseEstimate(PoseEstimateType.TARGET_POSE_ROBOT_SPACE).getRaw()[4])
-                        .addMovingAverage(10)
-                        .addMedianFilter(15);
-    xOffsetFiltered =  new FilteredValue(() -> limeLight.getTargetHorizontalOffset())
-                        .addMovingAverage(5);
+ 
 
     // Use addRequirements() here to declare subsystem dependencies.
   }
-
   // Called when the command is initially scheduled.
   @Override
   public void initialize() 
   {
     limeLight = base.getCameraFacing(ReefPole.getCenterReef());
-    
+    rotationFiltered =  new FilteredValue(() -> limeLight.getPoseEstimate(PoseEstimateType.TARGET_POSE_ROBOT_SPACE).getRaw()[4])
+    .addMovingAverage(10)
+    .addMedianFilter(15);
   }
 
   // Called every time the scheduler runs while the command is scheduled.
   @Override
   public void execute() 
   {
+    ReefPole pole = ReefPole.getPoleFromID(limeLight.getAprilTagID(), limeLight);
+    if(pole != null)
+    {
     if(limeLight.hasValidTarget())
     {
-
       double r = -controller.calculate(rotationFiltered.get(), 0);
       base.getDrivetrain().getRobotSpeeds().setFeedbackSpeeds(0,0,r);
+      System.out.println(r);
       
     }
     else{
       base.getDrivetrain().getRobotSpeeds().setFeedbackSpeeds(0,0,0);
-      
     }
-    
+  }
   }
 
   // Called once the command ends or is interrupted.
