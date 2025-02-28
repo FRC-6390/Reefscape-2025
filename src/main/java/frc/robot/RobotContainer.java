@@ -210,11 +210,10 @@ public class RobotContainer {
     driverController.pov.up.onTrue(superstructure.setState(SuperstructureState.AlgaeLow));
     
     //STRAFING
-    driverController.pov.left.whileTrue(() -> robotBase.getDrivetrain().getRobotSpeeds().setFeedbackSpeeds(0,-0.3,0)).onFalse(() -> {robotBase.getDrivetrain().getRobotSpeeds().setFeedbackSpeeds(0,0,0); robotBase.getDrivetrain().getRobotSpeeds().stopFeedbackSpeeds();});
-    driverController.pov.right.whileTrue(() -> robotBase.getDrivetrain().getRobotSpeeds().setFeedbackSpeeds(0,0.3,0)).onFalse(() -> {robotBase.getDrivetrain().getRobotSpeeds().setFeedbackSpeeds(0,0,0); robotBase.getDrivetrain().getRobotSpeeds().stopFeedbackSpeeds();});
-    driverController.pov.down.whileTrue(() -> robotBase.getDrivetrain().getRobotSpeeds().setFeedbackSpeeds(-0.3,0,0)).onFalse(() -> {robotBase.getDrivetrain().getRobotSpeeds().setFeedbackSpeeds(0,0,0); robotBase.getDrivetrain().getRobotSpeeds().stopFeedbackSpeeds();});
-    driverController.pov.up.whileTrue(() -> robotBase.getDrivetrain().getRobotSpeeds().setFeedbackSpeeds(0.3,0,0)).onFalse(() -> {robotBase.getDrivetrain().getRobotSpeeds().setFeedbackSpeeds(0,0,0); robotBase.getDrivetrain().getRobotSpeeds().stopFeedbackSpeeds();});
-
+    driverController.pov.left.whileTrue(() -> robotBase.getRobotSpeeds().setFeedbackSpeeds(0,-0.3,0)).onFalse(() -> robotBase.getRobotSpeeds().stopFeedbackSpeeds());
+    driverController.pov.right.whileTrue(() -> robotBase.getRobotSpeeds().setFeedbackSpeeds(0,0.3,0)).onFalse(() -> robotBase.getRobotSpeeds().stopFeedbackSpeeds());
+    driverController.pov.down.whileTrue(() -> robotBase.getRobotSpeeds().setFeedbackSpeeds(-0.3,0,0)).onFalse(() -> robotBase.getRobotSpeeds().stopFeedbackSpeeds());
+    driverController.pov.up.whileTrue(() -> robotBase.getRobotSpeeds().setFeedbackSpeeds(0.3,0,0)).onFalse(() -> robotBase.getRobotSpeeds().stopFeedbackSpeeds());
 
     // //----------------------------------------------------------DRIVER 2---------------------------------------------------------------//
 
