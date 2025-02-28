@@ -60,8 +60,7 @@ public class Rollers extends SubsystemBase {
       case Stopped:
       case RunningInverted:
             double setpoint = stateMachine.getGoalStateSetpoint() * base.getCameraFacing(ReefPole.getCenterReef()).config.getYawSin();
-            double speed = !flip ? setpoint : -setpoint;
-            motor.set(speed);
+            motor.set(!flip ? setpoint : -setpoint);
         break;
       case Algae:
         motor.set(stateMachine.getGoalStateSetpoint());

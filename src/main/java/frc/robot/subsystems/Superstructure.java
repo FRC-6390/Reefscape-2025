@@ -40,6 +40,7 @@ public class Superstructure extends SubsystemBase {
     public enum SuperstructureState implements SetpointProvider<SuperstructureTuple>
     {
         AlgaeHigh(new SuperstructureTuple(EndEffectorState.AlgaeHigh, ElevatorState.AlgaeHigh)),
+        AlgaeRetract(new SuperstructureTuple(EndEffectorState.AlgaeHigh, null)),
         AlgaeLow(new SuperstructureTuple(EndEffectorState.AlgaeLow, ElevatorState.AlgaeLow)),
         L4(new SuperstructureTuple(EndEffectorState.L4, ElevatorState.L4)),
         L3(new SuperstructureTuple(EndEffectorState.L3, ElevatorState.L3)),
@@ -161,6 +162,7 @@ public class Superstructure extends SubsystemBase {
       case L3:
       case L4:
       case AlgaeHigh:
+      case AlgaeRetract:
       case AlgaeLow:
       case Home:
       case Score:

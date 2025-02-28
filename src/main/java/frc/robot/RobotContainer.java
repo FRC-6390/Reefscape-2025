@@ -206,8 +206,8 @@ public class RobotContainer {
     driverController.y.onTrue(superstructure.setElevator(ElevatorState.L4)).toggleOnFalse(superstructure.setElevator(ElevatorState.Home));
 
     // //ALGAE REMOVAL SEQUENCE
-    driverController.pov.up.onTrue(superstructure.setState(SuperstructureState.AlgaeHigh));
-    driverController.pov.up.onTrue(superstructure.setState(SuperstructureState.AlgaeLow));
+    driverController.pov.up.toggleOnTrue(superstructure.setState(SuperstructureState.AlgaeHigh)).toggleOnFalse(superstructure.setState(SuperstructureState.AlgaeRetract));
+    driverController.pov.down.toggleOnTrue(superstructure.setState(SuperstructureState.AlgaeLow)).toggleOnFalse(superstructure.setState(SuperstructureState.AlgaeRetract));
     
     //STRAFING
     driverController.pov.left.whileTrue(() -> robotBase.getRobotSpeeds().setFeedbackSpeeds(0,-0.3,0)).onFalse(() -> robotBase.getRobotSpeeds().stopFeedbackSpeeds());
@@ -218,8 +218,11 @@ public class RobotContainer {
     // //----------------------------------------------------------DRIVER 2---------------------------------------------------------------//
 
     //FLIP EJECTION
-    // driverController2.a.onTrue(() -> endEffector.setFlip(true));
-    // driverController2.b.onTrue(() -> endEffector.setFlip(false));
+    driverController2.a.onTrue(() -> endEffector.getRollers().setFlip(true));
+    driverController2.b.onTrue(() -> endEffector.getRollers().setFlip(false));
+
+    driverController2.x.onTrue(() -> endEffector.getRotator().setFlip(true));
+    driverController2.y.onTrue(() -> endEffector.getRotator().setFlip(false));
 
     //END EFFECTOR OVERRIDE
     driverController2.x.onTrue(superstructure.setEndEffector(EndEffectorState.L4));

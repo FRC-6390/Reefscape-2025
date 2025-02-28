@@ -25,6 +25,7 @@ public class Rotator extends SubsystemBase {
   private final RobotBase<?> base;
   private final TalonFX motor;
   private final CANcoder encoder;
+  private boolean flip = false;
   private double nudge = 0;
   private final PIDController controller;
   private final StateMachine<Double, RotatorState> stateMachine;
@@ -93,12 +94,17 @@ public class Rotator extends SubsystemBase {
     return Rotation2d.fromRotations(getPosition() / Constants.EndEffector.ENCODER_GEAR_RATIO).minus(Rotation2d.fromRotations(Constants.EndEffector.ENCODER_OFFSET)).minus(Rotation2d.fromDegrees(nudge));
   }
 
+  public void setFlip(boolean shouldFlip)
+  {
+    flip = shouldFlip;
+  }
+
   public void update()
   {
     switch (stateMachine.getGoalState()) {
       case L4:
         double setpoint = stateMachine.getGoalStateSetpoint() * base.getCameraFacing(ReefPole.getCenterReef()).config.getYawSin();
-        setMotors(controller.calculate(getAngle().getDegrees(), setpoint));
+        setMotors(controller.calculate(getAngle().getDegrees(), !flip ? setpoint : -setpoint));
       break;
       case Home:
         setMotors(controller.calculate(getAngle().getDegrees(), stateMachine.getGoalState().getSetpoint()));
@@ -117,7 +123,6 @@ public class Rotator extends SubsystemBase {
     tab.addNumber("Rotations", this::getPosition).withPosition(4,1);
     tab.addString("Next State", () -> stateMachine.getNextState().name()).withPosition(5, 1);
     tab.addNumber("Next State Angle", () -> stateMachine.getNextState().getSetpoint()).withPosition(5, 1);
-
     return tab;
   }
 
