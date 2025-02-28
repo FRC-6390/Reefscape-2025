@@ -12,7 +12,6 @@ import ca.frc6390.athena.sensors.camera.limelight.LimeLight;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.subsystems.superstructure.Elevator;
@@ -79,34 +78,17 @@ public class Superstructure extends SubsystemBase {
   {
 
     LimeLight ll = base.getCameraFacing(ReefPole.getCenterReef());
-    SmartDashboard.putNumber("Dist", dist);
-
+    double dist = 99999;
     if(ll != null)
     {
-      ReefPole pole = ReefPole.getPoleFromID(ll.getAprilTagID(), ll);
-      if(pole != null && ll.hasValidTarget())
-      {
-        dist = ll.getTargetHorizontalOffset();
-      }
+        ReefPole pole = ReefPole.getPoleFromID(ll.getAprilTagID(), ll);
+        if(pole != null && ll.hasValidTarget())
+        {
+          dist = ll.getTargetHorizontalOffset();
+        }
     }
 
-    if(lr != null)
-    {
-    ReefPole pole2 = ReefPole.getPoleFromID(lr.getAprilTagID(), lr);
-    if(pole2 != null && lr.hasValidTarget())
-    {
-    dist2 = lr.getTargetHorizontalOffset();
-    }
-    }
-
-
-    if(Math.abs(dist) < 15 || Math.abs(dist2) < 15)
-    {
-      return true;
-    }
-    else{
-      return false;
-    } 
+    return Math.abs(dist) < 5;
 }
 
   public Superstructure setAutoDropElevator(boolean autoDropElevator) {
