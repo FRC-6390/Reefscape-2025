@@ -32,6 +32,8 @@ public class Superstructure {
   public RobotBase<?> base;
   public DelayedOutput output;
   public double dist;
+  public double dist2;
+
   
 
   public Superstructure(Elevator elevator, EndEffector effector, RobotBase<?> base) 
@@ -43,12 +45,17 @@ public class Superstructure {
     this.algaeMachine = effector.getAlgaeStateMachine();
     output =  new DelayedOutput(this::closeEnough, 0.85);
     dist = 9999;
+    dist2 = 9999;
   }
 
   public boolean closeEnough()
   {
-    LimeLight ll = base.getCameraFacing(ReefPole.getCenterReef());
+    LimeLight ll = base.getVision().getLimelight("limelight-left");
+    LimeLight lr = base.getVision().getLimelight("limelight-right");
+    
     SmartDashboard.putNumber("Dist", dist);
+    SmartDashboard.putNumber("Dist2", dist2);
+
 
     if(ll != null)
     {
@@ -59,7 +66,17 @@ public class Superstructure {
     }
     }
 
-    if(Math.abs(dist) < 15)
+    if(lr != null)
+    {
+    ReefPole pole2 = ReefPole.getPoleFromID(lr.getAprilTagID(), lr);
+    if(pole2 != null && lr.hasValidTarget())
+    {
+    dist2 = lr.getTargetHorizontalOffset();
+    }
+    }
+
+
+    if(Math.abs(dist) < 15 || Math.abs(dist2) < 15)
     {
       return true;
     }
