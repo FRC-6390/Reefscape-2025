@@ -289,6 +289,16 @@ public class EndEffector extends SubsystemBase {
 
 
   }
+  public boolean hasCoral(){
+  if(beamBreakCenter.getAsBoolean() || beamBreakLeft.getAsBoolean() || beamBreakRight.getAsBoolean())
+    {
+        return true;
+    }
+    else
+    {
+      return false;
+    }
+  }
 
 
   public ShuffleboardTab shuffleboard(String tab) {

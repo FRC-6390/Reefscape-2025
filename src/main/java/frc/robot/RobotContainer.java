@@ -206,17 +206,21 @@ public class RobotContainer {
     
     // //SCORING COMMANDS
     driverController.a.onTrue(Commands.sequence(superstructure.setAlgaeMachine(AlgaeExtensionState.Home),superstructure.setElevator(ElevatorState.Home), superstructure.setEndEffector(EndEffectorState.Home)));
-    driverController.b.onTrue(Commands.sequence(superstructure.setAlgaeMachine(AlgaeExtensionState.Home),superstructure.setElevator(ElevatorState.L2), superstructure.setEndEffector(EndEffectorState.Home)));
-    driverController.x.onTrue(Commands.sequence(superstructure.setAlgaeMachine(AlgaeExtensionState.Home),superstructure.setElevator(ElevatorState.L3), superstructure.setEndEffector(EndEffectorState.Home)));
     driverController.y.onTrue(Commands.sequence(superstructure.setAlgaeMachine(AlgaeExtensionState.Home),superstructure.setElevator(ElevatorState.L4), superstructure.autoEffector()));
-
+    driverController.b.and(() -> effector.hasCoral()).onTrue(Commands.sequence(superstructure.setAlgaeMachine(AlgaeExtensionState.Home),superstructure.setElevator(ElevatorState.L2), superstructure.setEndEffector(EndEffectorState.Home)));
+    driverController.x.and(() -> effector.hasCoral()).onTrue(Commands.sequence(superstructure.setAlgaeMachine(AlgaeExtensionState.Home),superstructure.setElevator(ElevatorState.L3), superstructure.setEndEffector(EndEffectorState.Home)));
+    
+    
     // //ALGAE REMOVAL SEQUENCE
-    driverController.pov.up.onTrue(Commands.sequence(superstructure.setAlgaeMachine(AlgaeExtensionState.Extended),superstructure.setElevator(ElevatorState.AlgaeHigh)));
-    driverController.pov.down.onTrue(Commands.sequence(superstructure.setAlgaeMachine(AlgaeExtensionState.Extended),superstructure.setElevator(ElevatorState.AlgaeLow)));
+    driverController.b.and(() -> !effector.beamBreakCenter.getAsBoolean() && !effector.beamBreakRight.getAsBoolean() && !effector.beamBreakLeft.getAsBoolean()).onTrue(Commands.sequence(superstructure.setAlgaeMachine(AlgaeExtensionState.Extended),superstructure.setElevator(ElevatorState.AlgaeHigh)));
+    driverController.x.and(() -> !effector.beamBreakCenter.getAsBoolean() && !effector.beamBreakRight.getAsBoolean() && !effector.beamBreakLeft.getAsBoolean()).onTrue(Commands.sequence(superstructure.setAlgaeMachine(AlgaeExtensionState.Extended),superstructure.setElevator(ElevatorState.AlgaeLow)));
+    
     
     //STRAFING
-    driverController.pov.left.whileTrue(() -> robotBase.getDrivetrain().getRobotSpeeds().setFeedbackSpeeds(-0.3,0,0)).onFalse(() -> {robotBase.getDrivetrain().getRobotSpeeds().setFeedbackSpeeds(0,0,0); robotBase.getDrivetrain().getRobotSpeeds().stopFeedbackSpeeds();});
-    driverController.pov.right.whileTrue(() -> robotBase.getDrivetrain().getRobotSpeeds().setFeedbackSpeeds(0.3,0,0)).onFalse(() -> {robotBase.getDrivetrain().getRobotSpeeds().setFeedbackSpeeds(0,0,0); robotBase.getDrivetrain().getRobotSpeeds().stopFeedbackSpeeds();});
+    driverController.pov.left.whileTrue(() -> robotBase.getDrivetrain().getRobotSpeeds().setFeedbackSpeeds(0,-0.3,0)).onFalse(() -> {robotBase.getDrivetrain().getRobotSpeeds().setFeedbackSpeeds(0,0,0); robotBase.getDrivetrain().getRobotSpeeds().stopFeedbackSpeeds();});
+    driverController.pov.right.whileTrue(() -> robotBase.getDrivetrain().getRobotSpeeds().setFeedbackSpeeds(0,0.3,0)).onFalse(() -> {robotBase.getDrivetrain().getRobotSpeeds().setFeedbackSpeeds(0,0,0); robotBase.getDrivetrain().getRobotSpeeds().stopFeedbackSpeeds();});
+    driverController.pov.down.whileTrue(() -> robotBase.getDrivetrain().getRobotSpeeds().setFeedbackSpeeds(-0.3,0,0)).onFalse(() -> {robotBase.getDrivetrain().getRobotSpeeds().setFeedbackSpeeds(0,0,0); robotBase.getDrivetrain().getRobotSpeeds().stopFeedbackSpeeds();});
+    driverController.pov.up.whileTrue(() -> robotBase.getDrivetrain().getRobotSpeeds().setFeedbackSpeeds(0.3,0,0)).onFalse(() -> {robotBase.getDrivetrain().getRobotSpeeds().setFeedbackSpeeds(0,0,0); robotBase.getDrivetrain().getRobotSpeeds().stopFeedbackSpeeds();});
 
 
     // //----------------------------------------------------------DRIVER 2---------------------------------------------------------------//
