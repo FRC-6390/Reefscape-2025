@@ -6,33 +6,34 @@ import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.hardware.CANcoder;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.NeutralModeValue;
+
+import ca.frc6390.athena.core.RobotBase;
 import ca.frc6390.athena.mechanisms.StateMachine;
 import ca.frc6390.athena.mechanisms.StateMachine.SetpointProvider;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.math.controller.PIDController;
+import edu.wpi.first.wpilibj.shuffleboard.BuiltInLayouts;
 import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardLayout;
 import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
+import frc.robot.utils.ReefScoringPos.ReefPole;
 
 public class Rotator extends SubsystemBase {
 
-  public final TalonFX motor;
-  public final CANcoder encoder;
-  public double nudge = 0;
-  public final PIDController controller;
-  public final StateMachine<Double, RotatorState> stateMachine;
-  public final StatusSignal<Angle> getAbsolutePosition;
+  private final RobotBase<?> base;
+  private final TalonFX motor;
+  private final CANcoder encoder;
+  private double nudge = 0;
+  private final PIDController controller;
+  private final StateMachine<Double, RotatorState> stateMachine;
+  private final StatusSignal<Angle> getAbsolutePosition;
 
   public enum RotatorState implements SetpointProvider<Double>
   {
-      StartConfiguration(0),
       Home(0),
-      Left(0),
-      Right(0),
-      LeftL4(20),
-      RightL4(-20);
+      L4(20);
 
       private double angle;
       private RotatorState(double angle)
@@ -46,9 +47,9 @@ public class Rotator extends SubsystemBase {
       }
   }
 
-  public Rotator() 
+  public Rotator(RobotBase<?> base) 
   {
-    //ROTATOR STUFF
+      this.base = base;
       motor = new TalonFX(Constants.EndEffector.MOTOR, Constants.EndEffector.CANBUS);
       encoder = new CANcoder(Constants.EndEffector.ENCODER, Constants.EndEffector.CANBUS);
       
@@ -95,15 +96,18 @@ public class Rotator extends SubsystemBase {
   public void update()
   {
     switch (stateMachine.getGoalState()) {
-      case Left, Right, RightL4, LeftL4, Home, StartConfiguration:
-      double speed = controller.calculate(getAngle().getDegrees(), stateMachine.getGoalState().getSetpoint());
-      setMotors(speed);
+      case L4:
+        double setpoint = stateMachine.getGoalStateSetpoint() * base.getCameraFacing(ReefPole.getCenterReef()).config.getYawSin();
+        setMotors(controller.calculate(getAngle().getDegrees(), setpoint));
+      break;
+      case Home:
+        setMotors(controller.calculate(getAngle().getDegrees(), stateMachine.getGoalState().getSetpoint()));
+      break;
     }
   }
 
-
   public ShuffleboardLayout shuffleboard(ShuffleboardTab tab, String name) {
-      return shuffleboard(tab.getLayout(name));
+      return shuffleboard(tab.getLayout(name, BuiltInLayouts.kList));
   }
 
   public ShuffleboardLayout shuffleboard(ShuffleboardLayout tab) {

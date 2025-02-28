@@ -20,10 +20,9 @@ public class Robot extends TimedRobot {
   @Override
   public void robotPeriodic() {
     CommandScheduler.getInstance().run();
-    m_robotContainer.superstructure.returnAfterScore();
     // SmartDashboard.putBoolean("Correct Pose", m_robotContainer.superstructure.closeEnough());
-    SmartDashboard.putNumber("Las Left",m_robotContainer.lasLeft.getMeasurement().distance_mm);
-    SmartDashboard.putNumber("Las Right",m_robotContainer.lasRight.getMeasurement().distance_mm);
+    if(m_robotContainer.lasLeft.getMeasurement() != null) SmartDashboard.putNumber("Las Left",m_robotContainer.lasLeft.getMeasurement().distance_mm);
+    if(m_robotContainer.lasRight.getMeasurement() != null) SmartDashboard.putNumber("Las Right",m_robotContainer.lasRight.getMeasurement().distance_mm);
 
   }
 
@@ -62,7 +61,7 @@ public class Robot extends TimedRobot {
   @Override
   public void teleopInit() {
     m_robotContainer.robotBase.getDrivetrain().getRobotSpeeds().stopAutoSpeeds();
-    // m_robotContainer.elevator.controller.reset(m_robotContainer.elevator.getHeightFromFloor());
+    m_robotContainer.elevator.reset();
     if (m_autonomousCommand != null) {
       m_autonomousCommand.cancel();
     }

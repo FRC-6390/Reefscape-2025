@@ -10,9 +10,9 @@ import ca.frc6390.athena.mechanisms.StateMachine.SetpointProvider;
 import ca.frc6390.athena.sensors.limitswitch.GenericLimitSwitch;
 import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.math.controller.PIDController;
+import edu.wpi.first.wpilibj.shuffleboard.BuiltInLayouts;
 import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardLayout;
 import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
 
@@ -99,7 +99,6 @@ public class AlgaeExtender extends SubsystemBase {
       motor.setPosition(AlgaeExtenderState.Extended.getSetpoint());
     }
 
-    //EXTENSION STUFF
     switch (stateMachine.getGoalState()) 
     {
       case Home:
@@ -107,8 +106,7 @@ public class AlgaeExtender extends SubsystemBase {
         break; 
       case Extended:
         double spd = Math.abs(controller.calculate(getPosition.getValueAsDouble(),AlgaeExtenderState.Extended.getSetpoint()));
-        SmartDashboard.putNumber("EEEEH", spd);
-        setMotors(spd + Math.copySign(0.1, spd));
+        setMotors(spd + 0.1);
       default:
         break;
     }
@@ -116,7 +114,7 @@ public class AlgaeExtender extends SubsystemBase {
 
 
   public ShuffleboardLayout shuffleboard(ShuffleboardTab tab, String name) {
-      return shuffleboard(tab.getLayout(name));
+      return shuffleboard(tab.getLayout(name, BuiltInLayouts.kList));
   }
 
 

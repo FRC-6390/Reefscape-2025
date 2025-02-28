@@ -17,11 +17,14 @@ import frc.robot.subsystems.superstructure.endeffector.Rollers.RollerState;
 public class EndEffector extends SubsystemBase{
 
     private final Rollers rollers;
-    private final boolean rollersEnabled = true;
+    private boolean rollersEnabled = true;
     private final Rotator rotator;
-    private final boolean rotatorEnabled = true;
+    private boolean rotatorEnabled = true;
     private final AlgaeExtender algae;
-    private final boolean algaeEnabled = true;
+    private boolean algaeEnabled = true;
+
+    private boolean autoEndScoring = true;
+
 
     private final StateMachine<Double, RollerState> rollerStateMachine;
     private final StateMachine<Double, RotatorState> rotatorStateMachine;
@@ -37,10 +40,12 @@ public class EndEffector extends SubsystemBase{
     {
         AlgaeHigh(new EndEffectorTuple(RollerState.Algae, RotatorState.Home, AlgaeExtenderState.Extended)),
         AlgaeLow(new EndEffectorTuple(RollerState.Algae, RotatorState.Home, AlgaeExtenderState.Extended)),
-        L4(new EndEffectorTuple(RollerState.Running, RotatorState.LeftL4, AlgaeExtenderState.Home)),
-        L3(new EndEffectorTuple(RollerState.Running, RotatorState.Home, AlgaeExtenderState.Home)),
-        L2(new EndEffectorTuple(RollerState.Running, RotatorState.Home, AlgaeExtenderState.Home)),
-        L1(new EndEffectorTuple(RollerState.Running, RotatorState.Home, AlgaeExtenderState.Home)),
+        L4(new EndEffectorTuple(null, RotatorState.L4, AlgaeExtenderState.Home)),
+        L3(new EndEffectorTuple(null, RotatorState.Home, AlgaeExtenderState.Home)),
+        L2(new EndEffectorTuple(null, RotatorState.Home, AlgaeExtenderState.Home)),
+        L1(new EndEffectorTuple(null, RotatorState.Home, AlgaeExtenderState.Home)),
+        Score(new EndEffectorTuple(RollerState.Running, null, null)),
+        Stop(new EndEffectorTuple(RollerState.Stopped, null, null)),
         Home(new EndEffectorTuple(RollerState.Stopped, RotatorState.Home, AlgaeExtenderState.Home));
 
 
@@ -58,7 +63,7 @@ public class EndEffector extends SubsystemBase{
     }
 
     public EndEffector(RobotBase<?> base){
-        this(new Rollers(base), new Rotator(), new AlgaeExtender());
+        this(new Rollers(base), new Rotator(base), new AlgaeExtender());
     }
 
     public EndEffector(Rollers rollers, Rotator rotator, AlgaeExtender algae){
@@ -106,36 +111,59 @@ public class EndEffector extends SubsystemBase{
         return tab;
     } 
 
+    public boolean isScoring(){
+        return rollerStateMachine.atAnyState(RollerState.Running, RollerState.RunningInverted);
+    }
+
+    public EndEffector setAutoEndScoring(boolean autoEndScoring) {
+        this.autoEndScoring = autoEndScoring;
+        return this;
+    }
+
+    public EndEffector setAlgaeEnabled(boolean algaeEnabled) {
+        this.algaeEnabled = algaeEnabled;
+        return this;
+    }
+
+    public EndEffector setRollersEnabled(boolean rollersEnabled) {
+        this.rollersEnabled = rollersEnabled;
+        return this;
+    }
+
+    public EndEffector setRotatorEnabled(boolean rotatorEnabled) {
+        this.rotatorEnabled = rotatorEnabled;
+        return this;
+    }
+
     public void update(){
 
-        if (algaeEnabled) algaeExtenderStateMachine.update();
-        if (rollersEnabled) rollerStateMachine.update();
-        if (rotatorEnabled) rotatorStateMachine.update();
+        algaeExtenderStateMachine.update();
+        rollerStateMachine.update();
+        rotatorStateMachine.update();
 
         stateMachine.update();
 
         EndEffectorState state = stateMachine.getGoalState();
+        EndEffectorTuple val = stateMachine.getGoalStateSetpoint();
         switch (state) {
             case L4: 
             case L3: 
             case L2: 
             case L1: 
-                rollerStateMachine.setGoalState(state.getSetpoint().rollerState);
-                rotatorStateMachine.setGoalState(state.getSetpoint().rotatorState, () -> rollerStateMachine.atGoalState());
-                algaeExtenderStateMachine.setGoalState(state.getSetpoint().algaeExtenderState);
-            break;
             case AlgaeHigh: 
             case AlgaeLow: 
-                rollerStateMachine.setGoalState(state.getSetpoint().rollerState);
-                rotatorStateMachine.setGoalState(state.getSetpoint().rotatorState, () -> rollerStateMachine.atGoalState());
-                algaeExtenderStateMachine.setGoalState(state.getSetpoint().algaeExtenderState, () -> rollerStateMachine.atGoalState());
-            break;
             case Home:
-                rollerStateMachine.setGoalState(state.getSetpoint().rollerState);
-                rotatorStateMachine.setGoalState(state.getSetpoint().rotatorState, () -> rollerStateMachine.atGoalState());
-                algaeExtenderStateMachine.setGoalState(state.getSetpoint().algaeExtenderState);
+            case Score:
+            case Stop:
+                if (val.rollerState != null && rollersEnabled) rollerStateMachine.setGoalState(val.rollerState,  () -> rotatorStateMachine.atGoalState());
+                if (val.rotatorState != null && rotatorEnabled) rotatorStateMachine.setGoalState(val.rotatorState);
+                if (val.algaeExtenderState != null && algaeEnabled) algaeExtenderStateMachine.setGoalState(val.algaeExtenderState, () -> rotatorStateMachine.atState(RotatorState.Home));
             default:
                 break;
+        }
+        
+        if(autoEndScoring && isScoring() && !hasGamePiece()) {
+            stateMachine.setGoalState(EndEffectorState.Home);
         }
     }
 

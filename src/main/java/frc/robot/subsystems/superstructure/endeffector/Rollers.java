@@ -5,6 +5,7 @@ import com.ctre.phoenix6.hardware.TalonFX;
 import ca.frc6390.athena.core.RobotBase;
 import ca.frc6390.athena.mechanisms.StateMachine;
 import ca.frc6390.athena.mechanisms.StateMachine.SetpointProvider;
+import edu.wpi.first.wpilibj.shuffleboard.BuiltInLayouts;
 import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardLayout;
 import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
@@ -76,12 +77,12 @@ public class Rollers extends SubsystemBase {
   }
 
   public ShuffleboardLayout shuffleboard(ShuffleboardTab tab, String name) {
-      return shuffleboard(tab.getLayout(name));
+      return shuffleboard(tab.getLayout(name, BuiltInLayouts.kList));
   }
 
   public ShuffleboardLayout shuffleboard(ShuffleboardLayout tab) {
     tab.addBoolean("IsFlipped", () ->  flip).withPosition(5, 1);
-  
+    tab.addString("Next State", () -> stateMachine.getNextState().name()).withPosition(5, 1);
     return tab;
   }
 

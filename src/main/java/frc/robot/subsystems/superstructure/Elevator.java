@@ -97,7 +97,7 @@ public class Elevator extends SubsystemBase{
     return -(getPosition.getValueAsDouble() / Constants.Elevator.ENCODER_GEAR_RATIO) * Math.PI *  Constants.Elevator.GEAR_DIAMETER_INCHES;
   }
 
-  public double getVel()
+  public double getVelocity()
   {
     return -(getVelocity.getValueAsDouble() / Constants.Elevator.ENCODER_GEAR_RATIO) * Math.PI *  Constants.Elevator.GEAR_DIAMETER_INCHES;
   }
@@ -114,6 +114,10 @@ public class Elevator extends SubsystemBase{
 
   public StateMachine<Double, ElevatorState> getStateMachine() {
     return stateMachine;
+  }
+
+  public void reset(){
+    controller.reset(getHeightFromFloor(), getVelocity());
   }
 
   //MOVES ELEVATOR UP OR DOWN

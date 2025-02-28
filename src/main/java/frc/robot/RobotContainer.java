@@ -5,8 +5,6 @@
 package frc.robot;
 
 import java.io.IOException;
-import java.lang.annotation.ElementType;
-
 import org.json.simple.parser.ParseException;
 
 import com.pathplanner.lib.auto.NamedCommands;
@@ -23,21 +21,16 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.CommandScheduler;
-import frc.robot.commands.auto.DriveToPoint;
 import frc.robot.commands.auto.PassiveAlign;
 import frc.robot.commands.auto.RotateTo;
 import edu.wpi.first.wpilibj2.command.Commands;
-import edu.wpi.first.wpilibj2.command.InstantCommand;
-import frc.robot.commands.mechanisms.Elevate;
 import frc.robot.subsystems.Superstructure;
+import frc.robot.subsystems.Superstructure.SuperstructureState;
 import frc.robot.subsystems.superstructure.CANdleSubsystem;
 import frc.robot.subsystems.superstructure.Elevator;
 import frc.robot.subsystems.superstructure.EndEffector;
 import frc.robot.subsystems.superstructure.EndEffector.EndEffectorState;
 import frc.robot.subsystems.superstructure.Elevator.ElevatorState;
-import frc.robot.subsystems.superstructure.endeffector.Rollers;
-import frc.robot.subsystems.superstructure.endeffector.Rollers.RollerState;
 
 public class RobotContainer {
 
@@ -116,9 +109,9 @@ public class RobotContainer {
   
   public final RobotBase<SwerveDrivetrain> robotBase = Constants.DriveTrain.ROBOT_BASE.create().shuffleboard();
   public Elevator elevator = new Elevator();
-  public EndEffector effector = new EndEffector(robotBase);
-  public Superstructure superstructure = new Superstructure(elevator, effector, robotBase);
-  public CANdleSubsystem candle = new CANdleSubsystem(effector, superstructure);
+  public EndEffector endEffector = new EndEffector(robotBase);
+  public Superstructure superstructure = new Superstructure(elevator, endEffector, robotBase);
+  public CANdleSubsystem candle = new CANdleSubsystem(endEffector, superstructure);
 
   private final EnhancedXboxController driverController = new EnhancedXboxController(0)
                                                               .setLeftInverted(false)
@@ -157,11 +150,11 @@ public class RobotContainer {
     SmartDashboard.putData(chooser);
     elevator.shuffleboard("Elevator");
     // elevator.setDefaultCommand(elevate);
-    effector.shuffleboard("Effector");
+    endEffector.shuffleboard("Effector");
     
     NamedCommands.registerCommand("Home", Commands.sequence(Commands.sequence(superstructure.setElevator(ElevatorState.Home), superstructure.setEndEffector(EndEffectorState.Home))));
-    NamedCommands.registerCommand("ManualL4", Commands.sequence(superstructure.setElevator(ElevatorState.L4), superstructure.autoEffector()));
-    NamedCommands.registerCommand("StartEject", new InstantCommand(() ->superstructure.ejectPiece()));
+    NamedCommands.registerCommand("ManualL4", Commands.sequence(superstructure.setState(SuperstructureState.L4), superstructure.setState(SuperstructureState.Score)));
+    NamedCommands.registerCommand("StartEject", superstructure.setState(SuperstructureState.Score));
     NamedCommands.registerCommand("Align", new PassiveAlign(robotBase));
 
     
@@ -203,7 +196,7 @@ public class RobotContainer {
 
 
     // //EJECT PIECE MANUALLY
-    driverController.leftBumper.whileTrue(() -> superstructure.ejectPiece());
+    driverController.leftBumper.whileTrue(() -> superstructure.setState(SuperstructureState.Score));
     
     // //SCORING COMMANDS
     driverController.a.onTrue(Commands.sequence(superstructure.setElevator(ElevatorState.Home), superstructure.setEndEffector(EndEffectorState.Home)));
@@ -212,8 +205,8 @@ public class RobotContainer {
     driverController.y.onTrue(Commands.sequence(superstructure.setElevator(ElevatorState.L4), superstructure.setEndEffector(EndEffectorState.L4)));
 
     // //ALGAE REMOVAL SEQUENCE
-    driverController.pov.up.onTrue(Commands.sequence(superstructure.setAlgaeMachine(AlgaeExtensionState.Extended),superstructure.setElevator(ElevatorState.AlgaeHigh)));
-    driverController.pov.down.onTrue(Commands.sequence(superstructure.setAlgaeMachine(AlgaeExtensionState.Extended),superstructure.setElevator(ElevatorState.AlgaeLow)));
+    driverController.pov.up.onTrue(superstructure.setState(SuperstructureState.AlgaeHigh));
+    driverController.pov.up.onTrue(superstructure.setState(SuperstructureState.AlgaeLow));
     
     //STRAFING
     driverController.pov.left.whileTrue(() -> robotBase.getDrivetrain().getRobotSpeeds().setFeedbackSpeeds(-0.3,0,0)).onFalse(() -> {robotBase.getDrivetrain().getRobotSpeeds().setFeedbackSpeeds(0,0,0); robotBase.getDrivetrain().getRobotSpeeds().stopFeedbackSpeeds();});
@@ -222,14 +215,13 @@ public class RobotContainer {
 
     // //----------------------------------------------------------DRIVER 2---------------------------------------------------------------//
 
-
     //FLIP EJECTION
-    driverController2.a.onTrue(() -> effector.setFlip(true));
-    driverController2.b.onTrue(() -> effector.setFlip(false));
+    // driverController2.a.onTrue(() -> endEffector.setFlip(true));
+    // driverController2.b.onTrue(() -> endEffector.setFlip(false));
 
     //END EFFECTOR OVERRIDE
-    driverController2.x.onTrue(superstructure.setEndEffector(EndEffectorState.LeftL4));
-    driverController2.y.onTrue(superstructure.setEndEffector(EndEffectorState.RightL4));
+    driverController2.x.onTrue(superstructure.setEndEffector(EndEffectorState.L4));
+    driverController2.y.onTrue(superstructure.setEndEffector(EndEffectorState.L4));
     driverController2.rightBumper.onTrue(superstructure.setEndEffector(EndEffectorState.Home));
 
     //ELEVATOR OVERIDE
