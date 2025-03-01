@@ -7,31 +7,13 @@
         {
           "type": "path",
           "data": {
-            "pathName": "LEFTSTARTPOS"
-          }
-        },
-        {
-          "type": "named",
-          "data": {
-            "name": "RotateToLeft"
-          }
-        },
-        {
-          "type": "path",
-          "data": {
-            "pathName": "PreLoadLeft"
-          }
-        },
-        {
-          "type": "named",
-          "data": {
-            "name": "ManualL4"
+            "pathName": "PreLoadLeft.0"
           }
         },
         {
           "type": "wait",
           "data": {
-            "waitTime": 1.0
+            "waitTime": 2.0
           }
         },
         {
@@ -43,13 +25,43 @@
         {
           "type": "wait",
           "data": {
-            "waitTime": 1.0
+            "waitTime": 3.0
           }
         },
         {
           "type": "named",
           "data": {
             "name": "Home"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "PreLoadLeft.1"
+          }
+        },
+        {
+          "type": "wait",
+          "data": {
+            "waitTime": 1.0
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "PreLoadLeft.2"
+          }
+        },
+        {
+          "type": "wait",
+          "data": {
+            "waitTime": 3.0
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "StartEject"
           }
         }
       ]

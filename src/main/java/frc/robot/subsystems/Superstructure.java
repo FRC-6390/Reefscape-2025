@@ -29,6 +29,7 @@ public class Superstructure extends SubsystemBase {
   private final StateMachine<SuperstructureTuple, SuperstructureState> stateMachine;
 
   private final RobotBase<?> base;
+  private final EndEffector endEffector;
 
   private final RunnableTrigger autoDropElevatorTrigger;
   private boolean autoDropElevator = true;
@@ -40,7 +41,7 @@ public class Superstructure extends SubsystemBase {
     public enum SuperstructureState implements SetpointProvider<SuperstructureTuple>
     {
         AlgaeHigh(new SuperstructureTuple(EndEffectorState.AlgaeHigh, ElevatorState.AlgaeHigh)),
-        AlgaeRetract(new SuperstructureTuple(EndEffectorState.AlgaeHigh, null)),
+        AlgaeRetract(new SuperstructureTuple(EndEffectorState.AlgaeRetract, null)),
         AlgaeLow(new SuperstructureTuple(EndEffectorState.AlgaeLow, ElevatorState.AlgaeLow)),
         L4(new SuperstructureTuple(EndEffectorState.L4, ElevatorState.L4)),
         L3(new SuperstructureTuple(EndEffectorState.L3, ElevatorState.L3)),
@@ -66,6 +67,7 @@ public class Superstructure extends SubsystemBase {
 
   public Superstructure(Elevator elevator, EndEffector endEffector, RobotBase<?> base) 
   {
+    this.endEffector = endEffector;
     this.elevatorStateMachine = elevator.getStateMachine();
     this.endEffectorStateMachine = endEffector.getStateMachine();
     this.base = base;
@@ -107,7 +109,9 @@ public class Superstructure extends SubsystemBase {
       return this;
   }
 
+
   public InstantCommand setState(SuperstructureState state) {
+    System.out.println(state.name());
     return new InstantCommand(() -> stateMachine.setGoalState(state));
   }
 
@@ -122,7 +126,7 @@ public class Superstructure extends SubsystemBase {
   public void elevatorStateManager(Elevator.ElevatorState state){
     switch (state) {
       case Home:
-        elevatorStateMachine.setGoalState(state, () -> endEffectorStateMachine.atState(EndEffectorState.Home));
+        elevatorStateMachine.setGoalState(state);
         break;
       case L1, AlgaeHigh, AlgaeLow:
         elevatorStateMachine.setGoalState(state);
@@ -171,6 +175,10 @@ public class Superstructure extends SubsystemBase {
         break;
       default:
         break;
+    }
+
+    if(endEffector.isAutoEndScoring() && endEffector.isScoring() && !endEffector.hasGamePiece()) {
+      stateMachine.setGoalState(SuperstructureState.Home);
     }
   }
 

@@ -12,6 +12,7 @@ import ca.frc6390.athena.devices.MotorController.Motor;
 import ca.frc6390.athena.drivetrains.swerve.SwerveDrivetrain;
 import ca.frc6390.athena.drivetrains.swerve.SwerveDrivetrain.SwerveDrivetrainConfig;
 import ca.frc6390.athena.drivetrains.swerve.modules.SwerveVendorSDS;
+import ca.frc6390.athena.sensors.camera.limelight.LimeLight.PoseEstimateWithLatencyType;
 import ca.frc6390.athena.sensors.camera.limelight.LimeLightConfig;
 import edu.wpi.first.math.controller.ElevatorFeedforward;
 import edu.wpi.first.math.controller.PIDController;
@@ -29,11 +30,11 @@ public interface Constants {
         // SAM OFFSETS
         // double[] ENCODER_OFFSETS = {0.697,3.123,2.445,-0.851};
 
-        // OLD PATRICK OFFSETS
-        double[] ENCODER_OFFSETS = {0.7294921875, 0.599609375,0.6860351562500001, 0.8649902343749999};
+        // OLD SIREN OFFSETS
+        // double[] ENCODER_OFFSETS = {0.7294921875, 0.599609375,0.6860351562500001, 0.8649902343749999};
 
-        // NEW PATRICK OFFSETS
-        // double[] ENCODER_OFFSETS = {0,0,0,0};
+        // NEW SIREN OFFSTS
+        double[] ENCODER_OFFSETS = {0.23535156250000003,0.09350585937499999,0.19873046875000003,0.361572265625};
         
         //OTHER WAY
         // double[] ENCODER_OFFSETS = {-0.86669921875, -0.19970703125,-0.67333984375,-0.880126953125};
@@ -59,14 +60,14 @@ public interface Constants {
                                                     .setDriftActivationSpeed(0.0)
                                                     .setCurrentLimit(40);
 //ROT P SHOULD BE 2
-        RobotLocalizationConfig LOCALIZATION_CONFIG = new RobotLocalizationConfig().setSlipThresh(0.2).setVision(0.2, 0.2, 9999).setAutoPlannerPID(new PIDConstants(5,0,0), new PIDConstants(0,0,0)).setVisionEnabled(true);
+        RobotLocalizationConfig LOCALIZATION_CONFIG = new RobotLocalizationConfig().setSlipThresh(0.2).setVision(1, 1, 9999).setAutoPlannerPID(new PIDConstants(5,0,0), new PIDConstants(2,0,0)).setVisionEnabled(false);
 
         RobotBaseConfig<SwerveDrivetrain> ROBOT_BASE = RobotBaseConfig.swerve(DRIVETRAIN_CONFIG)
                                                                       .setLocalization(LOCALIZATION_CONFIG)
                                                                     //   .setVision(RobotVisionConfig.blank().addLimeLights(new LimeLightConfig("limelight-left").setYawRelativeToForwards(-90)));
                                                                     // .setVision(RobotVisionConfig.blank().addPhotonVision(new PhotonVisionConfig("OV9281", new Transform3d(-0.25, -0.27 ,0.98, new Rotation3d()),PoseStrategy.MULTI_TAG_PNP_ON_COPROCESSOR)).addLimeLights(new LimeLightConfig("limelight-left").setYawRelativeToForwards(-90),new LimeLightConfig("limelight-right").setYawRelativeToForwards(90)));
 
-                                                                      .setVision(RobotVisionConfig.blank().addLimeLights(new LimeLightConfig("limelight-left").setYawRelativeToForwards(-90),new LimeLightConfig("limelight-right").setYawRelativeToForwards(90)));
+                                                                      .setVision(RobotVisionConfig.blank().addLimeLights(new LimeLightConfig("limelight-left").setYawRelativeToForwards(-90).setPosezestimateType(PoseEstimateWithLatencyType.BOT_POSE_MT2_BLUE),new LimeLightConfig("limelight-right").setYawRelativeToForwards(90).setPosezestimateType(PoseEstimateWithLatencyType.BOT_POSE_MT2_BLUE)));
     }
 
     public interface Controllers {

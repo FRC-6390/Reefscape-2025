@@ -25,8 +25,8 @@ public class CANdleSubsystem extends SubsystemBase {
   public void periodic() {
 
     red = effector.hasGamePiece() ? 0 : 255;
-    blue = effector.hasGamePiece() ? 255 : 0;
-    green = superstructure.closeEnough() ? 255 : 0;
+    green = effector.hasGamePiece() ? 255 : 0;
+    blue = superstructure.closeEnough() ? 255 : 0;
 
     candle.setLEDs(red,green,blue);
   }

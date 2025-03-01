@@ -24,7 +24,7 @@ public class Rollers extends SubsystemBase {
   {
     
     Stopped(0),
-    Algae(-1),
+    Algae(1),
     Running(1),
     RunningInverted(-1);
 
@@ -59,6 +59,8 @@ public class Rollers extends SubsystemBase {
       case Running:
       case Stopped:
       case RunningInverted:
+            // motor.set(stateMachine.getGoalStateSetpoint());
+
             double setpoint = stateMachine.getGoalStateSetpoint() * base.getCameraFacing(ReefPole.getCenterReef()).config.getYawSin();
             motor.set(!flip ? setpoint : -setpoint);
         break;
@@ -80,7 +82,7 @@ public class Rollers extends SubsystemBase {
   }
 
   public ShuffleboardLayout shuffleboard(ShuffleboardLayout tab) {
-    tab.addBoolean("IsFlipped", () ->  flip).withPosition(5, 1);
+    tab.addBoolean("IsEjectorFlipped", () ->  flip).withPosition(5, 1);
     tab.addString("Next State", () -> stateMachine.getNextState().name()).withPosition(5, 1);
     return tab;
   }

@@ -11,6 +11,7 @@ import ca.frc6390.athena.filters.FilteredValue;
 import ca.frc6390.athena.sensors.camera.limelight.LimeLight;
 import ca.frc6390.athena.sensors.camera.limelight.LimeLight.PoseEstimateType;
 import edu.wpi.first.math.controller.PIDController;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.utils.ReefScoringPos.ReefPole;
 
@@ -52,7 +53,7 @@ public class PassiveAlign extends Command {
     {
       double r = -controller.calculate(rotationFiltered.get(), 0);
       base.getDrivetrain().getRobotSpeeds().setFeedbackSpeeds(0,0,r);
-      System.out.println(r);
+      SmartDashboard.putNumber("Rotational Vel", r);
       
     }
     else{

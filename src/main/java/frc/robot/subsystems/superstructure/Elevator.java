@@ -43,14 +43,14 @@ public class Elevator extends SubsystemBase{
     //ELEVATOR HEIGHT FROM FLOOR IN INCHES
     Home(Constants.Elevator.OFFSET_FROM_FLOOR),
     L1(Constants.Elevator.OFFSET_FROM_FLOOR),
-    AlgaeHigh(58.1164997129706),
-    AlgaeLow(45.1735368151855),
+    AlgaeHigh(45.18043972873099),
+    AlgaeLow(31.23885533803234),
     //31.5
-    L2(32),
+    L2(32.78280700103924),
     //47.25
     L3(48),
     //72
-    L4(76);
+    L4(77.23066732041963);
 
 
     double pos;
@@ -77,7 +77,7 @@ public class Elevator extends SubsystemBase{
     leftMotor.setNeutralMode(NeutralModeValue.Brake);
     rightMotor.setNeutralMode(NeutralModeValue.Brake);
 
-    CurrentLimitsConfigs currentLimitsConfigs = new CurrentLimitsConfigs().withStatorCurrentLimit(40);
+    CurrentLimitsConfigs currentLimitsConfigs = new CurrentLimitsConfigs().withStatorCurrentLimit(41);
     currentLimitsConfigs.StatorCurrentLimitEnable = true;
     leftMotor.getConfigurator().apply(currentLimitsConfigs);
     rightMotor.getConfigurator().apply(currentLimitsConfigs);
@@ -123,6 +123,8 @@ public class Elevator extends SubsystemBase{
   //MOVES ELEVATOR UP OR DOWN
   public void setMotors(double speed)
   {
+    if(encoder != null)
+    {
     if (lowerlimitSwitch.getAsBoolean() && speed < 0){
       speed = 0;
     }
@@ -131,6 +133,7 @@ public class Elevator extends SubsystemBase{
     speed = -speed;
     leftMotor.set(speed);
     rightMotor.set(speed);
+  }
   }
   
   public void stop() {

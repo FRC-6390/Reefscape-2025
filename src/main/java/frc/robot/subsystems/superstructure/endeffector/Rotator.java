@@ -34,7 +34,8 @@ public class Rotator extends SubsystemBase {
   public enum RotatorState implements SetpointProvider<Double>
   {
       Home(0),
-      L4(20);
+      Algae(-16),
+      L4(-38.671875000000036);
 
       private double angle;
       private RotatorState(double angle)
@@ -107,6 +108,7 @@ public class Rotator extends SubsystemBase {
         setMotors(controller.calculate(getAngle().getDegrees(), !flip ? setpoint : -setpoint));
       break;
       case Home:
+      case Algae:
         setMotors(controller.calculate(getAngle().getDegrees(), stateMachine.getGoalState().getSetpoint()));
       break;
     }
@@ -123,6 +125,7 @@ public class Rotator extends SubsystemBase {
     tab.addNumber("Rotations", this::getPosition).withPosition(4,1);
     tab.addString("Next State", () -> stateMachine.getNextState().name()).withPosition(5, 1);
     tab.addNumber("Next State Angle", () -> stateMachine.getNextState().getSetpoint()).withPosition(5, 1);
+    tab.addBoolean("Is ROtator FLip", () -> flip);
     return tab;
   }
 

@@ -6,6 +6,7 @@ import ca.frc6390.athena.mechanisms.StateMachine.SetpointProvider;
 import ca.frc6390.athena.sensors.beambreak.IRBeamBreak;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.subsystems.superstructure.endeffector.AlgaeExtender;
 import frc.robot.subsystems.superstructure.endeffector.AlgaeExtender.AlgaeExtenderState;
@@ -25,6 +26,7 @@ public class EndEffector extends SubsystemBase{
 
     private boolean autoEndScoring = true;
 
+    // public Elevator elevator;
 
     private final StateMachine<Double, RollerState> rollerStateMachine;
     private final StateMachine<Double, RotatorState> rotatorStateMachine;
@@ -38,9 +40,9 @@ public class EndEffector extends SubsystemBase{
     
     public enum EndEffectorState implements SetpointProvider<EndEffectorTuple>
     {
-        AlgaeHigh(new EndEffectorTuple(RollerState.Algae, RotatorState.Home, AlgaeExtenderState.Extended)),
-        AlgaeRetract(new EndEffectorTuple(null, null, AlgaeExtenderState.Home)),
-        AlgaeLow(new EndEffectorTuple(RollerState.Algae, RotatorState.Home, AlgaeExtenderState.Extended)),
+        AlgaeHigh(new EndEffectorTuple(RollerState.Algae, RotatorState.Algae, AlgaeExtenderState.Extended)),
+        AlgaeRetract(new EndEffectorTuple(RollerState.Stopped, RotatorState.Home, AlgaeExtenderState.Home)),
+        AlgaeLow(new EndEffectorTuple(RollerState.Algae, RotatorState.Algae, AlgaeExtenderState.Extended)),
         L4(new EndEffectorTuple(null, RotatorState.L4, AlgaeExtenderState.Home)),
         L3(new EndEffectorTuple(null, RotatorState.Home, AlgaeExtenderState.Home)),
         L2(new EndEffectorTuple(null, RotatorState.Home, AlgaeExtenderState.Home)),
@@ -101,6 +103,7 @@ public class EndEffector extends SubsystemBase{
         tab.addBoolean("BeamBreakRight", () -> beamBreakRight.getAsBoolean());
         tab.addBoolean("BeamBreakCenter", () -> beamBreakCenter.getAsBoolean());
 
+        
         tab.addBoolean("rollersEnabled", () -> rollersEnabled);
         tab.addBoolean("algaeEnabled", () -> algaeEnabled);
         tab.addBoolean("rotatorEnabled", () -> rotatorEnabled);
@@ -157,15 +160,11 @@ public class EndEffector extends SubsystemBase{
             case Home:
             case Score:
             case Stop:
-                if (val.rollerState != null && rollersEnabled) rollerStateMachine.setGoalState(val.rollerState,  () -> rotatorStateMachine.atGoalState());
-                if (val.rotatorState != null && rotatorEnabled) rotatorStateMachine.setGoalState(val.rotatorState, () -> algaeExtenderStateMachine.atState(AlgaeExtenderState.Home));
-                if (val.algaeExtenderState != null && algaeEnabled) algaeExtenderStateMachine.setGoalState(val.algaeExtenderState, () -> rotatorStateMachine.atState(RotatorState.Home));
+                if (val.rollerState != null && rollersEnabled) rollerStateMachine.setGoalState(val.rollerState);
+                if (val.rotatorState != null && rotatorEnabled) rotatorStateMachine.setGoalState(val.rotatorState);
+                if (val.algaeExtenderState != null && algaeEnabled) algaeExtenderStateMachine.setGoalState(val.algaeExtenderState());
             default:
                 break;
-        }
-        
-        if(autoEndScoring && isScoring() && !hasGamePiece()) {
-            stateMachine.setGoalState(EndEffectorState.Home);
         }
     }
 
@@ -180,6 +179,11 @@ public class EndEffector extends SubsystemBase{
     public Rotator getRotator() {
         return rotator;
     }
+
+    public boolean isAutoEndScoring() {
+        return autoEndScoring;
+    }
+
 
     @Override
     public void periodic() {
