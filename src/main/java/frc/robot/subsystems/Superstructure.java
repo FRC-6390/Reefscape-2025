@@ -12,6 +12,7 @@ import ca.frc6390.athena.sensors.camera.limelight.LimeLight;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.subsystems.superstructure.Elevator;
@@ -28,6 +29,7 @@ public class Superstructure extends SubsystemBase {
 
   private final StateMachine<SuperstructureTuple, SuperstructureState> stateMachine;
 
+  public Elevator elevator;
   private final RobotBase<?> base;
   private final EndEffector endEffector;
 
@@ -68,6 +70,7 @@ public class Superstructure extends SubsystemBase {
   public Superstructure(Elevator elevator, EndEffector endEffector, RobotBase<?> base) 
   {
     this.endEffector = endEffector;
+    this.elevator = elevator;
     this.elevatorStateMachine = elevator.getStateMachine();
     this.endEffectorStateMachine = endEffector.getStateMachine();
     this.base = base;
@@ -75,6 +78,15 @@ public class Superstructure extends SubsystemBase {
     this.autoDropElevatorTrigger = new RunnableTrigger(() -> autoDropElevator && endEffector.isScoring() && elevatorStateMachine.atAnyState(ElevatorState.L1,ElevatorState.L2,ElevatorState.L3,ElevatorState.L4));
     autoDropElevatorTrigger.onFalse(setState(SuperstructureState.Home));
 
+  }
+
+  public boolean elevatorAtSetpoint()
+  {
+    if(elevator.controller.atSetpoint())
+    {
+      SmartDashboard.putBoolean("At Setpoint", elevator.controller.atSetpoint());
+      return true;
+    }
   }
 
   public boolean closeEnough()
