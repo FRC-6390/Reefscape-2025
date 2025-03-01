@@ -24,6 +24,7 @@ import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
+import frc.robot.commands.auto.AtState;
 import frc.robot.commands.auto.PassiveAlign;
 import frc.robot.commands.auto.RotateTo;
 import frc.robot.subsystems.Superstructure;
@@ -156,6 +157,8 @@ public class RobotContainer {
     NamedCommands.registerCommand("Home", superstructure.setState(SuperstructureState.Home));
     NamedCommands.registerCommand("ManualL4", superstructure.setState(SuperstructureState.L4));
     NamedCommands.registerCommand("StartEject", superstructure.setState(SuperstructureState.Score));
+    NamedCommands.registerCommand("WaitForElevator", new AtState(superstructure));
+
     
     
     NamedCommands.registerCommand("RotateToRight",new RotateTo(robotBase,Rotation2d.fromRadians(-0.49333207719329186)));
@@ -192,11 +195,11 @@ public class RobotContainer {
     // driverController.rightStick.toggleOnTrue(new PassiveAlign(robotBase));
 
     // //AUTO ALIGN (RIGHT BUMPER)
-    // driverController.rightBumper.onTrue(new DriveToPoint(robotBase));
+    driverController.rightBumper.onTrue(new DriveToPoint(robotBase));
 
 
     // //EJECT PIECE MANUALLY
-    driverController.rightBumper.whileTrue(superstructure.setState(SuperstructureState.Score));
+    // driverController.rightBumper.whileTrue(superstructure.setState(SuperstructureState.Score));
     driverController.leftBumper.whileTrue(superstructure.setState(SuperstructureState.Score));
 
     
