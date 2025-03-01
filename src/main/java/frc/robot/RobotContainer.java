@@ -24,7 +24,9 @@ import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
+import edu.wpi.first.wpilibj2.command.WaitCommand;
 import frc.robot.commands.auto.AtState;
+import frc.robot.commands.auto.AtStateEjector;
 import frc.robot.commands.auto.PassiveAlign;
 import frc.robot.commands.auto.RotateTo;
 import frc.robot.subsystems.Superstructure;
@@ -157,7 +159,9 @@ public class RobotContainer {
     NamedCommands.registerCommand("Home", superstructure.setState(SuperstructureState.Home));
     NamedCommands.registerCommand("ManualL4", superstructure.setState(SuperstructureState.L4));
     NamedCommands.registerCommand("StartEject", superstructure.setState(SuperstructureState.Score));
-    NamedCommands.registerCommand("WaitForElevator", new AtState(superstructure));
+    NamedCommands.registerCommand("WaitForElevator",Commands.deadline( new AtState(superstructure), new WaitCommand(3)));
+
+    NamedCommands.registerCommand("WaitForEjector", Commands.deadline( new AtStateEjector(endEffector), new WaitCommand(3)));
 
     
     
