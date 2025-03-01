@@ -31,7 +31,7 @@ public class Elevator extends SubsystemBase{
   private final TalonFX rightMotor;
   private final GenericLimitSwitch lowerlimitSwitch;
 
-  private final ProfiledPIDController controller;
+  public final ProfiledPIDController controller;
   private final ElevatorFeedforward feedforward;
 
   private final StateMachine<Double, ElevatorState> stateMachine;
@@ -85,7 +85,7 @@ public class Elevator extends SubsystemBase{
     //CONTROL SYSTEM SETUP
     controller = Constants.Elevator.CONTORLLER;
     controller.setIntegratorRange(-1.5, 1.5);
-    controller.setTolerance(0.2);
+    controller.setTolerance(0.8);
     controller.reset(getHeightFromFloor());
     feedforward = Constants.Elevator.FEEDFORWARD;
     stateMachine = new StateMachine<Double, ElevatorState>(ElevatorState.Home, controller::atSetpoint);
