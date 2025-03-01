@@ -93,6 +93,10 @@ public class EndEffector extends SubsystemBase{
         return beamBreakLeft.getAsBoolean() || beamBreakCenter.getAsBoolean() || beamBreakRight.getAsBoolean();
     }
 
+    public boolean hasNoPiece(){
+        return !beamBreakLeft.getAsBoolean() && !beamBreakCenter.getAsBoolean() && !beamBreakRight.getAsBoolean();
+    }
+
     public ShuffleboardTab shuffleboard(String tab) {
         return shuffleboard(Shuffleboard.getTab(tab));
     }

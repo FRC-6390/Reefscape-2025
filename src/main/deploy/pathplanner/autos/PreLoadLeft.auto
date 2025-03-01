@@ -23,9 +23,15 @@
           }
         },
         {
-          "type": "wait",
+          "type": "named",
           "data": {
-            "waitTime": 1.0
+            "name": "WaitForEjector"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "Home"
           }
         },
         {
@@ -59,9 +65,9 @@
           }
         },
         {
-          "type": "wait",
+          "type": "named",
           "data": {
-            "waitTime": 1.0
+            "name": "WaitForEjector"
           }
         },
         {
