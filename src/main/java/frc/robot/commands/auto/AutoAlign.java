@@ -15,6 +15,7 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import frc.robot.utils.AutoAlignHelper;
+import frc.robot.utils.ReefScoringPos;
 import frc.robot.utils.ReefScoringPos.ReefPole;
 public class AutoAlign extends Command {
   
@@ -34,7 +35,7 @@ public class AutoAlign extends Command {
   public double distToTrigger;
 
   public AutoAlign(RobotBase<?> base, LaserCan las, ReefPole pole) {
-    this(base.getCameraFacing(pole.getTranslation()), base, las, pole.getApriltagId());
+    this(ReefScoringPos.getLimelightFacing(base), base, las, pole.getApriltagId());
   }
   
   public AutoAlign(String limelight, RobotBase<?> base, LaserCan las) {

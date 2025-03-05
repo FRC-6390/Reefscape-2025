@@ -60,7 +60,7 @@ public class Rollers extends SubsystemBase {
       case Stopped:
       case RunningInverted:
             // motor.set(stateMachine.getGoalStateSetpoint());
-
+            double side = superstructure.
             double setpoint = stateMachine.getGoalStateSetpoint() * base.getCameraFacing(ReefPole.getCenterReef()).config.getYawSin();
             motor.set(!flip ? setpoint : -setpoint);
         break;

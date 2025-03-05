@@ -14,6 +14,7 @@ import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.subsystems.Superstructure;
 import frc.robot.subsystems.superstructure.Elevator;
 import frc.robot.subsystems.superstructure.Elevator.ElevatorState;
+import frc.robot.utils.ReefScoringPos;
 import frc.robot.utils.ReefScoringPos.ReefPole;
 
 /* You should consider using the more terse Command factories API instead https://docs.wpilib.org/en/stable/docs/software/commandbased/organizing-command-based.html#defining-commands */
@@ -55,7 +56,7 @@ public class Elevate extends Command {
   @Override
   public void execute() 
   {
-    limeLight = base.getCameraFacing(ReefPole.getCenterReef());
+    limeLight = ReefScoringPos.getLimelightFacing(base);
 
     if(limeLight.config.table() == "limelight-left")
     {

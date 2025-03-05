@@ -34,6 +34,7 @@ public class Superstructure extends SubsystemBase {
   private final EndEffector endEffector;
 
   private final RunnableTrigger autoDropElevatorTrigger;
+ 
   private boolean autoDropElevator = true;
   private boolean endEffectorEnabled = true;
   private boolean elevatorEnabled = true;
@@ -89,22 +90,24 @@ public class Superstructure extends SubsystemBase {
     }
   }
 
-  public boolean closeEnough()
-  {
+ 
 
-    LimeLight ll = base.getCameraFacing(ReefPole.getCenterReef());
-    double dist = 99999;
-    if(ll != null)
-    {
-        ReefPole pole = ReefPole.getPoleFromID(ll.getAprilTagID(), ll);
-        if(pole != null && ll.hasValidTarget())
-        {
-          dist = ll.getTargetHorizontalOffset();
-        }
-    }
+//   public boolean closeEnough()
+//   {
 
-    return Math.abs(dist) < 5;
-}
+//     // LimeLight ll = superstr(ReefPole.getCenterReef());
+//     double dist = 99999;
+//     if(ll != null)
+//     {
+//         ReefPole pole = ReefPole.getPoleFromID(ll.getAprilTagID(), ll);
+//         if(pole != null && ll.hasValidTarget())
+//         {
+//           dist = ll.getTargetHorizontalOffset();
+//         }
+//     }
+
+//     return Math.abs(dist) < 5;
+// }
 
   public Superstructure setAutoDropElevator(boolean autoDropElevator) {
       this.autoDropElevator = autoDropElevator;
