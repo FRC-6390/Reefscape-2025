@@ -16,7 +16,7 @@ import frc.robot.RobotContainer.PATHS;
 
 public class ReefScoringPos {
 
-    public static LimeLight currentLL = new LimeLight(new LimeLightConfig("empty"));
+    public static LimeLight currentLL = new LimeLight(new LimeLightConfig("limelight-left"));
 
     public static LimeLight getLimelightFacing(RobotBase<?> base)
     {
