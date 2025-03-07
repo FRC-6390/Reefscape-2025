@@ -7,7 +7,7 @@
         {
           "type": "path",
           "data": {
-            "pathName": "PreLoadLeft.0"
+            "pathName": "PreLoadRight (1).0"
           }
         },
         {
@@ -37,7 +37,7 @@
         {
           "type": "path",
           "data": {
-            "pathName": "PreLoadLeft.1"
+            "pathName": "PreLoadRight (1).1"
           }
         },
         {
@@ -49,7 +49,7 @@
         {
           "type": "path",
           "data": {
-            "pathName": "PreLoadLeft.2"
+            "pathName": "PreLoadRight (1).2"
           }
         },
         {
@@ -79,13 +79,7 @@
         {
           "type": "path",
           "data": {
-            "pathName": "PreLoadLeft.3"
-          }
-        },
-        {
-          "type": "wait",
-          "data": {
-            "waitTime": 1.0
+            "pathName": "PreLoadRight (1).3"
           }
         }
       ]

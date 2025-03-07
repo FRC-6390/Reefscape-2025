@@ -5,6 +5,7 @@ import com.ctre.phoenix6.hardware.TalonFX;
 import ca.frc6390.athena.core.RobotBase;
 import ca.frc6390.athena.mechanisms.StateMachine;
 import ca.frc6390.athena.mechanisms.StateMachine.SetpointProvider;
+import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.shuffleboard.BuiltInLayouts;
 import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardLayout;
 import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
@@ -24,7 +25,7 @@ public class Rollers extends SubsystemBase {
   {
     
     Stopped(0),
-    Algae(1),
+    Algae(-1),
     Running(1),
     RunningInverted(-1);
 
@@ -60,8 +61,16 @@ public class Rollers extends SubsystemBase {
       case Stopped:
       case RunningInverted:
             // motor.set(stateMachine.getGoalStateSetpoint());
+            double setpoint = stateMachine.getGoalStateSetpoint();
+            if(DriverStation.isAutonomousEnabled())
+            {
+             setpoint = stateMachine.getGoalStateSetpoint()* base.getCameraFacing(ReefPole.getCenterReef()).config.getYawSin();
+            }
+            else
+            {
+               setpoint = stateMachine.getGoalStateSetpoint();//* base.getCameraFacing(ReefPole.getCenterReef()).config.getYawSin();
 
-            double setpoint = stateMachine.getGoalStateSetpoint() * base.getCameraFacing(ReefPole.getCenterReef()).config.getYawSin();
+            }
             motor.set(!flip ? setpoint : -setpoint);
         break;
       case Algae:

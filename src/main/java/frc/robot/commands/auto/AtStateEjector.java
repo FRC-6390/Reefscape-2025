@@ -13,41 +13,13 @@ import frc.robot.subsystems.superstructure.EndEffector;
 public class AtStateEjector extends Command {
   /** Creates a new AtState. */
   public EndEffector effector;
-  public boolean isDone = false;
   public AtStateEjector(EndEffector effector) {
     this.effector = effector;
     // Use addRequirements() here to declare subsystem dependencies.
   }
-
-  // Called when the command is initially scheduled.
-  @Override
-  public void initialize() 
-  {
-    isDone = false;
-  }
-
-  // Called every time the scheduler runs while the command is scheduled.
-  @Override
-  public void execute() 
-  {
-   if(effector.hasNoPiece())
-   {
-    isDone = true;
-   }
-   else
-   {
-    isDone = false;
-   }
-  }
-
-  // Called once the command ends or is interrupted.
-  @Override
-  public void end(boolean interrupted) 
-  {}
-
   // Returns true when the command should end.
   @Override
   public boolean isFinished() {
-    return isDone;
+    return effector.hasNoPiece();
   }
 }

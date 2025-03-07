@@ -13,6 +13,7 @@ import ca.frc6390.athena.mechanisms.StateMachine.SetpointProvider;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.math.controller.PIDController;
+import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.shuffleboard.BuiltInLayouts;
 import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardLayout;
 import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
@@ -34,7 +35,8 @@ public class Rotator extends SubsystemBase {
   public enum RotatorState implements SetpointProvider<Double>
   {
       Home(0),
-      Algae(-16),
+      // Algae(-16),
+      Algae(0),
       L4(-38.671875000000036);
 
       private double angle;
@@ -102,9 +104,18 @@ public class Rotator extends SubsystemBase {
 
   public void update()
   {
+    
     switch (stateMachine.getGoalState()) {
       case L4:
-        double setpoint = stateMachine.getGoalStateSetpoint() * base.getCameraFacing(ReefPole.getCenterReef()).config.getYawSin();
+        double setpoint = stateMachine.getGoalStateSetpoint();
+        if(DriverStation.isAutonomousEnabled())
+        {
+         setpoint = stateMachine.getGoalStateSetpoint() * base.getCameraFacing(ReefPole.getCenterReef()).config.getYawSin();
+        }
+        else
+        {
+        setpoint = stateMachine.getGoalStateSetpoint(); //* base.getCameraFacing(ReefPole.getCenterReef()).config.getYawSin();
+        }
         setMotors(controller.calculate(getAngle().getDegrees(), !flip ? setpoint : -setpoint));
       break;
       case Home:
@@ -112,6 +123,7 @@ public class Rotator extends SubsystemBase {
         setMotors(controller.calculate(getAngle().getDegrees(), stateMachine.getGoalState().getSetpoint()));
       break;
     }
+  
   }
 
   public ShuffleboardLayout shuffleboard(ShuffleboardTab tab, String name) {

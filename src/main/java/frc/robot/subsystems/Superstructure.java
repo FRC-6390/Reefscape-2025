@@ -32,6 +32,7 @@ public class Superstructure extends SubsystemBase {
   public Elevator elevator;
   private final RobotBase<?> base;
   private final EndEffector endEffector;
+ 
 
   private final RunnableTrigger autoDropElevatorTrigger;
   private boolean autoDropElevator = true;
@@ -51,7 +52,7 @@ public class Superstructure extends SubsystemBase {
         L1(new SuperstructureTuple(EndEffectorState.L1, ElevatorState.L1)),
         Home(new SuperstructureTuple(EndEffectorState.Home, ElevatorState.Home)),
         Score(new SuperstructureTuple(EndEffectorState.Score, null));
-
+        
 
         private SuperstructureTuple states;
         private SuperstructureState(SuperstructureTuple states)
@@ -87,13 +88,20 @@ public class Superstructure extends SubsystemBase {
       SmartDashboard.putBoolean("At Setpoint", elevator.controller.atSetpoint());
       return true;
     }
+    else
+    {
+      return false;
+    }
   }
 
   public boolean closeEnough()
   {
 
-    LimeLight ll = base.getCameraFacing(ReefPole.getCenterReef());
-    double dist = 99999;
+    LimeLight ll = base.getVision().getLimelight("limelight-left");
+    LimeLight lr = base.getVision().getLimelight("limelight-right");
+    
+    double dist = 99;
+    double dist2 = 99;
     if(ll != null)
     {
         ReefPole pole = ReefPole.getPoleFromID(ll.getAprilTagID(), ll);
@@ -103,7 +111,16 @@ public class Superstructure extends SubsystemBase {
         }
     }
 
-    return Math.abs(dist) < 5;
+    if(lr != null)
+    {
+        ReefPole pole = ReefPole.getPoleFromID(lr.getAprilTagID(), lr);
+        if(pole != null && lr.hasValidTarget())
+        {
+          dist2 = lr.getTargetHorizontalOffset();
+        }
+    }
+
+    return Math.abs(dist) < 6.5 || Math.abs(dist2) < 6.5;
 }
 
   public Superstructure setAutoDropElevator(boolean autoDropElevator) {

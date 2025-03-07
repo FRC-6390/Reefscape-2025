@@ -54,7 +54,7 @@ public class AlgaeExtender extends SubsystemBase {
       CurrentLimitsConfigs limit = new CurrentLimitsConfigs();
       limit = limit.withStatorCurrentLimit(30);
       motor.getConfigurator().apply(limit);
-      controller = new PIDController(0.5, 0, 0);
+      controller = new PIDController(1, 0, 0);
       controller.setTolerance(1);
       stateMachine = new StateMachine<Double, AlgaeExtenderState>(AlgaeExtenderState.Home, this::atSetpoint);
       motor.setPosition(0);
@@ -106,7 +106,7 @@ public class AlgaeExtender extends SubsystemBase {
         break; 
       case Extended:
         double spd = Math.abs(controller.calculate(getPosition.getValueAsDouble(),AlgaeExtenderState.Extended.getSetpoint()));
-        setMotors(spd + 0.1);
+        setMotors(spd + 0.3);
       default:
         break;
     }

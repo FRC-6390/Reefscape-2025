@@ -141,7 +141,9 @@ public interface Constants {
         
         int ROLLER = 33;
         // double ENCODER_OFFSET = 0.551025390625;
-        double ENCODER_OFFSET = -0.044921875;
+        // double ENCODER_OFFSET = -0.044921875;
+        double ENCODER_OFFSET = -0.368896484375;
+
         double ENCODER_GEAR_RATIO = 1d/1d; //from motors 125d/1d;
         String CANBUS = "can";
         PIDController CONTORLLER = new PIDController(0.015, 0, 0);
