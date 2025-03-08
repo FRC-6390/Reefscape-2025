@@ -67,7 +67,7 @@ public interface Constants {
                                                                     //   .setVision(RobotVisionConfig.blank().addLimeLights(new LimeLightConfig("limelight-left").setYawRelativeToForwards(-90)));
                                                                     // .setVision(RobotVisionConfig.blank().addPhotonVision(new PhotonVisionConfig("OV9281", new Transform3d(-0.25, -0.27 ,0.98, new Rotation3d()),PoseStrategy.MULTI_TAG_PNP_ON_COPROCESSOR)).addLimeLights(new LimeLightConfig("limelight-left").setYawRelativeToForwards(-90),new LimeLightConfig("limelight-right").setYawRelativeToForwards(90)));
 
-                                                                      .setVision(RobotVisionConfig.blank().addLimeLights(new LimeLightConfig("limelight-left").setYawRelativeToForwards(-90).setPosezestimateType(PoseEstimateWithLatencyType.BOT_POSE_MT2_BLUE),new LimeLightConfig("limelight-right").setYawRelativeToForwards(90).setPosezestimateType(PoseEstimateWithLatencyType.BOT_POSE_MT2_BLUE)));
+                                                                      .setVision(RobotVisionConfig.blank().addLimeLights(new LimeLightConfig("limelight-left").setYawRelativeToForwards(-90).setPoseEstimateType(PoseEstimateWithLatencyType.BOT_POSE_MT2_BLUE),new LimeLightConfig("limelight-right").setYawRelativeToForwards(90).setPoseEstimateType(PoseEstimateWithLatencyType.BOT_POSE_MT2_BLUE)));
     }
 
     public interface Controllers {
