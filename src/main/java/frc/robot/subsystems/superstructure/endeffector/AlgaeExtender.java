@@ -94,22 +94,22 @@ public class AlgaeExtender extends SubsystemBase {
 
   public void update()
   {
-    if(limitSwitchAlgae.getAsBoolean())
-    {
-      motor.setPosition(AlgaeExtenderState.Extended.getSetpoint());
-    }
+    // if(limitSwitchAlgae.getAsBoolean())
+    // {
+    //   motor.setPosition(AlgaeExtenderState.Extended.getSetpoint());
+    // }
 
-    switch (stateMachine.getGoalState()) 
-    {
-      case Home:
-        setMotors(-controller.calculate(getPosition.getValueAsDouble(),AlgaeExtenderState.Home.getSetpoint()));
-        break; 
-      case Extended:
-        double spd = Math.abs(controller.calculate(getPosition.getValueAsDouble(),AlgaeExtenderState.Extended.getSetpoint()));
-        setMotors(spd + 0.3);
-      default:
-        break;
-    }
+    // switch (stateMachine.getGoalState()) 
+    // {
+    //   case Home:
+    //     setMotors(-controller.calculate(getPosition.getValueAsDouble(),AlgaeExtenderState.Home.getSetpoint()));
+    //     break; 
+    //   case Extended:
+    //     double spd = Math.abs(controller.calculate(getPosition.getValueAsDouble(),AlgaeExtenderState.Extended.getSetpoint()));
+    //     setMotors(spd + 0.3);
+    //   default:
+    //     break;
+    // }
   }
 
 

@@ -58,7 +58,7 @@ public interface Constants {
                                                     .setSteerInverted(true)
                                                     .setDriftCorrectionPID(new PIDController(0, 0, 0))
                                                     .setDriftActivationSpeed(0.0)
-                                                    .setCurrentLimit(40);
+                                                    .setCurrentLimit(80);
 //ROT P SHOULD BE 2
         RobotLocalizationConfig LOCALIZATION_CONFIG = new RobotLocalizationConfig().setSlipThresh(0.2).setVision(1, 1, 9999).setAutoPlannerPID(new PIDConstants(5,0,0), new PIDConstants(2,0,0)).setVisionEnabled(false);
 

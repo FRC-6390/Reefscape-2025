@@ -24,7 +24,7 @@ public class ReefScoringPos {
       LimeLight lr = base.getVision().getLimelight("limelight-right");
   
       ReefPole leftPole = ReefPole.getPoleFromID(ll.getAprilTagID(), ll);
-      ReefPole rightPole = ReefPole.getPoleFromID(ll.getAprilTagID(), ll);
+      ReefPole rightPole = ReefPole.getPoleFromID(lr.getAprilTagID(), lr);
       if(leftPole != null)
       {
         currentLL = ll;

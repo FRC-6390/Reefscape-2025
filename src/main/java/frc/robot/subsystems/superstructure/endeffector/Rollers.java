@@ -62,7 +62,7 @@ public class Rollers extends SubsystemBase {
       case Stopped:
       case RunningInverted:
             // motor.set(stateMachine.getGoalStateSetpoint());
-            double side = ReefScoringPos.getLimelightFacing(base).config.table() == "limelight-left" ? -1 : 1;
+            double side = ReefScoringPos.getLimelightFacing(base).config.getTable() == "limelight-left" ? 1 : -1;
             double setpoint = stateMachine.getGoalStateSetpoint() * side;//* base.getCameraFacing(ReefPole.getCenterReef()).config.getYawSin();
             motor.set(!flip ? setpoint : -setpoint);
         break;

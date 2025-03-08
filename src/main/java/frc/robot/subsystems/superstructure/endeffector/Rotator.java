@@ -108,8 +108,8 @@ public class Rotator extends SubsystemBase {
     
     switch (stateMachine.getGoalState()) {
       case L4:
-        double side = ReefScoringPos.getLimelightFacing(base).config.table() == "limelight-left" ? -1 : 1;
-        double setpoint = stateMachine.getGoalStateSetpoint();// * base.getCameraFacing(ReefPole.getCenterReef()).config.getYawSin();
+        double side = ReefScoringPos.getLimelightFacing(base).config.getTable() == "limelight-left" ? 1 : -1;
+        double setpoint = stateMachine.getGoalStateSetpoint()*side;// * base.getCameraFacing(ReefPole.getCenterReef()).config.getYawSin();
         setMotors(controller.calculate(getAngle().getDegrees(), !flip ? setpoint : -setpoint));
       break;
       case Home:

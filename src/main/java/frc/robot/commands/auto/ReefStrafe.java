@@ -5,7 +5,9 @@
 package frc.robot.commands.auto;
 
 import au.grapplerobotics.LaserCan;
+import ca.frc6390.athena.controllers.EnhancedXboxController;
 import ca.frc6390.athena.core.RobotBase;
+import ca.frc6390.athena.sensors.camera.limelight.LimeLight;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.utils.ReefScoringPos;
@@ -14,19 +16,15 @@ import frc.robot.utils.ReefScoringPos.ReefPole;
 /* You should consider using the more terse Command factories API instead https://docs.wpilib.org/en/stable/docs/software/commandbased/organizing-command-based.html#defining-commands */
 public class ReefStrafe extends Command {
   /** Creates a new ReefStrafe. */
-  public LaserCan laserLeft;
-  public LaserCan laserRight;
-  public LaserCan curLas;
   public RobotBase<?> base;
+  public LimeLight limeLight;
   public double speed;
   public boolean isDone = false;
-
-  public ReefStrafe(LaserCan laserLeft, LaserCan laserRight, RobotBase<?> base, double speed) 
+  public  EnhancedXboxController  controller;
+  public ReefStrafe(LaserCan laserLeft, LaserCan laserRight, RobotBase<?> base, double speed, EnhancedXboxController controller ) 
   {
-   this.laserLeft = laserLeft;
-   this.laserRight = laserRight; 
    this.base = base;
-   this.speed = speed;
+   this.speed = speed;  this.controller = controller;
   }
 
   // Called when the command is initially scheduled.
@@ -40,28 +38,17 @@ public class ReefStrafe extends Command {
   @Override
   public void execute() 
   {
-    if(ReefScoringPos.getLimelightFacing(base).config.table() == "limelight-left")
+
+    limeLight = ReefScoringPos.getLimelightFacing(base);
+    if(limeLight.getTargetHorizontalOffset() > 4)
     {
-     curLas = laserLeft; 
+        base.getDrivetrain().getRobotSpeeds().setDriverSpeeds(speed,controller.getLeftY(),0);
     }
-    else
+    else if(limeLight.getTargetHorizontalOffset() < 4)
     {
-      curLas = laserRight;
+        base.getDrivetrain().getRobotSpeeds().setDriverSpeeds(-speed,controller.getLeftY(),0);
     }
 
-    if(curLas.getMeasurement() != null)
-    {
-      if(curLas.getMeasurement().distance_mm > 800)
-      {
-        base.getDrivetrain().getRobotSpeeds().setFeedbackSpeeds(speed,0,0);
-      }
-      else
-      {
-        base.getDrivetrain().getRobotSpeeds().setFeedbackSpeeds(0,0,0);
-        base.getDrivetrain().getRobotSpeeds().stopFeedbackSpeeds();
-        isDone = true;
-      }
-    }
 }
 
   // Called once the command ends or is interrupted.

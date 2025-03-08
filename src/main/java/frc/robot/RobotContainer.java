@@ -220,8 +220,8 @@ public class RobotContainer {
     driverController.leftTrigger.tiggerAt(0.5).onTrue(superstructure.setState(SuperstructureState.AlgaeLow)).onFalse(superstructure.setState(SuperstructureState.AlgaeRetract));
     
     //STRAFING
-    driverController.pov.down.whileTrue(new ReefStrafe(lasLeft, lasRight, robotBase, -1));
-    driverController.pov.down.whileTrue(new ReefStrafe(lasLeft, lasRight, robotBase, 1));
+    driverController.pov.up.whileTrue(new ReefStrafe(lasLeft, lasRight, robotBase, -0.1,driverController));
+    driverController.pov.down.whileTrue(new ReefStrafe(lasLeft, lasRight, robotBase, 0.1,driverController));
 
     // //----------------------------------------------------------DRIVER 2---------------------------------------------------------------//
 

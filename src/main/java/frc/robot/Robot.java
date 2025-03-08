@@ -12,6 +12,7 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import frc.robot.commands.auto.PassiveAlign;
 import frc.robot.subsystems.Superstructure.SuperstructureState;
+import frc.robot.utils.ReefScoringPos;
 
 public class Robot extends TimedRobot {
   private Command m_autonomousCommand;
@@ -25,7 +26,7 @@ public class Robot extends TimedRobot {
   @Override
   public void robotPeriodic() {
     CommandScheduler.getInstance().run();
-    // SmartDashboard.putBoolean("Correct Pose", m_robotContainer.superstructure.closeEnough());
+    SmartDashboard.putString("Facing", ReefScoringPos.getLimelightFacing(m_robotContainer.robotBase).config.getTable());// SmartDashboard.putBoolean("Correct Pose", m_robotContainer.superstructure.closeEnough());
     if(m_robotContainer.lasLeft.getMeasurement() != null) SmartDashboard.putNumber("Las Left",m_robotContainer.lasLeft.getMeasurement().distance_mm);
     if(m_robotContainer.lasRight.getMeasurement() != null) SmartDashboard.putNumber("Las Right",m_robotContainer.lasRight.getMeasurement().distance_mm);
 
