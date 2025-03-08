@@ -6,6 +6,7 @@ package frc.robot;
 
 import com.pathplanner.lib.auto.NamedCommands;
 
+import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -19,13 +20,18 @@ public class Robot extends TimedRobot {
   private final RobotContainer m_robotContainer;
 
   public Robot() {  
-
+    
     m_robotContainer = new RobotContainer();
   }
 
   @Override
   public void robotPeriodic() {
     CommandScheduler.getInstance().run();
+      Pose2d relativePose = m_robotContainer.robotBase.getLocalization().getRelativePose();
+    SmartDashboard.putNumber("X", relativePose.getX());
+    SmartDashboard.putNumber("Y", relativePose.getY());
+    SmartDashboard.putNumber("Angle", relativePose.getRotation().getDegrees());   
+  
     SmartDashboard.putString("Facing", ReefScoringPos.getLimelightFacing(m_robotContainer.robotBase).config.getTable());// SmartDashboard.putBoolean("Correct Pose", m_robotContainer.superstructure.closeEnough());
     if(m_robotContainer.lasLeft.getMeasurement() != null) SmartDashboard.putNumber("Las Left",m_robotContainer.lasLeft.getMeasurement().distance_mm);
     if(m_robotContainer.lasRight.getMeasurement() != null) SmartDashboard.putNumber("Las Right",m_robotContainer.lasRight.getMeasurement().distance_mm);

@@ -75,9 +75,9 @@ public interface Constants {
     }
     public interface Climber {
         int LIMIT_SWITCH = 1;
-        int ENCODER = 40;
-        int LEFT_MOTOR = 31;
-        int RIGHT_MOTOR = 30;
+        int ENCODER = 42;
+        int LEFT_MOTOR = 43;
+        int RIGHT_MOTOR = 44;
         double ENCODER_OFFSET = 0;
         double ENCODER_GEAR_RATIO = 4d/1d;
         String CANBUS = "can";

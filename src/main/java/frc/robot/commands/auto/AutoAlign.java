@@ -10,6 +10,8 @@ import ca.frc6390.athena.core.RobotDrivetrain;
 import ca.frc6390.athena.core.RobotLocalization;
 import ca.frc6390.athena.core.RobotSpeeds.SpeedSource;
 import ca.frc6390.athena.sensors.camera.limelight.LimeLight;
+import edu.wpi.first.math.controller.PIDController;
+import edu.wpi.first.math.filter.MedianFilter;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -33,6 +35,7 @@ public class AutoAlign extends Command {
   public Command event;
   private LaserCan las;
   public double distToTrigger;
+  
 
   public AutoAlign(RobotBase<?> base, LaserCan las, ReefPole pole) {
     this(ReefScoringPos.getLimelightFacing(base), base, las, pole.getApriltagId());

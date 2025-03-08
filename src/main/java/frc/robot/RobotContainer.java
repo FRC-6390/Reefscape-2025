@@ -5,6 +5,7 @@
 package frc.robot;
 
 import java.io.IOException;
+import java.lang.management.ClassLoadingMXBean;
 
 import org.json.simple.parser.ParseException;
 
@@ -35,6 +36,7 @@ import frc.robot.commands.auto.RotateTo;
 import frc.robot.subsystems.Superstructure;
 import frc.robot.subsystems.Superstructure.SuperstructureState;
 import frc.robot.subsystems.superstructure.CANdleSubsystem;
+import frc.robot.subsystems.superstructure.Climber;
 import frc.robot.subsystems.superstructure.Elevator;
 import frc.robot.subsystems.superstructure.Elevator.ElevatorState;
 import frc.robot.subsystems.superstructure.EndEffector;
@@ -119,6 +121,7 @@ public class RobotContainer {
   
   public final RobotBase<SwerveDrivetrain> robotBase = Constants.DriveTrain.ROBOT_BASE.create().shuffleboard();
   public Elevator elevator = new Elevator();
+  public Climber climber = new Climber();
   public EndEffector endEffector = new EndEffector(robotBase).setAutoEndScoring(true);
   public Superstructure superstructure = new Superstructure(elevator, endEffector, robotBase);
   public CANdleSubsystem candle = new CANdleSubsystem(endEffector, superstructure);
@@ -129,11 +132,11 @@ public class RobotContainer {
                                                               .setSticksDeadzone(Constants.Controllers.STICK_DEADZONE)
                                                               .setLeftSlewrate(1.5);
 
-  private final EnhancedXboxController driverController2 = new EnhancedXboxController(1)
-                                                              .setLeftInverted(false)
-                                                              .setRightInverted(false)
-                                                              .setSticksDeadzone(Constants.Controllers.STICK_DEADZONE)
-                                                              .setLeftSlewrate(1.5);
+  // private final EnhancedXboxController driverController2 = new EnhancedXboxController(1)
+  //                                                             .setLeftInverted(false)
+  //                                                             .setRightInverted(false)
+  //                                                             .setSticksDeadzone(Constants.Controllers.STICK_DEADZONE)
+  //                                                             .setLeftSlewrate(1.5);
 
   public SendableChooser<String> chooser = new SendableChooser<>();
   // public Elevate elevate = new Elevate(ElevatorState.Home, lasLeft, lasRight, superstructure, robotBase, elevator);
@@ -159,7 +162,7 @@ public class RobotContainer {
     elevator.shuffleboard("Elevator");
     // elevator.setDefaultCommand(elevate);
     endEffector.shuffleboard("Effector");
-    
+    climber.shuffleboard("climber");
     NamedCommands.registerCommand("Home", superstructure.setState(SuperstructureState.Home));
     NamedCommands.registerCommand("ManualL4", superstructure.setState(SuperstructureState.L4));
     NamedCommands.registerCommand("StartEject", superstructure.setState(SuperstructureState.Score));
@@ -220,24 +223,26 @@ public class RobotContainer {
     driverController.leftTrigger.tiggerAt(0.5).onTrue(superstructure.setState(SuperstructureState.AlgaeLow)).onFalse(superstructure.setState(SuperstructureState.AlgaeRetract));
     
     //STRAFING
-    driverController.pov.up.whileTrue(new ReefStrafe(lasLeft, lasRight, robotBase, -0.1,driverController));
-    driverController.pov.down.whileTrue(new ReefStrafe(lasLeft, lasRight, robotBase, 0.1,driverController));
-
+    driverController.pov.up.whileTrue(new ReefStrafe(robotBase));
+    // driverController.pov.right.onTrue(() -> superstructure.setState(SuperstructureState.L2)).after(1).onTrue(() -> climber.setClimber(10));
+    // driverController.pov.left.onTrue(() -> superstructure.setState(SuperstructureState.L2)).after(1).onTrue(() -> climber.setClimber(0));
+    driverController.pov.right.whileTrue(() -> climber.setMotors(1)).onFalse(() -> climber.setMotors(0.0));
+    driverController.pov.left.whileTrue(() -> climber.setMotors(-1)).onFalse(() -> climber.setMotors(0.0));
+    driverController.pov.down.onTrue(() -> climber.setPosition(0));
     // //----------------------------------------------------------DRIVER 2---------------------------------------------------------------//
 
-    //FLIP EJECTION
-    driverController2.leftBumper.onTrue(() -> {endEffector.getRollers().setFlip(true); endEffector.getRotator().setFlip(true);});
-    driverController2.rightBumper.onTrue(() -> {endEffector.getRollers().setFlip(false); endEffector.getRotator().setFlip(false);});
+    // //FLIP EJECTION
+    // driverController2.leftBumper.onTrue(() -> {endEffector.getRollers().setFlip(true); endEffector.getRotator().setFlip(true);});
+    // driverController2.rightBumper.onTrue(() -> {endEffector.getRollers().setFlip(false); endEffector.getRotator().setFlip(false);});
 
-    //END EFFECTOR OVERRIDE
-    // driverController2.rightBumper.onTrue(superstructure.setState(SuperstructureState.Score));
+    // //END EFFECTOR OVERRIDE
+    // // driverController2.rightBumper.onTrue(superstructure.setState(SuperstructureState.Score));
 
-    //ELEVATOR OVERIDE
-    driverController2.pov.left.onTrue(superstructure.setElevator(ElevatorState.Home));
-    driverController2.pov.up.onTrue(() -> elevator.nudge(1));
-    driverController2.pov.down.onTrue(() -> elevator.nudge(-1));
-  
-    driverController2.start.after(2).onTrue(() -> robotBase.getLocalization().resetFieldPose(new Pose2d(0,0,Rotation2d.fromDegrees(90))));  
+    // //ELEVATOR OVERIDE
+    // driverController2.pov.left.onTrue(superstructure.setElevator(ElevatorState.Home));
+    // driverController2.pov.up.onTrue(() -> elevator.nudge(1));
+    // driverController2.pov.down.onTrue(() -> elevator.nudge(-1));
+    // driverController2.start.after(2).onTrue(() -> robotBase.getLocalization().resetFieldPose(new Pose2d(0,0,Rotation2d.fromDegrees(90))));  
     // driverController2.leftBumper.whileTrue(() -> {robotBase.getRobotSpeeds().setAutoSpeeds(new ChassisSpeeds(0,0,0)); robotBase.getRobotSpeeds().stopAutoSpeeds();});
   }
 
