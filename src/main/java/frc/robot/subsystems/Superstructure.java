@@ -35,6 +35,7 @@ public class Superstructure extends SubsystemBase {
  
 
   private final RunnableTrigger autoDropElevatorTrigger;
+ 
   private boolean autoDropElevator = true;
   private boolean endEffectorEnabled = true;
   private boolean elevatorEnabled = true;

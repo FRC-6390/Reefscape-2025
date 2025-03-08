@@ -13,6 +13,7 @@ import ca.frc6390.athena.sensors.camera.limelight.LimeLight.PoseEstimateType;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
+import frc.robot.utils.ReefScoringPos;
 import frc.robot.utils.ReefScoringPos.ReefPole;
 
 /* You should consider using the more terse Command factories API instead https://docs.wpilib.org/en/stable/docs/software/commandbased/organizing-command-based.html#defining-commands */
@@ -36,7 +37,7 @@ public class PassiveAlign extends Command {
   @Override
   public void initialize() 
   {
-    limeLight = base.getCameraFacing(ReefPole.getCenterReef());
+    limeLight = ReefScoringPos.getLimelightFacing(base);
     rotationFiltered =  new FilteredValue(() -> limeLight.getPoseEstimate(PoseEstimateType.TARGET_POSE_ROBOT_SPACE).getRaw()[4])
     .addMovingAverage(10)
     .addMedianFilter(15);

@@ -1,16 +1,41 @@
 package frc.robot.utils;
 
 import com.pathplanner.lib.path.PathPlannerPath;
+
+import ca.frc6390.athena.core.RobotBase;
 import ca.frc6390.athena.sensors.camera.limelight.LimeLight;
+import ca.frc6390.athena.sensors.camera.limelight.LimeLightConfig;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import frc.robot.Robot;
+import frc.robot.RobotContainer;
 import frc.robot.RobotContainer.PATHS;
 
 public class ReefScoringPos {
+
+    public static LimeLight currentLL = new LimeLight(new LimeLightConfig("limelight-left"));
+
+    public static LimeLight getLimelightFacing(RobotBase<?> base)
+    {
+      LimeLight ll = base.getVision().getLimelight("limelight-left");
+      LimeLight lr = base.getVision().getLimelight("limelight-right");
+  
+      ReefPole leftPole = ReefPole.getPoleFromID(ll.getAprilTagID(), ll);
+      ReefPole rightPole = ReefPole.getPoleFromID(ll.getAprilTagID(), ll);
+      if(leftPole != null)
+      {
+        currentLL = ll;
+      }
+      if(rightPole != null)
+      {
+        currentLL = lr;
+      }
+  
+      return currentLL;
+    }
 
     private final ReefLevel level;
     private final ReefPole side;

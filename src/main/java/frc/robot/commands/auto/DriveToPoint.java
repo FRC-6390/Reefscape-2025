@@ -10,6 +10,7 @@ import ca.frc6390.athena.sensors.camera.limelight.LimeLight;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
+import frc.robot.utils.ReefScoringPos;
 import frc.robot.utils.ReefScoringPos.ReefPole;
 
 public class DriveToPoint extends Command {
@@ -26,7 +27,7 @@ public class DriveToPoint extends Command {
   public void initialize() 
   {
     isDone = false;
-    limeLight = robotBase.getCameraFacing(ReefPole.getCenterReef());
+    limeLight = ReefScoringPos.getLimelightFacing(robotBase);
   }
 
   @Override

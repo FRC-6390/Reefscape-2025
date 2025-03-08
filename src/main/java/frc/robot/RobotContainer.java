@@ -14,6 +14,7 @@ import com.pathplanner.lib.path.PathPlannerPath;
 import com.pathplanner.lib.util.FileVersionException;
 
 import au.grapplerobotics.LaserCan;
+import frc.robot.commands.auto.ReefStrafe;
 import ca.frc6390.athena.controllers.EnhancedXboxController;
 import ca.frc6390.athena.core.RobotBase;
 import ca.frc6390.athena.drivetrains.swerve.SwerveDrivetrain;
@@ -219,16 +220,8 @@ public class RobotContainer {
     driverController.leftTrigger.tiggerAt(0.5).onTrue(superstructure.setState(SuperstructureState.AlgaeLow)).onFalse(superstructure.setState(SuperstructureState.AlgaeRetract));
     
     //STRAFING
-    // driverController.pov.up.whileTrue(new RelativeMove(robotBase, 0,-0.15,0)).onFalse(() -> robotBase.getRobotSpeeds().stopFeedbackSpeeds());
-    // driverController.pov.down.whileTrue(new RelativeMove(robotBase, 0,0.15,0)).onFalse(() -> robotBase.getRobotSpeeds().stopFeedbackSpeeds());
-    // driverController.pov.left.whileTrue(new RelativeMove(robotBase, 0.15,0,0)).onFalse(() -> robotBase.getRobotSpeeds().stopFeedbackSpeeds());
-    // driverController.pov.right.whileTrue(new RelativeMove(robotBase, -0.15, 0,0)).onFalse(() -> robotBase.getRobotSpeeds().stopFeedbackSpeeds());
-    
-    driverController.pov.left.whileTrue(() -> robotBase.getRobotSpeeds().setFeedbackSpeeds(0,-0.1,0)).onFalse(() -> robotBase.getRobotSpeeds().stopFeedbackSpeeds());
-
-    driverController.pov.right.whileTrue(() -> robotBase.getRobotSpeeds().setFeedbackSpeeds(0,0.1,0)).onFalse(() -> robotBase.getRobotSpeeds().stopFeedbackSpeeds());
-    driverController.pov.down.whileTrue(() -> robotBase.getRobotSpeeds().setFeedbackSpeeds(-0.1,0,0)).onFalse(() -> robotBase.getRobotSpeeds().stopFeedbackSpeeds());
-    driverController.pov.up.whileTrue(() -> robotBase.getRobotSpeeds().setFeedbackSpeeds(0.1,0,0)).onFalse(() -> robotBase.getRobotSpeeds().stopFeedbackSpeeds());
+    driverController.pov.down.whileTrue(new ReefStrafe(lasLeft, lasRight, robotBase, -1));
+    driverController.pov.down.whileTrue(new ReefStrafe(lasLeft, lasRight, robotBase, 1));
 
     // //----------------------------------------------------------DRIVER 2---------------------------------------------------------------//
 

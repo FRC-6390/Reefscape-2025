@@ -11,6 +11,7 @@ import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardLayout;
 import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
+import frc.robot.utils.ReefScoringPos;
 import frc.robot.utils.ReefScoringPos.ReefPole;
 
 public class Rollers extends SubsystemBase {
@@ -61,16 +62,8 @@ public class Rollers extends SubsystemBase {
       case Stopped:
       case RunningInverted:
             // motor.set(stateMachine.getGoalStateSetpoint());
-            double setpoint = stateMachine.getGoalStateSetpoint();
-            if(DriverStation.isAutonomousEnabled())
-            {
-             setpoint = stateMachine.getGoalStateSetpoint()* base.getCameraFacing(ReefPole.getCenterReef()).config.getYawSin();
-            }
-            else
-            {
-               setpoint = stateMachine.getGoalStateSetpoint();//* base.getCameraFacing(ReefPole.getCenterReef()).config.getYawSin();
-
-            }
+            double side = ReefScoringPos.getLimelightFacing(base).config.table() == "limelight-left" ? -1 : 1;
+            double setpoint = stateMachine.getGoalStateSetpoint() * side;//* base.getCameraFacing(ReefPole.getCenterReef()).config.getYawSin();
             motor.set(!flip ? setpoint : -setpoint);
         break;
       case Algae:

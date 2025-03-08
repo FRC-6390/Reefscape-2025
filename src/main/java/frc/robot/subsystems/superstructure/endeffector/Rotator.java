@@ -19,6 +19,7 @@ import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardLayout;
 import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
+import frc.robot.utils.ReefScoringPos;
 import frc.robot.utils.ReefScoringPos.ReefPole;
 
 public class Rotator extends SubsystemBase {
@@ -107,15 +108,8 @@ public class Rotator extends SubsystemBase {
     
     switch (stateMachine.getGoalState()) {
       case L4:
-        double setpoint = stateMachine.getGoalStateSetpoint();
-        if(DriverStation.isAutonomousEnabled())
-        {
-         setpoint = stateMachine.getGoalStateSetpoint() * base.getCameraFacing(ReefPole.getCenterReef()).config.getYawSin();
-        }
-        else
-        {
-        setpoint = stateMachine.getGoalStateSetpoint(); //* base.getCameraFacing(ReefPole.getCenterReef()).config.getYawSin();
-        }
+        double side = ReefScoringPos.getLimelightFacing(base).config.table() == "limelight-left" ? -1 : 1;
+        double setpoint = stateMachine.getGoalStateSetpoint();// * base.getCameraFacing(ReefPole.getCenterReef()).config.getYawSin();
         setMotors(controller.calculate(getAngle().getDegrees(), !flip ? setpoint : -setpoint));
       break;
       case Home:
