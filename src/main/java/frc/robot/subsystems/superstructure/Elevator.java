@@ -66,9 +66,9 @@ public class Elevator extends SubsystemBase{
 
   public Elevator() 
   {
-    encoder = new CANcoder(Constants.Elevator.ENCODER, Constants.Elevator.CANBUS);
-    leftMotor = new TalonFX(Constants.Elevator.LEFT_MOTOR, Constants.Elevator.CANBUS);
-    rightMotor = new TalonFX(Constants.Elevator.RIGHT_MOTOR, Constants.Elevator.CANBUS);
+    encoder = new CANcoder(Constants.Elevator.ENCODER, Constants.CANIVORE_CANBUS);
+    leftMotor = new TalonFX(Constants.Elevator.LEFT_MOTOR, Constants.CANIVORE_CANBUS);
+    rightMotor = new TalonFX(Constants.Elevator.RIGHT_MOTOR, Constants.CANIVORE_CANBUS);
     getPosition = encoder.getPosition();
     getVelocity = encoder.getVelocity();
     lowerlimitSwitch = new GenericLimitSwitch(Constants.Elevator.LIMIT_SWITCH);

@@ -46,7 +46,7 @@ public class Rollers extends SubsystemBase {
   public Rollers(RobotBase<?> base) 
   {
       this.base = base;
-      motor = new TalonFX(Constants.EndEffector.ROLLER, Constants.EndEffector.CANBUS);
+      motor = new TalonFX(Constants.EndEffector.ROLLER, Constants.CANIVORE_CANBUS);
       stateMachine = new StateMachine<Double, Rollers.RollerState>(RollerState.Stopped, () -> true);
   }
 

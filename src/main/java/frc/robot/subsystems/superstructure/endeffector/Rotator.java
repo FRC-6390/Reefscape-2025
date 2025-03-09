@@ -55,8 +55,8 @@ public class Rotator extends SubsystemBase {
   public Rotator(RobotBase<?> base) 
   {
       this.base = base;
-      motor = new TalonFX(Constants.EndEffector.MOTOR, Constants.EndEffector.CANBUS);
-      encoder = new CANcoder(Constants.EndEffector.ENCODER, Constants.EndEffector.CANBUS);
+      motor = new TalonFX(Constants.EndEffector.MOTOR, Constants.CANIVORE_CANBUS);
+      encoder = new CANcoder(Constants.EndEffector.ENCODER, Constants.CANIVORE_CANBUS);
       
 
       getAbsolutePosition = encoder.getAbsolutePosition();

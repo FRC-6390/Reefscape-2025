@@ -18,7 +18,7 @@ public class CANdleSubsystem extends SubsystemBase {
   {
     this.effector = effector;
     this.superstructure = superstructure;
-    this.candle = new CANdle(Constants.EndEffector.CANDLE_ID, Constants.EndEffector.CANBUS);
+    this.candle = new CANdle(Constants.EndEffector.CANDLE_ID, Constants.CANIVORE_CANBUS);
   }
 
   @Override

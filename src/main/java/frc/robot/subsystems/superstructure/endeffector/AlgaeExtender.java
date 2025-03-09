@@ -45,7 +45,7 @@ public class AlgaeExtender extends SubsystemBase {
   public AlgaeExtender() 
   {
       limitSwitchAlgae = new GenericLimitSwitch(Constants.EndEffector.LIMIT_SWITCH);
-      motor = new TalonFX(Constants.EndEffector.ALGAE_MOTOR, Constants.EndEffector.CANBUS);
+      motor = new TalonFX(Constants.EndEffector.ALGAE_MOTOR, Constants.CANIVORE_CANBUS);
 
       getPosition = motor.getRotorPosition();
 

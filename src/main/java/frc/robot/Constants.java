@@ -1,17 +1,16 @@
 package frc.robot;
 
-import com.pathplanner.lib.config.PIDConstants;
-
 import ca.frc6390.athena.core.RobotBase.RobotBaseConfig;
-import ca.frc6390.athena.core.RobotDrivetrain.RobotDriveTrainIDs.DrivetrainIDs;
 import ca.frc6390.athena.core.RobotLocalization.RobotLocalizationConfig;
-import ca.frc6390.athena.core.RobotVision.RobotVisionConfig;
 import ca.frc6390.athena.devices.Encoder.EncoderType;
 import ca.frc6390.athena.devices.IMU.IMUType;
 import ca.frc6390.athena.devices.MotorController.Motor;
 import ca.frc6390.athena.drivetrains.swerve.SwerveDrivetrain;
-import ca.frc6390.athena.drivetrains.swerve.SwerveDrivetrain.SwerveDrivetrainConfig;
+import ca.frc6390.athena.drivetrains.swerve.SwerveDrivetrainConfig;
 import ca.frc6390.athena.drivetrains.swerve.modules.SwerveVendorSDS;
+import ca.frc6390.athena.mechanisms.Mechanism.MechanismConfig;
+import ca.frc6390.athena.mechanisms.Mechanism.StatefulMechanism;
+import ca.frc6390.athena.mechanisms.StateMachine.SetpointProvider;
 import ca.frc6390.athena.sensors.camera.limelight.LimeLight.PoseEstimateWithLatencyType;
 import ca.frc6390.athena.sensors.camera.limelight.LimeLightConfig;
 import edu.wpi.first.math.controller.ElevatorFeedforward;
@@ -19,55 +18,38 @@ import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.controller.ProfiledPIDController;
 import edu.wpi.first.math.trajectory.TrapezoidProfile.Constraints;
 import edu.wpi.first.math.util.Units;
+import frc.robot.subsystems.superstructure.EndEffector.EndEffectorTuple;
 
 public interface Constants {
     
+    String CANIVORE_CANBUS = "can";
     public interface DriveTrain {
+
         double TRACKWIDTH_METERS = Units.inchesToMeters(18.375); 
-
-        String CANBUS = "can";
-
-        // SAM OFFSETS
-        // double[] ENCODER_OFFSETS = {0.697,3.123,2.445,-0.851};
-
-        // OLD SIREN OFFSETS
-        // double[] ENCODER_OFFSETS = {0.7294921875, 0.599609375,0.6860351562500001, 0.8649902343749999};
-
-        // NEW SIREN OFFSTS
+        
         double[] ENCODER_OFFSETS = {0.23535156250000003,0.09350585937499999,0.19873046875000003,0.361572265625};
         
-        //OTHER WAY
-        // double[] ENCODER_OFFSETS = {-0.86669921875, -0.19970703125,-0.67333984375,-0.880126953125};
-        
-        //REQUIRES INVERSION OF TWO MOTORS
-        // double[] ENCODER_OFFSETS = {-0.366943359375, -0.19970703125,-0.176513671875,-0.880126953125};
-        
-        SwerveDrivetrainConfig DRIVETRAIN_CONFIG = new SwerveDrivetrainConfig(IMUType.CTREPigeon2, false)
-                                                    .custom(
-                                                            SwerveVendorSDS.MK4n.L1_PLUS.config(Motor.KRAKEN_X60, EncoderType.CTRECANcoder).setPID(new PIDController(0.45,0,0)), 
-                                                            SwerveVendorSDS.MK4n.L1_PLUS.config(Motor.KRAKEN_X60,EncoderType.CTRECANcoder).setPID(new PIDController(0.45, 0, 0)), 
-                                                            SwerveVendorSDS.MK4i.L1_PLUS.config(Motor.KRAKEN_X60,EncoderType.CTRECANcoder).setPID(new PIDController(0.5 , 0,0)), 
-                                                            SwerveVendorSDS.MK4i.L1_PLUS.config(Motor.KRAKEN_X60,EncoderType.CTRECANcoder).setPID(new PIDController(0.5 , 0,0))
+        SwerveDrivetrainConfig DRIVETRAIN_CONFIG = SwerveDrivetrainConfig.defualt(TRACKWIDTH_METERS)
+                                                    .setIMU(IMUType.CTREPigeon2, false)
+                                                    .modules(
+                                                            SwerveVendorSDS.MK4n.L1_PLUS.config(Motor.KRAKEN_X60,EncoderType.CTRECANcoder).setP(0.45), 
+                                                            SwerveVendorSDS.MK4n.L1_PLUS.config(Motor.KRAKEN_X60,EncoderType.CTRECANcoder).setP(0.45), 
+                                                            SwerveVendorSDS.MK4i.L1_PLUS.config(Motor.KRAKEN_X60,EncoderType.CTRECANcoder).setP(0.5), 
+                                                            SwerveVendorSDS.MK4i.L1_PLUS.config(Motor.KRAKEN_X60,EncoderType.CTRECANcoder).setP(0.5)
                                                             )   
-                                                    .setModuleLocations(TRACKWIDTH_METERS)
-                                                    .setIDs(DrivetrainIDs.SWERVE_CHASSIS_STANDARD)
-                                                    .setOffsets(ENCODER_OFFSETS)
-                                                    .setCanbus(CANBUS)
-                                                    .setDriveInverted(false)
-                                                    .setFieldRelative(false)
-                                                    .setSteerInverted(true)
-                                                    .setDriftCorrectionPID(new PIDController(0, 0, 0))
-                                                    .setDriftActivationSpeed(0.0)
-                                                    .setCurrentLimit(80);
-//ROT P SHOULD BE 2
-        RobotLocalizationConfig LOCALIZATION_CONFIG = new RobotLocalizationConfig().setSlipThresh(0.2).setVision(1, 1, 9999).setAutoPlannerPID(new PIDConstants(5,0,0), new PIDConstants(2,0,0)).setVisionEnabled(false);
+                                                    .setEncoderOffset(ENCODER_OFFSETS)
+                                                    .setCanbus(CANIVORE_CANBUS);
+
+        RobotLocalizationConfig LOCALIZATION_CONFIG = RobotLocalizationConfig.vision(1, 1, 9999)
+                                                            .setAutoPlannerPID(5,0,0, 2,0,0);
 
         RobotBaseConfig<SwerveDrivetrain> ROBOT_BASE = RobotBaseConfig.swerve(DRIVETRAIN_CONFIG)
                                                                       .setLocalization(LOCALIZATION_CONFIG)
-                                                                    //   .setVision(RobotVisionConfig.blank().addLimeLights(new LimeLightConfig("limelight-left").setYawRelativeToForwards(-90)));
-                                                                    // .setVision(RobotVisionConfig.blank().addPhotonVision(new PhotonVisionConfig("OV9281", new Transform3d(-0.25, -0.27 ,0.98, new Rotation3d()),PoseStrategy.MULTI_TAG_PNP_ON_COPROCESSOR)).addLimeLights(new LimeLightConfig("limelight-left").setYawRelativeToForwards(-90),new LimeLightConfig("limelight-right").setYawRelativeToForwards(90)));
-
-                                                                      .setVision(RobotVisionConfig.blank().addLimeLights(new LimeLightConfig("limelight-left").setYawRelativeToForwards(-90).setPoseEstimateType(PoseEstimateWithLatencyType.BOT_POSE_MT2_BLUE),new LimeLightConfig("limelight-right").setYawRelativeToForwards(90).setPoseEstimateType(PoseEstimateWithLatencyType.BOT_POSE_MT2_BLUE)));
+                                                                      .setVision(
+                                                                        LimeLightConfig.table("limelight-left").setYawRelativeToForwards(-90).setPoseEstimateType(PoseEstimateWithLatencyType.BOT_POSE_MT2_BLUE), 
+                                                                        LimeLightConfig.table("limelight-right").setYawRelativeToForwards(90).setPoseEstimateType(PoseEstimateWithLatencyType.BOT_POSE_MT2_BLUE)
+                                                                        // PhotonVisionConfig.table("OV9281").setCameraRobotSpace(new Transform3d(-0.25, -0.27 ,0.98, new Rotation3d())).setPoseStrategy(PoseStrategy.MULTI_TAG_PNP_ON_RIO)
+                                                                        );
     }
 
     public interface Controllers {
@@ -80,24 +62,37 @@ public interface Constants {
         int RIGHT_MOTOR = 44;
         double ENCODER_OFFSET = 0;
         double ENCODER_GEAR_RATIO = 4d/1d;
-        String CANBUS = "can";
         PIDController CONTORLLER = new PIDController(0.015, 0, 0);
 
+        enum ClimberState implements SetpointProvider<Double>{
+            Home(0);
 
-        // MechanismConfig<StatefulMechanism<ClimberState>> CLIMBER_CONFIG = MechanismConfig.statefulGeneric(ClimberState.Home)
-        //                                                                                 .addMotors(Motor.KRAKEN_X60, 30,-31)
-        //                                                                                 .setEncoder(EncoderType.CTRECANcoder, 40)
-        //                                                                                 .setEncoderGearRatio(4d/1d)
-        //                                                                                 .setEncoderConversion(360)
-        //                                                                                 .setEncoderOffset(0)
-        //                                                                                 .setCanbus(CANBUS)
-        //                                                                                 .setPID(0.015, 0, 0)
-        //                                                                                 .addLowerLimitSwitch(0, 0, true);
+            double angle;
+            ClimberState(double angle){
+                this.angle = angle;
+            }
+
+            @Override
+            public Double getSetpoint() {
+               return angle;
+            }
+
+        }
+
+
+        MechanismConfig<StatefulMechanism<ClimberState>> CLIMBER_CONFIG = MechanismConfig.statefulGeneric(ClimberState.Home)
+                                                                                        .addMotors(Motor.KRAKEN_X60, 43, -44)
+                                                                                        .setEncoder(EncoderType.CTRECANcoder, 42)
+                                                                                        .setEncoderGearRatio(4d/1d)
+                                                                                        .setEncoderConversion(360)
+                                                                                        .setCanbus(CANIVORE_CANBUS)
+                                                                                        .setPID(0.015, 0, 0)
+                                                                                        .setCurrentLimit(60);
+                                                                                        // .addLowerLimitSwitch(0, 0, true);
 
     }
 
     public interface Elevator {
-        String CANBUS = "can";
         int ENCODER = 23;
 
         int LEFT_MOTOR = 20;
@@ -145,7 +140,6 @@ public interface Constants {
         double ENCODER_OFFSET = -0.368896484375;
 
         double ENCODER_GEAR_RATIO = 1d/1d; //from motors 125d/1d;
-        String CANBUS = "can";
         PIDController CONTORLLER = new PIDController(0.015, 0, 0);
         // PIDController CONTORLLER = new PIDController(0.005, 0, 0);
 

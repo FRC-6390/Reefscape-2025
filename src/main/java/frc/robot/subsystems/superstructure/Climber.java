@@ -41,8 +41,8 @@ public class Climber extends SubsystemBase {
 
   public Climber() 
   {
-    motorLeft = new TalonFX(Constants.Climber.LEFT_MOTOR, Constants.Climber.CANBUS);
-    motorRight = new TalonFX(Constants.Climber.RIGHT_MOTOR, Constants.Climber.CANBUS);
+    motorLeft = new TalonFX(Constants.Climber.LEFT_MOTOR, Constants.CANIVORE_CANBUS);
+    motorRight = new TalonFX(Constants.Climber.RIGHT_MOTOR, Constants.CANIVORE_CANBUS);
     CurrentLimitsConfigs currentLimitsConfigs = new CurrentLimitsConfigs().withStatorCurrentLimit(60);
     currentLimitsConfigs.StatorCurrentLimitEnable = true;
    
