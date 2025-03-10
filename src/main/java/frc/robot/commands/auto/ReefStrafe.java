@@ -94,7 +94,7 @@ public class ReefStrafe extends Command {
     double rSpeed = rcontroller.calculate(thetaMeasurement, 0);
     SmartDashboard.putNumber("Xspeed", Xspeed);
     SmartDashboard.putNumber("Yspeed", YSpeed);
-    // base.getDrivetrain().getRobotSpeeds().setFeedbackSpeeds(YSpeed, Xspeed, rSpeed);
+    base.getDrivetrain().getRobotSpeeds().setFeedbackSpeeds(0, 0, rSpeed);
   }
 
   // Called once the command ends or is interrupted.

@@ -28,11 +28,7 @@ public class Robot extends TimedRobot {
   public void robotPeriodic() {
     CommandScheduler.getInstance().run();
       Pose2d relativePose = m_robotContainer.robotBase.getLocalization().getRelativePose();
-    SmartDashboard.putNumber("X", relativePose.getX());
-    SmartDashboard.putNumber("Y", relativePose.getY());
-    SmartDashboard.putNumber("Angle", relativePose.getRotation().getDegrees());   
-  
-    SmartDashboard.putString("Facing", ReefScoringPos.getLimelightFacing(m_robotContainer.robotBase).config.getTable());// SmartDashboard.putBoolean("Correct Pose", m_robotContainer.superstructure.closeEnough());
+    SmartDashboard.putNumber("Skew", m_robotContainer.robotBase.getVision().getLimelight("limelight-right").getTargetSkew());
     if(m_robotContainer.lasLeft.getMeasurement() != null) SmartDashboard.putNumber("Las Left",m_robotContainer.lasLeft.getMeasurement().distance_mm);
     if(m_robotContainer.lasRight.getMeasurement() != null) SmartDashboard.putNumber("Las Right",m_robotContainer.lasRight.getMeasurement().distance_mm);
 

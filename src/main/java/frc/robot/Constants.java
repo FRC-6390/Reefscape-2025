@@ -1,14 +1,17 @@
 package frc.robot;
 
 import ca.frc6390.athena.core.RobotBase.RobotBaseConfig;
+import ca.frc6390.athena.core.RobotDrivetrain.RobotDrivetrainIDs.DrivetrainIDs;
 import ca.frc6390.athena.core.RobotLocalization.RobotLocalizationConfig;
-import ca.frc6390.athena.devices.Encoder.EncoderType;
+import ca.frc6390.athena.devices.EncoderConfig.EncoderType;
 import ca.frc6390.athena.devices.IMU.IMUType;
 import ca.frc6390.athena.devices.MotorController.Motor;
+import ca.frc6390.athena.devices.MotorControllerConfig.MotorControllerType;
+import ca.frc6390.athena.devices.MotorControllerConfig.MotorNeutralMode;
 import ca.frc6390.athena.drivetrains.swerve.SwerveDrivetrain;
 import ca.frc6390.athena.drivetrains.swerve.SwerveDrivetrainConfig;
 import ca.frc6390.athena.drivetrains.swerve.modules.SwerveVendorSDS;
-import ca.frc6390.athena.mechanisms.Mechanism.MechanismConfig;
+import ca.frc6390.athena.mechanisms.MechanismConfig;
 import ca.frc6390.athena.mechanisms.Mechanism.StatefulMechanism;
 import ca.frc6390.athena.mechanisms.StateMachine.SetpointProvider;
 import ca.frc6390.athena.sensors.camera.limelight.LimeLight.PoseEstimateWithLatencyType;
@@ -31,6 +34,7 @@ public interface Constants {
         
         SwerveDrivetrainConfig DRIVETRAIN_CONFIG = SwerveDrivetrainConfig.defualt(TRACKWIDTH_METERS)
                                                     .setIMU(IMUType.CTREPigeon2, false)
+                                                    .setIds(DrivetrainIDs.SWERVE_CHASSIS_STANDARD)
                                                     .modules(
                                                             SwerveVendorSDS.MK4n.L1_PLUS.config(Motor.KRAKEN_X60,EncoderType.CTRECANcoder).setP(0.45), 
                                                             SwerveVendorSDS.MK4n.L1_PLUS.config(Motor.KRAKEN_X60,EncoderType.CTRECANcoder).setP(0.45), 
@@ -81,15 +85,14 @@ public interface Constants {
 
 
         MechanismConfig<StatefulMechanism<ClimberState>> CLIMBER_CONFIG = MechanismConfig.statefulGeneric(ClimberState.Home)
-                                                                                        .addMotors(Motor.KRAKEN_X60, 43, -44)
-                                                                                        .setEncoder(EncoderType.CTRECANcoder, 42)
-                                                                                        .setEncoderGearRatio(4d/1d)
+                                                                                        .addMotors(Motor.KRAKEN_X60, 24, -26)
+                                                                                        .setEncoderFromMotor(24)
+                                                                                        .setNeutralMode(MotorNeutralMode.Brake)
+                                                                                        .setEncoderGearRatio(1d/4d)
                                                                                         .setEncoderConversion(360)
                                                                                         .setCanbus(CANIVORE_CANBUS)
                                                                                         .setPID(0.015, 0, 0)
                                                                                         .setCurrentLimit(60);
-                                                                                        // .addLowerLimitSwitch(0, 0, true);
-
     }
 
     public interface Elevator {

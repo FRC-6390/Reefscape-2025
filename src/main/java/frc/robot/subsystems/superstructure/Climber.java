@@ -49,7 +49,7 @@ public class Climber extends SubsystemBase {
 
     motorLeft.getConfigurator().apply(currentLimitsConfigs);
     motorRight.getConfigurator().apply(currentLimitsConfigs);
-    encoder = new CANcoder(Constants.Climber.ENCODER);
+    encoder = new CANcoder(Constants.Climber.ENCODER,Constants.CANIVORE_CANBUS);
     encoder.setPosition(0);
     controller = new PIDController(0.1, 0, 0);
     getPosition = encoder.getPosition();

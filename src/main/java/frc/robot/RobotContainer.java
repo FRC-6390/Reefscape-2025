@@ -34,7 +34,6 @@ import frc.robot.subsystems.superstructure.Elevator;
 import frc.robot.subsystems.superstructure.Elevator.ElevatorState;
 import frc.robot.subsystems.superstructure.EndEffector;
 
-
 public class RobotContainer {
 
 
@@ -42,13 +41,13 @@ public class RobotContainer {
   public final LaserCan lasRight = new LaserCan(0);
   
   public final RobotBase<SwerveDrivetrain> robotBase = Constants.DriveTrain.ROBOT_BASE.create().shuffleboard();
-  public final StatefulMechanism<ClimberState> climberTest = Constants.Climber.CLIMBER_CONFIG.create();
+  public final StatefulMechanism<ClimberState> climberTest = Constants.Climber.CLIMBER_CONFIG.build().shuffleboard("Climber Test");
 
-  public Elevator elevator = new Elevator();
-  public Climber climber = new Climber();
-  public EndEffector endEffector = new EndEffector(robotBase).setAutoEndScoring(true);
-  public Superstructure superstructure = new Superstructure(elevator, endEffector, robotBase);
-  public CANdleSubsystem candle = new CANdleSubsystem(endEffector, superstructure);
+  // public Elevator elevator = new Elevator();
+  // public Climber climber = new Climber();
+  // public EndEffector endEffector = new EndEffector(robotBase).setAutoEndScoring(true);
+  // public Superstructure superstructure = new Superstructure(elevator, endEffector, robotBase);
+  // public CANdleSubsystem candle = new CANdleSubsystem(endEffector, superstructure);
 
   private final EnhancedXboxController driverController = new EnhancedXboxController(0)
                                                               .setLeftInverted(true)
@@ -64,24 +63,26 @@ public class RobotContainer {
   public RobotContainer() 
   {
     configureBindings();
-    robotBase.getDrivetrain().setDriveCommand(driverController);
+    // robotBase.getDrivetrain().setDriveCommand(driverController);
 
     SmartDashboard.putData(chooser);
-    elevator.shuffleboard("Elevator");
+    // elevator.shuffleboard("Elevator");
     // elevator.setDefaultCommand(elevate);
-    endEffector.shuffleboard("Effector");
-    climber.shuffleboard("climber");
+    // endEffector.shuffleboard("Effector");
+    // climber.shuffleboard("climber");
     
-    NamedCommands.registerCommand("Home", superstructure.setState(SuperstructureState.Home));
-    NamedCommands.registerCommand("ManualL4", superstructure.setState(SuperstructureState.L4));
-    NamedCommands.registerCommand("StartEject", superstructure.setState(SuperstructureState.Score));
-    NamedCommands.registerCommand("WaitForElevator",Commands.race( new AtState(superstructure), new WaitCommand(3)));
-    NamedCommands.registerCommand("WaitForEjector", Commands.race( new AtStateEjector(endEffector), new WaitCommand(3)));
+    // NamedCommands.registerCommand("Home", superstructure.setState(SuperstructureState.Home));
+    // NamedCommands.registerCommand("ManualL4", superstructure.setState(SuperstructureState.L4));
+    // NamedCommands.registerCommand("StartEject", superstructure.setState(SuperstructureState.Score));
+    // NamedCommands.registerCommand("WaitForElevator",Commands.race( new AtState(superstructure), new WaitCommand(3)));
+    // NamedCommands.registerCommand("WaitForEjector", Commands.race( new AtStateEjector(endEffector), new WaitCommand(3)));
     NamedCommands.registerCommand("RotateToRight",new RotateTo(robotBase,Rotation2d.fromRadians(-0.49333207719329186)));
     NamedCommands.registerCommand("RotateToLeft", new RotateTo(robotBase,Rotation2d.fromRadians(-2.575148734982150)));
     NamedCommands.registerCommand("RotateToMid", new RotateTo(robotBase,Rotation2d.fromRadians(-1.601756394242849)));
 
     chooser = Autos.AUTOS.createChooser(AUTOS.PRELOADLEFT);
+    climberTest.setPidEnabled(false);
+    climberTest.setFeedforwardEnabled(false);
   }
 
   private void configureBindings() 
@@ -114,43 +115,43 @@ public class RobotContainer {
     // //AUTO ALIGN (RIGHT BUMPER)
     
     // //EJECT PIECE MANUALLY
-    driverController.rightBumper.whileTrue(superstructure.setState(SuperstructureState.Score));
-    driverController.leftBumper.whileTrue(superstructure.setState(SuperstructureState.Score));
+    // driverController.rightBumper.whileTrue(superstructure.setState(SuperstructureState.Score));
+    // driverController.leftBumper.whileTrue(superstructure.setState(SuperstructureState.Score));
 
     
     // //SCORING COMMANDS
-    driverController.a.onTrue(superstructure.setState(SuperstructureState.Home));
-    driverController.b.onTrue(superstructure.setState(SuperstructureState.L2));
-    driverController.x.onTrue(superstructure.setState(SuperstructureState.L3));
-    driverController.y.onTrue(superstructure.setState(SuperstructureState.L4));
+    // driverController.a.onTrue(superstructure.setState(SuperstructureState.Home));
+    // driverController.b.onTrue(superstructure.setState(SuperstructureState.L2));
+    // driverController.x.onTrue(superstructure.setState(SuperstructureState.L3));
+    // driverController.y.onTrue(superstructure.setState(SuperstructureState.L4));
 
     // //ALGAE REMOVAL SEQUENCE
-    driverController.rightTrigger.tiggerAt(0.5).onTrue(superstructure.setState(SuperstructureState.AlgaeHigh)).onFalse(superstructure.setState(SuperstructureState.AlgaeRetract));
-    driverController.leftTrigger.tiggerAt(0.5).onTrue(superstructure.setState(SuperstructureState.AlgaeLow)).onFalse(superstructure.setState(SuperstructureState.AlgaeRetract));
+    // driverController.rightTrigger.tiggerAt(0.5).onTrue(superstructure.setState(SuperstructureState.AlgaeHigh)).onFalse(superstructure.setState(SuperstructureState.AlgaeRetract));
+    // driverController.leftTrigger.tiggerAt(0.5).onTrue(superstructure.setState(SuperstructureState.AlgaeLow)).onFalse(superstructure.setState(SuperstructureState.AlgaeRetract));
     
     //STRAFING
     driverController.pov.up.whileTrue(new ReefStrafe(robotBase));
     // driverController.pov.right.onTrue(() -> superstructure.setState(SuperstructureState.L2)).after(1).onTrue(() -> climber.setClimber(10));
     // driverController.pov.left.onTrue(() -> superstructure.setState(SuperstructureState.L2)).after(1).onTrue(() -> climber.setClimber(0));
-    driverController.pov.right.whileTrue(() -> climberTest.setMotors(1)).onFalse(() -> climberTest.setMotors(0.0));
-    driverController.pov.left.whileTrue(() -> climberTest.setMotors(-1)).onFalse(() -> climberTest.setMotors(0.0));
+    driverController.pov.right.whileTrue(() -> climberTest.setMotors(0.5)).onFalse(() -> climberTest.setMotors(0.0));
+    driverController.pov.left.whileTrue(() -> climberTest.setMotors(-0.5)).onFalse(() -> climberTest.setMotors(0.0));
     
-    driverController.pov.down.onTrue(() -> climber.setPosition(0));
+    driverController.pov.down.onTrue(() -> climberTest.setEncoderPosition(0));
     // //----------------------------------------------------------DRIVER 2---------------------------------------------------------------//
 
     // //FLIP EJECTION
-    driverController2.leftBumper.onTrue(() -> {endEffector.getRollers().setFlip(true); endEffector.getRotator().setFlip(true);});
-    driverController2.rightBumper.onTrue(() -> {endEffector.getRollers().setFlip(false); endEffector.getRotator().setFlip(false);});
+    // driverController2.leftBumper.onTrue(() -> {endEffector.getRollers().setFlip(true); endEffector.getRotator().setFlip(true);});
+    // driverController2.rightBumper.onTrue(() -> {endEffector.getRollers().setFlip(false); endEffector.getRotator().setFlip(false);});
 
     // //END EFFECTOR OVERRIDE
-    driverController2.rightBumper.onTrue(superstructure.setState(SuperstructureState.Score));
+    // driverController2.rightBumper.onTrue(superstructure.setState(SuperstructureState.Score));
 
     // //ELEVATOR OVERIDE
-    driverController2.pov.left.onTrue(superstructure.setElevator(ElevatorState.Home));
-    driverController2.pov.up.onTrue(() -> elevator.nudge(1));
-    driverController2.pov.down.onTrue(() -> elevator.nudge(-1));
-    driverController2.start.after(2).onTrue(() -> robotBase.getLocalization().resetFieldPose(new Pose2d(0,0,Rotation2d.fromDegrees(90))));  
-    driverController2.leftBumper.whileTrue(() -> {robotBase.getRobotSpeeds().setAutoSpeeds(new ChassisSpeeds(0,0,0)); robotBase.getRobotSpeeds().stopAutoSpeeds();});
+    // driverController2.pov.left.onTrue(superstructure.setElevator(ElevatorState.Home));
+    // driverController2.pov.up.onTrue(() -> elevator.nudge(1));
+    // driverController2.pov.down.onTrue(() -> elevator.nudge(-1));
+    // driverController2.start.after(2).onTrue(() -> robotBase.getLocalization().resetFieldPose(new Pose2d(0,0,Rotation2d.fromDegrees(90))));  
+    // driverController2.leftBumper.whileTrue(() -> {robotBase.getRobotSpeeds().setAutoSpeeds(new ChassisSpeeds(0,0,0)); robotBase.getRobotSpeeds().stopAutoSpeeds();});
   }
 
   public Command getAutonomousCommand() 
