@@ -133,8 +133,8 @@ public class RobotContainer {
     driverController.pov.up.whileTrue(new ReefStrafe(robotBase));
     // driverController.pov.right.onTrue(() -> superstructure.setState(SuperstructureState.L2)).after(1).onTrue(() -> climber.setClimber(10));
     // driverController.pov.left.onTrue(() -> superstructure.setState(SuperstructureState.L2)).after(1).onTrue(() -> climber.setClimber(0));
-    driverController.pov.right.whileTrue(() -> climberTest.setMotors(0.5)).onFalse(() -> climberTest.setMotors(0.0));
-    driverController.pov.left.whileTrue(() -> climberTest.setMotors(-0.5)).onFalse(() -> climberTest.setMotors(0.0));
+    driverController.pov.right.whileTrue(() -> climberTest.setMotors(1)).onFalse(() -> climberTest.setMotors(0.0));
+    driverController.pov.left.whileTrue(() -> climberTest.setMotors(-1)).onFalse(() -> climberTest.setMotors(0.0));
     
     driverController.pov.down.onTrue(() -> climberTest.setEncoderPosition(0));
     // //----------------------------------------------------------DRIVER 2---------------------------------------------------------------//

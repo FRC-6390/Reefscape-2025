@@ -93,6 +93,9 @@ public interface Constants {
                                                                                         .setCanbus(CANIVORE_CANBUS)
                                                                                         .setPID(0.015, 0, 0)
                                                                                         .setCurrentLimit(60);
+                                                                                        // .addLimitSwitch(-4, 0, true ,-1);
+                                                                                       
+
     }
 
     public interface Elevator {
