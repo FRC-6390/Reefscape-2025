@@ -43,6 +43,7 @@ public class RobotContainer {
   public final RobotBase<SwerveDrivetrain> robotBase = Constants.DriveTrain.ROBOT_BASE.create().shuffleboard();
   public final StatefulMechanism<ClimberState> climberTest = Constants.Climber.CLIMBER_CONFIG.build().shuffleboard("Climber Test");
 
+
   // public Elevator elevator = new Elevator();
   // public Climber climber = new Climber();
   // public EndEffector endEffector = new EndEffector(robotBase).setAutoEndScoring(true);

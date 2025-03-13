@@ -12,6 +12,7 @@ import ca.frc6390.athena.drivetrains.swerve.SwerveDrivetrain;
 import ca.frc6390.athena.drivetrains.swerve.SwerveDrivetrainConfig;
 import ca.frc6390.athena.drivetrains.swerve.modules.SwerveVendorSDS;
 import ca.frc6390.athena.mechanisms.MechanismConfig;
+import ca.frc6390.athena.mechanisms.ArmMechanism.StatefulArmMechanism;
 import ca.frc6390.athena.mechanisms.Mechanism.StatefulMechanism;
 import ca.frc6390.athena.mechanisms.StateMachine.SetpointProvider;
 import ca.frc6390.athena.sensors.camera.limelight.LimeLight.PoseEstimateWithLatencyType;
@@ -151,19 +152,58 @@ public interface Constants {
 
         int CANDLE_ID = 22;
 
-        // MechanismConfig<StatefulTurretMechanism<EndEffectorState>> ENDEFFECTOR_CONFIG = MechanismConfig.statefulTurret(new SimpleMotorFeedforward(0, 0,0,0), EndEffectorState.StartConfiguration)
-        //                                                                             .addMotor(Motor.KRAKEN_X60, 31)
-        //                                                                             .setEncoder(EncoderType.CTRECANcoder, 40)
-        //                                                                             .setCanbus(CANBUS)
-        //                                                                             .setEncoderGearRatio(1d/1d)
-        //                                                                             .setEncoderConversion(360d)
-        //                                                                             .setEncoderOffset(0)
-        //                                                                             .setUseEncoderAbsolute(true)
-        //                                                                             .setProfiledPID(0,0,0, new Constraints(0, 0));
+        enum PivotState implements SetpointProvider<Double>{
+            Intaking(0),
+            Home(0),
+            Scoring(0);
 
-        // MechanismConfig<Mechanism> SCORER_CONFIG = MechanismConfig.generic()
+            double angle;
+            PivotState(double angle){
+                this.angle = angle;
+            }
+
+            @Override
+            public Double getSetpoint() {
+               return angle;
+            }
+
+        }
+
+        enum RollerState implements SetpointProvider<Double>{
+            Intaking(1),
+            Stopped(0),
+            Scoring(-1);
+
+            double speed;
+            RollerState(double speed){
+                this.speed = speed;
+            }
+
+            @Override
+            public Double getSetpoint() {
+               return speed;
+            }
+
+        }
+
+        MechanismConfig<StatefulMechanism<PivotState>> PIVOT_CONFIG = MechanismConfig.statefulGeneric(PivotState.Home)
+        .addMotors(Motor.KRAKEN_X60, 24, -26)
+        .setEncoderFromMotor(24)
+        .setNeutralMode(MotorNeutralMode.Brake)
+        .setEncoderGearRatio(1d/4d)
+        .setEncoderConversion(360)
+        .setCanbus(CANIVORE_CANBUS)
+        .setPID(0.015, 0, 0)
+        .setCurrentLimit(60);
+
+        MechanismConfig<StatefulMechanism<RollerState>> ROLLER_CONFIG = MechanismConfig.statefulGeneric(RollerState.Stopped)
+        .addMotors(Motor.KRAKEN_X60, 24, -26)
+        .setCanbus(CANIVORE_CANBUS)
+        .setCurrentLimit(60);
+
+        // echanismConfig<Mechanism> SCORER_CONFIG = MechanismConfig.generic()
                                                                     // .addMotor(Motor.KRAKEN_X60, 32)
-                                                                    // .setCanbus(CANBUS);
+                                                                    // .setCanbus(CANBUS);M
 
 
         // MechanismConfig<Mechanism> ALGEA_CONFIG = MechanismConfig.generic()
