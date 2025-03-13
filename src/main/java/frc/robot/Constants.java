@@ -31,30 +31,44 @@ public interface Constants {
 
         double TRACKWIDTH_METERS = Units.inchesToMeters(18.375); 
         
-        double[] ENCODER_OFFSETS = {0.23535156250000003,0.09350585937499999,0.19873046875000003,0.361572265625};
-        
+        // double[] ENCODER_OFFSETS = {0.23535156250000003,0.09350585937499999,0.19873046875000003,0.361572265625};
+        double[] ENCODER_OFFSETS = {0.863037109375,0.201171875,0.6755371093749999,0.882080078125};
+
+        // SwerveDrivetrainConfig DRIVETRAIN_CONFIG = SwerveDrivetrainConfig.defualt(TRACKWIDTH_METERS)
+        //                                             .setIMU(IMUType.CTREPigeon2, false)
+        //                                             .setIds(DrivetrainIDs.SWERVE_CHASSIS_STANDARD)
+        //                                             .modules(
+        //                                                     SwerveVendorSDS.MK4n.L1_PLUS.config(Motor.KRAKEN_X60,EncoderType.CTRECANcoder).setP(0.45), 
+        //                                                     SwerveVendorSDS.MK4n.L1_PLUS.config(Motor.KRAKEN_X60,EncoderType.CTRECANcoder).setP(0.45), 
+        //                                                     SwerveVendorSDS.MK4i.L1_PLUS.config(Motor.KRAKEN_X60,EncoderType.CTRECANcoder).setP(0.5), 
+        //                                                     SwerveVendorSDS.MK4i.L1_PLUS.config(Motor.KRAKEN_X60,EncoderType.CTRECANcoder).setP(0.5)
+        //                                                     )   
+        //                                             .setEncoderOffset(ENCODER_OFFSETS)
+        //                                             .setCanbus(CANIVORE_CANBUS);
         SwerveDrivetrainConfig DRIVETRAIN_CONFIG = SwerveDrivetrainConfig.defualt(TRACKWIDTH_METERS)
-                                                    .setIMU(IMUType.CTREPigeon2, false)
-                                                    .setIds(DrivetrainIDs.SWERVE_CHASSIS_STANDARD)
-                                                    .modules(
-                                                            SwerveVendorSDS.MK4n.L1_PLUS.config(Motor.KRAKEN_X60,EncoderType.CTRECANcoder).setP(0.45), 
-                                                            SwerveVendorSDS.MK4n.L1_PLUS.config(Motor.KRAKEN_X60,EncoderType.CTRECANcoder).setP(0.45), 
-                                                            SwerveVendorSDS.MK4i.L1_PLUS.config(Motor.KRAKEN_X60,EncoderType.CTRECANcoder).setP(0.5), 
-                                                            SwerveVendorSDS.MK4i.L1_PLUS.config(Motor.KRAKEN_X60,EncoderType.CTRECANcoder).setP(0.5)
-                                                            )   
-                                                    .setEncoderOffset(ENCODER_OFFSETS)
-                                                    .setCanbus(CANIVORE_CANBUS);
+        .setIMU(IMUType.CTREPigeon2, false)
+        .setIds(DrivetrainIDs.SWERVE_CHASSIS_STANDARD)
+        .modules(
+                SwerveVendorSDS.MK4i.L3.config(Motor.KRAKEN_X60,EncoderType.CTRECANcoder).setP(0.45),
+                SwerveVendorSDS.MK4i.L3.config(Motor.KRAKEN_X60,EncoderType.CTRECANcoder).setP(0.45),
+                SwerveVendorSDS.MK4i.L3.config(Motor.KRAKEN_X60,EncoderType.CTRECANcoder).setP(0.45),
+                SwerveVendorSDS.MK4i.L3.config(Motor.KRAKEN_X60,EncoderType.CTRECANcoder).setP(0.45)
+                )   
+        .setEncoderOffset(ENCODER_OFFSETS)
+        .setCanbus(CANIVORE_CANBUS);
 
         RobotLocalizationConfig LOCALIZATION_CONFIG = RobotLocalizationConfig.vision(1, 1, 9999)
                                                             .setAutoPlannerPID(5,0,0, 2,0,0);
-
+        LimeLightConfig[] LIMELIGHTS = {                                                                 LimeLightConfig.table("limelight-left").setYawRelativeToForwards(-90).setPoseEstimateType(PoseEstimateWithLatencyType.BOT_POSE_MT2_BLUE), 
+        LimeLightConfig.table("limelight-right").setYawRelativeToForwards(90).setPoseEstimateType(PoseEstimateWithLatencyType.BOT_POSE_MT2_BLUE)};
         RobotBaseConfig<SwerveDrivetrain> ROBOT_BASE = RobotBaseConfig.swerve(DRIVETRAIN_CONFIG)
                                                                       .setLocalization(LOCALIZATION_CONFIG)
                                                                       .setVision(
-                                                                        LimeLightConfig.table("limelight-left").setYawRelativeToForwards(-90).setPoseEstimateType(PoseEstimateWithLatencyType.BOT_POSE_MT2_BLUE), 
-                                                                        LimeLightConfig.table("limelight-right").setYawRelativeToForwards(90).setPoseEstimateType(PoseEstimateWithLatencyType.BOT_POSE_MT2_BLUE)
-                                                                        // PhotonVisionConfig.table("OV9281").setCameraRobotSpace(new Transform3d(-0.25, -0.27 ,0.98, new Rotation3d())).setPoseStrategy(PoseStrategy.MULTI_TAG_PNP_ON_RIO)
+                                                                        LIMELIGHTS[0],
+                                                                        LIMELIGHTS[1]// PhotonVisionConfig.table("OV9281").setCameraRobotSpace(new Transform3d(-0.25, -0.27 ,0.98, new Rotation3d())).setPoseStrategy(PoseStrategy.MULTI_TAG_PNP_ON_RIO)
                                                                         );
+
+        
     }
 
     public interface Controllers {
@@ -86,7 +100,7 @@ public interface Constants {
 
 
         MechanismConfig<StatefulMechanism<ClimberState>> CLIMBER_CONFIG = MechanismConfig.statefulGeneric(ClimberState.Home)
-                                                                                        .addMotors(Motor.KRAKEN_X60, 24, -26)
+                                                                                        .addMotors(Motor.KRAKEN_X60, 24, -26).addMotor(Motor.FALCON_500, 21)
                                                                                         .setEncoderFromMotor(24)
                                                                                         .setNeutralMode(MotorNeutralMode.Brake)
                                                                                         .setEncoderGearRatio(1d/4d)

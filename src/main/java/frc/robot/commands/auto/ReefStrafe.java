@@ -4,12 +4,16 @@
 
 package frc.robot.commands.auto;
 
+import java.util.Map;
+import java.util.Set;
+
 import com.ctre.phoenix6.hardware.Pigeon2;
 
 import au.grapplerobotics.LaserCan;
 import ca.frc6390.athena.controllers.EnhancedXboxController;
 import ca.frc6390.athena.core.RobotBase;
 import ca.frc6390.athena.sensors.camera.limelight.LimeLight;
+import ca.frc6390.athena.sensors.camera.limelight.LimeLightConfig;
 import ca.frc6390.athena.sensors.camera.limelight.LimeLight.PoseEstimateType;
 import ca.frc6390.athena.sensors.camera.limelight.LimeLight.PoseEstimateWithLatencyType;
 import edu.wpi.first.math.controller.HolonomicDriveController;
@@ -24,6 +28,7 @@ import edu.wpi.first.math.trajectory.TrapezoidProfile.Constraints;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
+import frc.robot.Constants;
 import frc.robot.utils.ReefScoringPos;
 import frc.robot.utils.ReefScoringPos.ReefPole;
 
@@ -32,16 +37,14 @@ public class ReefStrafe extends Command {
   /** Creates a new ReefStrafe. */
   public RobotBase<?> base;
   public LimeLight ll;
+  public int runTag = -1;
   public Pose2d curPose;
   public MedianFilter filter = new MedianFilter(10);
- public PIDController rcontroller = new PIDController(0.025, 0, 0);
- public double thetaMeasurement = 0;
-  // public HolonomicDriveController controller 
-  // = new HolonomicDriveController
-  // (
-  public PIDController controller =  new PIDController(0.5, 0, 0);
-    // new ProfiledPIDController(0, 0, 0, new Constraints(0, 0))
-  // );
+  public PIDController rcontroller = new PIDController(0.025, 0, 0);
+  public double thetaMeasurement = 0;
+  public ProfiledPIDController yController = new ProfiledPIDController(0.75, 0, 0, new Constraints(1, 1));
+  public ProfiledPIDController xController =  new ProfiledPIDController(1.2, 0, 0, new Constraints(2, 2));
+  
   public ReefStrafe(RobotBase<?> base)
   {
    this.base = base;
@@ -51,7 +54,7 @@ public class ReefStrafe extends Command {
   @Override
   public void initialize() 
   {
-    rcontroller.enableContinuousInput(-90, 0);
+    runTag = -1;
   }
 
   public Pose2d getBotPoseTagSpace(LimeLight ll)
@@ -61,12 +64,6 @@ public class ReefStrafe extends Command {
     double x = (Math.cos(Math.toRadians(angle)) * dist);
     double y = (Math.sin(Math.toRadians(angle)) * dist); 
     
-    SmartDashboard.putNumber("X1", x);
-    SmartDashboard.putNumber("Y1", y);
-    SmartDashboard.putNumber("DIST TO TAG", dist);
-
-    SmartDashboard.putNumber("Angle1", angle);   
-    
     return new Pose2d(x,y, base.getLocalization().getFieldPose().getRotation());
   }
 
@@ -74,27 +71,34 @@ public class ReefStrafe extends Command {
   @Override
   public void execute() 
   {
-    ll = base.getVision().getLimelight("limelight-left");
-
-    if(ll.hasValidTarget())
+    for (LimeLightConfig configs : Constants.DriveTrain.LIMELIGHTS) 
     {
-    curPose = getBotPoseTagSpace(ll);
-    thetaMeasurement = filter.calculate(ll.getTargetSkew());
-
-    SmartDashboard.putNumber("THETAMeasurement", thetaMeasurement);
+    ll = base.getVision().getLimelight(configs.getTable());  
     
-
+    if(ll.hasValidTarget())
+    { 
+    if(runTag == -1)
+    {
+      runTag = (int)ll.getAprilTagID();
+    }
+    curPose = getBotPoseTagSpace(ll);
+    thetaMeasurement =-filter.calculate(ll.getPoseEstimate(PoseEstimateType.TARGET_POSE_ROBOT_SPACE).getRaw()[4] + 15);
     }
     else
     {
       thetaMeasurement = 0;
     }
-    double Xspeed = 0;//-controller.calculate(curPose.getX(),0);
-    double YSpeed = 0;//controller.calculate(curPose.getY(),0);
-    double rSpeed = rcontroller.calculate(thetaMeasurement, 0);
-    SmartDashboard.putNumber("Xspeed", Xspeed);
-    SmartDashboard.putNumber("Yspeed", YSpeed);
-    base.getDrivetrain().getRobotSpeeds().setFeedbackSpeeds(0, 0, rSpeed);
+    double Xspeed = -yController.calculate(curPose.getX(),0);
+    double YSpeed = xController.calculate(curPose.getY(),0);
+    double rSpeed = rcontroller.calculate(thetaMeasurement, 0);//* Math.copySign(1, ll.getTargetHorizontalOffset()), 0);
+ 
+    if(runTag == (int)ll.getAprilTagID())
+    {
+    base.getDrivetrain().getRobotSpeeds().setFeedbackSpeeds(Xspeed, YSpeed, rSpeed);
+    }
+    }
+    // ll = base.getVision().getLimelight("limelight-right");
+    
   }
 
   // Called once the command ends or is interrupted.

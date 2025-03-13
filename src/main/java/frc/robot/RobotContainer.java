@@ -41,7 +41,7 @@ public class RobotContainer {
   public final LaserCan lasRight = new LaserCan(0);
   
   public final RobotBase<SwerveDrivetrain> robotBase = Constants.DriveTrain.ROBOT_BASE.create().shuffleboard();
-  public final StatefulMechanism<ClimberState> climberTest = Constants.Climber.CLIMBER_CONFIG.build().shuffleboard("Climber Test");
+  // public final StatefulMechanism<ClimberState> climberTest = Constants.Climber.CLIMBER_CONFIG.build().shuffleboard("Climber Test");
 
 
   // public Elevator elevator = new Elevator();
@@ -52,9 +52,9 @@ public class RobotContainer {
 
   private final EnhancedXboxController driverController = new EnhancedXboxController(0)
                                                               .setLeftInverted(true)
-                                                              .setRightInverted(true)
+                                                              .setRightInverted(false)
                                                               .setSticksDeadzone(Constants.Controllers.STICK_DEADZONE)
-                                                              .setLeftSlewrate(1.5);
+                                                              .setLeftSlewrate(2);
 
   private final EnhancedXboxController driverController2 = new EnhancedXboxController(1).setSticksDeadzone(Constants.Controllers.STICK_DEADZONE);
                    
@@ -64,7 +64,7 @@ public class RobotContainer {
   public RobotContainer() 
   {
     configureBindings();
-    // robotBase.getDrivetrain().setDriveCommand(driverController);
+    robotBase.getDrivetrain().setDriveCommand(driverController);
 
     SmartDashboard.putData(chooser);
     // elevator.shuffleboard("Elevator");
@@ -82,8 +82,8 @@ public class RobotContainer {
     NamedCommands.registerCommand("RotateToMid", new RotateTo(robotBase,Rotation2d.fromRadians(-1.601756394242849)));
 
     chooser = Autos.AUTOS.createChooser(AUTOS.PRELOADLEFT);
-    climberTest.setPidEnabled(false);
-    climberTest.setFeedforwardEnabled(false);
+    // climberTest.setPidEnabled(false);
+    // climberTest.setFeedforwardEnabled(false);
   }
 
   private void configureBindings() 
@@ -134,10 +134,10 @@ public class RobotContainer {
     driverController.pov.up.whileTrue(new ReefStrafe(robotBase));
     // driverController.pov.right.onTrue(() -> superstructure.setState(SuperstructureState.L2)).after(1).onTrue(() -> climber.setClimber(10));
     // driverController.pov.left.onTrue(() -> superstructure.setState(SuperstructureState.L2)).after(1).onTrue(() -> climber.setClimber(0));
-    driverController.pov.right.whileTrue(() -> climberTest.setMotors(1)).onFalse(() -> climberTest.setMotors(0.0));
-    driverController.pov.left.whileTrue(() -> climberTest.setMotors(-1)).onFalse(() -> climberTest.setMotors(0.0));
+    // driverController.pov.right.whileTrue(() -> climberTest.setMotors(1)).onFalse(() -> climberTest.setMotors(0.0));
+    // driverController.pov.left.whileTrue(() -> climberTest.setMotors(-1)).onFalse(() -> climberTest.setMotors(0.0));
     
-    driverController.pov.down.onTrue(() -> climberTest.setEncoderPosition(0));
+    // driverController.pov.down.onTrue(() -> climberTest.setEncoderPosition(0));
     // //----------------------------------------------------------DRIVER 2---------------------------------------------------------------//
 
     // //FLIP EJECTION
