@@ -42,7 +42,7 @@ public class Elevator extends SubsystemBase{
   public enum ElevatorState implements SetpointProvider<Double> {
     //ELEVATOR HEIGHT FROM FLOOR IN INCHES
     Home(Constants.Elevator.OFFSET_FROM_FLOOR),
-    L1(Constants.Elevator.OFFSET_FROM_FLOOR),
+    L1(Constants.Elevator.OFFSET_FROM_FLOOR + 3),
     AlgaeHigh(54.66734391140974),
     AlgaeLow(37.60104065578804),
     //31.5
