@@ -47,7 +47,7 @@ public class EndEffectorV2 extends SubsystemBase{
         L2(new EndEffectorTuple(RollerState.Stopped, PivotState.Scoring)),
         L1(new EndEffectorTuple(RollerState.Stopped, PivotState.Scoring)),
         Score(new EndEffectorTuple(RollerState.Scoring, PivotState.Scoring)),
-        Stop(new EndEffectorTuple(RollerState.Stopped, PivotState.Home)),
+        Stop(new EndEffectorTuple(RollerState.Stopped, null)),
         Home(new EndEffectorTuple(RollerState.Stopped, PivotState.Home)),
         Intaking(new EndEffectorTuple(RollerState.Intaking, PivotState.Intaking));
 

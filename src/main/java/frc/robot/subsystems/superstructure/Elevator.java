@@ -125,14 +125,14 @@ public class Elevator extends SubsystemBase{
   {
     if(encoder != null)
     {
-    if (lowerlimitSwitch.getAsBoolean() && speed < 0){
-      speed = 0;
-    }
+    // if (lowerlimitSwitch.getAsBoolean() && speed < 0){
+    //   speed = 0;
+    // }
     //negative is up, this makes negative down
    
-    speed = -speed;
+    // speed = speed;
     leftMotor.set(speed);
-    rightMotor.set(speed);
+    rightMotor.set(-speed);
   }
   }
   
@@ -179,15 +179,15 @@ public class Elevator extends SubsystemBase{
   public void update()
   {
     
-    switch (stateMachine.getGoalState()) {
-      case Home:
-        setMotors(-0.1);
-        resetNudge();
-        break;
-      case L1, L2, L3, L4, AlgaeHigh, AlgaeLow:
-        double speed = controller.calculate(getHeightFromFloor(),stateMachine.getGoalState().getSetpoint()) + feedforward.calculate(controller.getSetpoint().velocity) / 12;
-        setMotors(speed);
-    }
+    // switch (stateMachine.getGoalState()) {
+    //   case Home:
+    //     setMotors(-0.1);
+    //     resetNudge();
+    //     break;
+    //   case L1, L2, L3, L4, AlgaeHigh, AlgaeLow:
+    //     double speed = controller.calculate(getHeightFromFloor(),stateMachine.getGoalState().getSetpoint()) + feedforward.calculate(controller.getSetpoint().velocity) / 12;
+    //     setMotors(speed);
+    // }
     
   }
 

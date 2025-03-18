@@ -8,7 +8,7 @@ import com.pathplanner.lib.auto.NamedCommands;
 import com.pathplanner.lib.commands.PathPlannerAuto;
 
 import au.grapplerobotics.LaserCan;
-import frc.robot.commands.auto.ReefStrafe;
+import frc.robot.commands.auto.TagAlign;
 import ca.frc6390.athena.controllers.EnhancedXboxController;
 import ca.frc6390.athena.core.RobotBase;
 import ca.frc6390.athena.drivetrains.swerve.SwerveDrivetrain;
@@ -16,6 +16,8 @@ import ca.frc6390.athena.mechanisms.Mechanism.StatefulMechanism;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
+import edu.wpi.first.math.util.Units;
+import edu.wpi.first.units.Unit;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -44,29 +46,28 @@ public class RobotContainer {
   // public final StatefulMechanism<ClimberState> climberTest = Constants.Climber.CLIMBER_CONFIG.build().shuffleboard("Climber Test");
 
 
-  // public Elevator elevator = new Elevator();
+  public Elevator elevator = new Elevator();
   // public Climber climber = new Climber();
   // public EndEffector endEffector = new EndEffector(robotBase).setAutoEndScoring(true);
   // public Superstructure superstructure = new Superstructure(elevator, endEffector, robotBase);
-  // public CANdleSubsystem candle = new CANdleSubsystem(endEffector, superstructure);
+  public CANdleSubsystem candle = new CANdleSubsystem();
 
   private final EnhancedXboxController driverController = new EnhancedXboxController(0)
                                                               .setLeftInverted(true)
-                                                              .setRightInverted(false)
+                                                              .setRightInverted(true)
                                                               .setSticksDeadzone(Constants.Controllers.STICK_DEADZONE)
                                                               .setLeftSlewrate(2);
 
   private final EnhancedXboxController driverController2 = new EnhancedXboxController(1).setSticksDeadzone(Constants.Controllers.STICK_DEADZONE);
                    
 
-  public SendableChooser<Command> chooser = new SendableChooser<>();
   // public Elevate elevate = new Elevate(ElevatorState.Home, lasLeft, lasRight, superstructure, robotBase, elevator);
+  public SendableChooser<Command> chooser;
   public RobotContainer() 
   {
     configureBindings();
     robotBase.getDrivetrain().setDriveCommand(driverController);
-
-    SmartDashboard.putData(chooser);
+   
     // elevator.shuffleboard("Elevator");
     // elevator.setDefaultCommand(elevate);
     // endEffector.shuffleboard("Effector");
@@ -80,10 +81,17 @@ public class RobotContainer {
     NamedCommands.registerCommand("RotateToRight",new RotateTo(robotBase,Rotation2d.fromRadians(-0.49333207719329186)));
     NamedCommands.registerCommand("RotateToLeft", new RotateTo(robotBase,Rotation2d.fromRadians(-2.575148734982150)));
     NamedCommands.registerCommand("RotateToMid", new RotateTo(robotBase,Rotation2d.fromRadians(-1.601756394242849)));
+    NamedCommands.registerCommand("AlignRight", new TagAlign(robotBase, "limelight-right",Units.inchesToMeters(55)));
+    NamedCommands.registerCommand("AlignLeft", new TagAlign(robotBase, "limelight-left",Units.inchesToMeters(55)));
+    NamedCommands.registerCommand("AlignRightFar", new TagAlign(robotBase, "limelight-right", Units.inchesToMeters(0)));
+    NamedCommands.registerCommand("AlignLeftFar", new TagAlign(robotBase, "limelight-left", Units.inchesToMeters(90)));
 
-    chooser = Autos.AUTOS.createChooser(AUTOS.PRELOADLEFT);
+    
     // climberTest.setPidEnabled(false);
     // climberTest.setFeedforwardEnabled(false);
+
+    chooser = Autos.AUTOS.createChooser(AUTOS.PRELOADLEFT);
+    SmartDashboard.putData(chooser);
   }
 
   private void configureBindings() 
@@ -108,7 +116,9 @@ public class RobotContainer {
     //----------------------------------------------------------DRIVER 1---------------------------------------------------------------//
 
     //RESET ODOMETRY
-    driverController.start.onTrue(() -> robotBase.getDrivetrain().getIMU().setYaw(0)).after(2).onTrue(() -> robotBase.getLocalization().resetFieldPose(new Pose2d(0,0, Rotation2d.fromDegrees(0))));
+    driverController.start.onTrue(() -> robotBase.getDrivetrain().getIMU().setYaw(0)).after(2).onTrue(() -> robotBase.getLocalization().resetFieldPose(0,0, 0));
+    driverController.leftBumper.onTrue(() -> elevator.setMotors(0.5)).onFalse(() -> elevator.setMotors(0));
+    driverController.rightBumper.onTrue(() -> elevator.setMotors(-0.5)).onFalse(() -> elevator.setMotors(0));
 
     //PASSIVE ALIGN 
     // driverController.rightStick.toggleOnTrue(new PassiveAlign(robotBase));
@@ -131,7 +141,9 @@ public class RobotContainer {
     // driverController.leftTrigger.tiggerAt(0.5).onTrue(superstructure.setState(SuperstructureState.AlgaeLow)).onFalse(superstructure.setState(SuperstructureState.AlgaeRetract));
     
     //STRAFING
-    driverController.pov.up.whileTrue(new ReefStrafe(robotBase));
+    driverController.pov.left.whileTrue(new TagAlign(robotBase, "limelight-left", Units.inchesToMeters(90)));
+    driverController.pov.right.whileTrue(new TagAlign(robotBase, "limelight-right", Units.inchesToMeters(90)));
+
     // driverController.pov.right.onTrue(() -> superstructure.setState(SuperstructureState.L2)).after(1).onTrue(() -> climber.setClimber(10));
     // driverController.pov.left.onTrue(() -> superstructure.setState(SuperstructureState.L2)).after(1).onTrue(() -> climber.setClimber(0));
     // driverController.pov.right.whileTrue(() -> climberTest.setMotors(1)).onFalse(() -> climberTest.setMotors(0.0));
@@ -157,6 +169,7 @@ public class RobotContainer {
 
   public Command getAutonomousCommand() 
   {
+    
    return new PathPlannerAuto(chooser.getSelected()); 
   }
 }
