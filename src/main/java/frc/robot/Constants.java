@@ -71,11 +71,11 @@ public interface Constants {
 
         RobotLocalizationConfig LOCALIZATION_CONFIG = RobotLocalizationConfig.vision(0.3, 0.3, 9999)
                                                             .setAutoPlannerPID(5,0,0, 2,0,0).setVisionEnabled(true);
-        ConfigurableCamera[] LIMELIGHTS =
+        ConfigurableCamera[] CAMERAS =
          {                                                                 
-        LimeLightConfig.table("limelight-left").setYawRelativeToForwards(-15).setPoseEstimateType(PoseEstimateWithLatencyType.BOT_POSE_MT2_BLUE).setLocalizationTagExcludeList(17,18,19,20,21,22,6,7,8,9,10,11), 
-        LimeLightConfig.table("limelight-right").setYawRelativeToForwards(15).setPoseEstimateType(PoseEstimateWithLatencyType.BOT_POSE_MT2_BLUE).setLocalizationTagExcludeList(17,18,19,20,21,22,6,7,8,9,10,11),
-        // PhotonVisionConfig.table("OV9281").setCameraRobotSpace(new Transform3d(-0.29845,0.2286,1,new Rotation3d(0, 0, 180))).setPoseStrategy(PoseStrategy.MULTI_TAG_PNP_ON_COPROCESSOR)
+        LimeLightConfig.table("limelight-left").setUseForLocalization(false).setYawRelativeToForwards(-15).setPoseEstimateType(PoseEstimateWithLatencyType.BOT_POSE_MT2_BLUE).setLocalizationTagFilter(17,18,19,20,21,22,6,7,8,9,10,11), 
+        LimeLightConfig.table("limelight-right").setUseForLocalization(false).setYawRelativeToForwards(15).setPoseEstimateType(PoseEstimateWithLatencyType.BOT_POSE_MT2_BLUE).setLocalizationTagFilter(17,18,19,20,21,22,6,7,8,9,10,11),
+        PhotonVisionConfig.table("OV9281").setUseForLocalization(true).setCameraRobotSpace(new Transform3d(-0.29845,0.2286,1,new Rotation3d(0, 0, 180))).setPoseStrategy(PoseStrategy.MULTI_TAG_PNP_ON_COPROCESSOR)
         };
 
         //X -11.75
@@ -83,10 +83,7 @@ public interface Constants {
         //Z 33.5
         RobotBaseConfig<SwerveDrivetrain> ROBOT_BASE = RobotBaseConfig.swerve(DRIVETRAIN_CONFIG)
                                                                       .setLocalization(LOCALIZATION_CONFIG)
-                                                                      .setVision(
-                                                                        LIMELIGHTS[0],
-                                                                        LIMELIGHTS[1]// PhotonVisionConfig.table("OV9281").setCameraRobotSpace(new Transform3d(-0.25, -0.27 ,0.98, new Rotation3d())).setPoseStrategy(PoseStrategy.MULTI_TAG_PNP_ON_RIO)
-                                                                        );
+                                                                      .setVision(CAMERAS);
 
         
     }

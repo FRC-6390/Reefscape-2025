@@ -4,6 +4,10 @@
 
 package frc.robot;
 
+import java.util.Optional;
+
+import org.photonvision.EstimatedRobotPose;
+
 import com.pathplanner.lib.auto.NamedCommands;
 import com.pathplanner.lib.commands.PathPlannerAuto;
 
@@ -13,6 +17,7 @@ import ca.frc6390.athena.controllers.EnhancedXboxController;
 import ca.frc6390.athena.core.RobotBase;
 import ca.frc6390.athena.drivetrains.swerve.SwerveDrivetrain;
 import ca.frc6390.athena.mechanisms.Mechanism.StatefulMechanism;
+import ca.frc6390.athena.sensors.camera.photonvision.PhotonVision;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
@@ -120,6 +125,29 @@ public class RobotContainer {
     //RESET ODOMETRY
     driverController.start.onTrue(() -> robotBase.getDrivetrain().getIMU().setYaw(0)).after(2).onTrue(() -> robotBase.getLocalization().resetFieldPose(0,0, 0));
     driverController.leftBumper.whileTrue(new AutoPickup(robotBase));
+    driverController.b.whileTrue(() -> {
+
+      System.out.println("running");
+      var cams = robotBase.getVision().getPhotonVisions();
+      System.out.println("size: "+cams.size());
+
+      for (PhotonVision cam : cams.values()) {
+
+          System.out.println(cam.getLocalizationPose());
+
+          System.out.println("Connected: " + cam.isConnected());
+          System.out.println("unread: " + cam.getAllUnreadResults().size());
+
+         
+
+          // if (visionEst.isPresent()) {
+          //     return visionEst.get().estimatedPose.toPose2d();
+          // }
+
+          // return null;
+      }
+      
+    });
     //PASSIVE ALIGN 
     // driverController.rightStick.toggleOnTrue(new PassiveAlign(robotBase));
 
