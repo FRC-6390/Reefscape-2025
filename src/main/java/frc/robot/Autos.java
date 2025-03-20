@@ -4,10 +4,12 @@ import java.io.IOException;
 
 import org.json.simple.parser.ParseException;
 
+import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.commands.PathPlannerAuto;
 import com.pathplanner.lib.path.PathPlannerPath;
 import com.pathplanner.lib.util.FileVersionException;
 
+import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj2.command.Command;
 
@@ -15,24 +17,41 @@ public class Autos {
     
   public enum AUTOS {
         
-        LEFTSIDE("Choreo"),
-        RIGHTSIDE("ChoreoRight"),
-        TESTLEFT("ChoreoTestLeft"),
-        TESTRIGHT("ChoreoTestRight"),
-        TESTMID("ChoreoTestMid"),
-        PRELOADLEFT("PreLoadLeft"),
-        PRELOADRIGHT("PreLoadRight"),
-        PRELOADMID("PreLoadMid");
+        LEFTSIDE("Choreo", false),
+        RIGHTSIDE("ChoreoRight", false),
+        TESTLEFT("ChoreoTestLeft", false),
+        TESTRIGHT("ChoreoTestRight", false),
+        TESTMID("ChoreoTestMid", false),
+        PRELOADLEFT("PreLoadLeft", false),
+        PRELOADRIGHT("PreLoadRight", false),
+        PRELOADMID("PreLoadMid", false),
+        CORAL("CORAL", false);
 
         private final String auto;
-    
-        AUTOS(String auto){
+        private final boolean choreo;
+        AUTOS(String auto, boolean choreo){
             this.auto = auto;
+            this.choreo = choreo;
         }
 
-        public PathPlannerAuto getAuto()
+        public Command getAuto(){
+          return choreo ? getChoreoAuto() : getPathPlannerAuto();
+        }
+
+        public Command getPathPlannerAuto()
         {
           return new PathPlannerAuto(this.auto);
+        }
+
+        public Command getChoreoAuto()
+        {
+          try {
+            var path = PathPlannerPath.fromChoreoTrajectory(this.auto);
+            return AutoBuilder.followPath(path);
+          } catch (FileVersionException | IOException | ParseException e) {
+            DriverStation.reportError("Could not load Choreo Auto", e.getStackTrace()); 
+            return null;
+          }
         }
 
         public static SendableChooser<Command> createChooser(AUTOS defualtAuto){

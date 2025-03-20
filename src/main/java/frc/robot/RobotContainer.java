@@ -22,12 +22,13 @@ import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
+import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.WaitCommand;
 import frc.robot.Autos.AUTOS;
 import frc.robot.Constants.Climber.ClimberState;
 import frc.robot.commands.auto.AtState;
-import frc.robot.commands.auto.AtStateEjector;
-import frc.robot.commands.auto.RotateTo;
+import frc.robot.commands.auto.AutoPickup;
+import frc.robot.commands.auto.BasicAlign;
 import frc.robot.subsystems.Superstructure;
 import frc.robot.subsystems.Superstructure.SuperstructureState;
 import frc.robot.subsystems.superstructure.CANdleSubsystem;
@@ -50,7 +51,7 @@ public class RobotContainer {
   // public Climber climber = new Climber();
   // public EndEffector endEffector = new EndEffector(robotBase).setAutoEndScoring(true);
   // public Superstructure superstructure = new Superstructure(elevator, endEffector, robotBase);
-  public CANdleSubsystem candle = new CANdleSubsystem();
+  public CANdleSubsystem candle = new CANdleSubsystem(robotBase);
 
   private final EnhancedXboxController driverController = new EnhancedXboxController(0)
                                                               .setLeftInverted(true)
@@ -78,14 +79,14 @@ public class RobotContainer {
     // NamedCommands.registerCommand("StartEject", superstructure.setState(SuperstructureState.Score));
     // NamedCommands.registerCommand("WaitForElevator",Commands.race( new AtState(superstructure), new WaitCommand(3)));
     // NamedCommands.registerCommand("WaitForEjector", Commands.race( new AtStateEjector(endEffector), new WaitCommand(3)));
-    NamedCommands.registerCommand("RotateToRight",new RotateTo(robotBase,Rotation2d.fromRadians(-0.49333207719329186)));
-    NamedCommands.registerCommand("RotateToLeft", new RotateTo(robotBase,Rotation2d.fromRadians(-2.575148734982150)));
-    NamedCommands.registerCommand("RotateToMid", new RotateTo(robotBase,Rotation2d.fromRadians(-1.601756394242849)));
-    NamedCommands.registerCommand("AlignRight", new TagAlign(robotBase, "limelight-right",Units.inchesToMeters(55)));
-    NamedCommands.registerCommand("AlignLeft", new TagAlign(robotBase, "limelight-left",Units.inchesToMeters(55)));
-    NamedCommands.registerCommand("AlignRightFar", new TagAlign(robotBase, "limelight-right", Units.inchesToMeters(0)));
-    NamedCommands.registerCommand("AlignLeftFar", new TagAlign(robotBase, "limelight-left", Units.inchesToMeters(90)));
+    NamedCommands.registerCommand("AlignRight", new TagAlign(robotBase, "limelight-right", new InstantCommand(() -> candle.setRGB(0, 0, 255)), 55));
+    NamedCommands.registerCommand("AlignLeft", new TagAlign(robotBase, "limelight-left", new InstantCommand(() -> candle.setRGB(0, 0, 255)), 55));
+    NamedCommands.registerCommand("AlignRightFar", new TagAlign(robotBase, "limelight-right",  new InstantCommand(() -> candle.setRGB(0, 0, 255)), 55));
+    NamedCommands.registerCommand("AlignLeftFar", new TagAlign(robotBase, "limelight-left", new InstantCommand(() -> candle.setRGB(0, 0, 255)), 55));
+    NamedCommands.registerCommand("Pickup", new AutoPickup(robotBase));
 
+    NamedCommands.registerCommand("Home", new InstantCommand(() -> candle.setRGB(0, 0, 0)));
+    NamedCommands.registerCommand("Score", new InstantCommand(() -> candle.setRGB(0, 255, 0)));
     
     // climberTest.setPidEnabled(false);
     // climberTest.setFeedforwardEnabled(false);
@@ -97,6 +98,7 @@ public class RobotContainer {
   private void configureBindings() 
   {
 
+    driverController.a.onTrue(new InstantCommand(() -> candle.setRGB(0, 0, 255)));
     //TODO
         //  TEST RETURN TO SCORE
         //  TEST STRAFE
@@ -117,9 +119,7 @@ public class RobotContainer {
 
     //RESET ODOMETRY
     driverController.start.onTrue(() -> robotBase.getDrivetrain().getIMU().setYaw(0)).after(2).onTrue(() -> robotBase.getLocalization().resetFieldPose(0,0, 0));
-    driverController.leftBumper.onTrue(() -> elevator.setMotors(0.5)).onFalse(() -> elevator.setMotors(0));
-    driverController.rightBumper.onTrue(() -> elevator.setMotors(-0.5)).onFalse(() -> elevator.setMotors(0));
-
+    driverController.leftBumper.whileTrue(new AutoPickup(robotBase));
     //PASSIVE ALIGN 
     // driverController.rightStick.toggleOnTrue(new PassiveAlign(robotBase));
 
@@ -141,8 +141,10 @@ public class RobotContainer {
     // driverController.leftTrigger.tiggerAt(0.5).onTrue(superstructure.setState(SuperstructureState.AlgaeLow)).onFalse(superstructure.setState(SuperstructureState.AlgaeRetract));
     
     //STRAFING
-    driverController.pov.left.whileTrue(new TagAlign(robotBase, "limelight-left", Units.inchesToMeters(90)));
-    driverController.pov.right.whileTrue(new TagAlign(robotBase, "limelight-right", Units.inchesToMeters(90)));
+    driverController.pov.left.whileTrue(new TagAlign(robotBase, "limelight-left", new InstantCommand(() -> candle.setRGB(0, 0, 255)), 55));
+    driverController.pov.right.whileTrue(new TagAlign(robotBase, "limelight-right", new InstantCommand(() -> candle.setRGB(0, 0, 255)), 55));
+    driverController.pov.up.whileTrue(new BasicAlign(robotBase, "limelight-left"));
+    driverController.pov.down.whileTrue(new BasicAlign(robotBase, "limelight-right"));
 
     // driverController.pov.right.onTrue(() -> superstructure.setState(SuperstructureState.L2)).after(1).onTrue(() -> climber.setClimber(10));
     // driverController.pov.left.onTrue(() -> superstructure.setState(SuperstructureState.L2)).after(1).onTrue(() -> climber.setClimber(0));

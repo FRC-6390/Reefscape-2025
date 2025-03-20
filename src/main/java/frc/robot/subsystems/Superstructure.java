@@ -72,6 +72,36 @@ public class Superstructure extends SubsystemBase {
         }
     }
 
+    public boolean closeEnough()
+    {
+  
+      LimeLight ll = base.getVision().getLimelight("limelight-left");
+      LimeLight lr = base.getVision().getLimelight("limelight-right");
+      
+      double dist = 99;
+      double dist2 = 99;
+      if(ll != null)
+      {
+          ReefPole pole = ReefPole.getPoleFromID(ll.getAprilTagID(), ll);
+          if(pole != null && ll.hasValidTarget())
+          {
+            dist = ll.getTargetHorizontalOffset();
+          }
+      }
+  
+      if(lr != null)
+      {
+          ReefPole pole = ReefPole.getPoleFromID(lr.getAprilTagID(), lr);
+          if(pole != null && lr.hasValidTarget())
+          {
+            dist2 = lr.getTargetHorizontalOffset();
+          }
+      }
+  
+      return Math.abs(dist) < 6.5 || Math.abs(dist2) < 6.5;
+  }
+  
+
 
   public Superstructure(Elevator elevator, EndEffectorV2 endEffector, RobotBase<?> base) 
   {
@@ -105,34 +135,6 @@ public class Superstructure extends SubsystemBase {
     }
   }
 
-  public boolean closeEnough()
-  {
-
-    LimeLight ll = base.getVision().getLimelight("limelight-left");
-    LimeLight lr = base.getVision().getLimelight("limelight-right");
-    
-    double dist = 99;
-    double dist2 = 99;
-    if(ll != null)
-    {
-        ReefPole pole = ReefPole.getPoleFromID(ll.getAprilTagID(), ll);
-        if(pole != null && ll.hasValidTarget())
-        {
-          dist = ll.getTargetHorizontalOffset();
-        }
-    }
-
-    if(lr != null)
-    {
-        ReefPole pole = ReefPole.getPoleFromID(lr.getAprilTagID(), lr);
-        if(pole != null && lr.hasValidTarget())
-        {
-          dist2 = lr.getTargetHorizontalOffset();
-        }
-    }
-
-    return Math.abs(dist) < 6.5 || Math.abs(dist2) < 6.5;
-}
 
   public Superstructure setAutoDropElevator(boolean autoDropElevator) {
       this.autoDropElevator = autoDropElevator;

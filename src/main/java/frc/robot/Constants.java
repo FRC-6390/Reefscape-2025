@@ -1,5 +1,7 @@
 package frc.robot;
 
+import org.photonvision.PhotonPoseEstimator.PoseStrategy;
+
 import ca.frc6390.athena.core.RobotBase.RobotBaseConfig;
 import ca.frc6390.athena.core.RobotDrivetrain.RobotDrivetrainIDs.DrivetrainIDs;
 import ca.frc6390.athena.core.RobotLocalization.RobotLocalizationConfig;
@@ -16,10 +18,14 @@ import ca.frc6390.athena.mechanisms.ArmMechanism.StatefulArmMechanism;
 import ca.frc6390.athena.mechanisms.Mechanism.StatefulMechanism;
 import ca.frc6390.athena.mechanisms.StateMachine.SetpointProvider;
 import ca.frc6390.athena.sensors.camera.limelight.LimeLight.PoseEstimateWithLatencyType;
+import ca.frc6390.athena.sensors.camera.photonvision.PhotonVisionConfig;
+import ca.frc6390.athena.sensors.camera.ConfigurableCamera;
 import ca.frc6390.athena.sensors.camera.limelight.LimeLightConfig;
 import edu.wpi.first.math.controller.ElevatorFeedforward;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.controller.ProfiledPIDController;
+import edu.wpi.first.math.geometry.Rotation3d;
+import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.trajectory.TrapezoidProfile.Constraints;
 import edu.wpi.first.math.util.Units;
 import frc.robot.subsystems.superstructure.EndEffector.EndEffectorTuple;
@@ -63,13 +69,18 @@ public interface Constants {
         // .setEncoderOffset(ENCODER_OFFSETS)
         // .setCanbus(CANIVORE_CANBUS);
 
-        RobotLocalizationConfig LOCALIZATION_CONFIG = RobotLocalizationConfig.vision(1, 1, 9999)
-                                                            .setAutoPlannerPID(5,0,0, 2,0,0).setVisionEnabled(false);
-        LimeLightConfig[] LIMELIGHTS =
+        RobotLocalizationConfig LOCALIZATION_CONFIG = RobotLocalizationConfig.vision(0.3, 0.3, 9999)
+                                                            .setAutoPlannerPID(5,0,0, 2,0,0).setVisionEnabled(true);
+        ConfigurableCamera[] LIMELIGHTS =
          {                                                                 
-        LimeLightConfig.table("limelight-left").setYawRelativeToForwards(-15).setPoseEstimateType(PoseEstimateWithLatencyType.BOT_POSE_MT2_BLUE), 
-        LimeLightConfig.table("limelight-right").setYawRelativeToForwards(15).setPoseEstimateType(PoseEstimateWithLatencyType.BOT_POSE_MT2_BLUE)
+        LimeLightConfig.table("limelight-left").setYawRelativeToForwards(-15).setPoseEstimateType(PoseEstimateWithLatencyType.BOT_POSE_MT2_BLUE).setLocalizationTagExcludeList(17,18,19,20,21,22,6,7,8,9,10,11), 
+        LimeLightConfig.table("limelight-right").setYawRelativeToForwards(15).setPoseEstimateType(PoseEstimateWithLatencyType.BOT_POSE_MT2_BLUE).setLocalizationTagExcludeList(17,18,19,20,21,22,6,7,8,9,10,11),
+        // PhotonVisionConfig.table("OV9281").setCameraRobotSpace(new Transform3d(-0.29845,0.2286,1,new Rotation3d(0, 0, 180))).setPoseStrategy(PoseStrategy.MULTI_TAG_PNP_ON_COPROCESSOR)
         };
+
+        //X -11.75
+        //Y 9 inches
+        //Z 33.5
         RobotBaseConfig<SwerveDrivetrain> ROBOT_BASE = RobotBaseConfig.swerve(DRIVETRAIN_CONFIG)
                                                                       .setLocalization(LOCALIZATION_CONFIG)
                                                                       .setVision(

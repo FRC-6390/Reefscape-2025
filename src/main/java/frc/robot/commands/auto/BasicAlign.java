@@ -17,19 +17,18 @@ import frc.robot.utils.ReefScoringPos;
 import frc.robot.utils.ReefScoringPos.ReefPole;
 
 /* You should consider using the more terse Command factories API instead https://docs.wpilib.org/en/stable/docs/software/commandbased/organizing-command-based.html#defining-commands */
-public class PassiveAlign extends Command {
+public class BasicAlign extends Command {
 
   public LimeLight limeLight;
  
   public RobotBase<?> base;
-  public PIDController controller = new PIDController(0.0275, 0, 0);
+  public PIDController controller = new PIDController(0.03, 0, 0);
   
-  public FilteredValue rotationFiltered;
   
   /** Creates a new PassiveAlign. */
-  public PassiveAlign(RobotBase<?> base) {
+  public BasicAlign(RobotBase<?> base, String llTable) {
     this.base = base;
- 
+    limeLight = this.base.getVision().getLimelight(llTable);
 
     // Use addRequirements() here to declare subsystem dependencies.
   }
@@ -37,10 +36,7 @@ public class PassiveAlign extends Command {
   @Override
   public void initialize() 
   {
-    limeLight = ReefScoringPos.getLimelightFacing(base);
-    rotationFiltered =  new FilteredValue(() -> limeLight.getPoseEstimate(PoseEstimateType.TARGET_POSE_ROBOT_SPACE).getRaw()[4])
-    .addMovingAverage(10)
-    .addMedianFilter(15);
+   
   }
 
   // Called every time the scheduler runs while the command is scheduled.
@@ -52,8 +48,8 @@ public class PassiveAlign extends Command {
     {
     if(limeLight.hasValidTarget())
     {
-      double r = -controller.calculate(rotationFiltered.get(), 0);
-      base.getDrivetrain().getRobotSpeeds().setFeedbackSpeeds(0,0,r);
+      double r = controller.calculate(limeLight.getTargetHorizontalOffset(), 0);
+      base.getDrivetrain().getRobotSpeeds().setFeedbackSpeeds(0,r,0);
       SmartDashboard.putNumber("Rotational Vel", r);
       
     }
