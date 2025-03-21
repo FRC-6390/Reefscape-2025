@@ -7,7 +7,7 @@
         {
           "type": "path",
           "data": {
-            "pathName": "CORAL.0"
+            "pathName": "LEFTSIDE.0"
           }
         },
         {
@@ -27,7 +27,7 @@
                     {
                       "type": "wait",
                       "data": {
-                        "waitTime": 3.0
+                        "waitTime": 2.0
                       }
                     }
                   ]
@@ -36,7 +36,7 @@
               {
                 "type": "path",
                 "data": {
-                  "pathName": "CORAL.1"
+                  "pathName": "LEFTSIDE.1"
                 }
               }
             ]
@@ -51,36 +51,17 @@
         {
           "type": "path",
           "data": {
-            "pathName": "CORAL.2"
+            "pathName": "LEFTSIDE.2"
           }
         },
         {
-          "type": "deadline",
+          "type": "sequential",
           "data": {
             "commands": [
               {
-                "type": "race",
-                "data": {
-                  "commands": [
-                    {
-                      "type": "named",
-                      "data": {
-                        "name": "Pickup"
-                      }
-                    },
-                    {
-                      "type": "wait",
-                      "data": {
-                        "waitTime": 5.0
-                      }
-                    }
-                  ]
-                }
-              },
-              {
                 "type": "path",
                 "data": {
-                  "pathName": "CORAL.3"
+                  "pathName": "LEFTSIDE.3"
                 }
               }
             ]
@@ -89,7 +70,7 @@
         {
           "type": "path",
           "data": {
-            "pathName": "CORAL.4"
+            "pathName": "LEFTSIDE.4"
           }
         },
         {
@@ -118,7 +99,7 @@
               {
                 "type": "path",
                 "data": {
-                  "pathName": "CORAL.5"
+                  "pathName": "LEFTSIDE.5"
                 }
               }
             ]
@@ -133,36 +114,17 @@
         {
           "type": "path",
           "data": {
-            "pathName": "CORAL.6"
+            "pathName": "LEFTSIDE.6"
           }
         },
         {
-          "type": "deadline",
+          "type": "sequential",
           "data": {
             "commands": [
               {
-                "type": "race",
-                "data": {
-                  "commands": [
-                    {
-                      "type": "named",
-                      "data": {
-                        "name": "Pickup"
-                      }
-                    },
-                    {
-                      "type": "wait",
-                      "data": {
-                        "waitTime": 5.0
-                      }
-                    }
-                  ]
-                }
-              },
-              {
                 "type": "path",
                 "data": {
-                  "pathName": "CORAL.7"
+                  "pathName": "LEFTSIDE.7"
                 }
               }
             ]
@@ -171,7 +133,7 @@
         {
           "type": "path",
           "data": {
-            "pathName": "CORAL.8"
+            "pathName": "LEFTSIDE.8"
           }
         },
         {
@@ -200,7 +162,57 @@
               {
                 "type": "path",
                 "data": {
-                  "pathName": "CORAL.9"
+                  "pathName": "LEFTSIDE.9"
+                }
+              }
+            ]
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "Home"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "LEFTSIDE.10"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "LEFTSIDE.11"
+          }
+        },
+        {
+          "type": "deadline",
+          "data": {
+            "commands": [
+              {
+                "type": "race",
+                "data": {
+                  "commands": [
+                    {
+                      "type": "named",
+                      "data": {
+                        "name": "AlignLeft"
+                      }
+                    },
+                    {
+                      "type": "wait",
+                      "data": {
+                        "waitTime": 3.0
+                      }
+                    }
+                  ]
+                }
+              },
+              {
+                "type": "path",
+                "data": {
+                  "pathName": "LEFTSIDE.12"
                 }
               }
             ]

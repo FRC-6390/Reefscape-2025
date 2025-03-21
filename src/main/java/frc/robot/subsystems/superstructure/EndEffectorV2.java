@@ -20,36 +20,29 @@ import frc.robot.Constants.EndEffector.RollerState;
 
 public class EndEffectorV2 extends SubsystemBase{
 
-    private final StatefulMechanism<PivotState> pivot;
+    private final StatefulMechanism<PivotState> joint1;
+    private final StatefulMechanism<PivotState> joint2;
+
     private final StatefulMechanism<RollerState> rollers;
 
     private boolean autoEndScoring = true;
-
-    // public Elevator elevator;
-
-    // private final StateMachine<Double, RollerState> rollerStateMachine;
-    // private final StateMachine<Double, RotatorState> rotatorStateMachine;
-    // private final StateMachine<Double, AlgaeExtenderState> algaeExtenderStateMachine;
 
     private final StateMachine<EndEffectorTuple, EndEffectorState> stateMachine;
 
     private final IRBeamBreak beamBreakLeft, beamBreakRight, beamBreakCenter;
 
-    public record EndEffectorTuple(RollerState rollerState,  PivotState rotatorState ) {}
+    public record EndEffectorTuple(RollerState rollerState,  PivotState joint1state, PivotState joint2state) {}
     
     public enum EndEffectorState implements SetpointProvider<EndEffectorTuple>
     {
-        // AlgaeHigh(new EndEffectorTuple(RollerState.Algae, RotatorState.Algae, AlgaeExtenderState.Extended)),
-        // AlgaeRetract(new EndEffectorTuple(RollerState.Stopped, RotatorState.Home, AlgaeExtenderState.Home)),
-        // AlgaeLow(new EndEffectorTuple(RollerState.Algae, RotatorState.Algae, AlgaeExtenderState.Extended)),
-        L4(new EndEffectorTuple(RollerState.Stopped, PivotState.Scoring)),
-        L3(new EndEffectorTuple(RollerState.Stopped,  PivotState.Scoring)),
-        L2(new EndEffectorTuple(RollerState.Stopped, PivotState.Scoring)),
-        L1(new EndEffectorTuple(RollerState.Stopped, PivotState.Scoring)),
-        Score(new EndEffectorTuple(RollerState.Scoring, PivotState.Scoring)),
-        Stop(new EndEffectorTuple(RollerState.Stopped, null)),
-        Home(new EndEffectorTuple(RollerState.Stopped, PivotState.Home)),
-        Intaking(new EndEffectorTuple(RollerState.Intaking, PivotState.Intaking));
+        L4(new EndEffectorTuple(RollerState.Stopped, PivotState.Scoring, PivotState.ScoringJoint2)),
+        L3(new EndEffectorTuple(RollerState.Stopped,  PivotState.Scoring, PivotState.ScoringJoint2)),
+        L2(new EndEffectorTuple(RollerState.Stopped, PivotState.Scoring, PivotState.ScoringJoint2)),
+        L1(new EndEffectorTuple(RollerState.Stopped, PivotState.Scoring,PivotState.ScoringJoint2)),
+        Score(new EndEffectorTuple(RollerState.Scoring, PivotState.Scoring,PivotState.ScoringJoint2)),
+        Stop(new EndEffectorTuple(RollerState.Stopped, null, null)),
+        Home(new EndEffectorTuple(RollerState.Stopped, PivotState.Home, PivotState.HomeJoint2)),
+        Intaking(new EndEffectorTuple(RollerState.Intaking, PivotState.Intaking, PivotState.IntakingJoint2));
 
 
         private EndEffectorTuple states;
@@ -67,16 +60,17 @@ public class EndEffectorV2 extends SubsystemBase{
 
    
 
-    public EndEffectorV2( StatefulMechanism<PivotState> Pivot, StatefulMechanism<RollerState>  Rollers ){
+    public EndEffectorV2( StatefulMechanism<PivotState> joint1,StatefulMechanism<PivotState> joint2, StatefulMechanism<RollerState>  Rollers ){
     
-        this.pivot = Pivot;
+        this.joint1 = joint1;
         this.rollers = Rollers;
+        this.joint2 = joint2;
 
         beamBreakLeft = new IRBeamBreak(1);
         beamBreakCenter = new IRBeamBreak(0);
         beamBreakRight = new IRBeamBreak(2);
 
-        this.stateMachine = new StateMachine<EndEffectorTuple,EndEffectorState>(EndEffectorState.Home, () -> rollers.getStateMachine().atGoalState() && pivot.getStateMachine().atGoalState());
+        this.stateMachine = new StateMachine<EndEffectorTuple,EndEffectorState>(EndEffectorState.Home, () -> rollers.getStateMachine().atGoalState() && joint1.getStateMachine().atGoalState());
     }
 
     public StateMachine<EndEffectorTuple, EndEffectorState> getStateMachine() {
@@ -101,14 +95,6 @@ public class EndEffectorV2 extends SubsystemBase{
         tab.addBoolean("BeamBreakRight", () -> beamBreakRight.getAsBoolean());
         tab.addBoolean("BeamBreakCenter", () -> beamBreakCenter.getAsBoolean());
 
-        
-        // tab.addBoolean("rollersEnabled", () -> rollersEnabled);
-        // tab.addBoolean("algaeEnabled", () -> algaeEnabled);
-        // tab.addBoolean("rotatorEnabled", () -> rotatorEnabled);
-
-        // algaeExtender.shuffleboard(tab, "Algae Extender");
-        // rollers.shuffleboard(tab, "Rollers");
-        // rotator.shuffleboard(tab, "Rotator");
 
         return tab;
     } 
@@ -122,30 +108,13 @@ public class EndEffectorV2 extends SubsystemBase{
         return this;
     }
 
-    // public EndEffectorV2 setAlgaeEnabled(boolean algaeEnabled) {
-    //     this.algaeEnabled = algaeEnabled;
-    //     return this;
-    // }
-
-    // public EndEffectorV2 setRollersEnabled(boolean rollersEnabled) {
-    //     this.rollersEnabled = rollersEnabled;
-    //     return this;
-    // }
-
-    // public EndEffectorV2 setRotatorEnabled(boolean rotatorEnabled) {
-    //     this.rotatorEnabled = rotatorEnabled;
-    //     return this;
-    // }
 
     public void update(){
 
-        // algaeExtenderStateMachine.update();
-        // rollerStateMachine.update();
-        // rotatorStateMachine.update();
 
         stateMachine.update();
         rollers.update();
-        pivot.update();
+        joint1.update();
 
         EndEffectorState state = stateMachine.getGoalState();
         EndEffectorTuple val = stateMachine.getGoalStateSetpoint();
@@ -159,7 +128,9 @@ public class EndEffectorV2 extends SubsystemBase{
             case Intaking:
             case Stop:
                 if (val.rollerState != null) rollers.getStateMachine().setGoalState(val.rollerState);
-                if (val.rotatorState != null) pivot.getStateMachine().setGoalState(val.rotatorState);
+                if (val.joint1state != null) joint1.getStateMachine().setGoalState(val.joint1state);
+                if (val.joint2state != null) joint2.getStateMachine().setGoalState(val.joint2state);
+
             default:
                 break;
         }
@@ -170,8 +141,8 @@ public class EndEffectorV2 extends SubsystemBase{
         return rollers;
     }
 
-    public StatefulMechanism<PivotState> getPivot() {
-        return pivot;
+    public StatefulMechanism<PivotState> getJoint1() {
+        return joint1;
     }
 
     public boolean isAutoEndScoring() {

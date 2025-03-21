@@ -16,6 +16,7 @@ import frc.robot.commands.auto.TagAlign;
 import ca.frc6390.athena.controllers.EnhancedXboxController;
 import ca.frc6390.athena.core.RobotBase;
 import ca.frc6390.athena.drivetrains.swerve.SwerveDrivetrain;
+import ca.frc6390.athena.mechanisms.ArmMechanism.StatefulArmMechanism;
 import ca.frc6390.athena.mechanisms.Mechanism.StatefulMechanism;
 import ca.frc6390.athena.sensors.camera.photonvision.PhotonVision;
 import edu.wpi.first.math.geometry.Pose2d;
@@ -23,6 +24,7 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.units.Unit;
+import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -31,6 +33,7 @@ import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.WaitCommand;
 import frc.robot.Autos.AUTOS;
 import frc.robot.Constants.Climber.ClimberState;
+import frc.robot.Constants.EndEffector.PivotState;
 import frc.robot.commands.auto.AtState;
 import frc.robot.commands.auto.AutoPickup;
 import frc.robot.commands.auto.BasicAlign;
@@ -50,7 +53,9 @@ public class RobotContainer {
   
   public final RobotBase<SwerveDrivetrain> robotBase = Constants.DriveTrain.ROBOT_BASE.create().shuffleboard();
   // public final StatefulMechanism<ClimberState> climberTest = Constants.Climber.CLIMBER_CONFIG.build().shuffleboard("Climber Test");
-
+  public final StatefulArmMechanism<PivotState> arm = Constants.EndEffector.ARM_CONFIG.build().shuffleboard("Arm");
+  double speed = 0.5;
+  double current = 40;
 
   public Elevator elevator = new Elevator();
   // public Climber climber = new Climber();
@@ -72,9 +77,14 @@ public class RobotContainer {
   public RobotContainer() 
   {
     configureBindings();
+    arm.setPidEnabled(false);
+    arm.setFeedforwardEnabled(false);
+    Shuffleboard.getTab("Elevator").addDouble("Speed", () -> speed);
+    Shuffleboard.getTab("Elevator").addDouble("Current", () -> current);
+
     robotBase.getDrivetrain().setDriveCommand(driverController);
    
-    // elevator.shuffleboard("Elevator");
+    elevator.shuffleboard("Elevator");
     // elevator.setDefaultCommand(elevate);
     // endEffector.shuffleboard("Effector");
     // climber.shuffleboard("climber");
@@ -84,10 +94,10 @@ public class RobotContainer {
     // NamedCommands.registerCommand("StartEject", superstructure.setState(SuperstructureState.Score));
     // NamedCommands.registerCommand("WaitForElevator",Commands.race( new AtState(superstructure), new WaitCommand(3)));
     // NamedCommands.registerCommand("WaitForEjector", Commands.race( new AtStateEjector(endEffector), new WaitCommand(3)));
-    NamedCommands.registerCommand("AlignRight", new TagAlign(robotBase, "limelight-right", new InstantCommand(() -> candle.setRGB(0, 0, 255)), 55));
-    NamedCommands.registerCommand("AlignLeft", new TagAlign(robotBase, "limelight-left", new InstantCommand(() -> candle.setRGB(0, 0, 255)), 55));
-    NamedCommands.registerCommand("AlignRightFar", new TagAlign(robotBase, "limelight-right",  new InstantCommand(() -> candle.setRGB(0, 0, 255)), 55));
-    NamedCommands.registerCommand("AlignLeftFar", new TagAlign(robotBase, "limelight-left", new InstantCommand(() -> candle.setRGB(0, 0, 255)), 55));
+    NamedCommands.registerCommand("AlignRight", new TagAlign(robotBase, "limelight-right", new InstantCommand(() -> candle.setRGB(0, 0, 255)), Units.inchesToMeters(22)));
+    NamedCommands.registerCommand("AlignLeft", new TagAlign(robotBase, "limelight-left", new InstantCommand(() -> candle.setRGB(0, 0, 255)), Units.inchesToMeters(22)));
+    NamedCommands.registerCommand("AlignRightFar", new TagAlign(robotBase, "limelight-right",  new InstantCommand(() -> candle.setRGB(0, 0, 255)), Units.inchesToMeters(22)));
+    NamedCommands.registerCommand("AlignLeftFar", new TagAlign(robotBase, "limelight-left", new InstantCommand(() -> candle.setRGB(0, 0, 255)), Units.inchesToMeters(22)));
     NamedCommands.registerCommand("Pickup", new AutoPickup(robotBase));
 
     NamedCommands.registerCommand("Home", new InstantCommand(() -> candle.setRGB(0, 0, 0)));
@@ -96,7 +106,7 @@ public class RobotContainer {
     // climberTest.setPidEnabled(false);
     // climberTest.setFeedforwardEnabled(false);
 
-    chooser = Autos.AUTOS.createChooser(AUTOS.PRELOADLEFT);
+    chooser = Autos.AUTOS.createChooser(AUTOS.LEFTSIDE);
     SmartDashboard.putData(chooser);
   }
 
@@ -124,30 +134,41 @@ public class RobotContainer {
 
     //RESET ODOMETRY
     driverController.start.onTrue(() -> robotBase.getDrivetrain().getIMU().setYaw(0)).after(2).onTrue(() -> robotBase.getLocalization().resetFieldPose(0,0, 0));
-    driverController.leftBumper.whileTrue(new AutoPickup(robotBase));
-    driverController.b.whileTrue(() -> {
+    driverController.leftBumper.whileTrue(() -> elevator.setMotors(speed)).onFalse(() -> elevator.setMotors(0));
+    driverController.rightBumper.whileTrue(() -> elevator.setMotors(-speed)).onFalse(() -> elevator.setMotors(0));
+    driverController.pov.up.onTrue(() -> speed += 0.1);
+    driverController.pov.down.onTrue(() -> speed -= 0.1);
 
-      System.out.println("running");
-      var cams = robotBase.getVision().getPhotonVisions();
-      System.out.println("size: "+cams.size());
+    driverController.pov.left.onTrue(() -> {current += 0.5; elevator.setCurrentLimit(current);});
+    driverController.pov.right.onTrue(() ->  {current -= 0.5; elevator.setCurrentLimit(current);});
 
-      for (PhotonVision cam : cams.values()) {
 
-          System.out.println(cam.getLocalizationPose());
+    driverController.a.whileTrue(() -> arm.setMotors(speed)).onFalse(() -> arm.setMotors(0));
+    driverController.b.whileTrue(() -> arm.setMotors(-speed)).onFalse(() -> arm.setMotors(0));
+    
+    // driverController.b.whileTrue(() -> {
 
-          System.out.println("Connected: " + cam.isConnected());
-          System.out.println("unread: " + cam.getAllUnreadResults().size());
+    //   System.out.println("running");
+    //   var cams = robotBase.getVision().getPhotonVisions();
+    //   System.out.println("size: "+cams.size());
+
+    //   for (PhotonVision cam : cams.values()) {
+
+    //       System.out.println(cam.getLocalizationPose());
+
+    //       System.out.println("Connected: " + cam.isConnected());
+    //       System.out.println("unread: " + cam.getAllUnreadResults().size());
 
          
 
-          // if (visionEst.isPresent()) {
-          //     return visionEst.get().estimatedPose.toPose2d();
-          // }
+    //       // if (visionEst.isPresent()) {
+    //       //     return visionEst.get().estimatedPose.toPose2d();
+    //       // }
 
-          // return null;
-      }
+    //       // return null;
+    //   }
       
-    });
+    // });
     //PASSIVE ALIGN 
     // driverController.rightStick.toggleOnTrue(new PassiveAlign(robotBase));
 
@@ -169,10 +190,10 @@ public class RobotContainer {
     // driverController.leftTrigger.tiggerAt(0.5).onTrue(superstructure.setState(SuperstructureState.AlgaeLow)).onFalse(superstructure.setState(SuperstructureState.AlgaeRetract));
     
     //STRAFING
-    driverController.pov.left.whileTrue(new TagAlign(robotBase, "limelight-left", new InstantCommand(() -> candle.setRGB(0, 0, 255)), 55));
-    driverController.pov.right.whileTrue(new TagAlign(robotBase, "limelight-right", new InstantCommand(() -> candle.setRGB(0, 0, 255)), 55));
-    driverController.pov.up.whileTrue(new BasicAlign(robotBase, "limelight-left"));
-    driverController.pov.down.whileTrue(new BasicAlign(robotBase, "limelight-right"));
+    // driverController.pov.left.whileTrue(new TagAlign(robotBase, "limelight-left", new InstantCommand(() -> candle.setRGB(0, 0, 255)), Units.inchesToMeters(22)));
+    // driverController.pov.right.whileTrue(new TagAlign(robotBase, "limelight-right", new InstantCommand(() -> candle.setRGB(0, 0, 255)), Units.inchesToMeters(22)));
+    // driverController.pov.up.whileTrue(new BasicAlign(robotBase, "limelight-left"));
+    // driverController.pov.down.whileTrue(new BasicAlign(robotBase, "limelight-right"));
 
     // driverController.pov.right.onTrue(() -> superstructure.setState(SuperstructureState.L2)).after(1).onTrue(() -> climber.setClimber(10));
     // driverController.pov.left.onTrue(() -> superstructure.setState(SuperstructureState.L2)).after(1).onTrue(() -> climber.setClimber(0));

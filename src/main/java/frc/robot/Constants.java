@@ -21,6 +21,7 @@ import ca.frc6390.athena.sensors.camera.limelight.LimeLight.PoseEstimateWithLate
 import ca.frc6390.athena.sensors.camera.photonvision.PhotonVisionConfig;
 import ca.frc6390.athena.sensors.camera.ConfigurableCamera;
 import ca.frc6390.athena.sensors.camera.limelight.LimeLightConfig;
+import edu.wpi.first.math.controller.ArmFeedforward;
 import edu.wpi.first.math.controller.ElevatorFeedforward;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.controller.ProfiledPIDController;
@@ -73,9 +74,9 @@ public interface Constants {
                                                             .setAutoPlannerPID(5,0,0, 2,0,0).setVisionEnabled(true);
         ConfigurableCamera[] CAMERAS =
          {                                                                 
-        LimeLightConfig.table("limelight-left").setUseForLocalization(false).setYawRelativeToForwards(-15).setPoseEstimateType(PoseEstimateWithLatencyType.BOT_POSE_MT2_BLUE).setLocalizationTagFilter(17,18,19,20,21,22,6,7,8,9,10,11), 
-        LimeLightConfig.table("limelight-right").setUseForLocalization(false).setYawRelativeToForwards(15).setPoseEstimateType(PoseEstimateWithLatencyType.BOT_POSE_MT2_BLUE).setLocalizationTagFilter(17,18,19,20,21,22,6,7,8,9,10,11),
-        PhotonVisionConfig.table("OV9281").setUseForLocalization(true).setCameraRobotSpace(new Transform3d(-0.29845,0.2286,1,new Rotation3d(0, 0, 180))).setPoseStrategy(PoseStrategy.MULTI_TAG_PNP_ON_COPROCESSOR)
+        LimeLightConfig.table("limelight-left").setUseForLocalization(true).setYawRelativeToForwards(-15).setPoseEstimateType(PoseEstimateWithLatencyType.BOT_POSE_MT2_BLUE).setLocalizationTagFilter(17,18,19,20,21,22,6,7,8,9,10,11), 
+        LimeLightConfig.table("limelight-right").setUseForLocalization(true).setYawRelativeToForwards(15).setPoseEstimateType(PoseEstimateWithLatencyType.BOT_POSE_MT2_BLUE).setLocalizationTagFilter(17,18,19,20,21,22,6,7,8,9,10,11),
+        PhotonVisionConfig.table("OV9281").setUseForLocalization(false).setCameraRobotSpace(new Transform3d(-0.29845,0.2286,1,new Rotation3d(0, 0, 180))).setPoseStrategy(PoseStrategy.MULTI_TAG_PNP_ON_COPROCESSOR)
         };
 
         //X -11.75
@@ -167,26 +168,23 @@ public interface Constants {
     public interface EndEffector {
         int LIMIT_SWITCH = 3;
         int ENCODER = 40;
-        
-
-        int MOTOR = 31;
         int ALGAE_MOTOR = 32;
         
         int ROLLER = 33;
-        // double ENCODER_OFFSET = 0.551025390625;
-        // double ENCODER_OFFSET = -0.044921875;
         double ENCODER_OFFSET = -0.368896484375;
 
         double ENCODER_GEAR_RATIO = 1d/1d; //from motors 125d/1d;
         PIDController CONTORLLER = new PIDController(0.015, 0, 0);
-        // PIDController CONTORLLER = new PIDController(0.005, 0, 0);
 
         int CANDLE_ID = 22;
 
         enum PivotState implements SetpointProvider<Double>{
             Intaking(0),
             Home(0),
-            Scoring(0);
+            Scoring(0),
+            IntakingJoint2(0),
+            HomeJoint2(0),
+            ScoringJoint2(0);
 
             double angle;
             PivotState(double angle){
@@ -217,15 +215,28 @@ public interface Constants {
 
         }
 
-        MechanismConfig<StatefulMechanism<PivotState>> PIVOT_CONFIG = MechanismConfig.statefulGeneric(PivotState.Home)
-        .addMotors(Motor.KRAKEN_X60, 24, -26)
-        .setEncoderFromMotor(24)
+        MechanismConfig<StatefulArmMechanism<PivotState>> ARM_CONFIG = MechanismConfig.statefulArm(new ArmFeedforward(0,0,0), PivotState.Home)
+        .addMotors(Motor.KRAKEN_X60, 33)
+        .setEncoderFromMotor(33)
+        // .setEncoder(EncoderType.CTRECANcoder, 32)
         .setNeutralMode(MotorNeutralMode.Brake)
-        .setEncoderGearRatio(1d/4d)
+        // .setEncoderGearRatio(1d/1d)
+        // .setUseEncoderAbsolute(true)
+        // .setEncoderConversion(360)
+        .setCanbus(CANIVORE_CANBUS)
+        .setPID(0.015, 0, 0)
+        .setCurrentLimit(80);
+
+        MechanismConfig<StatefulArmMechanism<PivotState>> WRIST_CONFIG = MechanismConfig.statefulArm(new ArmFeedforward(0,0,0), PivotState.Home)
+        .addMotors(Motor.KRAKEN_X60, 33)
+        .setEncoder(EncoderType.CTRECANcoder, 34)
+        .setNeutralMode(MotorNeutralMode.Brake)
+        .setEncoderGearRatio(1d/1d)
+        .setUseEncoderAbsolute(true)
         .setEncoderConversion(360)
         .setCanbus(CANIVORE_CANBUS)
         .setPID(0.015, 0, 0)
-        .setCurrentLimit(60);
+        .setCurrentLimit(40);
 
         MechanismConfig<StatefulMechanism<RollerState>> ROLLER_CONFIG = MechanismConfig.statefulGeneric(RollerState.Stopped)
         .addMotors(Motor.KRAKEN_X60, 24, -26)

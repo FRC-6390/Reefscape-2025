@@ -46,7 +46,7 @@ public class Elevate extends Command {
   @Override
   public void initialize() 
   {
-    output = new DelayedOutput(superstructure::closeEnough, 0.25);
+    // output = new DelayedOutput(superstructure::closeEnough, 0.25);
     limeLight = null;
     distToTag = 9999;
     

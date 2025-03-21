@@ -72,37 +72,6 @@ public class Superstructure extends SubsystemBase {
         }
     }
 
-    public boolean closeEnough()
-    {
-  
-      LimeLight ll = base.getVision().getLimelight("limelight-left");
-      LimeLight lr = base.getVision().getLimelight("limelight-right");
-      
-      double dist = 99;
-      double dist2 = 99;
-      if(ll != null)
-      {
-          ReefPole pole = ReefPole.getPoleFromID(ll.getAprilTagID(), ll);
-          if(pole != null && ll.hasValidTarget())
-          {
-            dist = ll.getTargetHorizontalOffset();
-          }
-      }
-  
-      if(lr != null)
-      {
-          ReefPole pole = ReefPole.getPoleFromID(lr.getAprilTagID(), lr);
-          if(pole != null && lr.hasValidTarget())
-          {
-            dist2 = lr.getTargetHorizontalOffset();
-          }
-      }
-  
-      return Math.abs(dist) < 6.5 || Math.abs(dist2) < 6.5;
-  }
-  
-
-
   public Superstructure(Elevator elevator, EndEffectorV2 endEffector, RobotBase<?> base) 
   {
     this.endEffector = endEffector;
@@ -182,19 +151,6 @@ public class Superstructure extends SubsystemBase {
     endEffectorStateMachine.setGoalState(state);
   }
 
-  public Translation2d getCage()
-  {
-    Alliance team = DriverStation.getAlliance().get();
-    if(team.equals(Alliance.Red))
-    {
-      return new Translation2d(8.775, 6.201);
-    }
-    else
-    {
-      return new Translation2d(8.787, 1.921);
-    }
-  }
-
   public void update(){
     elevatorStateMachine.update();
     endEffectorStateMachine.update();
@@ -223,9 +179,13 @@ public class Superstructure extends SubsystemBase {
       stateMachine.setGoalState(SuperstructureState.Home);
     }
 
-    if(endEffector.hasNoPiece() && stateMachine.atAnyState(SuperstructureState.Home,SuperstructureState.L1))
+    if(endEffector.hasNoPiece() && stateMachine.atAnyState(SuperstructureState.Home))
     {
       stateMachine.setGoalState(SuperstructureState.Intaking);
+    }
+    if(endEffector.hasGamePiece())
+    {
+      stateMachine.setGoalState(SuperstructureState.L1);
     }
   }
 

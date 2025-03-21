@@ -26,6 +26,7 @@ import edu.wpi.first.wpilibj2.command.Commands;
 public class TagAlign extends Command {
   public RobotBase<?> base;
   public double AutoDistToTrigger;
+  public static double horizonalTolerance = 2.5;
   public double DistToCommand;
   public Command command;
   public LimeLight ll;
@@ -86,6 +87,7 @@ public class TagAlign extends Command {
   @Override
   public void execute() 
   {
+    System.out.println(DistToCommand);
        
     SmartDashboard.putBoolean("ENd ",endCommand.getAsBoolean());
 SmartDashboard.putNumber("Dist", ll.getPoseEstimate(PoseEstimateWithLatencyType.BOT_POSE_MT2_BLUE).getRaw()[9]);
@@ -123,7 +125,7 @@ SmartDashboard.putNumber("Dist", ll.getPoseEstimate(PoseEstimateWithLatencyType.
    
       
     // if(DriverStation.isAutonomous())
-    // {
+    // 
       if(runTag == (int)ll.getAprilTagID())
       {
         if(ll.getPoseEstimate(PoseEstimateWithLatencyType.BOT_POSE_MT2_BLUE).getRaw()[9] <= DistToCommand)
@@ -146,7 +148,7 @@ SmartDashboard.putNumber("Dist", ll.getPoseEstimate(PoseEstimateWithLatencyType.
     {
       SmartDashboard.putBoolean("ALGIN TAKEN",false);
       
-      base.getDrivetrain().getRobotSpeeds().enableSpeeds(SpeedSource.AUTO, true);
+      // base.getDrivetrain().getRobotSpeeds().enableSpeeds(SpeedSource.AUTO, true);
       // if(base.getDrivetrain().getRobotSpeeds().getAutoSpeeds().equals(new ChassisSpeeds(0,0,0)))
       // {
       //   base.getDrivetrain().getRobotSpeeds().setFeedbackSpeeds(-1, 0,0);
@@ -160,7 +162,7 @@ SmartDashboard.putNumber("Dist", ll.getPoseEstimate(PoseEstimateWithLatencyType.
 
   public boolean closeEnough()
   {
-    return ll.hasValidTarget() && ll.getPoseEstimate(PoseEstimateWithLatencyType.BOT_POSE_MT2_BLUE).getRaw()[9] <= 0.5 && ll.getTargetHorizontalOffset() < 3.5;
+    return ll.hasValidTarget() && ll.getPoseEstimate(PoseEstimateWithLatencyType.BOT_POSE_MT2_BLUE).getRaw()[9] <= 0.5 && Math.abs(ll.getTargetHorizontalOffset()) < horizonalTolerance;
   }
 
   // Called once the command ends or is interrupted.

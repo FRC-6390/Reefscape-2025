@@ -17,15 +17,15 @@ public class Autos {
     
   public enum AUTOS {
         
-        LEFTSIDE("Choreo", false),
-        RIGHTSIDE("ChoreoRight", false),
-        TESTLEFT("ChoreoTestLeft", false),
-        TESTRIGHT("ChoreoTestRight", false),
-        TESTMID("ChoreoTestMid", false),
-        PRELOADLEFT("PreLoadLeft", false),
-        PRELOADRIGHT("PreLoadRight", false),
-        PRELOADMID("PreLoadMid", false),
-        CORAL("CORAL", false);
+        LEFTSIDE("LeftSide", false),
+        LEFTLOLIPOP("LeftLoliPop", false),
+
+
+        BaseLineLeft("BaseLineLeft", false),
+        BaseLineMid("BaseLineMid", false),
+        BaseLineRight("BaseLineRight", false),
+
+        PreLoadMid("PreLoadMid", false);
 
         private final String auto;
         private final boolean choreo;
