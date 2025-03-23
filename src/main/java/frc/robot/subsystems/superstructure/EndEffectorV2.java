@@ -130,22 +130,22 @@ public class EndEffectorV2 extends SubsystemBase{
             case Score:
             case Intaking:
             case Stop:
-                if (val.rollerState != null) rollers.getStateMachine().setGoalState(val.rollerState);
-                if (val.joint1state != null) joint1.getStateMachine().setGoalState(val.joint1state);
+                if (val.rollerState != null) rollers.getStateMachine().queueState(val.rollerState);
+                if (val.joint1state != null) joint1.getStateMachine().queueState(val.joint1state);
                 if (val.joint2state != null) 
                 {
                  boolean transitioning = joint2.getStateMachine().atAnyState(WristState.Intaking) && val.joint2state.equals(WristState.Home);
                  if(transitioning)
                  {
-                    joint2.getStateMachine().setGoalState(WristState.TransitionState);
+                    joint2.getStateMachine().queueState(WristState.TransitionState);
                  }
                  if(joint2.getStateMachine().atAnyState(WristState.TransitionState))
                  {
-                    joint2.getStateMachine().setGoalState(WristState.Home);
+                    joint2.getStateMachine().queueState(WristState.Home);
                  }
                  if(!transitioning && !joint2.getStateMachine().getGoalState().equals(WristState.TransitionState))
                  {
-                    joint2.getStateMachine().setGoalState(val.joint2state);
+                    joint2.getStateMachine().queueState(val.joint2state);
                  }
                 }
             default:

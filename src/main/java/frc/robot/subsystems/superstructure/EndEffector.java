@@ -164,9 +164,9 @@ public class EndEffector extends SubsystemBase{
             case Home:
             case Score:
             case Stop:
-                if (val.rollerState != null && rollersEnabled) rollerStateMachine.setGoalState(val.rollerState);
-                if (val.rotatorState != null && rotatorEnabled) rotatorStateMachine.setGoalState(val.rotatorState);
-                if (val.algaeExtenderState != null && algaeEnabled) algaeExtenderStateMachine.setGoalState(val.algaeExtenderState());
+                if (val.rollerState != null && rollersEnabled) rollerStateMachine.queueState(val.rollerState);
+                if (val.rotatorState != null && rotatorEnabled) rotatorStateMachine.queueState(val.rotatorState);
+                if (val.algaeExtenderState != null && algaeEnabled) algaeExtenderStateMachine.queueState(val.algaeExtenderState());
             default:
                 break;
         }

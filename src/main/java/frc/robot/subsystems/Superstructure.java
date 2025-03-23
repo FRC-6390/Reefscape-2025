@@ -106,7 +106,7 @@ public class Superstructure extends SubsystemBase {
 
   public InstantCommand setState(SuperstructureState state) {
     System.out.println(state.name());
-    return new InstantCommand(() -> stateMachine.setGoalState(state));
+    return new InstantCommand(() -> stateMachine.queueState(state));
   }
 
   public InstantCommand setElevator(Elevator.ElevatorState state){
@@ -121,13 +121,13 @@ public class Superstructure extends SubsystemBase {
     if(elevatorEnabled){
       switch (state) {
         case Home:
-          elevatorStateMachine.setGoalState(state);
+          elevatorStateMachine.queueState(state);
           break;
         case L1, AlgaeHigh, AlgaeLow:
-          elevatorStateMachine.setGoalState(state);
+          elevatorStateMachine.queueState(state);
           break;
         case L2, L3, L4:
-          elevatorStateMachine.setGoalState(state);
+          elevatorStateMachine.queueState(state);
         default:
           return;
       }
@@ -139,11 +139,11 @@ public class Superstructure extends SubsystemBase {
     if(endEffectorEnabled){
       switch (state) {
         case L1, L2, L3, L4:
-          endEffectorStateMachine.setGoalState(EndEffectorState.Home);
-          endEffectorStateMachine.setNextState(state, elevatorStateMachine::atGoalState);
+          endEffectorStateMachine.queueState(EndEffectorState.Home);
+          endEffectorStateMachine.queueState(state, elevatorStateMachine::atGoalState);
           break;
         case Home, Score, Stop, Reverse, Intaking:
-          endEffectorStateMachine.setGoalState(state);
+          endEffectorStateMachine.queueState(state);
           break;
         default:
           return;
@@ -179,7 +179,7 @@ public class Superstructure extends SubsystemBase {
     }
 
     if(endEffector.isAutoEndScoring() && endEffector.isScoring() && !endEffector.hasGamePiece()) {
-      stateMachine.setGoalState(SuperstructureState.Home);
+      stateMachine.queueState(SuperstructureState.Home);
     }
 
     prevState = state;
