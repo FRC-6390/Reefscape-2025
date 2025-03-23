@@ -266,7 +266,7 @@ public interface Constants {
 
         MechanismConfig<StatefulMechanism<RollerState>> ROLLER_CONFIG = MechanismConfig.statefulGeneric(RollerState.Stopped)
         .addMotors(Motor.KRAKEN_X60, 37, 33)
-        .setEncoderFromMotor(37)
+        .setNeutralMode(MotorNeutralMode.Brake)
         .setCanbus(CANIVORE_CANBUS)
         .setCurrentLimit(60)
         .setUseSetpointAsOutput(true);

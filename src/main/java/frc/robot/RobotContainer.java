@@ -4,52 +4,32 @@
 
 package frc.robot;
 
-import java.util.Optional;
-
-import org.photonvision.EstimatedRobotPose;
-
 import com.pathplanner.lib.auto.NamedCommands;
 import com.pathplanner.lib.commands.PathPlannerAuto;
 
-import au.grapplerobotics.LaserCan;
 import frc.robot.commands.auto.TagAlign;
 import ca.frc6390.athena.controllers.EnhancedXboxController;
 import ca.frc6390.athena.core.RobotBase;
 import ca.frc6390.athena.drivetrains.swerve.SwerveDrivetrain;
 import ca.frc6390.athena.mechanisms.ArmMechanism.StatefulArmMechanism;
 import ca.frc6390.athena.mechanisms.Mechanism.StatefulMechanism;
-import ca.frc6390.athena.sensors.camera.photonvision.PhotonVision;
-import edu.wpi.first.math.geometry.Pose2d;
-import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.util.Units;
-import edu.wpi.first.units.Unit;
-import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
-import edu.wpi.first.wpilibj2.command.WaitCommand;
 import frc.robot.Autos.AUTOS;
-import frc.robot.Constants.Climber.ClimberState;
 import frc.robot.Constants.EndEffector.ArmState;
 import frc.robot.Constants.EndEffector.WristState;
 import frc.robot.Constants.EndEffector.RollerState;
 
-import frc.robot.commands.auto.AtState;
-import frc.robot.commands.auto.AutoPickup;
 import frc.robot.commands.auto.BasicAlign;
 import frc.robot.subsystems.Superstructure;
 import frc.robot.subsystems.Superstructure.SuperstructureState;
 import frc.robot.subsystems.superstructure.CANdleSubsystem;
-import frc.robot.subsystems.superstructure.Climber;
 import frc.robot.subsystems.superstructure.Elevator;
-import frc.robot.subsystems.superstructure.Elevator.ElevatorState;
-import frc.robot.subsystems.superstructure.EndEffectorV2.EndEffectorState;
-import frc.robot.utils.ReefScoringPos.ReefLevel;
 import frc.robot.utils.ReefScoringPos.ReefPole;
-import frc.robot.subsystems.superstructure.EndEffector;
 import frc.robot.subsystems.superstructure.EndEffectorV2;
 
 public class RobotContainer {

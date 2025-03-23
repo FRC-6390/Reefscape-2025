@@ -42,6 +42,8 @@ public class Superstructure extends SubsystemBase {
   private boolean endEffectorEnabled = true;
   private boolean elevatorEnabled = true;
 
+  private SuperstructureState prevState = null;
+
   public record SuperstructureTuple(EndEffectorState endEffector,  ElevatorState elevator) {}
     
     public enum SuperstructureState implements SetpointProvider<SuperstructureTuple>
@@ -86,19 +88,6 @@ public class Superstructure extends SubsystemBase {
     liftIntake.onTrue(setState(SuperstructureState.Home));
   }
 
-  public boolean elevatorAtSetpoint()
-  {
-    if(elevator.controller.atSetpoint())
-    {
-      SmartDashboard.putBoolean("At Setpoint", elevator.controller.atSetpoint());
-    }
-    else
-    {
-      return false;
-    }
-  }
-
-
   public Superstructure setAutoDropElevator(boolean autoDropElevator) {
       this.autoDropElevator = autoDropElevator;
       return this;
@@ -129,27 +118,36 @@ public class Superstructure extends SubsystemBase {
   }
 
   public void elevatorStateManager(Elevator.ElevatorState state){
-    switch (state) {
-      case Home:
-        elevatorStateMachine.setGoalState(state);
-        break;
-      case L1, AlgaeHigh, AlgaeLow:
-        elevatorStateMachine.setGoalState(state);
-        break;
-      case L2, L3, L4:
-        elevatorStateMachine.setGoalState(state);
+    if(elevatorEnabled){
+      switch (state) {
+        case Home:
+          elevatorStateMachine.setGoalState(state);
+          break;
+        case L1, AlgaeHigh, AlgaeLow:
+          elevatorStateMachine.setGoalState(state);
+          break;
+        case L2, L3, L4:
+          elevatorStateMachine.setGoalState(state);
+        default:
+          return;
+      }
     }
   }
 
   public void endEffectorStateManager(EndEffectorState state){
 
-    if(!elevatorAtSetpoint())
-    {
-    endEffectorStateMachine.setGoalState(EndEffectorState.Home);
-    }
-    else
-    {
-    endEffectorStateMachine.setGoalState(state);
+    if(endEffectorEnabled){
+      switch (state) {
+        case L1, L2, L3, L4:
+          endEffectorStateMachine.setGoalState(EndEffectorState.Home);
+          endEffectorStateMachine.setNextState(state, elevatorStateMachine::atGoalState);
+          break;
+        case Home, Score, Stop, Reverse, Intaking:
+          endEffectorStateMachine.setGoalState(state);
+          break;
+        default:
+          return;
+      }
     }
   }
 
@@ -160,26 +158,31 @@ public class Superstructure extends SubsystemBase {
 
     SuperstructureState state = stateMachine.getGoalState();
     SuperstructureTuple val = stateMachine.getGoalStateSetpoint();
-    switch (state) {
-      case L1:
-      case L2:
-      case L3:
-      case L4:
-      case AlgaeHigh:
-      case AlgaeRetract:
-      case AlgaeLow:
-      case Home:
-      case Score:
-        if(val.elevator != null && elevatorEnabled) elevatorStateManager(val.elevator);
-        if(val.endEffector != null && endEffectorEnabled) endEffectorStateManager(val.endEffector);
-        break;
-      default:
-        break;
+
+    if(prevState != state){
+      switch (state) {
+        case L1:
+        case L2:
+        case L3:
+        case L4:
+        case AlgaeHigh:
+        case AlgaeRetract:
+        case AlgaeLow:
+        case Home:
+        case Score:
+          elevatorStateManager(val.elevator);
+          endEffectorStateManager(val.endEffector);
+          break;
+        default:
+          break;
+      }
     }
 
     if(endEffector.isAutoEndScoring() && endEffector.isScoring() && !endEffector.hasGamePiece()) {
       stateMachine.setGoalState(SuperstructureState.Home);
     }
+
+    prevState = state;
   }
 
   @Override
