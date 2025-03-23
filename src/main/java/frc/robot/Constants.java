@@ -205,7 +205,7 @@ public interface Constants {
                 Home(0d),
                 Scoring(125.419921875),
                 ScoringL4(80),
-
+                TransitionState(25),
                 Scoringl1(50);
 
     

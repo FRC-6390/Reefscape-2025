@@ -47,7 +47,7 @@ public class EndEffectorV2 extends SubsystemBase{
         L3(new EndEffectorTuple(RollerState.Stopped,  ArmState.Scoring, WristState.Scoring)),
         L2(new EndEffectorTuple(RollerState.Stopped, ArmState.Scoring, WristState.Scoring)),
         L1(new EndEffectorTuple(RollerState.Stopped, ArmState.Scoring,WristState.Scoring)),
-        Score(new EndEffectorTuple(RollerState.Running, ArmState.Scoring,WristState.Scoring)),
+        Score(new EndEffectorTuple(RollerState.Running, null,null)),
         Stop(new EndEffectorTuple(RollerState.Stopped, null, null)),
         Home(new EndEffectorTuple(RollerState.Stopped, ArmState.Home, WristState.Home)),
         Reverse(new EndEffectorTuple(RollerState.Reverse, null, null)),
@@ -78,8 +78,8 @@ public class EndEffectorV2 extends SubsystemBase{
         proximitySensor = new GenericLimitSwitch(4, true);
 
         this.stateMachine = new StateMachine<EndEffectorTuple,EndEffectorState>(EndEffectorState.Home, () -> joint1.getStateMachine().atGoalState()&& joint2.getStateMachine().atGoalState());
-        proximitySensor.onTrue(() -> stateMachine.setGoalState(EndEffectorState.L1));
-        proximitySensor.onFalse(() -> stateMachine.setGoalState(EndEffectorState.L1));
+        // proximitySensor.onTrue(() -> stateMachine.setGoalState(EndEffectorState.L1));
+        // proximitySensor.onFalse(() -> stateMachine.setGoalState(EndEffectorState.L1));
         // proximitySensor.onTrue(() -> stateMachine.setGoalState(EndEffectorState.Reverse)).after(0.1).onTrue(() ->stateMachine.setGoalState(EndEffectorState.Home));
     }
 
@@ -132,7 +132,22 @@ public class EndEffectorV2 extends SubsystemBase{
             case Stop:
                 if (val.rollerState != null) rollers.getStateMachine().setGoalState(val.rollerState);
                 if (val.joint1state != null) joint1.getStateMachine().setGoalState(val.joint1state);
-                if (val.joint2state != null) joint2.getStateMachine().setGoalState(val.joint2state);
+                if (val.joint2state != null) 
+                {
+                 boolean transitioning = joint2.getStateMachine().atAnyState(WristState.Intaking) && val.joint2state.equals(WristState.Home);
+                 if(transitioning)
+                 {
+                    joint2.getStateMachine().setGoalState(WristState.TransitionState);
+                 }
+                 if(joint2.getStateMachine().atAnyState(WristState.TransitionState))
+                 {
+                    joint2.getStateMachine().setGoalState(WristState.Home);
+                 }
+                 if(!transitioning && !joint2.getStateMachine().getGoalState().equals(WristState.TransitionState))
+                 {
+                    joint2.getStateMachine().setGoalState(val.joint2state);
+                 }
+                }
             default:
                 break;
         }

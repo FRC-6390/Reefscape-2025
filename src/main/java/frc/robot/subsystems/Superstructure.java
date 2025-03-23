@@ -37,8 +37,7 @@ public class Superstructure extends SubsystemBase {
 
   private final RunnableTrigger autoDropElevatorTrigger;
   private final RunnableTrigger liftIntake;
-  private final RunnableTrigger dropIntake;
- 
+
   private boolean autoDropElevator = true;
   private boolean endEffectorEnabled = true;
   private boolean elevatorEnabled = true;
@@ -56,7 +55,7 @@ public class Superstructure extends SubsystemBase {
         L1(new SuperstructureTuple(EndEffectorState.L1, ElevatorState.L1)),
         Home(new SuperstructureTuple(EndEffectorState.Home, ElevatorState.Home)),
         Score(new SuperstructureTuple(EndEffectorState.Score, null)),
-        Intaking(new SuperstructureTuple(EndEffectorState.Intaking,  ElevatorState.L1));
+        Intaking(new SuperstructureTuple(EndEffectorState.Intaking,  ElevatorState.Home));
         
 
         private SuperstructureTuple states;
@@ -81,27 +80,22 @@ public class Superstructure extends SubsystemBase {
     this.base = base;
     this.stateMachine = new StateMachine<Superstructure.SuperstructureTuple,Superstructure.SuperstructureState>(SuperstructureState.Home, () -> elevatorStateMachine.atGoalState() && endEffectorStateMachine.atGoalState());
     this.autoDropElevatorTrigger = new RunnableTrigger(() -> autoDropElevator && endEffector.isScoring() && elevatorStateMachine.atAnyState(ElevatorState.L1,ElevatorState.L2,ElevatorState.L3,ElevatorState.L4));
-    this.liftIntake = new RunnableTrigger(() -> endEffector.hasGamePiece() && stateMachine.getGoalState().equals(SuperstructureState.Home));
-    this.dropIntake = new RunnableTrigger(() -> !endEffector.hasGamePiece() && stateMachine.getGoalState().equals(SuperstructureState.Home));
-    autoDropElevatorTrigger.onFalse(setState(SuperstructureState.Intaking));
+    this.liftIntake = new RunnableTrigger(() -> endEffector.hasGamePiece());  
 
-    
+    autoDropElevatorTrigger.onFalse(setState(SuperstructureState.Home));  
     liftIntake.onTrue(setState(SuperstructureState.Home));
-    dropIntake.onTrue(setState(SuperstructureState.Intaking));
-
   }
 
   public boolean elevatorAtSetpoint()
   {
-    // if(elevator.controller.atSetpoint())
-    // {
-    //   SmartDashboard.putBoolean("At Setpoint", elevator.controller.atSetpoint());
-      return true;
-    // }
-    // else
-    // {
-      // return false;
-    // }
+    if(elevator.controller.atSetpoint())
+    {
+      SmartDashboard.putBoolean("At Setpoint", elevator.controller.atSetpoint());
+    }
+    else
+    {
+      return false;
+    }
   }
 
 
@@ -148,7 +142,15 @@ public class Superstructure extends SubsystemBase {
   }
 
   public void endEffectorStateManager(EndEffectorState state){
+
+    if(!elevatorAtSetpoint())
+    {
+    endEffectorStateMachine.setGoalState(EndEffectorState.Home);
+    }
+    else
+    {
     endEffectorStateMachine.setGoalState(state);
+    }
   }
 
   public void update(){
@@ -177,15 +179,6 @@ public class Superstructure extends SubsystemBase {
 
     if(endEffector.isAutoEndScoring() && endEffector.isScoring() && !endEffector.hasGamePiece()) {
       stateMachine.setGoalState(SuperstructureState.Home);
-    }
-
-    if(!endEffector.hasGamePiece() && stateMachine.atAnyState(SuperstructureState.Home))
-    {
-      stateMachine.setGoalState(SuperstructureState.Intaking);
-    }
-    if(endEffector.hasGamePiece())
-    {
-      stateMachine.setGoalState(SuperstructureState.L1);
     }
   }
 
