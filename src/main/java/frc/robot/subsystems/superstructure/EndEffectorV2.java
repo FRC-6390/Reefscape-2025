@@ -1,27 +1,35 @@
 package frc.robot.subsystems.superstructure;
 
+import ca.frc6390.athena.commands.RunnableTrigger;
 import ca.frc6390.athena.core.RobotBase;
+import ca.frc6390.athena.mechanisms.ArmMechanism.StatefulArmMechanism;
 import ca.frc6390.athena.mechanisms.Mechanism.StatefulMechanism;
+import ca.frc6390.athena.mechanisms.Mechanism;
 import ca.frc6390.athena.mechanisms.StateMachine;
 import ca.frc6390.athena.mechanisms.StateMachine.SetpointProvider;
 import ca.frc6390.athena.sensors.beambreak.IRBeamBreak;
+import ca.frc6390.athena.sensors.limitswitch.GenericLimitSwitch;
+import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.subsystems.superstructure.endeffector.AlgaeExtender;
 import frc.robot.subsystems.superstructure.endeffector.AlgaeExtender.AlgaeExtenderState;
-import frc.robot.subsystems.superstructure.endeffector.Rollers;
+// import frc.robot.subsystems.superstructure.endeffector.Rollers;
 import frc.robot.subsystems.superstructure.endeffector.Rotator;
 import frc.robot.subsystems.superstructure.endeffector.Rotator.RotatorState;
-import frc.robot.Constants.EndEffector.PivotState;
+import frc.robot.Constants.EndEffector.ArmState;
+import frc.robot.Constants.EndEffector.WristState;
 import frc.robot.Constants.EndEffector.RollerState;
 
 
 public class EndEffectorV2 extends SubsystemBase{
 
-    private final StatefulMechanism<PivotState> joint1;
-    private final StatefulMechanism<PivotState> joint2;
+    private final StatefulArmMechanism<ArmState> joint1;
+    private final StatefulArmMechanism<WristState> joint2;
+    private RunnableTrigger liftIntake;
 
     private final StatefulMechanism<RollerState> rollers;
 
@@ -29,20 +37,21 @@ public class EndEffectorV2 extends SubsystemBase{
 
     private final StateMachine<EndEffectorTuple, EndEffectorState> stateMachine;
 
-    private final IRBeamBreak beamBreakLeft, beamBreakRight, beamBreakCenter;
+    private final GenericLimitSwitch proximitySensor;
 
-    public record EndEffectorTuple(RollerState rollerState,  PivotState joint1state, PivotState joint2state) {}
+    public record EndEffectorTuple(RollerState rollerState,  ArmState joint1state, WristState joint2state) {}
     
     public enum EndEffectorState implements SetpointProvider<EndEffectorTuple>
     {
-        L4(new EndEffectorTuple(RollerState.Stopped, PivotState.Scoring, PivotState.ScoringJoint2)),
-        L3(new EndEffectorTuple(RollerState.Stopped,  PivotState.Scoring, PivotState.ScoringJoint2)),
-        L2(new EndEffectorTuple(RollerState.Stopped, PivotState.Scoring, PivotState.ScoringJoint2)),
-        L1(new EndEffectorTuple(RollerState.Stopped, PivotState.Scoring,PivotState.ScoringJoint2)),
-        Score(new EndEffectorTuple(RollerState.Scoring, PivotState.Scoring,PivotState.ScoringJoint2)),
+        L4(new EndEffectorTuple(RollerState.Stopped, ArmState.ScoringL4, WristState.ScoringL4)),
+        L3(new EndEffectorTuple(RollerState.Stopped,  ArmState.Scoring, WristState.Scoring)),
+        L2(new EndEffectorTuple(RollerState.Stopped, ArmState.Scoring, WristState.Scoring)),
+        L1(new EndEffectorTuple(RollerState.Stopped, ArmState.Scoring,WristState.Scoring)),
+        Score(new EndEffectorTuple(RollerState.Running, ArmState.Scoring,WristState.Scoring)),
         Stop(new EndEffectorTuple(RollerState.Stopped, null, null)),
-        Home(new EndEffectorTuple(RollerState.Stopped, PivotState.Home, PivotState.HomeJoint2)),
-        Intaking(new EndEffectorTuple(RollerState.Intaking, PivotState.Intaking, PivotState.IntakingJoint2));
+        Home(new EndEffectorTuple(RollerState.Stopped, ArmState.Home, WristState.Home)),
+        Reverse(new EndEffectorTuple(RollerState.Reverse, null, null)),
+        Intaking(new EndEffectorTuple(RollerState.Running, ArmState.Intaking, WristState.Intaking));
 
 
         private EndEffectorTuple states;
@@ -60,17 +69,18 @@ public class EndEffectorV2 extends SubsystemBase{
 
    
 
-    public EndEffectorV2( StatefulMechanism<PivotState> joint1,StatefulMechanism<PivotState> joint2, StatefulMechanism<RollerState>  Rollers ){
+    public EndEffectorV2( StatefulArmMechanism<ArmState> joint1, StatefulArmMechanism<WristState> joint2, StatefulMechanism<RollerState> Rollers ){
     
         this.joint1 = joint1;
         this.rollers = Rollers;
-        this.joint2 = joint2;
+        this.joint2 = joint2;    
 
-        beamBreakLeft = new IRBeamBreak(1);
-        beamBreakCenter = new IRBeamBreak(0);
-        beamBreakRight = new IRBeamBreak(2);
+        proximitySensor = new GenericLimitSwitch(4, true);
 
-        this.stateMachine = new StateMachine<EndEffectorTuple,EndEffectorState>(EndEffectorState.Home, () -> rollers.getStateMachine().atGoalState() && joint1.getStateMachine().atGoalState());
+        this.stateMachine = new StateMachine<EndEffectorTuple,EndEffectorState>(EndEffectorState.Home, () -> joint1.getStateMachine().atGoalState()&& joint2.getStateMachine().atGoalState());
+        proximitySensor.onTrue(() -> stateMachine.setGoalState(EndEffectorState.L1));
+        proximitySensor.onFalse(() -> stateMachine.setGoalState(EndEffectorState.L1));
+        // proximitySensor.onTrue(() -> stateMachine.setGoalState(EndEffectorState.Reverse)).after(0.1).onTrue(() ->stateMachine.setGoalState(EndEffectorState.Home));
     }
 
     public StateMachine<EndEffectorTuple, EndEffectorState> getStateMachine() {
@@ -78,11 +88,7 @@ public class EndEffectorV2 extends SubsystemBase{
     }
 
     public boolean hasGamePiece(){
-        return beamBreakLeft.getAsBoolean() || beamBreakCenter.getAsBoolean() || beamBreakRight.getAsBoolean();
-    }
-
-    public boolean hasNoPiece(){
-        return !beamBreakLeft.getAsBoolean() && !beamBreakCenter.getAsBoolean() && !beamBreakRight.getAsBoolean();
+        return proximitySensor.getAsBoolean();
     }
 
     public ShuffleboardTab shuffleboard(String tab) {
@@ -91,16 +97,14 @@ public class EndEffectorV2 extends SubsystemBase{
 
     public ShuffleboardTab shuffleboard(ShuffleboardTab tab) {
        
-        tab.addBoolean("BeamBreakLeft", () -> beamBreakLeft.getAsBoolean());
-        tab.addBoolean("BeamBreakRight", () -> beamBreakRight.getAsBoolean());
-        tab.addBoolean("BeamBreakCenter", () -> beamBreakCenter.getAsBoolean());
+        tab.addBoolean("Has Game Piece", () -> hasGamePiece());
 
 
         return tab;
     } 
 
     public boolean isScoring(){
-        return rollers.getStateMachine().atAnyState(RollerState.Scoring);
+        return rollers.getStateMachine().atAnyState(RollerState.Running);
     }
 
     public EndEffectorV2 setAutoEndScoring(boolean autoEndScoring) {
@@ -110,7 +114,6 @@ public class EndEffectorV2 extends SubsystemBase{
 
 
     public void update(){
-
 
         stateMachine.update();
         rollers.update();
@@ -130,7 +133,6 @@ public class EndEffectorV2 extends SubsystemBase{
                 if (val.rollerState != null) rollers.getStateMachine().setGoalState(val.rollerState);
                 if (val.joint1state != null) joint1.getStateMachine().setGoalState(val.joint1state);
                 if (val.joint2state != null) joint2.getStateMachine().setGoalState(val.joint2state);
-
             default:
                 break;
         }
@@ -141,7 +143,7 @@ public class EndEffectorV2 extends SubsystemBase{
         return rollers;
     }
 
-    public StatefulMechanism<PivotState> getJoint1() {
+    public StatefulArmMechanism<ArmState> getJoint1() {
         return joint1;
     }
 

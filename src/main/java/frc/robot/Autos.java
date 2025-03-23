@@ -18,6 +18,7 @@ public class Autos {
   public enum AUTOS {
         
         LEFTSIDE("LeftSide", false),
+        LEFTSIDETEST("LeftSideTest", false),
         LEFTLOLIPOP("LeftLoliPop", false),
 
 

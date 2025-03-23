@@ -82,7 +82,7 @@ public class Superstructure extends SubsystemBase {
     this.stateMachine = new StateMachine<Superstructure.SuperstructureTuple,Superstructure.SuperstructureState>(SuperstructureState.Home, () -> elevatorStateMachine.atGoalState() && endEffectorStateMachine.atGoalState());
     this.autoDropElevatorTrigger = new RunnableTrigger(() -> autoDropElevator && endEffector.isScoring() && elevatorStateMachine.atAnyState(ElevatorState.L1,ElevatorState.L2,ElevatorState.L3,ElevatorState.L4));
     this.liftIntake = new RunnableTrigger(() -> endEffector.hasGamePiece() && stateMachine.getGoalState().equals(SuperstructureState.Home));
-    this.dropIntake = new RunnableTrigger(() -> endEffector.hasNoPiece()&& stateMachine.getGoalState().equals(SuperstructureState.Home));
+    this.dropIntake = new RunnableTrigger(() -> !endEffector.hasGamePiece() && stateMachine.getGoalState().equals(SuperstructureState.Home));
     autoDropElevatorTrigger.onFalse(setState(SuperstructureState.Intaking));
 
     
@@ -93,15 +93,15 @@ public class Superstructure extends SubsystemBase {
 
   public boolean elevatorAtSetpoint()
   {
-    if(elevator.controller.atSetpoint())
-    {
-      SmartDashboard.putBoolean("At Setpoint", elevator.controller.atSetpoint());
+    // if(elevator.controller.atSetpoint())
+    // {
+    //   SmartDashboard.putBoolean("At Setpoint", elevator.controller.atSetpoint());
       return true;
-    }
-    else
-    {
-      return false;
-    }
+    // }
+    // else
+    // {
+      // return false;
+    // }
   }
 
 
@@ -179,7 +179,7 @@ public class Superstructure extends SubsystemBase {
       stateMachine.setGoalState(SuperstructureState.Home);
     }
 
-    if(endEffector.hasNoPiece() && stateMachine.atAnyState(SuperstructureState.Home))
+    if(!endEffector.hasGamePiece() && stateMachine.atAnyState(SuperstructureState.Home))
     {
       stateMachine.setGoalState(SuperstructureState.Intaking);
     }

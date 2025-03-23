@@ -130,8 +130,8 @@ public class AutoPickup extends Command {
 
     if(targetVisible)
     {
-    base.getDrivetrain().getRobotSpeeds().enableSpeeds(SpeedSource.AUTO, false);
-    base.getDrivetrain().getRobotSpeeds().stopAutoSpeeds();
+      base.getDrivetrain().getRobotSpeeds().setSpeedSourceState("auto", false);
+    base.getDrivetrain().getRobotSpeeds().stopSpeeds("auto");
 
     double rSpeed = rController.calculate(targetYaw, 0);
     double xSpeed = -xController.calculate(targetPitch, 0);
@@ -140,7 +140,7 @@ public class AutoPickup extends Command {
     }
     else
     {
-      base.getDrivetrain().getRobotSpeeds().enableSpeeds(SpeedSource.AUTO, true);
+      base.getDrivetrain().getRobotSpeeds().setSpeedSourceState("auto", false);
     }
     // else
     // {
@@ -154,7 +154,7 @@ public class AutoPickup extends Command {
   @Override
   public void end(boolean interrupted) 
   {
-    base.getDrivetrain().getRobotSpeeds().setFeedbackSpeeds(0,0,0);
+    base.getDrivetrain().getRobotSpeeds().stopSpeeds("feedback");
   }
 
 

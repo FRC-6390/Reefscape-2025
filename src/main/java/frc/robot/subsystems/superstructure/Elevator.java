@@ -13,6 +13,7 @@ import com.ctre.phoenix6.signals.NeutralModeValue;
 import ca.frc6390.athena.mechanisms.StateMachine;
 import ca.frc6390.athena.mechanisms.StateMachine.SetpointProvider;
 import ca.frc6390.athena.sensors.limitswitch.GenericLimitSwitch;
+import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.controller.ElevatorFeedforward;
 import edu.wpi.first.math.controller.ProfiledPIDController;
 import edu.wpi.first.units.measure.Angle;
@@ -50,7 +51,7 @@ public class Elevator extends SubsystemBase{
     //47.25
     L3(48),
     //72
-    L4(77.23066732041963);
+    L4(76.23066732041963);
 
 
     double pos;
@@ -77,7 +78,7 @@ public class Elevator extends SubsystemBase{
     leftMotor.setNeutralMode(NeutralModeValue.Brake);
     rightMotor.setNeutralMode(NeutralModeValue.Brake);
 
-    CurrentLimitsConfigs currentLimitsConfigs = new CurrentLimitsConfigs().withStatorCurrentLimit(40);
+    CurrentLimitsConfigs currentLimitsConfigs = new CurrentLimitsConfigs().withStatorCurrentLimit(60);
     currentLimitsConfigs.StatorCurrentLimitEnable = true;
     leftMotor.getConfigurator().apply(currentLimitsConfigs);
     rightMotor.getConfigurator().apply(currentLimitsConfigs);
@@ -101,12 +102,12 @@ public class Elevator extends SubsystemBase{
 
   public double getHeight()
   {
-    return -(getPosition.getValueAsDouble() / Constants.Elevator.ENCODER_GEAR_RATIO) * Math.PI *  Constants.Elevator.GEAR_DIAMETER_INCHES;
+    return (getPosition.getValueAsDouble() / Constants.Elevator.ENCODER_GEAR_RATIO) * Math.PI *  Constants.Elevator.GEAR_DIAMETER_INCHES;
   }
 
   public double getVelocity()
   {
-    return -(getVelocity.getValueAsDouble() / Constants.Elevator.ENCODER_GEAR_RATIO) * Math.PI *  Constants.Elevator.GEAR_DIAMETER_INCHES;
+    return (getVelocity.getValueAsDouble() / Constants.Elevator.ENCODER_GEAR_RATIO) * Math.PI *  Constants.Elevator.GEAR_DIAMETER_INCHES;
   }
 
   public double getHeightFromFloor(){
@@ -130,16 +131,21 @@ public class Elevator extends SubsystemBase{
   //MOVES ELEVATOR UP OR DOWN
   public void setMotors(double speed)
   {
+    
     if(encoder != null)
     {
-    // if (lowerlimitSwitch.getAsBoolean() && speed < 0){
-    //   speed = 0;
+    if (lowerlimitSwitch.getAsBoolean() && speed < 0){
+      speed = 0;
+    }
+
+    // if(speed < 0)
+    // {
+      double sped = MathUtil.clamp(speed, -0.25, 1);
     // }
-    //negative is up, this makes negative down
+    // negative is up, this makes negative down
    
-    // speed = speed;
-    leftMotor.set(speed);
-    rightMotor.set(-speed);
+    leftMotor.set(sped);
+    rightMotor.set(-sped);
   }
   }
   
@@ -185,16 +191,16 @@ public class Elevator extends SubsystemBase{
 
   public void update()
   {
-    
-    // switch (stateMachine.getGoalState()) {
-    //   case Home:
-    //     setMotors(-0.1);
-    //     resetNudge();
-    //     break;
-    //   case L1, L2, L3, L4, AlgaeHigh, AlgaeLow:
-    //     double speed = controller.calculate(getHeightFromFloor(),stateMachine.getGoalState().getSetpoint()) + feedforward.calculate(controller.getSetpoint().velocity) / 12;
-    //     setMotors(speed);
-    // }
+
+    switch (stateMachine.getGoalState()) {
+      case Home:
+        setMotors(-0.1);
+        resetNudge();
+        break;
+      case L1, L2, L3, L4, AlgaeHigh, AlgaeLow:
+        double speed = controller.calculate(getHeightFromFloor(),stateMachine.getGoalState().getSetpoint()) + feedforward.calculate(controller.getSetpoint().velocity) / 12;
+        setMotors(speed);
+    }
     
   }
 

@@ -21,7 +21,7 @@
                     {
                       "type": "named",
                       "data": {
-                        "name": "AlignLeft"
+                        "name": "AlignRight"
                       }
                     },
                     {
@@ -84,7 +84,7 @@
                     {
                       "type": "named",
                       "data": {
-                        "name": "AlignRight"
+                        "name": "AlignRightK"
                       }
                     },
                     {
@@ -147,7 +147,7 @@
                     {
                       "type": "named",
                       "data": {
-                        "name": "AlignLeft"
+                        "name": "AlignLeftK"
                       }
                     },
                     {

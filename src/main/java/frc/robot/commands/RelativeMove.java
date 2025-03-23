@@ -23,7 +23,7 @@ public class RelativeMove extends Command{
 
     @Override
     public void execute() {
-        base.getRobotSpeeds().setFeedbackSpeeds(ChassisSpeeds.fromFieldRelativeSpeeds(x, y, z, base.getLocalization().getRelativePose().getRotation()));
+        base.getRobotSpeeds().setSpeeds("feedback", ChassisSpeeds.fromFieldRelativeSpeeds(x, y, z, base.getLocalization().getRelativePose().getRotation()));
     }
 
     @Override

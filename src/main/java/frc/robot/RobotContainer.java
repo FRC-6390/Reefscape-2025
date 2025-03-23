@@ -33,7 +33,10 @@ import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.WaitCommand;
 import frc.robot.Autos.AUTOS;
 import frc.robot.Constants.Climber.ClimberState;
-import frc.robot.Constants.EndEffector.PivotState;
+import frc.robot.Constants.EndEffector.ArmState;
+import frc.robot.Constants.EndEffector.WristState;
+import frc.robot.Constants.EndEffector.RollerState;
+
 import frc.robot.commands.auto.AtState;
 import frc.robot.commands.auto.AutoPickup;
 import frc.robot.commands.auto.BasicAlign;
@@ -43,7 +46,11 @@ import frc.robot.subsystems.superstructure.CANdleSubsystem;
 import frc.robot.subsystems.superstructure.Climber;
 import frc.robot.subsystems.superstructure.Elevator;
 import frc.robot.subsystems.superstructure.Elevator.ElevatorState;
+import frc.robot.subsystems.superstructure.EndEffectorV2.EndEffectorState;
+import frc.robot.utils.ReefScoringPos.ReefLevel;
+import frc.robot.utils.ReefScoringPos.ReefPole;
 import frc.robot.subsystems.superstructure.EndEffector;
+import frc.robot.subsystems.superstructure.EndEffectorV2;
 
 public class RobotContainer {
 
@@ -53,13 +60,16 @@ public class RobotContainer {
   
   public final RobotBase<SwerveDrivetrain> robotBase = Constants.DriveTrain.ROBOT_BASE.create().shuffleboard();
   // public final StatefulMechanism<ClimberState> climberTest = Constants.Climber.CLIMBER_CONFIG.build().shuffleboard("Climber Test");
-  public final StatefulArmMechanism<PivotState> arm = Constants.EndEffector.ARM_CONFIG.build().shuffleboard("Arm");
+  public final StatefulArmMechanism<ArmState> arm = Constants.EndEffector.ARM_CONFIG.build().shuffleboard("Arm");
+  public final StatefulArmMechanism<WristState> wrist = Constants.EndEffector.WRIST_CONFIG.build().shuffleboard("Wrist");
+  public final StatefulMechanism<RollerState> rollers = Constants.EndEffector.ROLLER_CONFIG.build().shuffleboard("Rollers");
+
   double speed = 0.5;
   double current = 40;
 
   public Elevator elevator = new Elevator();
   // public Climber climber = new Climber();
-  // public EndEffector endEffector = new EndEffector(robotBase).setAutoEndScoring(true);
+  public EndEffectorV2 endEffector = new EndEffectorV2(arm, wrist, rollers);
   // public Superstructure superstructure = new Superstructure(elevator, endEffector, robotBase);
   public CANdleSubsystem candle = new CANdleSubsystem(robotBase);
 
@@ -77,8 +87,12 @@ public class RobotContainer {
   public RobotContainer() 
   {
     configureBindings();
-    arm.setPidEnabled(false);
+    arm.setPidEnabled(true);
     arm.setFeedforwardEnabled(false);
+    wrist.setPidEnabled(true);
+    wrist.setFeedforwardEnabled(false);
+    rollers.setPidEnabled(true);
+    rollers.setFeedforwardEnabled(false);
     Shuffleboard.getTab("Elevator").addDouble("Speed", () -> speed);
     Shuffleboard.getTab("Elevator").addDouble("Current", () -> current);
 
@@ -94,11 +108,15 @@ public class RobotContainer {
     // NamedCommands.registerCommand("StartEject", superstructure.setState(SuperstructureState.Score));
     // NamedCommands.registerCommand("WaitForElevator",Commands.race( new AtState(superstructure), new WaitCommand(3)));
     // NamedCommands.registerCommand("WaitForEjector", Commands.race( new AtStateEjector(endEffector), new WaitCommand(3)));
-    NamedCommands.registerCommand("AlignRight", new TagAlign(robotBase, "limelight-right", new InstantCommand(() -> candle.setRGB(0, 0, 255)), Units.inchesToMeters(22)));
-    NamedCommands.registerCommand("AlignLeft", new TagAlign(robotBase, "limelight-left", new InstantCommand(() -> candle.setRGB(0, 0, 255)), Units.inchesToMeters(22)));
-    NamedCommands.registerCommand("AlignRightFar", new TagAlign(robotBase, "limelight-right",  new InstantCommand(() -> candle.setRGB(0, 0, 255)), Units.inchesToMeters(22)));
-    NamedCommands.registerCommand("AlignLeftFar", new TagAlign(robotBase, "limelight-left", new InstantCommand(() -> candle.setRGB(0, 0, 255)), Units.inchesToMeters(22)));
-    NamedCommands.registerCommand("Pickup", new AutoPickup(robotBase));
+    NamedCommands.registerCommand("AlignRight", new TagAlign(robotBase, "limelight-right", new InstantCommand(() -> candle.setRGB(0, 0, 255)), Units.inchesToMeters(22),ReefPole.NONE, candle));
+    NamedCommands.registerCommand("AlignLeft", new TagAlign(robotBase, "limelight-left", new InstantCommand(() -> candle.setRGB(0, 0, 255)), Units.inchesToMeters(22),ReefPole.NONE, candle));
+    NamedCommands.registerCommand("AlignRightK", new TagAlign(robotBase, "limelight-right",  new InstantCommand(() -> candle.setRGB(0, 0, 255)), Units.inchesToMeters(22), ReefPole.K,candle));
+    NamedCommands.registerCommand("AlignLeftK", new TagAlign(robotBase, "limelight-left", new InstantCommand(() -> candle.setRGB(0, 0, 255)), Units.inchesToMeters(22), ReefPole.K,candle));
+   
+    NamedCommands.registerCommand("BasicAlignLeft", new BasicAlign(robotBase, "limelight-left"));
+    NamedCommands.registerCommand("BasicAlignRight", new BasicAlign(robotBase, "limelight-right"));
+    NamedCommands.registerCommand("BasicAlignLeftK", new BasicAlign(robotBase, "limelight-left", ReefPole.K));
+    NamedCommands.registerCommand("BasicAlignRightK", new BasicAlign(robotBase, "limelight-right", ReefPole.K));
 
     NamedCommands.registerCommand("Home", new InstantCommand(() -> candle.setRGB(0, 0, 0)));
     NamedCommands.registerCommand("Score", new InstantCommand(() -> candle.setRGB(0, 255, 0)));
@@ -113,7 +131,6 @@ public class RobotContainer {
   private void configureBindings() 
   {
 
-    driverController.a.onTrue(new InstantCommand(() -> candle.setRGB(0, 0, 255)));
     //TODO
         //  TEST RETURN TO SCORE
         //  TEST STRAFE
@@ -134,18 +151,32 @@ public class RobotContainer {
 
     //RESET ODOMETRY
     driverController.start.onTrue(() -> robotBase.getDrivetrain().getIMU().setYaw(0)).after(2).onTrue(() -> robotBase.getLocalization().resetFieldPose(0,0, 0));
-    driverController.leftBumper.whileTrue(() -> elevator.setMotors(speed)).onFalse(() -> elevator.setMotors(0));
-    driverController.rightBumper.whileTrue(() -> elevator.setMotors(-speed)).onFalse(() -> elevator.setMotors(0));
-    driverController.pov.up.onTrue(() -> speed += 0.1);
-    driverController.pov.down.onTrue(() -> speed -= 0.1);
+    // driverController.leftBumper.whileTrue(() -> elevator.setMotors(speed)).onFalse(() -> elevator.setMotors(0));
+    // driverController.rightBumper.whileTrue(() -> elevator.setMotors(-speed)).onFalse(() -> elevator.setMotors(0));
+    // driverController.pov.up.onTrue(() -> speed += 0.1);
+    // driverController.pov.down.onTrue(() -> speed -= 0.1);
 
-    driverController.pov.left.onTrue(() -> {current += 0.5; elevator.setCurrentLimit(current);});
-    driverController.pov.right.onTrue(() ->  {current -= 0.5; elevator.setCurrentLimit(current);});
+    // driverController.pov.left.onTrue(() -> {speed += 0.5; elevator.setCurrentLimit(current);});
+    // driverController.pov.right.onTrue(() ->  {speed -= 0.5; elevator.setCurrentLimit(current);});
 
 
-    driverController.a.whileTrue(() -> arm.setMotors(speed)).onFalse(() -> arm.setMotors(0));
-    driverController.b.whileTrue(() -> arm.setMotors(-speed)).onFalse(() -> arm.setMotors(0));
+    // driverController.leftBumper.whileTrue(() -> endEffector.getStateMachine().setGoalState(EndEffectorState.L1)).after(1.25).onTrue(() -> endEffector.getStateMachine().setGoalState(EndEffectorState.Score));
+    driverController.rightBumper.whileTrue(() -> {elevator.getStateMachine().setGoalState(ElevatorState.Home); endEffector.getStateMachine().setGoalState(EndEffectorState.Intaking);});
+
+    // driverController.b.whileTrue(() -> endEffector.getStateMachine().setGoalState(EndEffectorState.Intaking));
+
+    // driverController.x.whileTrue(() -> wrist.getStateMachine().setGoalState(WristState.Intaking));
+    // driverController.y.whileTrue(() -> wrist.getStateMachine().setGoalState(WristState.Scoring));
     
+    // driverController.a.whileTrue(() -> arm.setMotors(speed)).onFalse(() -> arm.setMotors(0));
+    // driverController.b.whileTrue(() -> arm.setMotors(-speed)).onFalse(() -> arm.setMotors(0));
+    // driverController.x.whileTrue(() -> wrist.setMotors(speed)).onFalse(() -> wrist.setMotors(0));
+    // driverController.y.whileTrue(() -> wrist.setMotors(-speed)).onFalse(() -> wrist.setMotors(0));
+    driverController.a.onTrue(() -> {endEffector.getStateMachine().setGoalState(EndEffectorState.L1);elevator.getStateMachine().setGoalState(ElevatorState.L1);}).after(2).onTrue(() -> {endEffector.getStateMachine().setGoalState(EndEffectorState.Score);});//.after(1.25).onTrue(() -> endEffector.getStateMachine().setGoalState(EndEffectorState.Score));;
+    driverController.b.onTrue(() -> {endEffector.getStateMachine().setGoalState(EndEffectorState.L2);elevator.getStateMachine().setGoalState(ElevatorState.L2);}).after(2).onTrue(() -> endEffector.getStateMachine().setGoalState(EndEffectorState.Score));//.after(1.25).onTrue(() -> endEffector.getStateMachine().setGoalState(EndEffectorState.Score));;
+    driverController.x.onTrue(() -> {endEffector.getStateMachine().setGoalState(EndEffectorState.L3);elevator.getStateMachine().setGoalState(ElevatorState.L3);}).after(2).onTrue(() -> endEffector.getStateMachine().setGoalState(EndEffectorState.Score));//.after(1.25).onTrue(() -> endEffector.getStateMachine().setGoalState(EndEffectorState.Score));;
+    driverController.y.onTrue(() -> {endEffector.getStateMachine().setGoalState(EndEffectorState.L4);elevator.getStateMachine().setGoalState(ElevatorState.L4);}).after(2).onTrue(() -> endEffector.getStateMachine().setGoalState(EndEffectorState.Score));//.after(1.25).onTrue(() -> endEffector.getStateMachine().setGoalState(EndEffectorState.Score));;
+
     // driverController.b.whileTrue(() -> {
 
     //   System.out.println("running");
@@ -159,7 +190,7 @@ public class RobotContainer {
     //       System.out.println("Connected: " + cam.isConnected());
     //       System.out.println("unread: " + cam.getAllUnreadResults().size());
 
-         
+        //  endEffector.getStateMachine().setGoalState(EndEffectorState.L4);elevator.getStateMachine().setGoalState(ElevatorState.L4);}).after(2).onTrue(() -> elevator.getStateMachine().setGoalState(ElevatorState.Home)
 
     //       // if (visionEst.isPresent()) {
     //       //     return visionEst.get().estimatedPose.toPose2d();
@@ -190,10 +221,10 @@ public class RobotContainer {
     // driverController.leftTrigger.tiggerAt(0.5).onTrue(superstructure.setState(SuperstructureState.AlgaeLow)).onFalse(superstructure.setState(SuperstructureState.AlgaeRetract));
     
     //STRAFING
-    // driverController.pov.left.whileTrue(new TagAlign(robotBase, "limelight-left", new InstantCommand(() -> candle.setRGB(0, 0, 255)), Units.inchesToMeters(22)));
-    // driverController.pov.right.whileTrue(new TagAlign(robotBase, "limelight-right", new InstantCommand(() -> candle.setRGB(0, 0, 255)), Units.inchesToMeters(22)));
-    // driverController.pov.up.whileTrue(new BasicAlign(robotBase, "limelight-left"));
-    // driverController.pov.down.whileTrue(new BasicAlign(robotBase, "limelight-right"));
+    // driverController.pov.left.whileTrue(new TagAlign(robotBase, "limelight-left", new InstantCommand(() -> candle.setRGB(255, 255, 255)), Units.inchesToMeters(22), ReefPole.K, candle));
+    // driverController.pov.right.whileTrue(new TagAlign(robotBase, "limelight-right", new InstantCommand(() -> candle.setRGB(255, 255, 255)), Units.inchesToMeters(22), candle));
+    driverController.pov.up.whileTrue(new BasicAlign(robotBase, "limelight-left"));
+    driverController.pov.down.whileTrue(new BasicAlign(robotBase, "limelight-right"));
 
     // driverController.pov.right.onTrue(() -> superstructure.setState(SuperstructureState.L2)).after(1).onTrue(() -> climber.setClimber(10));
     // driverController.pov.left.onTrue(() -> superstructure.setState(SuperstructureState.L2)).after(1).onTrue(() -> climber.setClimber(0));
