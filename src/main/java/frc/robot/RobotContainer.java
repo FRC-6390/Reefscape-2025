@@ -38,10 +38,12 @@ public class RobotContainer {
   public final RobotBase<SwerveDrivetrain> robotBase = Constants.DriveTrain.ROBOT_BASE.create();//.shuffleboard();
   public final StatefulArmMechanism<ArmState> arm = Constants.EndEffector.ARM_CONFIG.build().shuffleboard("Arm");
   public final StatefulArmMechanism<WristState> wrist = Constants.EndEffector.WRIST_CONFIG.build().shuffleboard("Wrist");
-  public final StatefulMechanism<RollerState> rollers = Constants.EndEffector.ROLLER_CONFIG.build();//.shuffleboard("Rollers");
+  public final StatefulMechanism<RollerState> rollers = Constants.EndEffector.CORAL_ROLLERS.build();//.shuffleboard("Rollers");
+  public final StatefulMechanism<RollerState> algaeRollers = Constants.EndEffector.ALGAE_ROLLERS.build();//.shuffleboard("Rollers");
+
 
   public Elevator elevator = new Elevator();
-  public EndEffectorV2 endEffector = new EndEffectorV2(arm, wrist, rollers).setAutoEndScoring(true);
+  public EndEffectorV2 endEffector = new EndEffectorV2(arm, wrist, rollers,algaeRollers).setAutoEndScoring(true);
   public Superstructure superstructure = new Superstructure(elevator, endEffector, robotBase);
   public CANdleSubsystem candle = new CANdleSubsystem(robotBase);
 
@@ -71,6 +73,8 @@ public class RobotContainer {
     // elevator.setDefaultCommand(elevate);
     
     NamedCommands.registerCommand("Home", superstructure.setState(SuperstructureState.Home));
+    NamedCommands.registerCommand("Intake", superstructure.setState(SuperstructureState.Intaking));
+
     NamedCommands.registerCommand("L4", superstructure.setState(SuperstructureState.L4));
     NamedCommands.registerCommand("StartEject", superstructure.setState(SuperstructureState.Score));
     NamedCommands.registerCommand("WaitForElevator",superstructure.WaitForElevator());
@@ -86,7 +90,9 @@ public class RobotContainer {
     NamedCommands.registerCommand("BasicAlignRight", Commands.sequence(superstructure.setState(SuperstructureState.Align),new BasicAlign(robotBase, "limelight-right")));
     NamedCommands.registerCommand("BasicAlignLeftK", Commands.sequence(superstructure.setState(SuperstructureState.Align),new BasicAlign(robotBase, "limelight-left", ReefPole.K)));
     NamedCommands.registerCommand("BasicAlignRightK", Commands.sequence(superstructure.setState(SuperstructureState.Align),new BasicAlign(robotBase, "limelight-right", ReefPole.K)));
-    
+    NamedCommands.registerCommand("BasicAlignLeftA", Commands.sequence(superstructure.setState(SuperstructureState.Align),new BasicAlign(robotBase, "limelight-left", ReefPole.A)));
+    NamedCommands.registerCommand("BasicAlignRightA", Commands.sequence(superstructure.setState(SuperstructureState.Align),new BasicAlign(robotBase, "limelight-right", ReefPole.A)));
+
 
     chooser = Autos.AUTOS.createChooser(AUTOS.LEFTSIDE);
     SmartDashboard.putData(chooser);
@@ -111,13 +117,13 @@ public class RobotContainer {
     driverController.pov.down.whileTrue(() -> System.out.println(robotBase.getVision().getPhotonVision("Tag").isConnected()));
 
 
-    driverController.pov.left.whileTrue(new BasicAlign(robotBase, "limelight-left"));
+    driverController.pov.left.whileTrue(new BasicAlign(robotBase, "limelight-left", ReefPole.A));
     driverController.pov.right.whileTrue(new BasicAlign(robotBase, "limelight-right"));
 
-    driverController.a.onTrue(Commands.sequence(superstructure.setState(SuperstructureState.L1))).after(1.2).onTrue(superstructure.setState(SuperstructureState.Score));
-    driverController.b.onTrue(Commands.sequence(superstructure.setState(SuperstructureState.L2))).after(1.2).onTrue(superstructure.setState(SuperstructureState.Score));
-    driverController.x.onTrue(Commands.sequence(superstructure.setState(SuperstructureState.L3))).after(1.2).onTrue(superstructure.setState(SuperstructureState.Score));
-    driverController.y.onTrue(Commands.sequence(superstructure.setState(SuperstructureState.L4))).after(1.2).onTrue(superstructure.setState(SuperstructureState.Score));
+    driverController.a.onTrue(Commands.sequence(superstructure.setState(SuperstructureState.L1))).after(0.75).onTrue(superstructure.setState(SuperstructureState.Score));
+    driverController.b.onTrue(Commands.sequence(superstructure.setState(SuperstructureState.L2))).after(0.75).onTrue(superstructure.setState(SuperstructureState.Score));
+    driverController.x.onTrue(Commands.sequence(superstructure.setState(SuperstructureState.L3))).after(0.75).onTrue(superstructure.setState(SuperstructureState.Score));
+    driverController.y.onTrue(Commands.sequence(superstructure.setState(SuperstructureState.L4))).after(0.75).onTrue(superstructure.setState(SuperstructureState.Score));
   }
 
   public Command getAutonomousCommand() 

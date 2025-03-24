@@ -37,7 +37,9 @@ public class EndEffectorV2 extends SubsystemBase{
 
     private RunnableTrigger liftIntake;
 
-    private final StatefulMechanism<RollerState> rollers;
+    private final StatefulMechanism<RollerState> coralRollers;
+    private final StatefulMechanism<RollerState> algaeRollers;
+
 
     private boolean autoEndScoring = true;
 
@@ -47,22 +49,22 @@ public class EndEffectorV2 extends SubsystemBase{
 
     private EndEffectorState prevState;
 
-    public record EndEffectorTuple(RollerState rollerState,  ArmState joint1state, WristState joint2state) {}
+    public record EndEffectorTuple(RollerState coralRollerState, RollerState algaeRollerState,  ArmState joint1state, WristState joint2state) {}
     
     public enum EndEffectorState implements SetpointProvider<EndEffectorTuple>
     {
-        L4(new EndEffectorTuple(RollerState.Stopped, ArmState.ScoringL4, WristState.ScoringL4)),
-        L3(new EndEffectorTuple(RollerState.Stopped,  ArmState.Scoring, WristState.Scoring)),
-        L2(new EndEffectorTuple(RollerState.Stopped, ArmState.Scoring, WristState.Scoring)),
-        L1(new EndEffectorTuple(RollerState.Stopped, ArmState.Scoring,WristState.Scoring)),
-        Score(new EndEffectorTuple(RollerState.Running, null,null)),
-        Stop(new EndEffectorTuple(RollerState.Stopped, null, null)),
-        Home(new EndEffectorTuple(RollerState.Stopped, ArmState.Home, WristState.Home)),
-        Reverse(new EndEffectorTuple(RollerState.Reverse, null, null)),
-        Intaking(new EndEffectorTuple(RollerState.Running, ArmState.Intaking, WristState.Intaking)),
-        Transition(new EndEffectorTuple(RollerState.Stopped, ArmState.TransitionState, WristState.TransitionState));
-
-
+        L4(new EndEffectorTuple(RollerState.Stopped,RollerState.Stopped, ArmState.ScoringL4, WristState.ScoringL4)),
+        L3(new EndEffectorTuple(RollerState.Stopped, RollerState.Stopped, ArmState.Scoring, WristState.Scoring)),
+        L2(new EndEffectorTuple(RollerState.Stopped,RollerState.Stopped, ArmState.Scoring, WristState.Scoring)),
+        L1(new EndEffectorTuple(RollerState.Stopped, RollerState.Stopped,ArmState.Scoring,WristState.Scoring)),
+        Score(new EndEffectorTuple(RollerState.Running,RollerState.Running, null,null)),
+        Stop(new EndEffectorTuple(RollerState.Stopped,RollerState.Stopped, null, null)),
+        Home(new EndEffectorTuple(RollerState.Stopped, RollerState.Stopped,ArmState.Home, WristState.Home)),
+        Reverse(new EndEffectorTuple(RollerState.Reverse,RollerState.Reverse, null, null)),
+        Intaking(new EndEffectorTuple(RollerState.Running, RollerState.Running, ArmState.Intaking, WristState.Intaking)),
+        AlgaeHigh(new EndEffectorTuple(RollerState.Stopped, RollerState.Running, ArmState.AlgaeHigh, WristState.AlgaeHigh)),
+        AlgaeLow(new EndEffectorTuple(RollerState.Stopped, RollerState.Reverse, ArmState.AlgaeLow, WristState.AlgaeLow)),
+        Transition(new EndEffectorTuple(RollerState.Stopped,RollerState.Stopped, ArmState.TransitionState, WristState.TransitionState));
 
         private EndEffectorTuple states;
         private EndEffectorState(EndEffectorTuple states)
@@ -79,10 +81,11 @@ public class EndEffectorV2 extends SubsystemBase{
 
    
 
-    public EndEffectorV2( StatefulArmMechanism<ArmState> joint1, StatefulArmMechanism<WristState> joint2, StatefulMechanism<RollerState> Rollers ){
+    public EndEffectorV2( StatefulArmMechanism<ArmState> joint1, StatefulArmMechanism<WristState> joint2, StatefulMechanism<RollerState> coralRollers, StatefulMechanism<RollerState> AlgaeRollers ){
     
         this.joint1 = joint1;
-        this.rollers = Rollers;
+        this.coralRollers = coralRollers;
+        this.algaeRollers = AlgaeRollers;
         this.joint2 = joint2;    
         this.prevState = EndEffectorState.Home;
 
@@ -120,7 +123,7 @@ public class EndEffectorV2 extends SubsystemBase{
     } 
 
     public boolean isScoring(){
-        return rollers.getStateMachine().atAnyState(RollerState.Running) && !joint1.getStateMachine().getGoalState().equals(ArmState.Intaking);
+        return coralRollers.getStateMachine().atAnyState(RollerState.Running) && !joint1.getStateMachine().getGoalState().equals(ArmState.Intaking);
     }
 
     public EndEffectorV2 setAutoEndScoring(boolean autoEndScoring) {
@@ -132,7 +135,7 @@ public class EndEffectorV2 extends SubsystemBase{
     public void update(){
 
         stateMachine.update();
-        rollers.update();
+        coralRollers.update();
         joint1.update();
 
         EndEffectorState state = stateMachine.getGoalState();
@@ -141,7 +144,8 @@ public class EndEffectorV2 extends SubsystemBase{
         if(!prevState.equals(state)){
             switch (state) {                  
                 default:
-                    if (val.rollerState != null) rollers.getStateMachine().queueState(val.rollerState);
+                    if (val.coralRollerState != null) coralRollers.getStateMachine().queueState(val.coralRollerState);
+                    if (val.algaeRollerState != null) algaeRollers.getStateMachine().queueState(val.algaeRollerState);
                     if (val.joint1state != null) joint1.getStateMachine().queueState(val.joint1state);
                     if (val.joint2state != null) joint2.getStateMachine().queueState(val.joint2state);
                 break;
@@ -153,8 +157,8 @@ public class EndEffectorV2 extends SubsystemBase{
     }
 
 
-    public StatefulMechanism<RollerState> getRollers() {
-        return rollers;
+    public StatefulMechanism<RollerState> getCoralRollers() {
+        return coralRollers;
     }
 
     public StatefulArmMechanism<ArmState> getJoint1() {

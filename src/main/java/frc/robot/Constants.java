@@ -76,9 +76,9 @@ public interface Constants {
                                                             .setAutoPlannerPID(7,0,0, 2,0,0).setVisionEnabled(true);
         ConfigurableCamera[] CAMERAS =
          {                                                                 
-        LimeLightConfig.table("limelight-left").setUseForLocalization(false).setYawRelativeToForwards(-15).setPoseEstimateType(PoseEstimateWithLatencyType.BOT_POSE_MT2_BLUE).setLocalizationTagFilter(17,18,19,20,21,22,6,7,8,9,10,11), 
-        LimeLightConfig.table("limelight-right").setUseForLocalization(false).setYawRelativeToForwards(15).setPoseEstimateType(PoseEstimateWithLatencyType.BOT_POSE_MT2_BLUE).setLocalizationTagFilter(17,18,19,20,21,22,6,7,8,9,10,11),
-        PhotonVisionConfig.table("Tag").setUseForLocalization(false).setCameraRobotSpace(new Transform3d(-0.29845,0.2286,Units.inchesToMeters(33),new Rotation3d(0, 0, 180))).setPoseStrategy(PoseStrategy.PNP_DISTANCE_TRIG_SOLVE)
+        LimeLightConfig.table("limelight-left").setUseForLocalization(true).setYawRelativeToForwards(-15).setPoseEstimateType(PoseEstimateWithLatencyType.BOT_POSE_MT2_BLUE).setLocalizationTagFilter(17,18,19,20,21,22,6,7,8,9,10,11), 
+        LimeLightConfig.table("limelight-right").setUseForLocalization(true).setYawRelativeToForwards(15).setPoseEstimateType(PoseEstimateWithLatencyType.BOT_POSE_MT2_BLUE).setLocalizationTagFilter(17,18,19,20,21,22,6,7,8,9,10,11),
+        PhotonVisionConfig.table("Tag").setUseForLocalization(false).setCameraRobotSpace(new Transform3d(-0.29845,0.2286,Units.inchesToMeters(36),new Rotation3d(0, 0, 180))).setPoseStrategy(PoseStrategy.PNP_DISTANCE_TRIG_SOLVE)
         };
 
         //X -11.75
@@ -182,6 +182,9 @@ public interface Constants {
 
         enum ArmState implements SetpointProvider<Double>{
             Intaking(150.38085937),
+            AlgaeHigh(0),
+            AlgaeLow(0),
+
             Home(0),
             Scoring(78.310546875),
             TransitionState(65),
@@ -205,6 +208,8 @@ public interface Constants {
                 Intaking(62),
                 Home(0d),
                 Scoring(125.419921875),
+                AlgaeHigh(0),
+                AlgaeLow(0),
                 ScoringL4(80),
                 TransitionState(62),
                 Scoringl1(50);
@@ -225,7 +230,7 @@ public interface Constants {
         enum RollerState implements SetpointProvider<Double>{
             Running(1),
             Stopped(0),
-            Reverse(-0.2);
+            Reverse(-1);
 
             double speed;
             RollerState(double speed){
@@ -262,11 +267,18 @@ public interface Constants {
         .setUseEncoderAbsolute(true)
         .setEncoderConversion(360)
         .setCanbus(CANIVORE_CANBUS)
-        .setPID(0.03, 0, 0)
+        .setPID(0.025, 0, 0)
         .setCurrentLimit(60);
 
-        MechanismConfig<StatefulMechanism<RollerState>> ROLLER_CONFIG = MechanismConfig.statefulGeneric(RollerState.Stopped)
-        .addMotors(Motor.KRAKEN_X60, 37, 33)
+        MechanismConfig<StatefulMechanism<RollerState>> CORAL_ROLLERS = MechanismConfig.statefulGeneric(RollerState.Stopped)
+        .addMotors(Motor.KRAKEN_X60, 37)
+        .setNeutralMode(MotorNeutralMode.Brake)
+        .setCanbus(CANIVORE_CANBUS)
+        .setCurrentLimit(60)
+        .setUseSetpointAsOutput(true);
+
+        MechanismConfig<StatefulMechanism<RollerState>> ALGAE_ROLLERS = MechanismConfig.statefulGeneric(RollerState.Stopped)
+        .addMotors(Motor.KRAKEN_X60, 33)
         .setNeutralMode(MotorNeutralMode.Brake)
         .setCanbus(CANIVORE_CANBUS)
         .setCurrentLimit(60)

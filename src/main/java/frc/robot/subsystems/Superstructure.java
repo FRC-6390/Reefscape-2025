@@ -46,6 +46,8 @@ public class Superstructure extends SubsystemBase {
   private final RunnableTrigger liftIntake;
   private final DelayedOutput atL4;
   private final DelayedOutput atHome;
+  private final DelayedOutput elevatorAtIntake;
+
 
 
   private boolean autoDropElevator = true;
@@ -58,9 +60,8 @@ public class Superstructure extends SubsystemBase {
     
     public enum SuperstructureState implements SetpointProvider<SuperstructureTuple>
     {
-        AlgaeHigh(new SuperstructureTuple(null, ElevatorState.AlgaeHigh)),
-        AlgaeRetract(new SuperstructureTuple(null, null)),
-        AlgaeLow(new SuperstructureTuple(null, ElevatorState.AlgaeLow)),
+        AlgaeHigh(new SuperstructureTuple(EndEffectorState.AlgaeHigh, ElevatorState.AlgaeHigh)),
+        AlgaeLow(new SuperstructureTuple(EndEffectorState.AlgaeLow, ElevatorState.AlgaeLow)),
         L4(new SuperstructureTuple(EndEffectorState.L4, ElevatorState.L4)),
         L3(new SuperstructureTuple(EndEffectorState.L3, ElevatorState.L3)),
         L2(new SuperstructureTuple(EndEffectorState.L2, ElevatorState.L2)),
@@ -96,6 +97,7 @@ public class Superstructure extends SubsystemBase {
     this.liftIntake = new RunnableTrigger(() -> endEffector.hasGamePiece());  
     this.atL4 = new DelayedOutput(() -> endeffectorAtState(EndEffectorState.L4), 0.125);
     this.atHome = new DelayedOutput(() -> endeffectorAtState(EndEffectorState.Home), 0.125);
+    this.elevatorAtIntake = new DelayedOutput(() -> elevatorStateMachine.atAnyState(ElevatorState.Intaking), 0.125);
 
     autoDropElevatorTrigger.onFalse(setState(SuperstructureState.Home));  
     liftIntake.onTrue(setState(SuperstructureState.Align));
@@ -158,7 +160,9 @@ public class Superstructure extends SubsystemBase {
       // }
 
       switch (state) {
-        case L1,L2,L3,L4,Home:
+        case L1,L2,L3,L4,Home,Intaking:
+        if(prevState.states.elevator != null)
+        {
         if((prevState.states.elevator.equals(ElevatorState.L4)||prevState.states.elevator.equals(ElevatorState.L3)||prevState.states.elevator.equals(ElevatorState.L2)||prevState.states.elevator.equals(ElevatorState.L1)))
         {
           endEffectorStateMachine.queueState(EndEffectorState.Home);
@@ -179,6 +183,11 @@ public class Superstructure extends SubsystemBase {
           {
             endEffectorStateMachine.queueState(EndEffectorState.L1, () -> atHome.getAsBoolean());
           }
+          if(state.equals(ElevatorState.Intaking))
+          {
+            endEffectorStateMachine.queueState(EndEffectorState.Intaking, () -> atHome.getAsBoolean() && elevatorAtIntake.getAsBoolean());
+          }
+        }
         }
         default:
         elevatorStateMachine.queueState(state);
@@ -199,24 +208,21 @@ public class Superstructure extends SubsystemBase {
           // else
           // {
        
-            endEffectorStateMachine.queueState(state, () -> elevatorStateMachine.atGoalState());
+          endEffectorStateMachine.queueState(state, () -> elevatorStateMachine.atGoalState());
           
           // }
           break;
         case Home:
           if(prevState.equals(SuperstructureState.Intaking))
           {
-          endEffectorStateMachine.queueState(EndEffectorState.Transition, () -> endEffector.getJoint1().getStateMachine().atAnyState(ArmState.TransitionState) && endEffector.getJoint2().getStateMachine().atAnyState(WristState.TransitionState));
-          endEffectorStateMachine.queueState(EndEffectorState.Home);
+          endEffectorStateMachine.queueState(EndEffectorState.Transition);
+          endEffectorStateMachine.queueState(EndEffectorState.Home, () -> endEffector.getJoint1().getStateMachine().atAnyState(ArmState.TransitionState) && endEffector.getJoint2().getStateMachine().atAnyState(WristState.TransitionState));
           }
           else
           {
           endEffectorStateMachine.queueState(state);
           }
           break;
-        case Intaking:
-        endEffectorStateMachine.queueState(state, () -> elevatorStateMachine.atState(ElevatorState.Intaking));
-        break;
         default:
         endEffectorStateMachine.queueState(state);
           return;
@@ -241,7 +247,7 @@ public class Superstructure extends SubsystemBase {
     SuperstructureState state = stateMachine.getGoalState();
     SuperstructureTuple val = stateMachine.getGoalStateSetpoint();
 
-    SmartDashboard.putBoolean("At Intaking", elevatorStateMachine.atState(ElevatorState.Intaking));
+    SmartDashboard.putBoolean("At Intaking", elevatorStateMachine.atAnyState(ElevatorState.Intaking));
 
     if(!prevState.equals(state)){
       switch (state) {

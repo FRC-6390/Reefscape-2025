@@ -32,10 +32,12 @@ public class BasicAlign extends Command {
   public RobotBase<?> base;
     public MedianFilter filter;
     public DelayedOutput endCommand;
+    public DelayedOutput seenTagAndLost;
     public DelayedOutput noTagFound;
     public ReefPole pole;
+    public boolean hasSet = false;
 
-  public PIDController controller = new PIDController(0.035, 0, 0);
+  public PIDController controller = new PIDController(0.035, 0.004, 0);
   
   
   /** Creates a new PassiveAlign. */
@@ -43,11 +45,14 @@ public class BasicAlign extends Command {
     this.base = base;
     limeLight = this.base.getVision().getLimelight(llTable);
     this.pole = pole;
+    hasSet = false;
+    
     // Use addRequirements() here to declare subsystem dependencies.
   }
 
   public BasicAlign(RobotBase<?> base, String llTable) {
     this(base, llTable, ReefPole.NONE);
+    hasSet = false;
     // Use addRequirements() here to declare subsystem dependencies.
   }
   // Called when the command is initially scheduled.
@@ -55,8 +60,11 @@ public class BasicAlign extends Command {
   public void initialize() 
   {
     filter = new MedianFilter(25);
-    endCommand = new DelayedOutput(() -> linedUp(), 0.75);
+    endCommand = new DelayedOutput(() -> linedUp(), 0.5);
     noTagFound = new DelayedOutput(() -> noTag(), 5);
+    seenTagAndLost = new DelayedOutput(() -> hasSeenAndLost(), 1);
+    controller.setIntegratorRange(-10, 10);
+    hasSet = false;
     if(!pole.equals(ReefPole.NONE))
     {
       limeLight.setPriorityID((int)pole.getApriltagId());
@@ -74,6 +82,8 @@ public class BasicAlign extends Command {
   {
   SmartDashboard.putBoolean("EndCommand",endCommand.getAsBoolean());
   SmartDashboard.putBoolean("No Tag",noTagFound.getAsBoolean());
+  SmartDashboard.putNumber("Dist",limeLight.getPoseEstimate(PoseEstimateWithLatencyType.BOT_POSE_MT2_BLUE).getRaw()[9]);
+  SmartDashboard.putNumber("HOFfset",limeLight.getTargetHorizontalOffset());
 
   if(DriverStation.isAutonomous())
   {
@@ -81,40 +91,56 @@ public class BasicAlign extends Command {
   {
   if(limeLight.hasValidTarget())
   {
+  if(!hasSet)
+  {
+    hasSet = true;
+  }
   SmartDashboard.putNumber("Rot", Math.abs(filter.calculate(limeLight.getPoseEstimate(PoseEstimateType.TARGET_POSE_ROBOT_SPACE).getRaw()[4])));
-  if(Math.abs(filter.calculate(limeLight.getPoseEstimate(PoseEstimateType.TARGET_POSE_ROBOT_SPACE).getRaw()[4])) < 5)
+  if(Math.abs(filter.calculate(limeLight.getPoseEstimate(PoseEstimateType.TARGET_POSE_ROBOT_SPACE).getRaw()[4])) < 10)
     {
       double r = controller.calculate(limeLight.getTargetHorizontalOffset(), 0);
       double x = 0;
       if(base.getRobotSpeeds().getSpeeds("auto").equals(new ChassisSpeeds()))
       {
-         x = 0.2;
+         x = 0.1;
       }
       SmartDashboard.putNumber("Speed", r);
       base.getDrivetrain().getRobotSpeeds().setAxisState("auto", SpeedAxis.Y, false);
       base.getDrivetrain().getRobotSpeeds().setSpeeds("feedback", x, r, 0);
     }
   }
+  else
+  {
+    base.getDrivetrain().getRobotSpeeds().stopSpeeds("feedback");
+  }
   }
   else
   {
   if(limeLight.hasValidTarget())
   {
+    if(!hasSet)
+    {
+      hasSet = true;
+    }
   SmartDashboard.putNumber("Rot", Math.abs(filter.calculate(limeLight.getPoseEstimate(PoseEstimateType.TARGET_POSE_ROBOT_SPACE).getRaw()[4])));
   if(limeLight.getAprilTagID() == pole.getApriltagId())
   {
-  if(Math.abs(filter.calculate(limeLight.getPoseEstimate(PoseEstimateType.TARGET_POSE_ROBOT_SPACE).getRaw()[4])) < 5)
+  if(Math.abs(filter.calculate(limeLight.getPoseEstimate(PoseEstimateType.TARGET_POSE_ROBOT_SPACE).getRaw()[4])) < 10)
     {
       double r = controller.calculate(limeLight.getTargetHorizontalOffset(), 0);
       double x = 0;
       if(base.getRobotSpeeds().getSpeeds("auto").equals(new ChassisSpeeds()))
       {
-         x = 0.2;
+         x = 0.1;
       }
       SmartDashboard.putNumber("Speed", r);
       base.getDrivetrain().getRobotSpeeds().setAxisState("auto", SpeedAxis.Y, false);
       base.getDrivetrain().getRobotSpeeds().setSpeeds("feedback", x,r,0); 
     }
+  }
+  else
+  {
+    base.getDrivetrain().getRobotSpeeds().stopSpeeds("feedback");
   }
   } 
   }
@@ -123,12 +149,21 @@ else
 {
   if(limeLight.hasValidTarget())
   {
+    if(!hasSet)
+  {
+    hasSet = true;
+  }
   SmartDashboard.putNumber("Rot", Math.abs(filter.calculate(limeLight.getPoseEstimate(PoseEstimateType.TARGET_POSE_ROBOT_SPACE).getRaw()[4])));
   
       double r = controller.calculate(limeLight.getTargetHorizontalOffset(), 0);
+      double x = 0;
+      if(base.getRobotSpeeds().getSpeeds("auto").equals(new ChassisSpeeds()))
+      {
+         x = 0.1;
+      }
       SmartDashboard.putNumber("Speed", r);
       base.getDrivetrain().getRobotSpeeds().setAxisState("auto", SpeedAxis.Y, false);
-      base.getDrivetrain().getRobotSpeeds().setSpeeds("feedback", 0,r,0); 
+      base.getDrivetrain().getRobotSpeeds().setSpeeds("feedback", x,r,0); 
   }
 }
   
@@ -173,12 +208,16 @@ else
   public boolean linedUp()
   {
     Pose2d pose = getBotPoseTagSpace(limeLight);
-    return limeLight.hasValidTarget() && limeLight.getPoseEstimate(PoseEstimateWithLatencyType.BOT_POSE_MT2_BLUE).getRaw()[9] <= 0.5 && Math.abs(Math.abs(limeLight.getTargetHorizontalOffset()))< 4;
+    return limeLight.hasValidTarget() && limeLight.getPoseEstimate(PoseEstimateWithLatencyType.BOT_POSE_MT2_BLUE).getRaw()[9] <= 0.525 && Math.abs(Math.abs(limeLight.getTargetHorizontalOffset()))< 7;
   } 
+  public boolean hasSeenAndLost()
+  {
+    return hasSet && !limeLight.hasValidTarget();
+  }
   // Returns true when the command should end.
   @Override
   public boolean isFinished() {
-    if(DriverStation.isAutonomous()) return endCommand.getAsBoolean() || noTagFound.getAsBoolean();
+    if(DriverStation.isAutonomous()) return endCommand.getAsBoolean() || noTagFound.getAsBoolean() || seenTagAndLost.getAsBoolean();
     else
     {
       return false;

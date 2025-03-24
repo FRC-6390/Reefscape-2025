@@ -48,7 +48,7 @@ public class Elevator extends SubsystemBase{
     //ELEVATOR HEIGHT FROM FLOOR IN INCHES
     Home(Constants.Elevator.OFFSET_FROM_FLOOR),
     L1(Constants.Elevator.OFFSET_FROM_FLOOR + 3),
-    Intaking(0d),
+    Intaking(Constants.Elevator.OFFSET_FROM_FLOOR),
 
     Aligning(30.71423390857545),
 
@@ -204,7 +204,7 @@ public class Elevator extends SubsystemBase{
 
     switch (stateMachine.getGoalState()) {
       case Home, Intaking:
-        setMotors(-0.1);
+        setMotors(-0.25);
         resetNudge();
         break;
       case L1, L2, L3, L4, AlgaeHigh, AlgaeLow, Aligning:
