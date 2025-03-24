@@ -38,7 +38,7 @@ public class TagAlign extends Command {
   public double thetaMeasurement;
   public ProfiledPIDController xController = new ProfiledPIDController(2, 0, 0, new Constraints(0.25, 0.25));
   public ProfiledPIDController yController =  new ProfiledPIDController(4, 0.1, 0, new Constraints(1, 1));
-  public PIDController rController = new PIDController(0.05, 0, 0);
+  public PIDController rController = new PIDController(0.04, 0, 0);
   public DelayedOutput endCommand;
   public DelayedOutput noTag;
   public ReefPole pole;

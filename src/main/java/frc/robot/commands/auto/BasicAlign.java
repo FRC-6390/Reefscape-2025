@@ -35,7 +35,7 @@ public class BasicAlign extends Command {
     public DelayedOutput noTagFound;
     public ReefPole pole;
 
-  public PIDController controller = new PIDController(0.03, 0, 0);
+  public PIDController controller = new PIDController(0.035, 0, 0);
   
   
   /** Creates a new PassiveAlign. */
@@ -85,9 +85,14 @@ public class BasicAlign extends Command {
   if(Math.abs(filter.calculate(limeLight.getPoseEstimate(PoseEstimateType.TARGET_POSE_ROBOT_SPACE).getRaw()[4])) < 5)
     {
       double r = controller.calculate(limeLight.getTargetHorizontalOffset(), 0);
+      double x = 0;
+      if(base.getRobotSpeeds().getSpeeds("auto").equals(new ChassisSpeeds()))
+      {
+         x = 0.2;
+      }
       SmartDashboard.putNumber("Speed", r);
       base.getDrivetrain().getRobotSpeeds().setAxisState("auto", SpeedAxis.Y, false);
-      base.getDrivetrain().getRobotSpeeds().setSpeeds("feedback", 0, r, 0);
+      base.getDrivetrain().getRobotSpeeds().setSpeeds("feedback", x, r, 0);
     }
   }
   }
@@ -101,9 +106,14 @@ public class BasicAlign extends Command {
   if(Math.abs(filter.calculate(limeLight.getPoseEstimate(PoseEstimateType.TARGET_POSE_ROBOT_SPACE).getRaw()[4])) < 5)
     {
       double r = controller.calculate(limeLight.getTargetHorizontalOffset(), 0);
+      double x = 0;
+      if(base.getRobotSpeeds().getSpeeds("auto").equals(new ChassisSpeeds()))
+      {
+         x = 0.2;
+      }
       SmartDashboard.putNumber("Speed", r);
       base.getDrivetrain().getRobotSpeeds().setAxisState("auto", SpeedAxis.Y, false);
-      base.getDrivetrain().getRobotSpeeds().setSpeeds("feedback", 0,r,0); 
+      base.getDrivetrain().getRobotSpeeds().setSpeeds("feedback", x,r,0); 
     }
   }
   } 
@@ -163,7 +173,7 @@ else
   public boolean linedUp()
   {
     Pose2d pose = getBotPoseTagSpace(limeLight);
-    return limeLight.hasValidTarget() && limeLight.getPoseEstimate(PoseEstimateWithLatencyType.BOT_POSE_MT2_BLUE).getRaw()[9] <= 0.5 && Math.abs(Math.abs(limeLight.getTargetHorizontalOffset()))< 2.5;
+    return limeLight.hasValidTarget() && limeLight.getPoseEstimate(PoseEstimateWithLatencyType.BOT_POSE_MT2_BLUE).getRaw()[9] <= 0.5 && Math.abs(Math.abs(limeLight.getTargetHorizontalOffset()))< 4;
   } 
   // Returns true when the command should end.
   @Override

@@ -10,6 +10,7 @@ import com.ctre.phoenix6.hardware.CANcoder;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 
+import ca.frc6390.athena.commands.RunnableTrigger;
 import ca.frc6390.athena.mechanisms.StateMachine;
 import ca.frc6390.athena.mechanisms.StateMachine.SetpointProvider;
 import ca.frc6390.athena.sensors.limitswitch.GenericLimitSwitch;
@@ -36,6 +37,7 @@ public class Elevator extends SubsystemBase{
 
   public final ProfiledPIDController controller;
   private final ElevatorFeedforward feedforward;
+  private RunnableTrigger idle;
 
   private final StateMachine<Double, ElevatorState> stateMachine;
   private final StatusSignal<Angle> getPosition;
@@ -46,7 +48,9 @@ public class Elevator extends SubsystemBase{
     //ELEVATOR HEIGHT FROM FLOOR IN INCHES
     Home(Constants.Elevator.OFFSET_FROM_FLOOR),
     L1(Constants.Elevator.OFFSET_FROM_FLOOR + 3),
-    Aligning(33.629),
+    Intaking(0d),
+
+    Aligning(30.71423390857545),
 
     AlgaeHigh(54.66734391140974),
     AlgaeLow(37.60104065578804),
@@ -77,7 +81,6 @@ public class Elevator extends SubsystemBase{
     getPosition = encoder.getPosition();
     getVelocity = encoder.getVelocity();
     lowerlimitSwitch = new GenericLimitSwitch(Constants.Elevator.LIMIT_SWITCH, true);
-    lowerlimitSwitch.onTrue(new InstantCommand(() -> {encoder.setPosition(0); stop();}));
     
     leftMotor.setNeutralMode(NeutralModeValue.Brake);
     rightMotor.setNeutralMode(NeutralModeValue.Brake);
@@ -94,7 +97,9 @@ public class Elevator extends SubsystemBase{
     controller.reset(getHeightFromFloor());
     feedforward = Constants.Elevator.FEEDFORWARD;
     stateMachine = new StateMachine<Double, ElevatorState>(ElevatorState.Home, controller::atGoal);
-
+    idle = new RunnableTrigger(() -> lowerlimitSwitch.getAsBoolean() && !stateMachine.getGoalState().equals(ElevatorState.Intaking));
+    idle.onTrue(() -> stateMachine.queueState(ElevatorState.Aligning));
+    lowerlimitSwitch.onTrue(new InstantCommand(() -> {encoder.setPosition(0); stop(); controller.setGoal(ElevatorState.Home.getSetpoint());}));//.and(()->!stateMachine.atAnyState(ElevatorState.Intaking)).onTrue(() -> {});
   }
 
   public void setCurrentLimit(double current) {
@@ -198,7 +203,7 @@ public class Elevator extends SubsystemBase{
   {
 
     switch (stateMachine.getGoalState()) {
-      case Home:
+      case Home, Intaking:
         setMotors(-0.1);
         resetNudge();
         break;

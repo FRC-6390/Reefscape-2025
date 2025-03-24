@@ -73,11 +73,11 @@ public interface Constants {
         // .setCanbus(CANIVORE_CANBUS);
 
         RobotLocalizationConfig LOCALIZATION_CONFIG = RobotLocalizationConfig.vision(0.1, 0.1, 9999)
-                                                            .setAutoPlannerPID(5,0,0, 2,0,0).setVisionEnabled(true);
+                                                            .setAutoPlannerPID(7,0,0, 2,0,0).setVisionEnabled(true);
         ConfigurableCamera[] CAMERAS =
          {                                                                 
-        LimeLightConfig.table("limelight-left").setUseForLocalization(true).setYawRelativeToForwards(-15).setPoseEstimateType(PoseEstimateWithLatencyType.BOT_POSE_MT2_BLUE).setLocalizationTagFilter(17,18,19,20,21,22,6,7,8,9,10,11), 
-        LimeLightConfig.table("limelight-right").setUseForLocalization(true).setYawRelativeToForwards(15).setPoseEstimateType(PoseEstimateWithLatencyType.BOT_POSE_MT2_BLUE).setLocalizationTagFilter(17,18,19,20,21,22,6,7,8,9,10,11),
+        LimeLightConfig.table("limelight-left").setUseForLocalization(false).setYawRelativeToForwards(-15).setPoseEstimateType(PoseEstimateWithLatencyType.BOT_POSE_MT2_BLUE).setLocalizationTagFilter(17,18,19,20,21,22,6,7,8,9,10,11), 
+        LimeLightConfig.table("limelight-right").setUseForLocalization(false).setYawRelativeToForwards(15).setPoseEstimateType(PoseEstimateWithLatencyType.BOT_POSE_MT2_BLUE).setLocalizationTagFilter(17,18,19,20,21,22,6,7,8,9,10,11),
         PhotonVisionConfig.table("Tag").setUseForLocalization(false).setCameraRobotSpace(new Transform3d(-0.29845,0.2286,Units.inchesToMeters(33),new Rotation3d(0, 0, 180))).setPoseStrategy(PoseStrategy.PNP_DISTANCE_TRIG_SOLVE)
         };
 
@@ -146,8 +146,8 @@ public interface Constants {
         //MAX ACCEL WAS 15
         // ProfiledPIDController CONTORLLER = new ProfiledPIDController(0.01, 0.01, 0, new Constraints(50, 10));
         // ElevatorFeedforward FEEDFORWARD = new ElevatorFeedforward(0, 0.208, 0.00,0.0);
-        ProfiledPIDController CONTORLLER = new ProfiledPIDController(0.15, 0.0, 0, new Constraints(50, 5));
-        ElevatorFeedforward FEEDFORWARD = new ElevatorFeedforward(0, 0.165, 0.377,0.0);
+        ProfiledPIDController CONTORLLER = new ProfiledPIDController(0.1, 0.0, 0, new Constraints(50, 20));
+        ElevatorFeedforward FEEDFORWARD = new ElevatorFeedforward(0, 0.14, 0.32,0.0);
 
         // ProfiledPIDController CONTORLLER = new ProfiledPIDController(0.11, 0, 0, new Constraints(60, 30));
         // ElevatorFeedforward FEEDFORWARD = new ElevatorFeedforward(0, 0.129, 0.377,0.75);
@@ -181,9 +181,10 @@ public interface Constants {
         int CANDLE_ID = 22;
 
         enum ArmState implements SetpointProvider<Double>{
-            Intaking(145.634765625),
+            Intaking(150.38085937),
             Home(0),
             Scoring(78.310546875),
+            TransitionState(65),
             ScoringL4(60),
 
             Scoringl1(78.310546875);
@@ -201,11 +202,11 @@ public interface Constants {
         }
 
             enum WristState implements SetpointProvider<Double>{
-                Intaking(40.87890625),
+                Intaking(62),
                 Home(0d),
                 Scoring(125.419921875),
                 ScoringL4(80),
-                TransitionState(25),
+                TransitionState(62),
                 Scoringl1(50);
 
     
@@ -247,8 +248,8 @@ public interface Constants {
         .setUseEncoderAbsolute(true)
         .setEncoderConversion(360)
         .setCanbus(CANIVORE_CANBUS)
-        .setTolerance(2)
-        .setPID(0.008, 0, 0)
+        .setTolerance(6)
+        .setPID(0.009, 0, 0)
         .setCurrentLimit(60);
         
         MechanismConfig<StatefulArmMechanism<WristState>> WRIST_CONFIG = MechanismConfig.statefulArm(new ArmFeedforward(0,0,0), WristState.Home)
@@ -261,7 +262,7 @@ public interface Constants {
         .setUseEncoderAbsolute(true)
         .setEncoderConversion(360)
         .setCanbus(CANIVORE_CANBUS)
-        .setPID(0.008, 0, 0)
+        .setPID(0.03, 0, 0)
         .setCurrentLimit(60);
 
         MechanismConfig<StatefulMechanism<RollerState>> ROLLER_CONFIG = MechanismConfig.statefulGeneric(RollerState.Stopped)

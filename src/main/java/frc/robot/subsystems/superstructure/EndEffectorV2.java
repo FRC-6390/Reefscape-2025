@@ -30,6 +30,9 @@ public class EndEffectorV2 extends SubsystemBase{
 
     private final StatefulArmMechanism<ArmState> joint1;
     private final StatefulArmMechanism<WristState> joint2;
+    // public DelayedOutput joint1AtGoal;
+    // public DelayedOutput joint2AtGoal;
+
     private final DelayedOutput hasNoPiece;
 
     private RunnableTrigger liftIntake;
@@ -56,7 +59,9 @@ public class EndEffectorV2 extends SubsystemBase{
         Stop(new EndEffectorTuple(RollerState.Stopped, null, null)),
         Home(new EndEffectorTuple(RollerState.Stopped, ArmState.Home, WristState.Home)),
         Reverse(new EndEffectorTuple(RollerState.Reverse, null, null)),
-        Intaking(new EndEffectorTuple(RollerState.Running, ArmState.Intaking, WristState.Intaking));
+        Intaking(new EndEffectorTuple(RollerState.Running, ArmState.Intaking, WristState.Intaking)),
+        Transition(new EndEffectorTuple(RollerState.Stopped, ArmState.TransitionState, WristState.TransitionState));
+
 
 
         private EndEffectorTuple states;
@@ -134,20 +139,12 @@ public class EndEffectorV2 extends SubsystemBase{
         EndEffectorTuple val = stateMachine.getGoalStateSetpoint();
 
         if(!prevState.equals(state)){
-            switch (state) {
-                case L4: 
-                case L3: 
-                case L2: 
-                case L1:  
-                case Home:
-                case Score:
-                case Intaking:
-                case Stop:
+            switch (state) {                  
+                default:
                     if (val.rollerState != null) rollers.getStateMachine().queueState(val.rollerState);
                     if (val.joint1state != null) joint1.getStateMachine().queueState(val.joint1state);
                     if (val.joint2state != null) joint2.getStateMachine().queueState(val.joint2state);
-                default:
-                    break;
+                break;
             }
         }
 

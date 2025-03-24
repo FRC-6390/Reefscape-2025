@@ -37,7 +37,7 @@ import frc.robot.subsystems.superstructure.EndEffectorV2.EndEffectorState;
 public class RobotContainer {
   public final RobotBase<SwerveDrivetrain> robotBase = Constants.DriveTrain.ROBOT_BASE.create();//.shuffleboard();
   public final StatefulArmMechanism<ArmState> arm = Constants.EndEffector.ARM_CONFIG.build().shuffleboard("Arm");
-  public final StatefulArmMechanism<WristState> wrist = Constants.EndEffector.WRIST_CONFIG.build();//.shuffleboard("Wrist");
+  public final StatefulArmMechanism<WristState> wrist = Constants.EndEffector.WRIST_CONFIG.build().shuffleboard("Wrist");
   public final StatefulMechanism<RollerState> rollers = Constants.EndEffector.ROLLER_CONFIG.build();//.shuffleboard("Rollers");
 
   public Elevator elevator = new Elevator();
@@ -74,7 +74,7 @@ public class RobotContainer {
     NamedCommands.registerCommand("L4", superstructure.setState(SuperstructureState.L4));
     NamedCommands.registerCommand("StartEject", superstructure.setState(SuperstructureState.Score));
     NamedCommands.registerCommand("WaitForElevator",superstructure.WaitForElevator());
-    NamedCommands.registerCommand("WaitForEffector",superstructure.WaitForEffector());
+    NamedCommands.registerCommand("WaitForEffector",superstructure.WaitForL4());
     NamedCommands.registerCommand("WaitForEjector", superstructure.WaitForEjector());
 
     // NamedCommands.registerCommand("AlignRight", new TagAlign(robotBase, "limelight-right", new InstantCommand(() -> candle.setRGB(0, 0, 255)), Units.inchesToMeters(22),ReefPole.NONE, candle));
@@ -111,8 +111,8 @@ public class RobotContainer {
     driverController.pov.down.whileTrue(() -> System.out.println(robotBase.getVision().getPhotonVision("Tag").isConnected()));
 
 
-    driverController.pov.left.whileTrue(Commands.sequence(superstructure.setState(SuperstructureState.Align),new BasicAlign(robotBase, "limelight-left")));
-    driverController.pov.right.whileTrue(Commands.sequence(superstructure.setState(SuperstructureState.Align),new BasicAlign(robotBase, "limelight-right")));
+    driverController.pov.left.whileTrue(new BasicAlign(robotBase, "limelight-left"));
+    driverController.pov.right.whileTrue(new BasicAlign(robotBase, "limelight-right"));
 
     driverController.a.onTrue(Commands.sequence(superstructure.setState(SuperstructureState.L1))).after(1.2).onTrue(superstructure.setState(SuperstructureState.Score));
     driverController.b.onTrue(Commands.sequence(superstructure.setState(SuperstructureState.L2))).after(1.2).onTrue(superstructure.setState(SuperstructureState.Score));
