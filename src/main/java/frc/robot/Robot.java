@@ -32,6 +32,8 @@ public class Robot extends TimedRobot {
   public void robotPeriodic() {
     CommandScheduler.getInstance().run();
       Pose2d relativePose = m_robotContainer.robotBase.getLocalization().getRelativePose();
+      SmartDashboard.putString("LL", m_robotContainer.selectedLimelight);
+      
     // SmartDashboard.putNumber("Proxim", //m_robotContainer.robotBase.getVision().getLimelight("limelight-right").getTargetSkew());
     // if(m_robotContainer.lasLeft.getMeasurement() != null) SmartDashboard.putNumber("Las Left",m_robotContainer.lasLeft.getMeasurement().distance_mm);
     // if(m_robotContainer.lasRight.getMeasurement() != null) SmartDashboard.putNumber("Las Right",m_robotContainer.lasRight.getMeasurement().distance_mm);
@@ -50,6 +52,7 @@ public class Robot extends TimedRobot {
   public void disabledInit() 
   {
     m_robotContainer.elevator.reset();
+    m_robotContainer.superstructure.setSuper(SuperstructureState.Home);
 
   }
 
@@ -77,6 +80,7 @@ public class Robot extends TimedRobot {
 
   @Override
   public void teleopInit() {
+    m_robotContainer.selectedLimelight = "limelight-right";
     m_robotContainer.elevator.reset();
 
     m_robotContainer.robotBase.getDrivetrain().getRobotSpeeds().stopSpeeds("auto");

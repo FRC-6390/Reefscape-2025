@@ -12,7 +12,7 @@
         {
             "groupId": "ca.frc6390.athena",
             "artifactId": "competition-java",
-            "version": "2025.13.49"
+            "version": "2025.13.61"
         }
     ],
     "jniDependencies": [],

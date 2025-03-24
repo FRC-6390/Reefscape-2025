@@ -31,7 +31,7 @@ public class TagAlign extends Command {
   public static double horizonalTolerance = 2.5;
   public double DistToCommand;
   public Command command;
-  public LimeLight ll;
+  public static LimeLight ll;
   public int runTag;
   public Pose2d curPose;
   public MedianFilter filter;
@@ -52,7 +52,7 @@ public class TagAlign extends Command {
    this.command = command;
    this.candle = candle;
    this.DistToCommand = DistToCommand;
-   this.ll = this.base.getVision().getLimelight(lltable);
+   ll = this.base.getVision().getLimelight(lltable);
   }
 
   public TagAlign(RobotBase<?> base, String lltable, CANdleSubsystem candle)

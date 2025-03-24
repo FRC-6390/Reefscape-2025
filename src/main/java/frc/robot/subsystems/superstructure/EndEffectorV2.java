@@ -1,6 +1,7 @@
 package frc.robot.subsystems.superstructure;
 
 import ca.frc6390.athena.commands.RunnableTrigger;
+import ca.frc6390.athena.controllers.DelayedOutput;
 import ca.frc6390.athena.core.RobotBase;
 import ca.frc6390.athena.mechanisms.ArmMechanism.StatefulArmMechanism;
 import ca.frc6390.athena.mechanisms.Mechanism.StatefulMechanism;
@@ -29,6 +30,8 @@ public class EndEffectorV2 extends SubsystemBase{
 
     private final StatefulArmMechanism<ArmState> joint1;
     private final StatefulArmMechanism<WristState> joint2;
+    private final DelayedOutput hasNoPiece;
+
     private RunnableTrigger liftIntake;
 
     private final StatefulMechanism<RollerState> rollers;
@@ -38,6 +41,8 @@ public class EndEffectorV2 extends SubsystemBase{
     private final StateMachine<EndEffectorTuple, EndEffectorState> stateMachine;
 
     private final GenericLimitSwitch proximitySensor;
+
+    private EndEffectorState prevState;
 
     public record EndEffectorTuple(RollerState rollerState,  ArmState joint1state, WristState joint2state) {}
     
@@ -74,8 +79,10 @@ public class EndEffectorV2 extends SubsystemBase{
         this.joint1 = joint1;
         this.rollers = Rollers;
         this.joint2 = joint2;    
+        this.prevState = EndEffectorState.Home;
 
         proximitySensor = new GenericLimitSwitch(4, true);
+        hasNoPiece = new DelayedOutput(() -> !hasGamePiece(), 0.25);
 
         this.stateMachine = new StateMachine<EndEffectorTuple,EndEffectorState>(EndEffectorState.Home, () -> joint1.getStateMachine().atGoalState()&& joint2.getStateMachine().atGoalState());
         // proximitySensor.onTrue(() -> stateMachine.setGoalState(EndEffectorState.L1));
@@ -91,6 +98,10 @@ public class EndEffectorV2 extends SubsystemBase{
         return proximitySensor.getAsBoolean();
     }
 
+    public boolean hasNoPiece(){
+        return hasNoPiece.getAsBoolean();
+    }
+
     public ShuffleboardTab shuffleboard(String tab) {
         return shuffleboard(Shuffleboard.getTab(tab));
     }
@@ -104,7 +115,7 @@ public class EndEffectorV2 extends SubsystemBase{
     } 
 
     public boolean isScoring(){
-        return rollers.getStateMachine().atAnyState(RollerState.Running);
+        return rollers.getStateMachine().atAnyState(RollerState.Running) && !joint1.getStateMachine().getGoalState().equals(ArmState.Intaking);
     }
 
     public EndEffectorV2 setAutoEndScoring(boolean autoEndScoring) {
@@ -121,36 +132,27 @@ public class EndEffectorV2 extends SubsystemBase{
 
         EndEffectorState state = stateMachine.getGoalState();
         EndEffectorTuple val = stateMachine.getGoalStateSetpoint();
-        switch (state) {
-            case L4: 
-            case L3: 
-            case L2: 
-            case L1:  
-            case Home:
-            case Score:
-            case Intaking:
-            case Stop:
-                if (val.rollerState != null) rollers.getStateMachine().queueState(val.rollerState);
-                if (val.joint1state != null) joint1.getStateMachine().queueState(val.joint1state);
-                if (val.joint2state != null) 
-                {
-                 boolean transitioning = joint2.getStateMachine().atAnyState(WristState.Intaking) && val.joint2state.equals(WristState.Home);
-                 if(transitioning)
-                 {
-                    joint2.getStateMachine().queueState(WristState.TransitionState);
-                 }
-                 if(joint2.getStateMachine().atAnyState(WristState.TransitionState))
-                 {
-                    joint2.getStateMachine().queueState(WristState.Home);
-                 }
-                 if(!transitioning && !joint2.getStateMachine().getGoalState().equals(WristState.TransitionState))
-                 {
-                    joint2.getStateMachine().queueState(val.joint2state);
-                 }
-                }
-            default:
-                break;
+
+        if(!prevState.equals(state)){
+            switch (state) {
+                case L4: 
+                case L3: 
+                case L2: 
+                case L1:  
+                case Home:
+                case Score:
+                case Intaking:
+                case Stop:
+                    if (val.rollerState != null) rollers.getStateMachine().queueState(val.rollerState);
+                    if (val.joint1state != null) joint1.getStateMachine().queueState(val.joint1state);
+                    if (val.joint2state != null) joint2.getStateMachine().queueState(val.joint2state);
+                default:
+                    break;
+            }
         }
+
+        prevState = state;
+        
     }
 
 
@@ -160,6 +162,9 @@ public class EndEffectorV2 extends SubsystemBase{
 
     public StatefulArmMechanism<ArmState> getJoint1() {
         return joint1;
+    }
+    public StatefulArmMechanism<WristState> getJoint2() {
+        return joint2;
     }
 
     public boolean isAutoEndScoring() {

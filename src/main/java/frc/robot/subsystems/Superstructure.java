@@ -13,8 +13,11 @@ import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import edu.wpi.first.wpilibj2.command.WaitUntilCommand;
 import frc.robot.subsystems.superstructure.Elevator;
 import frc.robot.subsystems.superstructure.EndEffector;
 import frc.robot.subsystems.superstructure.EndEffectorV2;
@@ -55,6 +58,7 @@ public class Superstructure extends SubsystemBase {
         L3(new SuperstructureTuple(EndEffectorState.L3, ElevatorState.L3)),
         L2(new SuperstructureTuple(EndEffectorState.L2, ElevatorState.L2)),
         L1(new SuperstructureTuple(EndEffectorState.L1, ElevatorState.L1)),
+        Align(new SuperstructureTuple(EndEffectorState.Home, ElevatorState.Aligning)),
         Home(new SuperstructureTuple(EndEffectorState.Home, ElevatorState.Home)),
         Score(new SuperstructureTuple(EndEffectorState.Score, null)),
         Intaking(new SuperstructureTuple(EndEffectorState.Intaking,  ElevatorState.Home));
@@ -86,12 +90,37 @@ public class Superstructure extends SubsystemBase {
 
     autoDropElevatorTrigger.onFalse(setState(SuperstructureState.Home));  
     liftIntake.onTrue(setState(SuperstructureState.Home));
+
+    prevState = SuperstructureState.Home;
   }
 
   public Superstructure setAutoDropElevator(boolean autoDropElevator) {
       this.autoDropElevator = autoDropElevator;
       return this;
   }
+
+  public Command WaitForElevator() {
+    return new WaitUntilCommand(() -> elevatorStateMachine.atGoalState());
+  }
+
+  public Command WaitForEffector() {
+    return new WaitUntilCommand(() -> endEffectorStateMachine.atAnyState(EndEffectorState.L4,EndEffectorState.L3,EndEffectorState.L2,EndEffectorState.L1));
+  }
+
+  public Command WaitForEjector() {
+    return new WaitUntilCommand(() -> !endEffector.hasGamePiece());
+  }
+
+  public Command WaitForElevatorV2() {
+    return new WaitUntilCommand(() -> elevator.controller.atGoal());
+  }
+
+  public Command WaitForEffectorV2() {
+    
+    return new WaitUntilCommand(() -> endEffector.getJoint1().atSetpoint() && endEffector.getJoint2().atSetpoint());
+}
+
+
 
   public Superstructure setElevatorEnabled(boolean elevatorEnabled) {
       this.elevatorEnabled = elevatorEnabled;
@@ -108,6 +137,9 @@ public class Superstructure extends SubsystemBase {
     System.out.println(state.name());
     return new InstantCommand(() -> stateMachine.queueState(state));
   }
+  public void setSuper(SuperstructureState state) {
+    stateMachine.queueState(state);
+  }
 
   public InstantCommand setElevator(Elevator.ElevatorState state){
     return new InstantCommand(() -> elevatorStateManager(state));
@@ -119,6 +151,11 @@ public class Superstructure extends SubsystemBase {
 
   public void elevatorStateManager(Elevator.ElevatorState state){
     if(elevatorEnabled){
+      // if(elevatorStateMachine.getGoalState().equals(Elevator.ElevatorState.Home) && elevatorStateMachine.atGoalState())
+      // {
+      //   elevatorStateManager(ElevatorState.Aligning);
+      // }
+
       switch (state) {
         case Home:
           elevatorStateMachine.queueState(state);
@@ -126,7 +163,7 @@ public class Superstructure extends SubsystemBase {
         case L1, AlgaeHigh, AlgaeLow:
           elevatorStateMachine.queueState(state);
           break;
-        case L2, L3, L4:
+        case L2, L3, L4, Aligning:
           elevatorStateMachine.queueState(state);
         default:
           return;
@@ -139,8 +176,14 @@ public class Superstructure extends SubsystemBase {
     if(endEffectorEnabled){
       switch (state) {
         case L1, L2, L3, L4:
+          if(!elevatorStateMachine.atGoalState())
+          {
           endEffectorStateMachine.queueState(EndEffectorState.Home);
-          endEffectorStateMachine.queueState(state, elevatorStateMachine::atGoalState);
+          }
+          else
+          {
+          endEffectorStateMachine.queueState(state);
+          }
           break;
         case Home, Score, Stop, Reverse, Intaking:
           endEffectorStateMachine.queueState(state);
@@ -159,7 +202,9 @@ public class Superstructure extends SubsystemBase {
     SuperstructureState state = stateMachine.getGoalState();
     SuperstructureTuple val = stateMachine.getGoalStateSetpoint();
 
-    if(prevState != state){
+    SmartDashboard.putBoolean("EndEffectorAtState", endEffector.getJoint1().atSetpoint() && endEffector.getJoint2().atSetpoint());
+
+    // if(!prevState.equals(state)){
       switch (state) {
         case L1:
         case L2:
@@ -170,19 +215,23 @@ public class Superstructure extends SubsystemBase {
         case AlgaeLow:
         case Home:
         case Score:
-          elevatorStateManager(val.elevator);
-          endEffectorStateManager(val.endEffector);
+        case Intaking:
+        case Align:
+          if (val.elevator != null)elevatorStateManager(val.elevator);
+          if (val.endEffector != null) endEffectorStateManager(val.endEffector);
           break;
         default:
+          if (val.elevator != null)elevatorStateManager(val.elevator);
+          if (val.endEffector != null) endEffectorStateManager(val.endEffector);
           break;
       }
-    }
+    // }
 
-    if(endEffector.isAutoEndScoring() && endEffector.isScoring() && !endEffector.hasGamePiece()) {
-      stateMachine.queueState(SuperstructureState.Home);
-    }
+    // if(endEffector.isAutoEndScoring() && endEffector.isScoring() && endEffector.hasNoPiece()) {
+    //   stateMachine.queueState(SuperstructureState.Home);
+    // }
 
-    prevState = state;
+    // prevState = state;
   }
 
   @Override

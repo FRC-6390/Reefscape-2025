@@ -18,6 +18,7 @@ import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.filter.MedianFilter;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
+import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.utils.ReefScoringPos;
@@ -74,6 +75,8 @@ public class BasicAlign extends Command {
   SmartDashboard.putBoolean("EndCommand",endCommand.getAsBoolean());
   SmartDashboard.putBoolean("No Tag",noTagFound.getAsBoolean());
 
+  if(DriverStation.isAutonomous())
+  {
   if(pole.equals(ReefPole.NONE))
   {
   if(limeLight.hasValidTarget())
@@ -83,7 +86,7 @@ public class BasicAlign extends Command {
     {
       double r = controller.calculate(limeLight.getTargetHorizontalOffset(), 0);
       SmartDashboard.putNumber("Speed", r);
-      // base.getDrivetrain().getRobotSpeeds().enableAxis(SpeedAxis.YAuto, false);
+      base.getDrivetrain().getRobotSpeeds().setAxisState("auto", SpeedAxis.Y, false);
       base.getDrivetrain().getRobotSpeeds().setSpeeds("feedback", 0, r, 0);
     }
   }
@@ -99,12 +102,25 @@ public class BasicAlign extends Command {
     {
       double r = controller.calculate(limeLight.getTargetHorizontalOffset(), 0);
       SmartDashboard.putNumber("Speed", r);
-      // base.getDrivetrain().getRobotSpeeds().enableAxis(SpeedAxis.YAuto, false);
+      base.getDrivetrain().getRobotSpeeds().setAxisState("auto", SpeedAxis.Y, false);
       base.getDrivetrain().getRobotSpeeds().setSpeeds("feedback", 0,r,0); 
     }
   }
   } 
   }
+}
+else
+{
+  if(limeLight.hasValidTarget())
+  {
+  SmartDashboard.putNumber("Rot", Math.abs(filter.calculate(limeLight.getPoseEstimate(PoseEstimateType.TARGET_POSE_ROBOT_SPACE).getRaw()[4])));
+  
+      double r = controller.calculate(limeLight.getTargetHorizontalOffset(), 0);
+      SmartDashboard.putNumber("Speed", r);
+      base.getDrivetrain().getRobotSpeeds().setAxisState("auto", SpeedAxis.Y, false);
+      base.getDrivetrain().getRobotSpeeds().setSpeeds("feedback", 0,r,0); 
+  }
+}
   
   }
 
@@ -112,8 +128,11 @@ public class BasicAlign extends Command {
   @Override
   public void end(boolean interrupted) {
     base.getDrivetrain().getRobotSpeeds().stopSpeeds("feedback");
+    base.getDrivetrain().getRobotSpeeds().stopSpeeds("auto");
+
     limeLight.setPriorityID(-1);
-    // base.getDrivetrain().getRobotSpeeds().enableAxis(SpeedAxis.YAuto, true);
+    base.getDrivetrain().getRobotSpeeds().setAxisState("auto", SpeedAxis.Y, true);
+
   }
 
   public boolean noTag()
@@ -144,11 +163,15 @@ public class BasicAlign extends Command {
   public boolean linedUp()
   {
     Pose2d pose = getBotPoseTagSpace(limeLight);
-    return Math.abs(pose.getX()) < 0.434 && Math.abs(limeLight.getTargetHorizontalOffset()) < 2.5;
+    return limeLight.hasValidTarget() && limeLight.getPoseEstimate(PoseEstimateWithLatencyType.BOT_POSE_MT2_BLUE).getRaw()[9] <= 0.5 && Math.abs(Math.abs(limeLight.getTargetHorizontalOffset()))< 2.5;
   } 
   // Returns true when the command should end.
   @Override
   public boolean isFinished() {
-    return endCommand.getAsBoolean() || noTagFound.getAsBoolean();
+    if(DriverStation.isAutonomous()) return endCommand.getAsBoolean() || noTagFound.getAsBoolean();
+    else
+    {
+      return false;
+    }
   }
 }

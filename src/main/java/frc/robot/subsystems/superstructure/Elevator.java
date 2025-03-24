@@ -21,6 +21,8 @@ import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.units.measure.Voltage;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
@@ -44,6 +46,8 @@ public class Elevator extends SubsystemBase{
     //ELEVATOR HEIGHT FROM FLOOR IN INCHES
     Home(Constants.Elevator.OFFSET_FROM_FLOOR),
     L1(Constants.Elevator.OFFSET_FROM_FLOOR + 3),
+    Aligning(33.629),
+
     AlgaeHigh(54.66734391140974),
     AlgaeLow(37.60104065578804),
     //31.5
@@ -72,7 +76,7 @@ public class Elevator extends SubsystemBase{
     rightMotor = new TalonFX(Constants.Elevator.RIGHT_MOTOR, Constants.CANIVORE_CANBUS);
     getPosition = encoder.getPosition();
     getVelocity = encoder.getVelocity();
-    lowerlimitSwitch = new GenericLimitSwitch(Constants.Elevator.LIMIT_SWITCH);
+    lowerlimitSwitch = new GenericLimitSwitch(Constants.Elevator.LIMIT_SWITCH, true);
     lowerlimitSwitch.onTrue(new InstantCommand(() -> {encoder.setPosition(0); stop();}));
     
     leftMotor.setNeutralMode(NeutralModeValue.Brake);
@@ -89,7 +93,7 @@ public class Elevator extends SubsystemBase{
     controller.setTolerance(0.8);
     controller.reset(getHeightFromFloor());
     feedforward = Constants.Elevator.FEEDFORWARD;
-    stateMachine = new StateMachine<Double, ElevatorState>(ElevatorState.Home, controller::atSetpoint);
+    stateMachine = new StateMachine<Double, ElevatorState>(ElevatorState.Home, controller::atGoal);
 
   }
 
@@ -124,6 +128,7 @@ public class Elevator extends SubsystemBase{
     return stateMachine;
   }
 
+
   public void reset(){
     controller.reset(getHeightFromFloor(), getVelocity());
   }
@@ -140,12 +145,12 @@ public class Elevator extends SubsystemBase{
 
     // if(speed < 0)
     // {
-      double sped = MathUtil.clamp(speed, -0.25, 1);
+    //   double sped = MathUtil.clamp(speed, -1, 1);
     // }
     // negative is up, this makes negative down
    
-    leftMotor.set(sped);
-    rightMotor.set(-sped);
+    leftMotor.set(speed);
+    rightMotor.set(-speed);
   }
   }
   
@@ -167,7 +172,7 @@ public class Elevator extends SubsystemBase{
       tab.addDouble("Fused Controller Output", () -> controller.calculate(getHeightFromFloor(),stateMachine.getGoalState().getSetpoint()) + feedforward.calculate(controller.getSetpoint().velocity) / 12);
       tab.addDouble("PID Output", () -> controller.calculate(getHeightFromFloor(), stateMachine.getGoalState().getSetpoint())).withPosition(5, 1);
       tab.addDouble("Feedforward Output", () -> feedforward.calculate(controller.getSetpoint().velocity));
-      tab.addBoolean("State Changer", stateMachine.getChangeStateSupplier()).withPosition(6, 1);
+      tab.addBoolean("State Changer", () -> stateMachine.atGoalState()).withPosition(6, 1);
       tab.addDouble("Profiled Pos Setpoint",() -> controller.getSetpoint().position);
       tab.addDouble("Profiled Vel Setpoint",() -> controller.getSetpoint().velocity);
       tab.addDouble("Nudge",() -> nudge);
@@ -197,7 +202,7 @@ public class Elevator extends SubsystemBase{
         setMotors(-0.1);
         resetNudge();
         break;
-      case L1, L2, L3, L4, AlgaeHigh, AlgaeLow:
+      case L1, L2, L3, L4, AlgaeHigh, AlgaeLow, Aligning:
         double speed = controller.calculate(getHeightFromFloor(),stateMachine.getGoalState().getSetpoint()) + feedforward.calculate(controller.getSetpoint().velocity) / 12;
         setMotors(speed);
     }
