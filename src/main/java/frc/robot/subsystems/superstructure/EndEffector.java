@@ -2,7 +2,7 @@ package frc.robot.subsystems.superstructure;
 
 import ca.frc6390.athena.controllers.DelayedOutput;
 import ca.frc6390.athena.mechanisms.ArmMechanism.StatefulArmMechanism;
-import ca.frc6390.athena.mechanisms.Mechanism.StatefulMechanism;
+import ca.frc6390.athena.mechanisms.StatefulMechanism;
 import ca.frc6390.athena.mechanisms.StateMachine;
 import ca.frc6390.athena.mechanisms.StateMachine.SetpointProvider;
 import ca.frc6390.athena.sensors.limitswitch.GenericLimitSwitch;
@@ -11,8 +11,6 @@ import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants.EndEffector.ArmState;
 import frc.robot.Constants.EndEffector.WristState;
-import frc.robot.subsystems.Superstructure.SuperstructureTuple;
-import frc.robot.subsystems.superstructure.Elevator.ElevatorState;
 import frc.robot.Constants.EndEffector.RollerState;
 
 
@@ -108,7 +106,7 @@ public class EndEffector extends SubsystemBase{
     } 
 
     public boolean isScoring(){
-        return coralRollers.getStateMachine().atAnyState(RollerState.Running) && !joint1.getStateMachine().getGoalState().equals(ArmState.Intaking);
+        return coralRollers.getStateMachine().atState(RollerState.Running) && !joint1.getStateMachine().getGoalState().equals(ArmState.Intaking);
     }
 
     public EndEffector setAutoEndScoring(boolean autoEndScoring) {

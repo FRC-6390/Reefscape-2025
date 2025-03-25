@@ -94,11 +94,11 @@ public class Superstructure extends SubsystemBase {
     this.elevatorStateMachine = elevator.getStateMachine();
     this.endEffectorStateMachine = endEffector.getStateMachine();
     this.stateMachine = new StateMachine<Superstructure.SuperstructureTuple,Superstructure.SuperstructureState>(SuperstructureState.Home, () -> elevatorStateMachine.atGoalState() && endEffectorStateMachine.atGoalState());
-    this.autoDropElevatorTrigger = new RunnableTrigger(() -> autoDropElevator && endEffector.hasNoPiece() && elevatorStateMachine.atAnyState(ElevatorState.L1,ElevatorState.L2,ElevatorState.L3,ElevatorState.L4) && !endEffectorStateMachine.getGoalState().equals(EndEffectorState.AlgaeScore));
+    this.autoDropElevatorTrigger = new RunnableTrigger(() -> autoDropElevator && endEffector.hasNoPiece() && elevatorStateMachine.atState(ElevatorState.L1,ElevatorState.L2,ElevatorState.L3,ElevatorState.L4) && !endEffectorStateMachine.getGoalState().equals(EndEffectorState.AlgaeScore));
     this.liftIntake = new RunnableTrigger(() -> endEffector.hasGamePiece());  
     this.atL4 = new DelayedOutput(() -> endeffectorAtState(EndEffectorState.L4), 0.125);
     this.atHome = new DelayedOutput(() -> endeffectorAtState(EndEffectorState.Home), 0.125);
-    this.elevatorAtIntake = new DelayedOutput(() -> elevatorStateMachine.atAnyState(ElevatorState.Intaking), 0.125);
+    this.elevatorAtIntake = new DelayedOutput(() -> elevatorStateMachine.atState(ElevatorState.Intaking), 0.125);
 
     autoDropElevatorTrigger.onTrue(() -> {setSuper(SuperstructureState.HomePID); RobotContainer.selectedState = SuperstructureState.Stopped;});  
     liftIntake.onTrue(setState(SuperstructureState.Align));
@@ -112,7 +112,7 @@ public class Superstructure extends SubsystemBase {
   }
 
   public Command WaitForElevator() {
-    return new WaitUntilCommand(() -> elevatorStateMachine.atGoalState());
+    return elevatorStateMachine.waitUntilAtGoal();
   }
 
   public Command WaitForEjector() {
@@ -121,7 +121,8 @@ public class Superstructure extends SubsystemBase {
 
   public Command WaitForL4() 
   { 
-    return new WaitUntilCommand(() -> atL4.getAsBoolean());
+    return endEffectorStateMachine.waitUntil(EndEffectorState.L4);
+    // return new WaitUntilCommand(() -> atL4.getAsBoolean());
   }
 
 
@@ -218,7 +219,7 @@ public class Superstructure extends SubsystemBase {
           if(prevState.equals(SuperstructureState.Intaking))
           {
           endEffectorStateMachine.queueState(EndEffectorState.Transition);
-          endEffectorStateMachine.queueState(EndEffectorState.Home, () -> endEffector.getJoint1().getStateMachine().atAnyState(ArmState.TransitionState) && endEffector.getJoint2().getStateMachine().atAnyState(WristState.TransitionState));
+          endEffectorStateMachine.queueState(EndEffectorState.Home, () -> endEffector.getJoint1().getStateMachine().atState(ArmState.TransitionState) && endEffector.getJoint2().getStateMachine().atState(WristState.TransitionState));
           }
           else
           {
@@ -234,7 +235,7 @@ public class Superstructure extends SubsystemBase {
 
   public boolean endeffectorAtState(EndEffectorState state)
   {
-    return endEffectorStateMachine.atAnyState(state);
+    return endEffectorStateMachine.atState(state);
   }
 
   public void update(){
