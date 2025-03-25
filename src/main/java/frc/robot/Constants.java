@@ -75,6 +75,38 @@ public interface Constants {
     }
 
     public interface Elevator {
+
+
+        public enum ElevatorState implements SetpointProvider<Double> {
+            //ELEVATOR HEIGHT FROM FLOOR IN INCHES
+            HomeReset(Constants.Elevator.OFFSET_FROM_FLOOR),
+            HomePID(Constants.Elevator.OFFSET_FROM_FLOOR),
+            L1(Constants.Elevator.OFFSET_FROM_FLOOR + 3),
+            Intaking(Constants.Elevator.OFFSET_FROM_FLOOR),
+
+            Aligning(32.2),
+
+            AlgaeHigh(48.9),
+            AlgaeLow(35.463),
+            //31.5
+            L2(34.78280700103924),
+            //47.25
+            L3(48),
+            //72
+            L4(76.23066732041963);
+
+
+            double pos;
+            private ElevatorState(double pos){
+                this.pos = pos;
+            }
+
+            @Override
+            public Double getSetpoint() {
+            return pos;
+            }
+        }
+       
         int ENCODER = 42;
 
         int LEFT_MOTOR = 20;
@@ -86,6 +118,19 @@ public interface Constants {
         int LIMIT_SWITCH = 5;
         ProfiledPIDController CONTORLLER = new ProfiledPIDController(0.1, 0.0, 0, new Constraints(50, 15));
         ElevatorFeedforward FEEDFORWARD = new ElevatorFeedforward(0, 0.14, 0.32,0.0);
+
+        // MechanismConfig<StatefulElevatorMechanism<ElevatorState>> ELEVATOR_CONFIG = MechanismConfig.statefulElevator(new ElevatorFeedforward(0,0.14,0.32, 0), ElevatorState.HomeReset)
+        // .addMotors(Motor.KRAKEN_X60, 20, -21)
+        // .setEncoder(EncoderType.CTRECANcoder, 42)
+        // .setNeutralMode(MotorNeutralMode.Brake)
+        // .setEncoderOffset(24)
+        // .setEncoderConversion(3d)
+        // .setTolerance(1)
+        // .setCanbus(CANIVORE_CANBUS)
+        // .setProfiledPID(0.025, 0, 0, 50 ,15)
+        // .setCurrentLimit(60)
+        // .addLowerLimitSwitch(-5, 24, true)
+        // .setStateActionSupressMotors(ElevatorState.HomeReset, mech -> mech.setSpeed(-0.2));
     }
 
     public interface EndEffector {

@@ -4,8 +4,6 @@
 
 package frc.robot.subsystems;
 
-import com.ctre.phoenix6.StatusSignal.SignalMeasurement;
-
 import ca.frc6390.athena.commands.RunnableTrigger;
 import ca.frc6390.athena.controllers.DelayedOutput;
 import ca.frc6390.athena.mechanisms.StateMachine;
@@ -16,11 +14,11 @@ import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.WaitUntilCommand;
 import frc.robot.RobotContainer;
+import frc.robot.Constants.Elevator.ElevatorState;
 import frc.robot.Constants.EndEffector.ArmState;
 import frc.robot.Constants.EndEffector.WristState;
 import frc.robot.subsystems.superstructure.Elevator;
 import frc.robot.subsystems.superstructure.EndEffector;
-import frc.robot.subsystems.superstructure.Elevator.ElevatorState;
 import frc.robot.subsystems.superstructure.EndEffector.EndEffectorState;
 import frc.robot.subsystems.superstructure.EndEffector.EndEffectorTuple;
 
@@ -146,7 +144,7 @@ public class Superstructure extends SubsystemBase {
     stateMachine.queueState(state);
   }
 
-  public InstantCommand setElevator(Elevator.ElevatorState state){
+  public InstantCommand setElevator(ElevatorState state){
     return new InstantCommand(() -> elevatorStateManager(state));
   }
 
@@ -154,7 +152,7 @@ public class Superstructure extends SubsystemBase {
     return new InstantCommand(() -> endEffectorStateManager(state));
   }
 
-  public void elevatorStateManager(Elevator.ElevatorState state){
+  public void elevatorStateManager(ElevatorState state){
     if(elevatorEnabled){
       // if(elevatorStateMachine.getGoalState().equals(Elevator.ElevatorState.Home) && elevatorStateMachine.atGoalState())
       // {

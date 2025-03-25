@@ -12,7 +12,6 @@ import com.ctre.phoenix6.signals.NeutralModeValue;
 
 import ca.frc6390.athena.commands.RunnableTrigger;
 import ca.frc6390.athena.mechanisms.StateMachine;
-import ca.frc6390.athena.mechanisms.StateMachine.SetpointProvider;
 import ca.frc6390.athena.sensors.limitswitch.GenericLimitSwitch;
 import edu.wpi.first.math.controller.ElevatorFeedforward;
 import edu.wpi.first.math.controller.ProfiledPIDController;
@@ -24,6 +23,7 @@ import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
+import frc.robot.Constants.Elevator.ElevatorState;
 
 public class Elevator extends SubsystemBase{
 
@@ -40,36 +40,6 @@ public class Elevator extends SubsystemBase{
   private final StatusSignal<Angle> getPosition;
   private final StatusSignal<AngularVelocity> getVelocity;
   private double nudge = 0;
-  
-  public enum ElevatorState implements SetpointProvider<Double> {
-    //ELEVATOR HEIGHT FROM FLOOR IN INCHES
-    HomeReset(Constants.Elevator.OFFSET_FROM_FLOOR),
-    HomePID(Constants.Elevator.OFFSET_FROM_FLOOR),
-    L1(Constants.Elevator.OFFSET_FROM_FLOOR + 3),
-    Intaking(Constants.Elevator.OFFSET_FROM_FLOOR),
-
-    Aligning(32.2),
-
-    AlgaeHigh(48.9),
-    AlgaeLow(35.463),
-    //31.5
-    L2(34.78280700103924),
-    //47.25
-    L3(48),
-    //72
-    L4(76.23066732041963);
-
-
-    double pos;
-    private ElevatorState(double pos){
-        this.pos = pos;
-    }
-
-    @Override
-    public Double getSetpoint() {
-      return pos;
-    }
-}
 
   public Elevator() 
   {
