@@ -6,16 +6,9 @@ package frc.robot.subsystems;
 
 import ca.frc6390.athena.commands.RunnableTrigger;
 import ca.frc6390.athena.controllers.DelayedOutput;
-import ca.frc6390.athena.core.RobotBase;
 import ca.frc6390.athena.mechanisms.StateMachine;
 import ca.frc6390.athena.mechanisms.StateMachine.SetpointProvider;
-import ca.frc6390.athena.sensors.camera.limelight.LimeLight;
-import edu.wpi.first.math.geometry.Translation2d;
-import edu.wpi.first.wpilibj.DriverStation;
-import edu.wpi.first.wpilibj.DriverStation.Alliance;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.WaitUntilCommand;
@@ -23,11 +16,9 @@ import frc.robot.Constants.EndEffector.ArmState;
 import frc.robot.Constants.EndEffector.WristState;
 import frc.robot.subsystems.superstructure.Elevator;
 import frc.robot.subsystems.superstructure.EndEffector;
-import frc.robot.subsystems.superstructure.EndEffectorV2;
 import frc.robot.subsystems.superstructure.Elevator.ElevatorState;
-import frc.robot.subsystems.superstructure.EndEffectorV2.EndEffectorState;
-import frc.robot.subsystems.superstructure.EndEffectorV2.EndEffectorTuple;
-import frc.robot.utils.ReefScoringPos.ReefPole;
+import frc.robot.subsystems.superstructure.EndEffector.EndEffectorState;
+import frc.robot.subsystems.superstructure.EndEffector.EndEffectorTuple;
 
 public class Superstructure extends SubsystemBase {
   
@@ -37,10 +28,7 @@ public class Superstructure extends SubsystemBase {
   private final StateMachine<SuperstructureTuple, SuperstructureState> stateMachine;
 
   public Elevator elevator;
-  private final RobotBase<?> base;
-  private final EndEffectorV2 endEffector;
-
- 
+  private final EndEffector endEffector;
 
   private final RunnableTrigger autoDropElevatorTrigger;
   private final RunnableTrigger liftIntake;
@@ -87,13 +75,12 @@ public class Superstructure extends SubsystemBase {
         }
     }
 
-  public Superstructure(Elevator elevator, EndEffectorV2 endEffector, RobotBase<?> base) 
+  public Superstructure(Elevator elevator, EndEffector endEffector) 
   {
     this.endEffector = endEffector;
     this.elevator = elevator;
     this.elevatorStateMachine = elevator.getStateMachine();
     this.endEffectorStateMachine = endEffector.getStateMachine();
-    this.base = base;
     this.stateMachine = new StateMachine<Superstructure.SuperstructureTuple,Superstructure.SuperstructureState>(SuperstructureState.Home, () -> elevatorStateMachine.atGoalState() && endEffectorStateMachine.atGoalState());
     this.autoDropElevatorTrigger = new RunnableTrigger(() -> autoDropElevator && endEffector.isScoring() && elevatorStateMachine.atAnyState(ElevatorState.L1,ElevatorState.L2,ElevatorState.L3,ElevatorState.L4));
     this.liftIntake = new RunnableTrigger(() -> endEffector.hasGamePiece());  
@@ -242,14 +229,8 @@ public class Superstructure extends SubsystemBase {
     endEffectorStateMachine.update();
     stateMachine.update();
 
-    SmartDashboard.putBoolean("JOint1 At Goal", endEffector.getJoint1().getStateMachine().atAnyState(ArmState.TransitionState));
-    SmartDashboard.putBoolean("Joint2 at goal",endEffector.getJoint2().getStateMachine().atAnyState(WristState.TransitionState));
-    SmartDashboard.putBoolean("At HOME",atHome.getAsBoolean());
-
     SuperstructureState state = stateMachine.getGoalState();
     SuperstructureTuple val = stateMachine.getGoalStateSetpoint();
-
-    SmartDashboard.putBoolean("At Intaking", elevatorStateMachine.atAnyState(ElevatorState.Intaking));
 
     if(!prevState.equals(state)){
       switch (state) {

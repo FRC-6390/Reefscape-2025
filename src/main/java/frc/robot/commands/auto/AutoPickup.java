@@ -106,16 +106,16 @@ public class AutoPickup extends Command {
             double biggest = lens[0] > lens[1] ? lens[0] : lens[1];
             double smallest = lens[0] < lens[1] ? lens[0] : lens[1];
             SmartDashboard.putNumber("Ratio", smallest / biggest);            
-            SmartDashboard.putNumber("Len1", len1);
-            SmartDashboard.putNumber("Len2", len2);
-            SmartDashboard.putNumber("CORNER 0 X",  corners.get(0).x);
-            SmartDashboard.putNumber("CORNER 1 X",  corners.get(1).x);
-            SmartDashboard.putNumber("CORNER 2 X",  corners.get(2).x);
-            SmartDashboard.putNumber("CORNER 3 X",  corners.get(3).x);
-            SmartDashboard.putNumber("CORNER 0 Y",  corners.get(0).y);
-            SmartDashboard.putNumber("CORNER 1 Y",  corners.get(1).y);
-            SmartDashboard.putNumber("CORNER 2 Y",  corners.get(2).y);
-            SmartDashboard.putNumber("CORNER 3 Y",  corners.get(3).y);
+            // SmartDashboard.putNumber("Len1", len1);
+            // SmartDashboard.putNumber("Len2", len2);
+            // SmartDashboard.putNumber("CORNER 0 X",  corners.get(0).x);
+            // SmartDashboard.putNumber("CORNER 1 X",  corners.get(1).x);
+            // SmartDashboard.putNumber("CORNER 2 X",  corners.get(2).x);
+            // SmartDashboard.putNumber("CORNER 3 X",  corners.get(3).x);
+            // SmartDashboard.putNumber("CORNER 0 Y",  corners.get(0).y);
+            // SmartDashboard.putNumber("CORNER 1 Y",  corners.get(1).y);
+            // SmartDashboard.putNumber("CORNER 2 Y",  corners.get(2).y);
+            // SmartDashboard.putNumber("CORNER 3 Y",  corners.get(3).y);
 
 
 

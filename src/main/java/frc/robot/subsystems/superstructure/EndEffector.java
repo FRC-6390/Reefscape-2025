@@ -1,55 +1,53 @@
 package frc.robot.subsystems.superstructure;
 
-import ca.frc6390.athena.core.RobotBase;
+import ca.frc6390.athena.controllers.DelayedOutput;
+import ca.frc6390.athena.mechanisms.ArmMechanism.StatefulArmMechanism;
+import ca.frc6390.athena.mechanisms.Mechanism.StatefulMechanism;
 import ca.frc6390.athena.mechanisms.StateMachine;
 import ca.frc6390.athena.mechanisms.StateMachine.SetpointProvider;
-import ca.frc6390.athena.sensors.beambreak.IRBeamBreak;
+import ca.frc6390.athena.sensors.limitswitch.GenericLimitSwitch;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
-import frc.robot.subsystems.superstructure.endeffector.AlgaeExtender;
-import frc.robot.subsystems.superstructure.endeffector.AlgaeExtender.AlgaeExtenderState;
-import frc.robot.subsystems.superstructure.endeffector.Rollers;
-import frc.robot.subsystems.superstructure.endeffector.Rotator;
-import frc.robot.subsystems.superstructure.endeffector.Rotator.RotatorState;
-import frc.robot.subsystems.superstructure.endeffector.Rollers.RollerState;
+import frc.robot.Constants.EndEffector.ArmState;
+import frc.robot.Constants.EndEffector.WristState;
+import frc.robot.Constants.EndEffector.RollerState;
+
 
 public class EndEffector extends SubsystemBase{
 
-    private final Rollers rollers;
-    private boolean rollersEnabled = true;
-    private final Rotator rotator;
-    private boolean rotatorEnabled = true;
-    private final AlgaeExtender algaeExtender;
-    private boolean algaeEnabled = true;
+    private final StatefulArmMechanism<ArmState> joint1;
+    private final StatefulArmMechanism<WristState> joint2;
+    // public DelayedOutput joint1AtGoal;
+    // public DelayedOutput joint2AtGoal;
+
+    private final DelayedOutput hasNoPiece;
+
+    private final StatefulMechanism<RollerState> rollers;
 
     private boolean autoEndScoring = true;
 
-    // public Elevator elevator;
-
-    private final StateMachine<Double, RollerState> rollerStateMachine;
-    private final StateMachine<Double, RotatorState> rotatorStateMachine;
-    private final StateMachine<Double, AlgaeExtenderState> algaeExtenderStateMachine;
-
     private final StateMachine<EndEffectorTuple, EndEffectorState> stateMachine;
 
-    private final IRBeamBreak beamBreakLeft, beamBreakRight, beamBreakCenter;
+    private final GenericLimitSwitch proximitySensor;
 
-    public record EndEffectorTuple(RollerState rollerState,  RotatorState rotatorState, AlgaeExtenderState algaeExtenderState) {}
+    private EndEffectorState prevState;
+
+    public record EndEffectorTuple(RollerState rollerState,  ArmState joint1state, WristState joint2state) {}
     
     public enum EndEffectorState implements SetpointProvider<EndEffectorTuple>
     {
-        AlgaeHigh(new EndEffectorTuple(RollerState.Algae, RotatorState.Algae, AlgaeExtenderState.Extended)),
-        AlgaeRetract(new EndEffectorTuple(RollerState.Stopped, RotatorState.Home, AlgaeExtenderState.Home)),
-        AlgaeLow(new EndEffectorTuple(RollerState.Algae, RotatorState.Algae, AlgaeExtenderState.Extended)),
-        L4(new EndEffectorTuple(null, RotatorState.L4, AlgaeExtenderState.Home)),
-        L3(new EndEffectorTuple(null, RotatorState.Home, AlgaeExtenderState.Home)),
-        L2(new EndEffectorTuple(null, RotatorState.Home, AlgaeExtenderState.Home)),
-        L1(new EndEffectorTuple(null, RotatorState.Home, AlgaeExtenderState.Home)),
-        Score(new EndEffectorTuple(RollerState.Running, null, null)),
+        L4(new EndEffectorTuple(RollerState.Stopped, ArmState.ScoringL4, WristState.ScoringL4)),
+        L3(new EndEffectorTuple(RollerState.Stopped,  ArmState.Scoring, WristState.Scoring)),
+        L2(new EndEffectorTuple(RollerState.Stopped, ArmState.Scoring, WristState.Scoring)),
+        L1(new EndEffectorTuple(RollerState.Stopped, ArmState.Scoring,WristState.Scoring)),
+        Score(new EndEffectorTuple(RollerState.Running, null,null)),
         Stop(new EndEffectorTuple(RollerState.Stopped, null, null)),
-        Home(new EndEffectorTuple(RollerState.Stopped, RotatorState.Home, AlgaeExtenderState.Home));
+        Home(new EndEffectorTuple(RollerState.Stopped, ArmState.Home, WristState.Home)),
+        Reverse(new EndEffectorTuple(RollerState.Reverse, null, null)),
+        Intaking(new EndEffectorTuple(RollerState.Running, ArmState.Intaking, WristState.Intaking)),
+        Transition(new EndEffectorTuple(RollerState.Stopped, ArmState.TransitionState, WristState.TransitionState));
+
 
 
         private EndEffectorTuple states;
@@ -65,24 +63,19 @@ public class EndEffector extends SubsystemBase{
         }
     }
 
-    public EndEffector(RobotBase<?> base){
-        this(new Rollers(base), new Rotator(base), new AlgaeExtender());
-    }
+   
 
-    public EndEffector(Rollers rollers, Rotator rotator, AlgaeExtender algae){
-        this.rollers = rollers;
-        this.rotator = rotator;
-        this.algaeExtender = algae;
+    public EndEffector( StatefulArmMechanism<ArmState> joint1, StatefulArmMechanism<WristState> joint2, StatefulMechanism<RollerState> Rollers ){
+    
+        this.joint1 = joint1;
+        this.rollers = Rollers;
+        this.joint2 = joint2;    
+        this.prevState = EndEffectorState.Home;
 
-        this.rollerStateMachine = rollers.getStateMachine();
-        this.rotatorStateMachine = rotator.getStateMachine();
-        this.algaeExtenderStateMachine = algae.getStateMachine();
+        proximitySensor = new GenericLimitSwitch(4, true);
+        hasNoPiece = new DelayedOutput(() -> !hasGamePiece(), 0.25);
 
-        beamBreakLeft = new IRBeamBreak(1);
-        beamBreakCenter = new IRBeamBreak(0);
-        beamBreakRight = new IRBeamBreak(2);
-
-        this.stateMachine = new StateMachine<EndEffectorTuple,EndEffectorState>(EndEffectorState.Home, () -> rollerStateMachine.atGoalState() && rotatorStateMachine.atGoalState() && algaeExtenderStateMachine.atGoalState());
+        this.stateMachine = new StateMachine<EndEffectorTuple,EndEffectorState>(EndEffectorState.Home, () -> joint1.getStateMachine().atGoalState()&& joint2.getStateMachine().atGoalState());
     }
 
     public StateMachine<EndEffectorTuple, EndEffectorState> getStateMachine() {
@@ -90,11 +83,11 @@ public class EndEffector extends SubsystemBase{
     }
 
     public boolean hasGamePiece(){
-        return beamBreakLeft.getAsBoolean() || beamBreakCenter.getAsBoolean() || beamBreakRight.getAsBoolean();
+        return proximitySensor.getAsBoolean();
     }
 
     public boolean hasNoPiece(){
-        return !beamBreakLeft.getAsBoolean() && !beamBreakCenter.getAsBoolean() && !beamBreakRight.getAsBoolean();
+        return hasNoPiece.getAsBoolean();
     }
 
     public ShuffleboardTab shuffleboard(String tab) {
@@ -103,24 +96,14 @@ public class EndEffector extends SubsystemBase{
 
     public ShuffleboardTab shuffleboard(ShuffleboardTab tab) {
        
-        tab.addBoolean("BeamBreakLeft", () -> beamBreakLeft.getAsBoolean());
-        tab.addBoolean("BeamBreakRight", () -> beamBreakRight.getAsBoolean());
-        tab.addBoolean("BeamBreakCenter", () -> beamBreakCenter.getAsBoolean());
+        tab.addBoolean("Has Game Piece", () -> hasGamePiece());
 
-        
-        tab.addBoolean("rollersEnabled", () -> rollersEnabled);
-        tab.addBoolean("algaeEnabled", () -> algaeEnabled);
-        tab.addBoolean("rotatorEnabled", () -> rotatorEnabled);
-
-        algaeExtender.shuffleboard(tab, "Algae Extender");
-        rollers.shuffleboard(tab, "Rollers");
-        rotator.shuffleboard(tab, "Rotator");
 
         return tab;
     } 
 
     public boolean isScoring(){
-        return rollerStateMachine.atAnyState(RollerState.Running, RollerState.RunningInverted);
+        return rollers.getStateMachine().atAnyState(RollerState.Running) && !joint1.getStateMachine().getGoalState().equals(ArmState.Intaking);
     }
 
     public EndEffector setAutoEndScoring(boolean autoEndScoring) {
@@ -128,60 +111,40 @@ public class EndEffector extends SubsystemBase{
         return this;
     }
 
-    public EndEffector setAlgaeEnabled(boolean algaeEnabled) {
-        this.algaeEnabled = algaeEnabled;
-        return this;
-    }
-
-    public EndEffector setRollersEnabled(boolean rollersEnabled) {
-        this.rollersEnabled = rollersEnabled;
-        return this;
-    }
-
-    public EndEffector setRotatorEnabled(boolean rotatorEnabled) {
-        this.rotatorEnabled = rotatorEnabled;
-        return this;
-    }
 
     public void update(){
 
-        algaeExtenderStateMachine.update();
-        rollerStateMachine.update();
-        rotatorStateMachine.update();
-
         stateMachine.update();
+        rollers.update();
+        joint1.update();
 
         EndEffectorState state = stateMachine.getGoalState();
         EndEffectorTuple val = stateMachine.getGoalStateSetpoint();
-        switch (state) {
-            case L4: 
-            case L3: 
-            case L2: 
-            case L1: 
-            case AlgaeHigh: 
-            case AlgaeRetract:
-            case AlgaeLow: 
-            case Home:
-            case Score:
-            case Stop:
-                if (val.rollerState != null && rollersEnabled) rollerStateMachine.queueState(val.rollerState);
-                if (val.rotatorState != null && rotatorEnabled) rotatorStateMachine.queueState(val.rotatorState);
-                if (val.algaeExtenderState != null && algaeEnabled) algaeExtenderStateMachine.queueState(val.algaeExtenderState());
-            default:
+
+        if(!prevState.equals(state)){
+            switch (state) {                  
+                default:
+                    if (val.rollerState != null) rollers.getStateMachine().queueState(val.rollerState);
+                    if (val.joint1state != null) joint1.getStateMachine().queueState(val.joint1state);
+                    if (val.joint2state != null) joint2.getStateMachine().queueState(val.joint2state);
                 break;
+            }
         }
+
+        prevState = state;
+        
     }
 
-    public AlgaeExtender getAlgaeExtender() {
-        return algaeExtender;
-    }
 
-    public Rollers getRollers() {
+    public StatefulMechanism<RollerState> getRollers() {
         return rollers;
     }
 
-    public Rotator getRotator() {
-        return rotator;
+    public StatefulArmMechanism<ArmState> getJoint1() {
+        return joint1;
+    }
+    public StatefulArmMechanism<WristState> getJoint2() {
+        return joint2;
     }
 
     public boolean isAutoEndScoring() {

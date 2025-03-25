@@ -7,19 +7,15 @@ package frc.robot;
 import com.pathplanner.lib.auto.NamedCommands;
 import com.pathplanner.lib.commands.PathPlannerAuto;
 
-import frc.robot.commands.auto.TagAlign;
 import ca.frc6390.athena.controllers.EnhancedXboxController;
 import ca.frc6390.athena.core.RobotBase;
 import ca.frc6390.athena.drivetrains.swerve.SwerveDrivetrain;
 import ca.frc6390.athena.mechanisms.ArmMechanism.StatefulArmMechanism;
 import ca.frc6390.athena.mechanisms.Mechanism.StatefulMechanism;
-import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
-import edu.wpi.first.wpilibj2.command.InstantCommand;
-import edu.wpi.first.wpilibj2.command.WaitCommand;
 import frc.robot.Autos.AUTOS;
 import frc.robot.Constants.EndEffector.ArmState;
 import frc.robot.Constants.EndEffector.WristState;
@@ -31,8 +27,7 @@ import frc.robot.subsystems.Superstructure.SuperstructureState;
 import frc.robot.subsystems.superstructure.CANdleSubsystem;
 import frc.robot.subsystems.superstructure.Elevator;
 import frc.robot.utils.ReefScoringPos.ReefPole;
-import frc.robot.subsystems.superstructure.EndEffectorV2;
-import frc.robot.subsystems.superstructure.EndEffectorV2.EndEffectorState;
+import frc.robot.subsystems.superstructure.EndEffector;
 
 public class RobotContainer {
   public final RobotBase<SwerveDrivetrain> robotBase = Constants.DriveTrain.ROBOT_BASE.create();//.shuffleboard();
@@ -42,9 +37,9 @@ public class RobotContainer {
   public final StatefulMechanism<RollerState> algaeRollers = Constants.EndEffector.ALGAE_ROLLERS.build();//.shuffleboard("Rollers");
 
 
-  public Elevator elevator = new Elevator();
-  public EndEffectorV2 endEffector = new EndEffectorV2(arm, wrist, rollers,algaeRollers).setAutoEndScoring(true);
-  public Superstructure superstructure = new Superstructure(elevator, endEffector, robotBase);
+  public final Elevator elevator = new Elevator();
+  public final EndEffector endEffector = new EndEffector(arm, wrist, rollers).setAutoEndScoring(true);
+  public Superstructure superstructure = new Superstructure(elevator, endEffector);
   public CANdleSubsystem candle = new CANdleSubsystem(robotBase);
 
   private final EnhancedXboxController driverController = new EnhancedXboxController(0)
@@ -55,18 +50,10 @@ public class RobotContainer {
 
   private final EnhancedXboxController driverController2 = new EnhancedXboxController(1).setSticksDeadzone(Constants.Controllers.STICK_DEADZONE);
                    
-  public String selectedLimelight = "limelight-left";
-
   public SendableChooser<Command> chooser;
   public RobotContainer() 
   {
     configureBindings();
-    arm.setPidEnabled(true);
-    arm.setFeedforwardEnabled(false);
-    wrist.setPidEnabled(true);
-    wrist.setFeedforwardEnabled(false);
-    rollers.setPidEnabled(true);
-    rollers.setFeedforwardEnabled(false);
     robotBase.getDrivetrain().setDriveCommand(driverController);
    
     elevator.shuffleboard("Elevator");
@@ -99,11 +86,6 @@ public class RobotContainer {
   
   }
 
-  public InstantCommand selectLimelight(String limleight)
-  {
-    return new InstantCommand(() -> selectedLimelight = limleight);
-  }
-
   private void configureBindings() 
   {
     //----------------------------------------------------------DRIVER 1---------------------------------------------------------------//
@@ -113,9 +95,6 @@ public class RobotContainer {
 
     driverController.leftBumper.onTrue(superstructure.setState(SuperstructureState.Intaking));
     driverController.rightBumper.onTrue(superstructure.setState(SuperstructureState.HomePID)).after(1).onTrue(superstructure.setState(SuperstructureState.Home));
-
-    driverController.pov.down.whileTrue(() -> System.out.println(robotBase.getVision().getPhotonVision("Tag").isConnected()));
-
 
     driverController.pov.left.whileTrue(new TagAlign(robotBase, "limelight-left"));
     driverController.pov.right.whileTrue(new TagAlign(robotBase, "limelight-right"));

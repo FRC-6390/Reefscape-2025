@@ -91,12 +91,7 @@ public class BasicAlign extends Command {
   {
   if(limeLight.hasValidTarget())
   {
-  if(!hasSet)
-  {
-    hasSet = true;
-  }
-  SmartDashboard.putNumber("Rot", Math.abs(filter.calculate(limeLight.getPoseEstimate(PoseEstimateType.TARGET_POSE_ROBOT_SPACE).getRaw()[4])));
-  if(Math.abs(filter.calculate(limeLight.getPoseEstimate(PoseEstimateType.TARGET_POSE_ROBOT_SPACE).getRaw()[4])) < 15)
+  if(Math.abs(filter.calculate(limeLight.getPoseEstimate(PoseEstimateType.TARGET_POSE_ROBOT_SPACE).getRaw()[4])) < 5)
     {
       double r = controller.calculate(limeLight.getTargetHorizontalOffset(), 0);
       double x = 0;
@@ -104,7 +99,6 @@ public class BasicAlign extends Command {
       {
          x = 0.1;
       }
-      SmartDashboard.putNumber("Speed", r);
       base.getDrivetrain().getRobotSpeeds().setAxisState("auto", SpeedAxis.Y, false);
       base.getDrivetrain().getRobotSpeeds().setSpeeds("feedback", x, r, 0);
     }
@@ -118,11 +112,6 @@ public class BasicAlign extends Command {
   {
   if(limeLight.hasValidTarget())
   {
-    if(!hasSet)
-    {
-      hasSet = true;
-    }
-  SmartDashboard.putNumber("Rot", Math.abs(filter.calculate(limeLight.getPoseEstimate(PoseEstimateType.TARGET_POSE_ROBOT_SPACE).getRaw()[4])));
   if(limeLight.getAprilTagID() == pole.getApriltagId())
   {
   if(Math.abs(filter.calculate(limeLight.getPoseEstimate(PoseEstimateType.TARGET_POSE_ROBOT_SPACE).getRaw()[4])) < 10)
@@ -133,7 +122,6 @@ public class BasicAlign extends Command {
       {
          x = 0.1;
       }
-      SmartDashboard.putNumber("Speed", r);
       base.getDrivetrain().getRobotSpeeds().setAxisState("auto", SpeedAxis.Y, false);
       base.getDrivetrain().getRobotSpeeds().setSpeeds("feedback", x,r,0); 
     }
@@ -149,19 +137,8 @@ else
 {
   if(limeLight.hasValidTarget())
   {
-    if(!hasSet)
-  {
-    hasSet = true;
-  }
-  SmartDashboard.putNumber("Rot", Math.abs(filter.calculate(limeLight.getPoseEstimate(PoseEstimateType.TARGET_POSE_ROBOT_SPACE).getRaw()[4])));
   
       double r = controller.calculate(limeLight.getTargetHorizontalOffset(), 0);
-      double x = 0;
-      if(base.getRobotSpeeds().getSpeeds("auto").equals(new ChassisSpeeds()))
-      {
-         x = 0.1;
-      }
-      SmartDashboard.putNumber("Speed", r);
       base.getDrivetrain().getRobotSpeeds().setAxisState("auto", SpeedAxis.Y, false);
       base.getDrivetrain().getRobotSpeeds().setSpeeds("feedback", x,r,0); 
   }
@@ -197,18 +174,13 @@ else
     double angle = ll.getTargetHorizontalOffset();
     double x = (Math.cos(Math.toRadians(angle)) * dist);
     double y = (Math.sin(Math.toRadians(angle)) * dist); 
-    SmartDashboard.putNumber("x",x);
-    SmartDashboard.putNumber("Y", y);
-    SmartDashboard.putNumber("Angle", angle);
     
-
     return new Pose2d(x,y, base.getLocalization().getFieldPose().getRotation());
   }
 
   public boolean linedUp()
   {
-    Pose2d pose = getBotPoseTagSpace(limeLight);
-    return limeLight.hasValidTarget() && limeLight.getPoseEstimate(PoseEstimateWithLatencyType.BOT_POSE_MT2_BLUE).getRaw()[9] <= 0.525 && Math.abs(Math.abs(limeLight.getTargetHorizontalOffset()))< 7;
+    return limeLight.hasValidTarget() && limeLight.getPoseEstimate(PoseEstimateWithLatencyType.BOT_POSE_MT2_BLUE).getRaw()[9] <= 0.5 && Math.abs(Math.abs(limeLight.getTargetHorizontalOffset()))< 4;
   } 
   public boolean hasSeenAndLost()
   {
