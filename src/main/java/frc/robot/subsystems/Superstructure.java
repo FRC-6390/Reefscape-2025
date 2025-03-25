@@ -67,7 +67,9 @@ public class Superstructure extends SubsystemBase {
         L2(new SuperstructureTuple(EndEffectorState.L2, ElevatorState.L2)),
         L1(new SuperstructureTuple(EndEffectorState.L1, ElevatorState.L1)),
         Align(new SuperstructureTuple(EndEffectorState.Home, ElevatorState.Aligning)),
-        Home(new SuperstructureTuple(EndEffectorState.Home, ElevatorState.Home)),
+        Home(new SuperstructureTuple(EndEffectorState.Home, ElevatorState.HomeReset)),
+        HomePID(new SuperstructureTuple(EndEffectorState.Home, ElevatorState.HomePID)),
+
         Score(new SuperstructureTuple(EndEffectorState.Score, null)),
         Intaking(new SuperstructureTuple(EndEffectorState.Intaking,  ElevatorState.Intaking));
         
@@ -99,7 +101,7 @@ public class Superstructure extends SubsystemBase {
     this.atHome = new DelayedOutput(() -> endeffectorAtState(EndEffectorState.Home), 0.125);
     this.elevatorAtIntake = new DelayedOutput(() -> elevatorStateMachine.atAnyState(ElevatorState.Intaking), 0.125);
 
-    autoDropElevatorTrigger.onFalse(setState(SuperstructureState.Home));  
+    autoDropElevatorTrigger.onFalse(setState(SuperstructureState.HomePID));  
     liftIntake.onTrue(setState(SuperstructureState.Align));
 
     prevState = SuperstructureState.Home;
@@ -160,7 +162,7 @@ public class Superstructure extends SubsystemBase {
       // }
 
       switch (state) {
-        case L1,L2,L3,L4,Home,Intaking:
+        case L1,L2,L3,L4,HomeReset,HomePID,Intaking:
         if(prevState.states.elevator != null)
         {
         if((prevState.states.elevator.equals(ElevatorState.L4)||prevState.states.elevator.equals(ElevatorState.L3)||prevState.states.elevator.equals(ElevatorState.L2)||prevState.states.elevator.equals(ElevatorState.L1)))

@@ -73,7 +73,7 @@ if(currentLas != null)
     {
       if(currentLas.getMeasurement().distance_mm > 900)
       {
-        superstructure.elevatorStateManager(ElevatorState.Home);
+        superstructure.elevatorStateManager(ElevatorState.HomeReset);
       }
     }
   }

@@ -72,7 +72,7 @@ public class RobotContainer {
     elevator.shuffleboard("Elevator");
     // elevator.setDefaultCommand(elevate);
     
-    NamedCommands.registerCommand("Home", superstructure.setState(SuperstructureState.Home));
+    NamedCommands.registerCommand("Home", superstructure.setState(SuperstructureState.HomePID));
     NamedCommands.registerCommand("Intake", superstructure.setState(SuperstructureState.Intaking));
 
     NamedCommands.registerCommand("L4", superstructure.setState(SuperstructureState.L4));
@@ -112,13 +112,13 @@ public class RobotContainer {
     driverController.start.onTrue(() -> robotBase.getDrivetrain().getIMU().setYaw(0)).after(2).onTrue(() -> robotBase.getLocalization().resetFieldPose(0,0, 0));
 
     driverController.leftBumper.onTrue(superstructure.setState(SuperstructureState.Intaking));
-    driverController.rightBumper.onTrue(superstructure.setState(SuperstructureState.Home));
+    driverController.rightBumper.onTrue(superstructure.setState(SuperstructureState.HomePID)).after(1).onTrue(superstructure.setState(SuperstructureState.Home));
 
     driverController.pov.down.whileTrue(() -> System.out.println(robotBase.getVision().getPhotonVision("Tag").isConnected()));
 
 
-    driverController.pov.left.whileTrue(new BasicAlign(robotBase, "limelight-left", ReefPole.A));
-    driverController.pov.right.whileTrue(new BasicAlign(robotBase, "limelight-right"));
+    driverController.pov.left.whileTrue(new TagAlign(robotBase, "limelight-left"));
+    driverController.pov.right.whileTrue(new TagAlign(robotBase, "limelight-right"));
 
     driverController.a.onTrue(Commands.sequence(superstructure.setState(SuperstructureState.L1))).after(0.75).onTrue(superstructure.setState(SuperstructureState.Score));
     driverController.b.onTrue(Commands.sequence(superstructure.setState(SuperstructureState.L2))).after(0.75).onTrue(superstructure.setState(SuperstructureState.Score));

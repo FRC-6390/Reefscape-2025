@@ -46,7 +46,8 @@ public class Elevator extends SubsystemBase{
   
   public enum ElevatorState implements SetpointProvider<Double> {
     //ELEVATOR HEIGHT FROM FLOOR IN INCHES
-    Home(Constants.Elevator.OFFSET_FROM_FLOOR),
+    HomeReset(Constants.Elevator.OFFSET_FROM_FLOOR),
+    HomePID(Constants.Elevator.OFFSET_FROM_FLOOR),
     L1(Constants.Elevator.OFFSET_FROM_FLOOR + 3),
     Intaking(Constants.Elevator.OFFSET_FROM_FLOOR),
 
@@ -96,10 +97,10 @@ public class Elevator extends SubsystemBase{
     controller.setTolerance(0.8);
     controller.reset(getHeightFromFloor());
     feedforward = Constants.Elevator.FEEDFORWARD;
-    stateMachine = new StateMachine<Double, ElevatorState>(ElevatorState.Home, controller::atGoal);
+    stateMachine = new StateMachine<Double, ElevatorState>(ElevatorState.HomeReset, controller::atGoal);
     idle = new RunnableTrigger(() -> lowerlimitSwitch.getAsBoolean() && !stateMachine.getGoalState().equals(ElevatorState.Intaking));
     idle.onTrue(() -> stateMachine.queueState(ElevatorState.Aligning));
-    lowerlimitSwitch.onTrue(new InstantCommand(() -> {encoder.setPosition(0); stop(); controller.setGoal(ElevatorState.Home.getSetpoint());}));//.and(()->!stateMachine.atAnyState(ElevatorState.Intaking)).onTrue(() -> {});
+    lowerlimitSwitch.onTrue(new InstantCommand(() -> {encoder.setPosition(0); stop(); controller.setGoal(ElevatorState.HomeReset.getSetpoint());}));//.and(()->!stateMachine.atAnyState(ElevatorState.Intaking)).onTrue(() -> {});
   }
 
   public void setCurrentLimit(double current) {
@@ -203,11 +204,11 @@ public class Elevator extends SubsystemBase{
   {
 
     switch (stateMachine.getGoalState()) {
-      case Home, Intaking:
+      case HomeReset, Intaking:
         setMotors(-0.25);
         resetNudge();
         break;
-      case L1, L2, L3, L4, AlgaeHigh, AlgaeLow, Aligning:
+      case L1, L2, L3, L4, AlgaeHigh, AlgaeLow, Aligning, HomePID:
         double speed = controller.calculate(getHeightFromFloor(),stateMachine.getGoalState().getSetpoint()) + feedforward.calculate(controller.getSetpoint().velocity) / 12;
         setMotors(speed);
     }
