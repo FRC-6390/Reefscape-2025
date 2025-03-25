@@ -30,7 +30,9 @@ public class BasicAlign extends Command {
 
   public PIDController controller = new PIDController(0.035, 0.004, 0);
   
-  
+  public double getOffsetToTarget(){
+    return limeLight.getTargetHorizontalOffset() + ReefPole.getPoleFromID(limeLight.getAprilTagID(), limeLight).getOffsetInDegrees();
+ }
   /** Creates a new PassiveAlign. */
   public BasicAlign(RobotBase<?> base, String llTable, ReefPole pole) {
     this.base = base;
@@ -74,7 +76,7 @@ public class BasicAlign extends Command {
   SmartDashboard.putBoolean("EndCommand",endCommand.getAsBoolean());
   SmartDashboard.putBoolean("No Tag",noTagFound.getAsBoolean());
   SmartDashboard.putNumber("Dist",limeLight.getPoseEstimate(PoseEstimateWithLatencyType.BOT_POSE_MT2_BLUE).getRaw()[9]);
-  SmartDashboard.putNumber("HOFfset",limeLight.getTargetHorizontalOffset());
+  SmartDashboard.putNumber("HOFfset",getOffsetToTarget());
 
   if(DriverStation.isAutonomous())
   {
@@ -88,7 +90,7 @@ public class BasicAlign extends Command {
   }
   if(Math.abs(filter.calculate(limeLight.getPoseEstimate(PoseEstimateType.TARGET_POSE_ROBOT_SPACE).getRaw()[4])) < 15)
     {
-      double r = controller.calculate(limeLight.getTargetHorizontalOffset(), 0);
+      double r = controller.calculate(getOffsetToTarget(), 0);
       double x = 0;
       if(base.getRobotSpeeds().getSpeeds("auto").equals(new ChassisSpeeds()))
       {
@@ -115,7 +117,7 @@ public class BasicAlign extends Command {
   {
   if(Math.abs(filter.calculate(limeLight.getPoseEstimate(PoseEstimateType.TARGET_POSE_ROBOT_SPACE).getRaw()[4])) < 10)
     {
-      double r = controller.calculate(limeLight.getTargetHorizontalOffset(), 0);
+      double r = controller.calculate(getOffsetToTarget(), 0);
       double x = 0;
       if(base.getRobotSpeeds().getSpeeds("auto").equals(new ChassisSpeeds()))
       {
@@ -141,7 +143,7 @@ else
     hasSet = true;
   }
   
-      double r = controller.calculate(limeLight.getTargetHorizontalOffset(), 0);
+      double r = controller.calculate(getOffsetToTarget(), 0);
       double x = 0;
       if(base.getRobotSpeeds().getSpeeds("auto").equals(new ChassisSpeeds()))
       {
@@ -193,7 +195,7 @@ else
   public boolean linedUp()
   {
     Pose2d pose = getBotPoseTagSpace(limeLight);
-    return limeLight.hasValidTarget() && limeLight.getPoseEstimate(PoseEstimateWithLatencyType.BOT_POSE_MT2_BLUE).getRaw()[9] <= 0.525 && Math.abs(Math.abs(limeLight.getTargetHorizontalOffset()))< 7;
+    return limeLight.hasValidTarget() && limeLight.getPoseEstimate(PoseEstimateWithLatencyType.BOT_POSE_MT2_BLUE).getRaw()[9] <= 0.525 && Math.abs(Math.abs(getOffsetToTarget()))< 7;
   } 
   public boolean hasSeenAndLost()
   {
