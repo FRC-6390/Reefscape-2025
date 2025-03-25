@@ -139,6 +139,7 @@ else
   {
   
       double r = controller.calculate(limeLight.getTargetHorizontalOffset(), 0);
+      double x = 0;
       base.getDrivetrain().getRobotSpeeds().setAxisState("auto", SpeedAxis.Y, false);
       base.getDrivetrain().getRobotSpeeds().setSpeeds("feedback", x,r,0); 
   }

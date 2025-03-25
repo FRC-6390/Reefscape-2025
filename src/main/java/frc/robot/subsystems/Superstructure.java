@@ -36,8 +36,6 @@ public class Superstructure extends SubsystemBase {
   private final DelayedOutput atHome;
   private final DelayedOutput elevatorAtIntake;
 
-
-
   private boolean autoDropElevator = true;
   private boolean endEffectorEnabled = true;
   private boolean elevatorEnabled = true;

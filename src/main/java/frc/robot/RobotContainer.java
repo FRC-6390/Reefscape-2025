@@ -22,6 +22,7 @@ import frc.robot.Constants.EndEffector.WristState;
 import frc.robot.Constants.EndEffector.RollerState;
 
 import frc.robot.commands.auto.BasicAlign;
+import frc.robot.commands.auto.TagAlign;
 import frc.robot.subsystems.Superstructure;
 import frc.robot.subsystems.Superstructure.SuperstructureState;
 import frc.robot.subsystems.superstructure.CANdleSubsystem;
@@ -38,7 +39,7 @@ public class RobotContainer {
 
 
   public final Elevator elevator = new Elevator();
-  public final EndEffector endEffector = new EndEffector(arm, wrist, rollers).setAutoEndScoring(true);
+  public final EndEffector endEffector = new EndEffector(arm, wrist, rollers, algaeRollers).setAutoEndScoring(true);
   public Superstructure superstructure = new Superstructure(elevator, endEffector);
   public CANdleSubsystem candle = new CANdleSubsystem(robotBase);
 
