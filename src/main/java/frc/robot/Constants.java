@@ -147,19 +147,16 @@ public interface Constants {
         int CANDLE_ID = 22;
 
         enum ArmState implements SetpointProvider<Double>{
-            Intaking(150.38085937),
-            AlgaeHigh(52.8),
-            AlgaeLow(52.8),
-
-            Home(61.083),
-            StartConfiguration(0),
-
-            Scoring(78.310546875),
-            TransitionState(65),
-            ScoringL4(60),
-            AlgaeScore(120.58),
-          
-            Scoringl1(66.08);
+            Intaking(0), //150.38085937
+            AlgaeHigh(-97.5), //52.8
+            AlgaeLow(-97.5), //52.8
+            Home(-89), //61.083
+            StartConfiguration(-90), //0
+            Scoring(-72), //78.310546875
+            TransitionState(-85), //65
+            ScoringL4(-90), //60
+            AlgaeScore(-30), //120.58
+            Scoringl1(-84); //66.08
 
             double angle;
             ArmState(double angle){
