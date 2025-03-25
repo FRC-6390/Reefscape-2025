@@ -39,6 +39,7 @@ public class RobotContainer {
   public final StatefulMechanism<RollerState> algaeRollers = Constants.EndEffector.ALGAE_ROLLERS.build();//.shuffleboard("Rollers");
 
 
+
   public final Elevator elevator = new Elevator();
   public final EndEffector endEffector = new EndEffector(arm, wrist, rollers, algaeRollers).setAutoEndScoring(true);
   public Superstructure superstructure = new Superstructure(elevator, endEffector);
@@ -52,7 +53,9 @@ public class RobotContainer {
                                                               .setLeftSlewrate(2);
 
   private final EnhancedXboxController driverController2 = new EnhancedXboxController(1).setSticksDeadzone(Constants.Controllers.STICK_DEADZONE);
-                   
+          
+  
+ 
   public SendableChooser<Command> chooser;
   public RobotContainer() 
   {
