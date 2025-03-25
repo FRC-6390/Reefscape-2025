@@ -250,7 +250,6 @@ package frc.robot.commands.auto;
  
  import ca.frc6390.athena.controllers.DelayedOutput;
  import ca.frc6390.athena.core.RobotBase;
- import ca.frc6390.athena.core.RobotSpeeds.SpeedSource;
  import ca.frc6390.athena.sensors.camera.limelight.LimeLight;
  import ca.frc6390.athena.sensors.camera.limelight.LimeLight.PoseEstimateType;
  import ca.frc6390.athena.sensors.camera.limelight.LimeLight.PoseEstimateWithLatencyType;
@@ -259,7 +258,6 @@ package frc.robot.commands.auto;
  import edu.wpi.first.math.filter.MedianFilter;
  import edu.wpi.first.math.geometry.Pose2d;
  import edu.wpi.first.math.trajectory.TrapezoidProfile.Constraints;
- import edu.wpi.first.math.util.Units;
  import edu.wpi.first.wpilibj.DriverStation;
  import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
  import edu.wpi.first.wpilibj2.command.Command;

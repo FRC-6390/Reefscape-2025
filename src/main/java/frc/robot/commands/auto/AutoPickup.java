@@ -5,7 +5,6 @@
 package frc.robot.commands.auto;
 
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 
 import org.photonvision.PhotonCamera;
@@ -13,9 +12,6 @@ import org.photonvision.targeting.TargetCorner;
 
 import ca.frc6390.athena.controllers.DelayedOutput;
 import ca.frc6390.athena.core.RobotBase;
-import ca.frc6390.athena.core.RobotSpeeds.SpeedAxis;
-import ca.frc6390.athena.core.RobotSpeeds.SpeedSource;
-import edu.wpi.first.hal.simulation.RoboRioDataJNI;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;

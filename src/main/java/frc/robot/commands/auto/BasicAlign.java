@@ -1,12 +1,8 @@
 package frc.robot.commands.auto;
 
-import au.grapplerobotics.LaserCan;
 import ca.frc6390.athena.controllers.DelayedOutput;
 import ca.frc6390.athena.core.RobotBase;
-import ca.frc6390.athena.core.RobotLocalization;
 import ca.frc6390.athena.core.RobotSpeeds.SpeedAxis;
-import ca.frc6390.athena.core.RobotSpeeds.SpeedSource;
-import ca.frc6390.athena.filters.FilteredValue;
 import ca.frc6390.athena.sensors.camera.limelight.LimeLight;
 import ca.frc6390.athena.sensors.camera.limelight.LimeLight.PoseEstimateType;
 import ca.frc6390.athena.sensors.camera.limelight.LimeLight.PoseEstimateWithLatencyType;
@@ -17,7 +13,6 @@ import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
-import frc.robot.utils.ReefScoringPos;
 import frc.robot.utils.ReefScoringPos.ReefPole;
 
 /* You should consider using the more terse Command factories API instead https://docs.wpilib.org/en/stable/docs/software/commandbased/organizing-command-based.html#defining-commands */
@@ -91,7 +86,6 @@ public class BasicAlign extends Command {
   {
     hasSet = true;
   }
-  SmartDashboard.putNumber("Rot", Math.abs(filter.calculate(limeLight.getPoseEstimate(PoseEstimateType.TARGET_POSE_ROBOT_SPACE).getRaw()[4])));
   if(Math.abs(filter.calculate(limeLight.getPoseEstimate(PoseEstimateType.TARGET_POSE_ROBOT_SPACE).getRaw()[4])) < 15)
     {
       double r = controller.calculate(limeLight.getTargetHorizontalOffset(), 0);
@@ -100,7 +94,6 @@ public class BasicAlign extends Command {
       {
          x = 0.1;
       }
-      SmartDashboard.putNumber("Speed", r);
       base.getDrivetrain().getRobotSpeeds().setAxisState("auto", SpeedAxis.Y, false);
       base.getDrivetrain().getRobotSpeeds().setSpeeds("feedback", x, r, 0);
     }
@@ -118,7 +111,6 @@ public class BasicAlign extends Command {
     {
       hasSet = true;
     }
-  SmartDashboard.putNumber("Rot", Math.abs(filter.calculate(limeLight.getPoseEstimate(PoseEstimateType.TARGET_POSE_ROBOT_SPACE).getRaw()[4])));
   if(limeLight.getAprilTagID() == pole.getApriltagId())
   {
   if(Math.abs(filter.calculate(limeLight.getPoseEstimate(PoseEstimateType.TARGET_POSE_ROBOT_SPACE).getRaw()[4])) < 10)
@@ -129,7 +121,6 @@ public class BasicAlign extends Command {
       {
          x = 0.1;
       }
-      SmartDashboard.putNumber("Speed", r);
       base.getDrivetrain().getRobotSpeeds().setAxisState("auto", SpeedAxis.Y, false);
       base.getDrivetrain().getRobotSpeeds().setSpeeds("feedback", x,r,0); 
     }
@@ -149,7 +140,6 @@ else
   {
     hasSet = true;
   }
-  SmartDashboard.putNumber("Rot", Math.abs(filter.calculate(limeLight.getPoseEstimate(PoseEstimateType.TARGET_POSE_ROBOT_SPACE).getRaw()[4])));
   
       double r = controller.calculate(limeLight.getTargetHorizontalOffset(), 0);
       double x = 0;
@@ -157,7 +147,6 @@ else
       {
          x = 0.1;
       }
-      SmartDashboard.putNumber("Speed", r);
       base.getDrivetrain().getRobotSpeeds().setAxisState("auto", SpeedAxis.Y, false);
       base.getDrivetrain().getRobotSpeeds().setSpeeds("feedback", x,r,0); 
   }
