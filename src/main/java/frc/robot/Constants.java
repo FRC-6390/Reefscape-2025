@@ -2,6 +2,7 @@ package frc.robot;
 
 import org.photonvision.PhotonPoseEstimator.PoseStrategy;
 
+import ca.frc6390.athena.controllers.ElevatorFeedForwardsSendable;
 import ca.frc6390.athena.core.RobotBase.RobotBaseConfig;
 import ca.frc6390.athena.core.RobotDrivetrain.RobotDrivetrainIDs.DrivetrainIDs;
 import ca.frc6390.athena.core.RobotLocalization.RobotLocalizationConfig;
@@ -51,14 +52,19 @@ public interface Constants {
                                                     .setCanbus(CANIVORE_CANBUS)
                                                     .setCurrentLimit(80);
 
+        //UP 40
+        //LEFT SIDE 8.5
+        //X 4.5                                                 
         RobotLocalizationConfig LOCALIZATION_CONFIG = RobotLocalizationConfig.vision(0.1, 0.1, 9999)
                                                             .setAutoPlannerPID(7,0,0, 2,0,0).setVisionEnabled(true);
         ConfigurableCamera[] CAMERAS =
          {                                                                 
-        LimeLightConfig.table("limelight-left").setUseForLocalization(true).setYawRelativeToForwards(-15).setPoseEstimateType(PoseEstimateWithLatencyType.BOT_POSE_MT2_BLUE).setLocalizationTagFilter(17,18,19,20,21,22,6,7,8,9,10,11), 
-        LimeLightConfig.table("limelight-right").setUseForLocalization(true).setYawRelativeToForwards(15).setPoseEstimateType(PoseEstimateWithLatencyType.BOT_POSE_MT2_BLUE).setLocalizationTagFilter(17,18,19,20,21,22,6,7,8,9,10,11),
-        PhotonVisionConfig.table("Tag").setUseForLocalization(true).setCameraRobotSpace(new Transform3d(-0.29845,0.2286,Units.inchesToMeters(36),new Rotation3d(0, 0, 180))).setPoseStrategy(PoseStrategy.PNP_DISTANCE_TRIG_SOLVE)
-        };
+        LimeLightConfig.table("limelight-left").setUseForLocalization(false).setYawRelativeToForwards(-15).setPoseEstimateType(PoseEstimateWithLatencyType.BOT_POSE_MT2_BLUE).setLocalizationTagFilter(17,18,19,20,21,22,6,7,8,9,10,11), 
+        LimeLightConfig.table("limelight-right").setUseForLocalization(false).setYawRelativeToForwards(15).setPoseEstimateType(PoseEstimateWithLatencyType.BOT_POSE_MT2_BLUE).setLocalizationTagFilter(17,18,19,20,21,22,6,7,8,9,10,11),
+        PhotonVisionConfig.table("Tag").setUseForLocalization(false).setCameraRobotSpace(new Transform3d(-0.29845,0.2286,Units.inchesToMeters(36),new Rotation3d(0, 0, 180))).setPoseStrategy(PoseStrategy.PNP_DISTANCE_TRIG_SOLVE),
+        PhotonVisionConfig.table("TagFront").setUseForLocalization(true).setCameraRobotSpace(new Transform3d(-Units.inchesToMeters(7),-Units.inchesToMeters(8.5),Units.inchesToMeters(36),new Rotation3d(0, 0, 0))).setPoseStrategy(PoseStrategy.PNP_DISTANCE_TRIG_SOLVE)
+
+    };
 
         //X -11.75
         //Y 9 inches
@@ -116,8 +122,11 @@ public interface Constants {
         double ENCODER_GEAR_RATIO = 1d/1d;
         double MOTOR_GEAR_RATIO = 7d/1d;
         int LIMIT_SWITCH = 5;
-        ProfiledPIDController CONTORLLER = new ProfiledPIDController(0.1, 0.0, 0, new Constraints(50, 15));
-        ElevatorFeedforward FEEDFORWARD = new ElevatorFeedforward(0, 0.14, 0.32,0.0);
+        // ProfiledPIDController CONTORLLER = new ProfiledPIDController(0.1, 0.0, 0, new Constraints(50, 10));
+        // ElevatorFeedforward FEEDFORWARD = new ElevatorFeedforward(0, 0.14, 0.32,0.0);
+        ProfiledPIDController CONTORLLER = new ProfiledPIDController(0.11, 0.0, 0, new Constraints(20, 15));
+        ElevatorFeedForwardsSendable FEEDFORWARD = new ElevatorFeedForwardsSendable(0, 0.117, 0.1,0);
+
 
         // MechanismConfig<StatefulElevatorMechanism<ElevatorState>> ELEVATOR_CONFIG = MechanismConfig.statefulElevator(new ElevatorFeedforward(0,0.14,0.32, 0), ElevatorState.HomeReset)
         // .addMotors(Motor.KRAKEN_X60, 20, -21)
@@ -142,7 +151,7 @@ public interface Constants {
             AlgaeHigh(52.8),
             AlgaeLow(52.8),
 
-            Home(66.083),
+            Home(61.083),
             StartConfiguration(0),
 
             Scoring(78.310546875),
@@ -217,7 +226,8 @@ public interface Constants {
         .setEncoderConversion(360)
         .setCanbus(CANIVORE_CANBUS)
         .setTolerance(6)
-        .setPID(0.009, 0, 0)
+        .setPID(0.007, 0, 0)
+        // .setProfiledPID(new ProfiledPIDController(0.000, 0, 0, new Constraints(0, 0)))
         .setCurrentLimit(60);
         
         MechanismConfig<StatefulArmMechanism<WristState>> WRIST_CONFIG = MechanismConfig.statefulArm(new ArmFeedforward(0,0,0), WristState.StartConfiguration)
@@ -230,7 +240,8 @@ public interface Constants {
         .setUseEncoderAbsolute(true)
         .setEncoderConversion(360)
         .setCanbus(CANIVORE_CANBUS)
-        .setPID(0.025, 0, 0)
+        .setPID(0.007, 0, 0.00)
+        // .setProfiledPID(new ProfiledPIDController(0, 0, 0, new Constraints(0, 0)))
         .setCurrentLimit(60);
 
         MechanismConfig<StatefulMechanism<RollerState>> CORAL_ROLLERS = MechanismConfig.statefulGeneric(RollerState.Stopped)

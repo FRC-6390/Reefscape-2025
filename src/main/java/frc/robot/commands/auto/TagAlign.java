@@ -266,6 +266,7 @@ import edu.wpi.first.wpilibj.DriverStation;
  import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.subsystems.Superstructure;
 import frc.robot.subsystems.Superstructure.SuperstructureState;
+import frc.robot.utils.ReefScoringPos.ReefPole;
  
  public class TagAlign extends Command {
    public RobotBase<?> base;
@@ -315,7 +316,7 @@ import frc.robot.subsystems.Superstructure.SuperstructureState;
    public Pose2d getBotPoseTagSpace(LimeLight ll)
    {
      double dist = ll.getPoseEstimate(PoseEstimateWithLatencyType.BOT_POSE_MT2_BLUE).getRaw()[9];
-     double angle = ll.getTargetHorizontalOffset();
+     double angle = getOffsetToTarget();
      double x = (Math.cos(Math.toRadians(angle)) * dist);
      double y = (Math.sin(Math.toRadians(angle)) * dist); 
      SmartDashboard.putNumber("x", ll.getPoseEstimate(PoseEstimateWithLatencyType.BOT_POSE_BLUE).getLocalizationPose().getX());
@@ -333,7 +334,7 @@ import frc.robot.subsystems.Superstructure.SuperstructureState;
         
      SmartDashboard.putBoolean("ENd ",endCommand.getAsBoolean());
      SmartDashboard.putNumber("DisToTfg ",ll.getPoseEstimate(PoseEstimateWithLatencyType.BOT_POSE_MT2_BLUE).getRaw()[9]);
-     SmartDashboard.putNumber("HOFf ",Math.abs(ll.getTargetHorizontalOffset()));
+     SmartDashboard.putNumber("HOFf ",Math.abs(getOffsetToTarget()));
 
     //  return ll.hasValidTarget() && ll.getPoseEstimate(PoseEstimateWithLatencyType.BOT_POSE_MT2_BLUE).getRaw()[9] <= 0.525 && Math.abs(ll.getTargetHorizontalOffset())< 3.5;
 
@@ -354,11 +355,11 @@ import frc.robot.subsystems.Superstructure.SuperstructureState;
  
      if(ll.getPoseEstimate(PoseEstimateWithLatencyType.BOT_POSE_MT2_BLUE).getRaw()[9] > 1)
      {
-       xController.setP(1);
+       xController.setP(2);
      }
      else
      {
-       xController.setP(0.75);
+       xController.setP(1);
      }
  
     
@@ -366,7 +367,7 @@ import frc.robot.subsystems.Superstructure.SuperstructureState;
      if(ll.hasValidTarget())
      {
  
-       double Xspeed = -xController.calculate(curPose.getX(), Units.inchesToMeters(8));
+       double Xspeed = -xController.calculate(curPose.getX(), Units.inchesToMeters(13));
        double YSpeed = yController.calculate(curPose.getY(),0);
        double rSpeed = rController.calculate(thetaMeasurement, 0);//* Math.copySign(1, ll.getTargetHorizontalOffset()), 0);
     
@@ -392,14 +393,25 @@ import frc.robot.subsystems.Superstructure.SuperstructureState;
 
      if(endCommand.getAsBoolean())
      {
+      if(!superstructure.stateMachine.getGoalState().equals(SuperstructureState.Score))
+      {
       superstructure.setSuper(state.get());
+      }
+     }
+     else
+     {
+      superstructure.setSuper(SuperstructureState.Home);
      }
      
    }
  
    public boolean closeEnough()
    {
-     return ll.hasValidTarget() && ll.getPoseEstimate(PoseEstimateWithLatencyType.BOT_POSE_MT2_BLUE).getRaw()[9] <= 0.525 && Math.abs(ll.getTargetHorizontalOffset())< 3.5;
+     return ll.hasValidTarget() && ll.getPoseEstimate(PoseEstimateWithLatencyType.BOT_POSE_MT2_BLUE).getRaw()[9] <= 0.525 && Math.abs(getOffsetToTarget()) < 3.5;
+   }
+
+   public double getOffsetToTarget(){
+      return ll.getTargetHorizontalOffset() + ReefPole.getPoleFromID(runTag, ll).getOffsetInDegrees();
    }
  
    // Called once the command ends or is interrupted.

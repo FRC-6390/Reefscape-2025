@@ -17,6 +17,7 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import frc.robot.Autos.AUTOS;
+import frc.robot.Constants.Elevator.ElevatorState;
 import frc.robot.Constants.EndEffector.ArmState;
 import frc.robot.Constants.EndEffector.WristState;
 import frc.robot.Constants.EndEffector.RollerState;
@@ -60,12 +61,14 @@ public class RobotContainer {
    
     arm.setPidEnabled(true);
     wrist.setPidEnabled(true);
+    arm.setFeedforwardEnabled(false);
+    wrist.setFeedforwardEnabled(false);
 
     elevator.shuffleboard("Elevator");
     // elevator.setDefaultCommand(elevate);
     
     NamedCommands.registerCommand("Home", superstructure.setState(SuperstructureState.HomePID));
-    NamedCommands.registerCommand("Intake", superstructure.setState(SuperstructureState.Intaking));
+    NamedCommands.registerCommand("Intake", Commands.either(superstructure.setState(SuperstructureState.Intaking), Commands.none(), () -> endEffector.hasNoPiece()));
 
     NamedCommands.registerCommand("L4", superstructure.setState(SuperstructureState.L4));
     NamedCommands.registerCommand("StartEject", superstructure.setState(SuperstructureState.Score));
@@ -102,8 +105,8 @@ public class RobotContainer {
     //RESET ODOMETRY
     driverController.start.onTrue(() -> robotBase.getDrivetrain().getIMU().setYaw(0)).after(2).onTrue(() -> robotBase.getLocalization().resetFieldPose(0,0, 0));
 
-    driverController.leftBumper.onTrue(superstructure.setState(SuperstructureState.Intaking));
-    driverController.rightBumper.onTrue(superstructure.setState(SuperstructureState.HomePID)).after(1).onTrue(superstructure.setState(SuperstructureState.Home));
+    driverController.leftBumper.onTrue(Commands.either(superstructure.setState(SuperstructureState.Intaking), Commands.none(), () -> endEffector.hasNoPiece()));
+    driverController.rightBumper.onTrue(superstructure.setState(SuperstructureState.Score));
 
     driverController.leftTrigger.tiggerAt(0.5).onTrue(superstructure.setState(SuperstructureState.AlgaeLow)).onFalse(superstructure.setState(SuperstructureState.Home));
     driverController.rightTrigger.tiggerAt(0.5).onTrue(superstructure.setState(SuperstructureState.AlgaeHigh)).onFalse(superstructure.setState(SuperstructureState.Home));
@@ -111,18 +114,26 @@ public class RobotContainer {
     driverController.pov.left.whileTrue(new TagAlign(robotBase, "limelight-left", superstructure,() -> selectedState));
     driverController.pov.right.whileTrue(new TagAlign(robotBase, "limelight-right",superstructure ,() -> selectedState));
     driverController.pov.up.whileTrue(superstructure.setState(SuperstructureState.ScoreAlgae)).after(0.2).onTrue(superstructure.setState(SuperstructureState.AlgaeScore));
-    driverController.pov.down.whileTrue(superstructure.setState(SuperstructureState.AlgaeSpit));
+    driverController.pov.down.onTrue(superstructure.setState(SuperstructureState.HomePID)).after(1).onTrue(superstructure.setState(SuperstructureState.Home));
 
+    driverController.a.onTrue(() -> selectedState = SuperstructureState.L1);//after(0.5).onTrue(() -> selectedState = SuperstructureState.Score);
+    driverController.b.onTrue(() -> selectedState = SuperstructureState.L2);//.after(0.5).onTrue(() -> selectedState = SuperstructureState.Score);
+    driverController.x.onTrue(() -> selectedState = SuperstructureState.L3);//.after(0.5).onTrue(() -> selectedState = SuperstructureState.Score);
+    driverController.y.onTrue(() -> selectedState = SuperstructureState.L4);//.after(0.5).onTrue(() -> selectedState = SuperstructureState.Score);
 
-    driverController.a.onTrue(() -> selectedState = SuperstructureState.L1).after(0.5).onTrue(() -> selectedState = SuperstructureState.Score);
-    driverController.b.onTrue(() -> selectedState = SuperstructureState.L2).after(0.5).onTrue(() -> selectedState = SuperstructureState.Score);
-    driverController.x.onTrue(() -> selectedState = SuperstructureState.L3).after(0.5).onTrue(() -> selectedState = SuperstructureState.Score);
-    driverController.y.onTrue(() -> selectedState = SuperstructureState.L4).after(0.5).onTrue(() -> selectedState = SuperstructureState.Score);
+//---------------------------------------------------------DRIVER 2--------------------------------------------------//
 
-    // driverController.a.onTrue(Commands.sequence(superstructure.setState(SuperstructureState.L1))).after(0.75).onTrue(superstructure.setState(SuperstructureState.Score));
-    // driverController.b.onTrue(Commands.sequence(superstructure.setState(SuperstructureState.L2))).after(0.75).onTrue(superstructure.setState(SuperstructureState.Score));
-    // driverController.x.onTrue(Commands.sequence(superstructure.setState(SuperstructureState.L3))).after(0.75).onTrue(superstructure.setState(SuperstructureState.Score));
-    // driverController.y.onTrue(Commands.sequence(superstructure.setState(SuperstructureState.L4))).after(0.75).onTrue(superstructure.setState(SuperstructureState.Score));
+    driverController2.a.onTrue(superstructure.setState(SuperstructureState.L1)).after(0.75).onTrue(superstructure.setState(SuperstructureState.Score));
+    driverController2.b.onTrue(superstructure.setState(SuperstructureState.L2)).after(0.75).onTrue(superstructure.setState(SuperstructureState.Score));
+    driverController2.x.onTrue(superstructure.setState(SuperstructureState.L3)).after(0.75).onTrue(superstructure.setState(SuperstructureState.Score));
+    driverController2.y.onTrue(superstructure.setState(SuperstructureState.L4)).after(0.75).onTrue(superstructure.setState(SuperstructureState.Score));
+  
+    driverController2.pov.up.onTrue(() -> elevator.nudge(1));
+    driverController2.pov.down.onTrue(() -> elevator.nudge(-1));
+    driverController2.pov.right.onTrue(() -> arm.setNudge(arm.getNudge() + 5));
+    driverController2.pov.left.onTrue(() -> arm.setNudge(arm.getNudge() - 5));
+    driverController2.rightBumper.onTrue(() -> wrist.setNudge(wrist.getNudge() + 5));
+    driverController2.leftBumper.onTrue(() -> wrist.setNudge(wrist.getNudge() - 5));
   }
 
   public Command getAutonomousCommand() 

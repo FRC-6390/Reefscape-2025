@@ -11,6 +11,7 @@ import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 
 import ca.frc6390.athena.commands.RunnableTrigger;
+import ca.frc6390.athena.controllers.ElevatorFeedForwardsSendable;
 import ca.frc6390.athena.mechanisms.StateMachine;
 import ca.frc6390.athena.sensors.limitswitch.GenericLimitSwitch;
 import edu.wpi.first.math.controller.ElevatorFeedforward;
@@ -33,7 +34,7 @@ public class Elevator extends SubsystemBase{
   private final GenericLimitSwitch lowerlimitSwitch;
 
   public final ProfiledPIDController controller;
-  private final ElevatorFeedforward feedforward;
+  private final ElevatorFeedForwardsSendable feedforward;
   private RunnableTrigger idle;
 
   private final StateMachine<Double, ElevatorState> stateMachine;
@@ -53,7 +54,7 @@ public class Elevator extends SubsystemBase{
     leftMotor.setNeutralMode(NeutralModeValue.Brake);
     rightMotor.setNeutralMode(NeutralModeValue.Brake);
 
-    CurrentLimitsConfigs currentLimitsConfigs = new CurrentLimitsConfigs().withStatorCurrentLimit(60);
+    CurrentLimitsConfigs currentLimitsConfigs = new CurrentLimitsConfigs().withStatorCurrentLimit(65);
     currentLimitsConfigs.StatorCurrentLimitEnable = true;
     leftMotor.getConfigurator().apply(currentLimitsConfigs);
     rightMotor.getConfigurator().apply(currentLimitsConfigs);
@@ -137,6 +138,9 @@ public class Elevator extends SubsystemBase{
 
   public ShuffleboardTab shuffleboard(ShuffleboardTab tab) {
       tab.addBoolean("Lower Limit", lowerlimitSwitch::getAsBoolean);
+      tab.add("feedforward Controller",feedforward);
+      tab.add("pid Controller",controller);
+
       tab.addDouble("Elevator Height", this::getHeight).withPosition(1, 1);
       tab.addDouble("Elevator Height From Floor Inches", this::getHeightFromFloor).withPosition(2, 1);
       tab.addString("Setpoint", () -> stateMachine.getGoalState().name()).withPosition(3, 1);

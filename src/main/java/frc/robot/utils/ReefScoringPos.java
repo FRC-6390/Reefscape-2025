@@ -173,7 +173,7 @@ public class ReefScoringPos {
                 }
 
                 default:
-                    return null;
+                    return ReefPole.NONE;
             }
         }
 

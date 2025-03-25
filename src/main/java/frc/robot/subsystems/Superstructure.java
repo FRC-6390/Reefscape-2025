@@ -27,7 +27,7 @@ public class Superstructure extends SubsystemBase {
   private final StateMachine<Double, ElevatorState> elevatorStateMachine;
   private final StateMachine<EndEffectorTuple, EndEffectorState> endEffectorStateMachine;
 
-  private final StateMachine<SuperstructureTuple, SuperstructureState> stateMachine;
+  public final StateMachine<SuperstructureTuple, SuperstructureState> stateMachine;
 
   public Elevator elevator;
   private final EndEffector endEffector;
@@ -92,13 +92,13 @@ public class Superstructure extends SubsystemBase {
     this.elevatorStateMachine = elevator.getStateMachine();
     this.endEffectorStateMachine = endEffector.getStateMachine();
     this.stateMachine = new StateMachine<Superstructure.SuperstructureTuple,Superstructure.SuperstructureState>(SuperstructureState.Home, () -> elevatorStateMachine.atGoalState() && endEffectorStateMachine.atGoalState());
-    this.autoDropElevatorTrigger = new RunnableTrigger(() -> autoDropElevator && endEffector.hasNoPiece() && elevatorStateMachine.atState(ElevatorState.L1,ElevatorState.L2,ElevatorState.L3,ElevatorState.L4) && !endEffectorStateMachine.getGoalState().equals(EndEffectorState.AlgaeScore));
+    this.autoDropElevatorTrigger = new RunnableTrigger(() -> autoDropElevator && endEffector.hasNoPiece() && endEffector.isScoring() && elevatorStateMachine.atState(ElevatorState.L1,ElevatorState.L2,ElevatorState.L3,ElevatorState.L4) && !endEffectorStateMachine.getGoalState().equals(EndEffectorState.AlgaeScore));
     this.liftIntake = new RunnableTrigger(() -> endEffector.hasGamePiece());  
     this.atL4 = new DelayedOutput(() -> endeffectorAtState(EndEffectorState.L4), 0.125);
     this.atHome = new DelayedOutput(() -> endeffectorAtState(EndEffectorState.Home), 0.125);
     this.elevatorAtIntake = new DelayedOutput(() -> elevatorStateMachine.atState(ElevatorState.Intaking), 0.125);
 
-    autoDropElevatorTrigger.onTrue(() -> {setSuper(SuperstructureState.HomePID); RobotContainer.selectedState = SuperstructureState.Stopped;});  
+    autoDropElevatorTrigger.onTrue(() -> {setSuper(SuperstructureState.HomePID);});  
     liftIntake.onTrue(setState(SuperstructureState.Align));
 
     prevState = SuperstructureState.Home;
