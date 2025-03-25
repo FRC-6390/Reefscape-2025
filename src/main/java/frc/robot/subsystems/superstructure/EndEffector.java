@@ -11,6 +11,8 @@ import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants.EndEffector.ArmState;
 import frc.robot.Constants.EndEffector.WristState;
+import frc.robot.subsystems.Superstructure.SuperstructureTuple;
+import frc.robot.subsystems.superstructure.Elevator.ElevatorState;
 import frc.robot.Constants.EndEffector.RollerState;
 
 
@@ -39,14 +41,20 @@ public class EndEffector extends SubsystemBase{
         L4(new EndEffectorTuple(RollerState.Stopped,RollerState.Stopped, ArmState.ScoringL4, WristState.ScoringL4)),
         L3(new EndEffectorTuple(RollerState.Stopped, RollerState.Stopped, ArmState.Scoring, WristState.Scoring)),
         L2(new EndEffectorTuple(RollerState.Stopped,RollerState.Stopped, ArmState.Scoring, WristState.Scoring)),
-        L1(new EndEffectorTuple(RollerState.Stopped, RollerState.Stopped,ArmState.Scoring,WristState.Scoring)),
+        L1(new EndEffectorTuple(RollerState.Stopped, RollerState.Stopped,ArmState.Scoringl1,WristState.Scoringl1)),
         Score(new EndEffectorTuple(RollerState.Running,RollerState.Running, null,null)),
+        AlgaeScore(new EndEffectorTuple(RollerState.Stopped,RollerState.Stopped, ArmState.AlgaeScore,WristState.AlgaeScore)),
+        ScoreAlgae(new EndEffectorTuple(RollerState.Running,RollerState.Running, null,null)),
+
         Stop(new EndEffectorTuple(RollerState.Stopped,RollerState.Stopped, null, null)),
+        StartConfiguration(new EndEffectorTuple(RollerState.Stopped, RollerState.Stopped,ArmState.StartConfiguration, WristState.StartConfiguration)),
         Home(new EndEffectorTuple(RollerState.Stopped, RollerState.Stopped,ArmState.Home, WristState.Home)),
+
         Reverse(new EndEffectorTuple(RollerState.Reverse,RollerState.Reverse, null, null)),
         Intaking(new EndEffectorTuple(RollerState.Running, RollerState.Running, ArmState.Intaking, WristState.Intaking)),
-        AlgaeHigh(new EndEffectorTuple(RollerState.Stopped, RollerState.Running, ArmState.AlgaeHigh, WristState.AlgaeHigh)),
+        AlgaeHigh(new EndEffectorTuple(RollerState.Stopped, RollerState.Reverse, ArmState.AlgaeHigh, WristState.AlgaeHigh)),
         AlgaeLow(new EndEffectorTuple(RollerState.Stopped, RollerState.Reverse, ArmState.AlgaeLow, WristState.AlgaeLow)),
+        
         Transition(new EndEffectorTuple(RollerState.Stopped,RollerState.Stopped, ArmState.TransitionState, WristState.TransitionState));
 
         private EndEffectorTuple states;
@@ -114,6 +122,7 @@ public class EndEffector extends SubsystemBase{
         stateMachine.update();
         coralRollers.update();
         joint1.update();
+        joint2.update();
 
         EndEffectorState state = stateMachine.getGoalState();
         EndEffectorTuple val = stateMachine.getGoalStateSetpoint();

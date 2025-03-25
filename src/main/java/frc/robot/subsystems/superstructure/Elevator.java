@@ -48,12 +48,12 @@ public class Elevator extends SubsystemBase{
     L1(Constants.Elevator.OFFSET_FROM_FLOOR + 3),
     Intaking(Constants.Elevator.OFFSET_FROM_FLOOR),
 
-    Aligning(30.71423390857545),
+    Aligning(32.2),
 
-    AlgaeHigh(54.66734391140974),
-    AlgaeLow(37.60104065578804),
+    AlgaeHigh(48.9),
+    AlgaeLow(35.463),
     //31.5
-    L2(32.78280700103924),
+    L2(34.78280700103924),
     //47.25
     L3(48),
     //72

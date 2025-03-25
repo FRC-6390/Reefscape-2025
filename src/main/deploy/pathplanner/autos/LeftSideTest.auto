@@ -24,6 +24,12 @@
           }
         },
         {
+          "type": "named",
+          "data": {
+            "name": "TagAlignLeft"
+          }
+        },
+        {
           "type": "sequential",
           "data": {
             "commands": [
@@ -113,6 +119,12 @@
                 }
               }
             ]
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "TagAlignLeft"
           }
         },
         {

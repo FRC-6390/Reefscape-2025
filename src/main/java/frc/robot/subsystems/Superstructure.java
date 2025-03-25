@@ -4,14 +4,18 @@
 
 package frc.robot.subsystems;
 
+import com.ctre.phoenix6.StatusSignal.SignalMeasurement;
+
 import ca.frc6390.athena.commands.RunnableTrigger;
 import ca.frc6390.athena.controllers.DelayedOutput;
 import ca.frc6390.athena.mechanisms.StateMachine;
 import ca.frc6390.athena.mechanisms.StateMachine.SetpointProvider;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.WaitUntilCommand;
+import frc.robot.RobotContainer;
 import frc.robot.Constants.EndEffector.ArmState;
 import frc.robot.Constants.EndEffector.WristState;
 import frc.robot.subsystems.superstructure.Elevator;
@@ -47,13 +51,23 @@ public class Superstructure extends SubsystemBase {
     public enum SuperstructureState implements SetpointProvider<SuperstructureTuple>
     {
         AlgaeHigh(new SuperstructureTuple(EndEffectorState.AlgaeHigh, ElevatorState.AlgaeHigh)),
+        NONE(new SuperstructureTuple(null,null)),
+
         AlgaeLow(new SuperstructureTuple(EndEffectorState.AlgaeLow, ElevatorState.AlgaeLow)),
+        AlgaeScore(new SuperstructureTuple(EndEffectorState.AlgaeScore, ElevatorState.L4)),
+        ScoreAlgae(new SuperstructureTuple(EndEffectorState.ScoreAlgae, ElevatorState.L4)),
+
+        AlgaeSpit(new SuperstructureTuple(EndEffectorState.AlgaeScore, null)),
+
         L4(new SuperstructureTuple(EndEffectorState.L4, ElevatorState.L4)),
         L3(new SuperstructureTuple(EndEffectorState.L3, ElevatorState.L3)),
         L2(new SuperstructureTuple(EndEffectorState.L2, ElevatorState.L2)),
         L1(new SuperstructureTuple(EndEffectorState.L1, ElevatorState.L1)),
+        StartConfiguration(new SuperstructureTuple(EndEffectorState.StartConfiguration, ElevatorState.HomeReset)),
         Align(new SuperstructureTuple(EndEffectorState.Home, ElevatorState.Aligning)),
         Home(new SuperstructureTuple(EndEffectorState.Home, ElevatorState.HomeReset)),
+        Stopped(new SuperstructureTuple(EndEffectorState.Stop, null)),
+
         HomePID(new SuperstructureTuple(EndEffectorState.Home, ElevatorState.HomePID)),
 
         Score(new SuperstructureTuple(EndEffectorState.Score, null)),
@@ -80,13 +94,13 @@ public class Superstructure extends SubsystemBase {
     this.elevatorStateMachine = elevator.getStateMachine();
     this.endEffectorStateMachine = endEffector.getStateMachine();
     this.stateMachine = new StateMachine<Superstructure.SuperstructureTuple,Superstructure.SuperstructureState>(SuperstructureState.Home, () -> elevatorStateMachine.atGoalState() && endEffectorStateMachine.atGoalState());
-    this.autoDropElevatorTrigger = new RunnableTrigger(() -> autoDropElevator && endEffector.isScoring() && elevatorStateMachine.atAnyState(ElevatorState.L1,ElevatorState.L2,ElevatorState.L3,ElevatorState.L4));
+    this.autoDropElevatorTrigger = new RunnableTrigger(() -> autoDropElevator && endEffector.hasNoPiece() && elevatorStateMachine.atAnyState(ElevatorState.L1,ElevatorState.L2,ElevatorState.L3,ElevatorState.L4) && !endEffectorStateMachine.getGoalState().equals(EndEffectorState.AlgaeScore));
     this.liftIntake = new RunnableTrigger(() -> endEffector.hasGamePiece());  
     this.atL4 = new DelayedOutput(() -> endeffectorAtState(EndEffectorState.L4), 0.125);
     this.atHome = new DelayedOutput(() -> endeffectorAtState(EndEffectorState.Home), 0.125);
     this.elevatorAtIntake = new DelayedOutput(() -> elevatorStateMachine.atAnyState(ElevatorState.Intaking), 0.125);
 
-    autoDropElevatorTrigger.onFalse(setState(SuperstructureState.HomePID));  
+    autoDropElevatorTrigger.onTrue(() -> {setSuper(SuperstructureState.HomePID); RobotContainer.selectedState = SuperstructureState.Stopped;});  
     liftIntake.onTrue(setState(SuperstructureState.Align));
 
     prevState = SuperstructureState.Home;
@@ -187,7 +201,8 @@ public class Superstructure extends SubsystemBase {
 
     if(endEffectorEnabled){
       switch (state) {
-        case L1, L2, L3, L4:
+
+        case L1, L2, L3, L4, AlgaeScore, AlgaeHigh, AlgaeLow:
           // if(!elevatorStateMachine.atGoalState())
           // {
           endEffectorStateMachine.queueState(EndEffectorState.Home);
@@ -226,6 +241,8 @@ public class Superstructure extends SubsystemBase {
     elevatorStateMachine.update();
     endEffectorStateMachine.update();
     stateMachine.update();
+
+    SmartDashboard.putBoolean("AtGoalState", elevatorStateMachine.atGoalState());
 
     SuperstructureState state = stateMachine.getGoalState();
     SuperstructureTuple val = stateMachine.getGoalStateSetpoint();

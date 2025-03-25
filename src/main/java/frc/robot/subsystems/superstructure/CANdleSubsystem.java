@@ -58,16 +58,16 @@ public class CANdleSubsystem extends SubsystemBase {
         }
     }
 
-    return Math.abs(dist) < 6.5 || Math.abs(dist2) < 6.5;
+    return Math.abs(dist) < 5.5 || Math.abs(dist2) < 5.5;
 }
 
 
   @Override
   public void periodic() {
 
-    // red = effector.hasGamePiece() ? 0 : 255;
+    red = closeEnough() ? 0 : 255;
     // green = effector.hasGamePiece() ? 255 : 0;
-    // blue = superstructure.closeEnough() ? 255 : 0;
+    green = closeEnough() ? 255 : 0;
 
     // candle.setLEDs(255, 0, 0, 0, 0, 29);
     // candle.setLEDs(0, 0, 255, 0, 29, 100);

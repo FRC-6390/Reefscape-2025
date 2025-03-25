@@ -84,7 +84,7 @@ public interface Constants {
         double ENCODER_GEAR_RATIO = 1d/1d;
         double MOTOR_GEAR_RATIO = 7d/1d;
         int LIMIT_SWITCH = 5;
-        ProfiledPIDController CONTORLLER = new ProfiledPIDController(0.1, 0.0, 0, new Constraints(50, 17));
+        ProfiledPIDController CONTORLLER = new ProfiledPIDController(0.1, 0.0, 0, new Constraints(50, 15));
         ElevatorFeedforward FEEDFORWARD = new ElevatorFeedforward(0, 0.14, 0.32,0.0);
     }
 
@@ -94,15 +94,18 @@ public interface Constants {
 
         enum ArmState implements SetpointProvider<Double>{
             Intaking(150.38085937),
-            AlgaeHigh(0),
-            AlgaeLow(0),
+            AlgaeHigh(52.8),
+            AlgaeLow(52.8),
 
-            Home(0),
+            Home(66.083),
+            StartConfiguration(0),
+
             Scoring(78.310546875),
             TransitionState(65),
             ScoringL4(60),
-
-            Scoringl1(78.310546875);
+            AlgaeScore(120.58),
+          
+            Scoringl1(66.08);
 
             double angle;
             ArmState(double angle){
@@ -118,13 +121,16 @@ public interface Constants {
 
             enum WristState implements SetpointProvider<Double>{
                 Intaking(62),
-                Home(0d),
+                Home(109.95d),
                 Scoring(125.419921875),
-                AlgaeHigh(0),
-                AlgaeLow(0),
+                AlgaeHigh(2.933),
+                AlgaeLow(2.933),
                 ScoringL4(80),
                 TransitionState(62),
-                Scoringl1(50);
+                AlgaeScore(168.92),
+
+                StartConfiguration(0),
+                Scoringl1(109.95);
 
     
                 double angle;
@@ -156,7 +162,7 @@ public interface Constants {
 
         }
 
-        MechanismConfig<StatefulArmMechanism<ArmState>> ARM_CONFIG = MechanismConfig.statefulArm(new ArmFeedforward(0,0,0), ArmState.Home)
+        MechanismConfig<StatefulArmMechanism<ArmState>> ARM_CONFIG = MechanismConfig.statefulArm(new ArmFeedforward(0,0,0), ArmState.StartConfiguration)
         .addMotors(Motor.KRAKEN_X60, -31)
         .setEncoder(EncoderType.CTRECANcoder, 32)
         .setNeutralMode(MotorNeutralMode.Brake)
@@ -169,7 +175,7 @@ public interface Constants {
         .setPID(0.009, 0, 0)
         .setCurrentLimit(60);
         
-        MechanismConfig<StatefulArmMechanism<WristState>> WRIST_CONFIG = MechanismConfig.statefulArm(new ArmFeedforward(0,0,0), WristState.Home)
+        MechanismConfig<StatefulArmMechanism<WristState>> WRIST_CONFIG = MechanismConfig.statefulArm(new ArmFeedforward(0,0,0), WristState.StartConfiguration)
         .addMotors(Motor.KRAKEN_X60, -36)
         .setEncoder(EncoderType.CTRECANcoder, 35)
         .setNeutralMode(MotorNeutralMode.Brake)

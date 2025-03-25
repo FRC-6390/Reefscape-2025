@@ -248,7 +248,9 @@
 
 package frc.robot.commands.auto;
  
- import ca.frc6390.athena.controllers.DelayedOutput;
+ import java.util.function.Supplier;
+
+import ca.frc6390.athena.controllers.DelayedOutput;
  import ca.frc6390.athena.core.RobotBase;
  import ca.frc6390.athena.sensors.camera.limelight.LimeLight;
  import ca.frc6390.athena.sensors.camera.limelight.LimeLight.PoseEstimateType;
@@ -258,44 +260,51 @@ package frc.robot.commands.auto;
  import edu.wpi.first.math.filter.MedianFilter;
  import edu.wpi.first.math.geometry.Pose2d;
  import edu.wpi.first.math.trajectory.TrapezoidProfile.Constraints;
- import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.math.util.Units;
+import edu.wpi.first.wpilibj.DriverStation;
  import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
  import edu.wpi.first.wpilibj2.command.Command;
+import frc.robot.subsystems.Superstructure;
+import frc.robot.subsystems.Superstructure.SuperstructureState;
  
  public class TagAlign extends Command {
    public RobotBase<?> base;
-   public double AutoDistToTrigger;
    public LimeLight ll;
    public int runTag;
    public Pose2d curPose;
    public MedianFilter filter;
    public double thetaMeasurement;
-   public ProfiledPIDController xController = new ProfiledPIDController(.75, 0, 0, new Constraints(1, 1));
-   public ProfiledPIDController yController =  new ProfiledPIDController(3, 0, 0, new Constraints(2, 2));
+   public ProfiledPIDController xController = new ProfiledPIDController(1, 0, 0, new Constraints(1, 1));
+   public ProfiledPIDController yController =  new ProfiledPIDController(3.5, 0, 0, new Constraints(2, 2));
    public PIDController rController = new PIDController(0.025, 0, 0);
    public DelayedOutput endCommand;
    public DelayedOutput noTag;
+   public Superstructure superstructure;
+   public Supplier<SuperstructureState> state;
+
    
-   public TagAlign(RobotBase<?> base,String lltable, double AutoDistToTrigger)
+   public TagAlign(RobotBase<?> base,String lltable, Superstructure superstructure, Supplier<SuperstructureState> stateToGoTo)
    {
     this.base = base;
-    this.AutoDistToTrigger = AutoDistToTrigger;
+    this.superstructure = superstructure;
+    this.state = stateToGoTo;
     this.ll = this.base.getVision().getLimelight(lltable);
+    
    }
  
-   public TagAlign(RobotBase<?> base, String lltable)
+   public TagAlign(RobotBase<?> base, String lltable, Superstructure superstructure)
    {
-    this(base, lltable, Double.POSITIVE_INFINITY);
+    this(base, lltable, superstructure, () -> SuperstructureState.NONE);
    }
  
    @Override
    public void initialize() 
    {
      runTag = -1;
-     endCommand = new DelayedOutput(() -> closeEnough(), 0.75);
+     endCommand = new DelayedOutput(() -> closeEnough(), 0.2);
      curPose = new Pose2d();
      filter = new MedianFilter(50);
-     noTag = new DelayedOutput(() -> hasNoTag(), 1.5);
+     noTag = new DelayedOutput(() -> hasNoTag(), 1);
      thetaMeasurement = 0;
    }
  
@@ -323,7 +332,12 @@ package frc.robot.commands.auto;
    {
         
      SmartDashboard.putBoolean("ENd ",endCommand.getAsBoolean());
- 
+     SmartDashboard.putNumber("DisToTfg ",ll.getPoseEstimate(PoseEstimateWithLatencyType.BOT_POSE_MT2_BLUE).getRaw()[9]);
+     SmartDashboard.putNumber("HOFf ",Math.abs(ll.getTargetHorizontalOffset()));
+
+    //  return ll.hasValidTarget() && ll.getPoseEstimate(PoseEstimateWithLatencyType.BOT_POSE_MT2_BLUE).getRaw()[9] <= 0.525 && Math.abs(ll.getTargetHorizontalOffset())< 3.5;
+
+     System.out.println("RUNNNING");
      if(ll.hasValidTarget())
      { 
        if(runTag == -1)
@@ -352,13 +366,13 @@ package frc.robot.commands.auto;
      if(ll.hasValidTarget())
      {
  
-       double Xspeed = -xController.calculate(curPose.getX(), 0);
+       double Xspeed = -xController.calculate(curPose.getX(), Units.inchesToMeters(8));
        double YSpeed = yController.calculate(curPose.getY(),0);
        double rSpeed = rController.calculate(thetaMeasurement, 0);//* Math.copySign(1, ll.getTargetHorizontalOffset()), 0);
     
      // if(DriverStation.isAutonomous())
      // {
-       if(ll.getPoseEstimate(PoseEstimateWithLatencyType.BOT_POSE_MT2_BLUE).getRaw()[9] <= AutoDistToTrigger)
+       if(ll.getPoseEstimate(PoseEstimateWithLatencyType.BOT_POSE_MT2_BLUE).getRaw()[9] <= 100000000)
        {
          SmartDashboard.putBoolean("ALGIN TAKEN",true);
          // base.getDrivetrain().getRobotSpeeds().stopAutoSpeeds();
@@ -375,12 +389,17 @@ package frc.robot.commands.auto;
        SmartDashboard.putBoolean("ALGIN TAKEN",false);
        base.getDrivetrain().getRobotSpeeds().stopSpeeds("feedback");
      }
+
+     if(endCommand.getAsBoolean())
+     {
+      superstructure.setSuper(state.get());
+     }
      
    }
  
    public boolean closeEnough()
    {
-     return ll.hasValidTarget() && ll.getPoseEstimate(PoseEstimateWithLatencyType.BOT_POSE_MT2_BLUE).getRaw()[9] <= 0.5;
+     return ll.hasValidTarget() && ll.getPoseEstimate(PoseEstimateWithLatencyType.BOT_POSE_MT2_BLUE).getRaw()[9] <= 0.525 && Math.abs(ll.getTargetHorizontalOffset())< 3.5;
    }
  
    // Called once the command ends or is interrupted.
