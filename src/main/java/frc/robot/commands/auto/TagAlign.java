@@ -248,31 +248,28 @@
 
 package frc.robot.commands.auto;
  
- import java.util.function.Supplier;
-
 import ca.frc6390.athena.controllers.DelayedOutput;
  import ca.frc6390.athena.core.RobotBase;
- import ca.frc6390.athena.sensors.camera.limelight.LimeLight;
+import ca.frc6390.athena.core.RobotSpeeds;
+import ca.frc6390.athena.sensors.camera.limelight.LimeLight;
  import ca.frc6390.athena.sensors.camera.limelight.LimeLight.PoseEstimateType;
  import ca.frc6390.athena.sensors.camera.limelight.LimeLight.PoseEstimateWithLatencyType;
  import edu.wpi.first.math.controller.PIDController;
  import edu.wpi.first.math.controller.ProfiledPIDController;
  import edu.wpi.first.math.filter.MedianFilter;
- import edu.wpi.first.math.geometry.Pose2d;
- import edu.wpi.first.math.trajectory.TrapezoidProfile.Constraints;
+ import edu.wpi.first.math.geometry.Translation2d;
+import edu.wpi.first.math.trajectory.TrapezoidProfile.Constraints;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.DriverStation;
  import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
  import edu.wpi.first.wpilibj2.command.Command;
-import frc.robot.subsystems.Superstructure;
-import frc.robot.subsystems.Superstructure.SuperstructureState;
 import frc.robot.utils.ReefScoringPos.ReefPole;
  
  public class TagAlign extends Command {
-   public RobotBase<?> base;
+   public RobotSpeeds robotSpeeds;
    public LimeLight ll;
-   public int runTag;
-   public Pose2d curPose;
+   public long runTag;
+   public Translation2d curTranslation;
    public MedianFilter filter;
    public double thetaMeasurement;
    public ProfiledPIDController xController = new ProfiledPIDController(1, 0, 0, new Constraints(1, 1));
@@ -280,30 +277,19 @@ import frc.robot.utils.ReefScoringPos.ReefPole;
    public PIDController rController = new PIDController(0.025, 0, 0);
    public DelayedOutput endCommand;
    public DelayedOutput noTag;
-   public Superstructure superstructure;
-   public Supplier<SuperstructureState> state;
 
-   
-   public TagAlign(RobotBase<?> base,String lltable, Superstructure superstructure, Supplier<SuperstructureState> stateToGoTo)
+   public TagAlign(RobotBase<?> base,String lltable)
    {
-    this.base = base;
-    this.superstructure = superstructure;
-    this.state = stateToGoTo;
-    this.ll = this.base.getVision().getLimelight(lltable);
-    
+    this.robotSpeeds = base.getDrivetrain().getRobotSpeeds();
+    this.ll = base.getVision().getLimelight(lltable);
    }
- 
-   public TagAlign(RobotBase<?> base, String lltable, Superstructure superstructure)
-   {
-    this(base, lltable, superstructure, () -> SuperstructureState.NONE);
-   }
- 
+
    @Override
    public void initialize() 
    {
      runTag = -1;
      endCommand = new DelayedOutput(() -> closeEnough(), 0.2);
-     curPose = new Pose2d();
+     curTranslation = new Translation2d();
      filter = new MedianFilter(50);
      noTag = new DelayedOutput(() -> hasNoTag(), 1);
      thetaMeasurement = 0;
@@ -315,7 +301,7 @@ import frc.robot.utils.ReefScoringPos.ReefPole;
    }
 
   
-   public Pose2d getBotPoseTagSpace(LimeLight ll)
+   public Translation2d getBotPoseTagSpace(LimeLight ll)
    {
      double dist = ll.getPoseEstimate(PoseEstimateWithLatencyType.BOT_POSE_MT2_BLUE).getRaw()[9];
      double angle = getOffsetToTarget();
@@ -326,7 +312,7 @@ import frc.robot.utils.ReefScoringPos.ReefPole;
      SmartDashboard.putNumber("Angle", thetaMeasurement);
      
  
-     return new Pose2d(x,y, base.getLocalization().getFieldPose().getRotation());
+     return new Translation2d(x,y);
    }
  
    // Called every time the scheduler runs while the command is scheduled.
@@ -345,9 +331,9 @@ import frc.robot.utils.ReefScoringPos.ReefPole;
      { 
        if(runTag == -1)
        {
-         runTag = (int)ll.getAprilTagID();
+         runTag = ll.getAprilTagID();
        }
-       curPose = getBotPoseTagSpace(ll);
+       curTranslation = getBotPoseTagSpace(ll);
        thetaMeasurement =-filter.calculate(ll.getPoseEstimate(PoseEstimateType.TARGET_POSE_ROBOT_SPACE).getRaw()[4]);
      }
      else
@@ -366,57 +352,54 @@ import frc.robot.utils.ReefScoringPos.ReefPole;
  
     
  
-     if(ll.hasValidTarget())
+     if(!ll.hasValidTarget())
      {
+        SmartDashboard.putBoolean("ALGIN TAKEN",false);
+        robotSpeeds.stopSpeeds("feedback");
+        return;
+     }
  
-       double Xspeed = -xController.calculate(curPose.getX(), Units.inchesToMeters(9.5));
-       double YSpeed = yController.calculate(curPose.getY(),0);
+       double Xspeed = -xController.calculate(curTranslation.getX(), Units.inchesToMeters(9.5));
+       double YSpeed = yController.calculate(curTranslation.getY(),0);
        double rSpeed = rController.calculate(thetaMeasurement, 0);//* Math.copySign(1, ll.getTargetHorizontalOffset()), 0);
-    
-     // if(DriverStation.isAutonomous())
-     // {
+
        if(ll.getPoseEstimate(PoseEstimateWithLatencyType.BOT_POSE_MT2_BLUE).getRaw()[9] <= 100000000)
        {
          SmartDashboard.putBoolean("ALGIN TAKEN",true);
-         // base.getDrivetrain().getRobotSpeeds().stopAutoSpeeds();
-         base.getDrivetrain().getRobotSpeeds().setSpeeds("feedback",Xspeed, YSpeed, -rSpeed);
+         robotSpeeds.setSpeeds("feedback",Xspeed, YSpeed, -rSpeed);
        }
        else
        {
          SmartDashboard.putBoolean("ALGIN TAKEN",false);
-         base.getDrivetrain().getRobotSpeeds().stopSpeeds("feedback");
+         robotSpeeds.stopSpeeds("feedback");
        }
-     }
-     else
-     {
-       SmartDashboard.putBoolean("ALGIN TAKEN",false);
-       base.getDrivetrain().getRobotSpeeds().stopSpeeds("feedback");
-     }
 
-     if(DriverStation.isTeleop())
-    {
-     if(endCommand.getAsBoolean())
-     {
-      if(!superstructure.stateMachine.getGoalState().equals(SuperstructureState.Score))
-      {
+
+    //    if(DriverStation.isTeleop())
+    // {
+
+    //  if(endCommand.getAsBoolean())
+    //  {
+    //   if(!superstructure.stateMachine.getGoalState().equals(SuperstructureState.Score))
+    //   {
       
-      if(superstructure.l4Ready() || superstructure.l3Ready() || superstructure.l2Ready() || superstructure.l1Ready())
-      {
-        if(!superstructure.drop()) {superstructure.setSuper(SuperstructureState.Score);}
-      }
-      else
-      {
-        if(!superstructure.drop()) {superstructure.setSuper(state.get());}
-      }
+    //   if(superstructure.l4Ready() || superstructure.l3Ready() || superstructure.l2Ready() || superstructure.l1Ready())
+    //   {
+    //     if(!superstructure.drop()) {superstructure.setSuper(SuperstructureState.Score);}
+    //   }
+    //   else
+    //   {
+    //     if(!superstructure.drop()) {superstructure.setSuper(state.get());}
+    //   }
 
-      if(superstructure.drop())
-      {
-        superstructure.setSuper(SuperstructureState.HomePID);
-      }
-      }
-     }
-    }
-     
+    //   if(superstructure.drop())
+    //   {
+    //     superstructure.setSuper(SuperstructureState.HomePID);
+    //   }
+    //   }
+    //  }
+    // }
+    
    }
  
    public boolean closeEnough()
@@ -433,7 +416,7 @@ import frc.robot.utils.ReefScoringPos.ReefPole;
    public void end(boolean interrupted) {
      
      
-     base.getDrivetrain().getRobotSpeeds().stopSpeeds("feedback");
+    robotSpeeds.stopSpeeds("feedback");
 
    }
  
@@ -447,7 +430,7 @@ import frc.robot.utils.ReefScoringPos.ReefPole;
      }
      else
      {
-     return false;
+     return endCommand.getAsBoolean();
      }
      
    }

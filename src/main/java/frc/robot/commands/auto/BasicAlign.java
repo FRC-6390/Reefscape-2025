@@ -194,7 +194,7 @@ else
 
   public boolean linedUp()
   {
-    Pose2d pose = getBotPoseTagSpace(limeLight);
+    // Pose2d pose = getBotPoseTagSpace(limeLight);
     return limeLight.hasValidTarget() && limeLight.getPoseEstimate(PoseEstimateWithLatencyType.BOT_POSE_MT2_BLUE).getRaw()[9] <= 0.525 && Math.abs(Math.abs(getOffsetToTarget()))< 7;
   } 
   public boolean hasSeenAndLost()

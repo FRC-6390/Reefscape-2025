@@ -17,7 +17,6 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import frc.robot.Autos.AUTOS;
-import frc.robot.Constants.Elevator.ElevatorState;
 import frc.robot.Constants.EndEffector.ArmState;
 import frc.robot.Constants.EndEffector.WristState;
 import frc.robot.Constants.EndEffector.RollerState;
@@ -50,11 +49,9 @@ public class RobotContainer {
                                                               .setSticksDeadzone(Constants.Controllers.STICK_DEADZONE)
                                                               .setLeftSlewrate(2);
 
-  private final EnhancedXboxController driverController2 = new EnhancedXboxController(1).setSticksDeadzone(Constants.Controllers.STICK_DEADZONE);
-          
-  
- 
+  private final EnhancedXboxController driverController2 = new EnhancedXboxController(1).setSticksDeadzone(Constants.Controllers.STICK_DEADZONE); 
   public SendableChooser<Command> chooser;
+  
   public RobotContainer() 
   {
     configureBindings();
@@ -82,8 +79,8 @@ public class RobotContainer {
     // NamedCommands.registerCommand("AlignRightK", new TagAlign(robotBase, "limelight-right",  new InstantCommand(() -> candle.setRGB(0, 0, 255)), Units.inchesToMeters(22), ReefPole.K,candle));
     // NamedCommands.registerCommand("AlignLeftK", new TagAlign(robotBase, "limelight-left", new InstantCommand(() -> candle.setRGB(0, 0, 255)), Units.inchesToMeters(22), ReefPole.K,candle));
   
-    NamedCommands.registerCommand("TagAlignLeft", new TagAlign(robotBase, "limelight-left", superstructure));
-    NamedCommands.registerCommand("TagAlignRight", new TagAlign(robotBase, "limelight-right", superstructure));
+    NamedCommands.registerCommand("TagAlignLeft", new TagAlign(robotBase, "limelight-left"));
+    NamedCommands.registerCommand("TagAlignRight", new TagAlign(robotBase, "limelight-right"));
   
     NamedCommands.registerCommand("BasicAlignLeft", Commands.sequence(superstructure.setState(SuperstructureState.Align),new BasicAlign(robotBase,"limelight-left")));
     NamedCommands.registerCommand("BasicAlignRight", Commands.sequence(superstructure.setState(SuperstructureState.Align),new BasicAlign(robotBase, "limelight-right")));
@@ -110,9 +107,8 @@ public class RobotContainer {
 
     driverController.leftTrigger.tiggerAt(0.5).onTrue(superstructure.setState(SuperstructureState.AlgaeLow)).onFalse(superstructure.setState(SuperstructureState.Home));
     driverController.rightTrigger.tiggerAt(0.5).onTrue(superstructure.setState(SuperstructureState.AlgaeHigh)).onFalse(superstructure.setState(SuperstructureState.Home));
-
-    driverController.pov.right.whileTrue(new TagAlign(robotBase, "limelight-left", superstructure,() -> selectedState)).onFalse(superstructure.setState(SuperstructureState.HomePID));
-    driverController.pov.left.whileTrue(new TagAlign(robotBase, "limelight-right",superstructure ,() -> selectedState)).onFalse(superstructure.setState(SuperstructureState.HomePID));
+    driverController.pov.right.whileTrue(new TagAlign(robotBase, "limelight-left").andThen(() -> superstructure.autoScore(selectedState))).onFalse(superstructure.setState(SuperstructureState.HomePID));
+    driverController.pov.left.whileTrue(new TagAlign(robotBase, "limelight-right").andThen(() -> superstructure.autoScore(selectedState))).onFalse(superstructure.setState(SuperstructureState.HomePID));
     driverController.pov.up.whileTrue(superstructure.setState(SuperstructureState.AlgaeScore)).after(1).onTrue(superstructure.setState(SuperstructureState.ScoreAlgae));
     driverController.pov.down.onTrue(superstructure.setState(SuperstructureState.HomePID)).after(1).onTrue(superstructure.setState(SuperstructureState.Home));
 

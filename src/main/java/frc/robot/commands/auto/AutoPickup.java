@@ -129,8 +129,8 @@ public class AutoPickup extends Command {
       base.getDrivetrain().getRobotSpeeds().setSpeedSourceState("auto", false);
     base.getDrivetrain().getRobotSpeeds().stopSpeeds("auto");
 
-    double rSpeed = rController.calculate(targetYaw, 0);
-    double xSpeed = -xController.calculate(targetPitch, 0);
+    // double rSpeed = rController.calculate(targetYaw, 0);
+    // double xSpeed = -xController.calculate(targetPitch, 0);
 
     // base.getDrivetrain().getRobotSpeeds().setFeedbackSpeeds(xSpeed, 0, rSpeed);
     }

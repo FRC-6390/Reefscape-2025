@@ -14,7 +14,6 @@ import ca.frc6390.athena.commands.RunnableTrigger;
 import ca.frc6390.athena.controllers.ElevatorFeedForwardsSendable;
 import ca.frc6390.athena.mechanisms.StateMachine;
 import ca.frc6390.athena.sensors.limitswitch.GenericLimitSwitch;
-import edu.wpi.first.math.controller.ElevatorFeedforward;
 import edu.wpi.first.math.controller.ProfiledPIDController;
 import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.AngularVelocity;
@@ -66,7 +65,7 @@ public class Elevator extends SubsystemBase{
     controller.reset(getHeightFromFloor());
     feedforward = Constants.Elevator.FEEDFORWARD;
     stateMachine = new StateMachine<Double, ElevatorState>(ElevatorState.HomeReset, controller::atGoal);
-    idle = new RunnableTrigger(() -> lowerlimitSwitch.getAsBoolean() && !stateMachine.getGoalState().equals(ElevatorState.Intaking));
+    idle = new RunnableTrigger(() -> lowerlimitSwitch.getAsBoolean() && !stateMachine.isGoalState(ElevatorState.Intaking));
     idle.onTrue(() -> stateMachine.queueState(ElevatorState.Aligning));
     lowerlimitSwitch.onTrue(new InstantCommand(() -> {encoder.setPosition(0); stop(); reset();}));//.and(()->!stateMachine.atAnyState(ElevatorState.Intaking)).onTrue(() -> {});
   }

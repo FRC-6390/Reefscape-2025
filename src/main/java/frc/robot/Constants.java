@@ -22,7 +22,6 @@ import ca.frc6390.athena.sensors.camera.photonvision.PhotonVisionConfig;
 import ca.frc6390.athena.sensors.camera.ConfigurableCamera;
 import ca.frc6390.athena.sensors.camera.limelight.LimeLightConfig;
 import edu.wpi.first.math.controller.ArmFeedforward;
-import edu.wpi.first.math.controller.ElevatorFeedforward;
 import edu.wpi.first.math.controller.ProfiledPIDController;
 import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Transform3d;
@@ -128,7 +127,7 @@ public interface Constants {
         ElevatorFeedForwardsSendable FEEDFORWARD = new ElevatorFeedForwardsSendable(0, 0.117, 0.1,0);
 
 
-        // MechanismConfig<StatefulElevatorMechanism<ElevatorState>> ELEVATOR_CONFIG = MechanismConfig.statefulElevator(new ElevatorFeedforward(0,0.14,0.32, 0), ElevatorState.HomeReset)
+        // MechanismConfig<StatefulElevatorMechanism<ElevatorState>> ELEVATOR_CONFIG = MechanismConfig.statefulElevator(new ElevatorFeedforward(0,0.117,0.1, 0), ElevatorState.HomeReset)
         // .addMotors(Motor.KRAKEN_X60, 20, -21)
         // .setEncoder(EncoderType.CTRECANcoder, 42)
         // .setNeutralMode(MotorNeutralMode.Brake)
@@ -136,10 +135,10 @@ public interface Constants {
         // .setEncoderConversion(3d)
         // .setTolerance(1)
         // .setCanbus(CANIVORE_CANBUS)
-        // .setProfiledPID(0.025, 0, 0, 50 ,15)
+        // .setProfiledPID(0.11, 0, 0, 80 ,60)
         // .setCurrentLimit(60)
         // .addLowerLimitSwitch(-5, 24, true)
-        // .setStateActionSupressMotors(ElevatorState.HomeReset, mech -> mech.setSpeed(-0.2));
+        // .setStateActionSupressMotors(mech -> mech.setSpeed(-0.25), ElevatorState.HomeReset, ElevatorState.Intaking);
     }
 
     public interface EndEffector {

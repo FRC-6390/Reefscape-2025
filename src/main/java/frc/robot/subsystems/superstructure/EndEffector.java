@@ -82,6 +82,7 @@ public class EndEffector extends SubsystemBase{
         hasNoPiece = new DelayedOutput(() -> !hasGamePiece(), 0.25);
 
         this.stateMachine = new StateMachine<EndEffectorTuple,EndEffectorState>(EndEffectorState.Home, () -> joint1.getStateMachine().atGoalState()&& joint2.getStateMachine().atGoalState());
+        stateMachine.setAtStateDelay(0.125);
     }
 
     public StateMachine<EndEffectorTuple, EndEffectorState> getStateMachine() {
@@ -106,7 +107,7 @@ public class EndEffector extends SubsystemBase{
     } 
 
     public boolean isScoring(){
-        return coralRollers.getStateMachine().atState(RollerState.Running) && !joint1.getStateMachine().getGoalState().equals(ArmState.Intaking);
+        return coralRollers.getStateMachine().atState(RollerState.Running) && !joint1.getStateMachine().isGoalState(ArmState.Intaking);
     }
 
     public EndEffector setAutoEndScoring(boolean autoEndScoring) {
