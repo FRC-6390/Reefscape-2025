@@ -58,9 +58,12 @@ public class Autos {
         public static SendableChooser<Command> createChooser(AUTOS defualtAuto){
             SendableChooser<Command> chooser = new SendableChooser<>();
             for (AUTOS auto : AUTOS.values()) {
+              if(auto.equals(defualtAuto)){
+                chooser.setDefaultOption(auto.name(), auto.getAuto());
+              }else{
                 chooser.addOption(auto.name(), auto.getAuto());
+              } 
             }
-            chooser.setDefaultOption(defualtAuto.name(), defualtAuto.getAuto());
             return chooser;
         }
     }

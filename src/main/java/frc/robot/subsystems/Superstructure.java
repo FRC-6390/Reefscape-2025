@@ -163,7 +163,6 @@ public class Superstructure extends SubsystemBase {
 
 
   public InstantCommand setState(SuperstructureState state) {
-    System.out.println(state.name());
     return new InstantCommand(() -> stateMachine.queueState(state));
   }
   public void setSuper(SuperstructureState state) {
