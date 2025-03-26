@@ -169,6 +169,25 @@
               }
             ]
           }
+        },
+        {
+          "type": "deadline",
+          "data": {
+            "commands": [
+              {
+                "type": "named",
+                "data": {
+                  "name": "BasicAlignLeftA"
+                }
+              },
+              {
+                "type": "path",
+                "data": {
+                  "pathName": "LeftSideTest.5"
+                }
+              }
+            ]
+          }
         }
       ]
     }

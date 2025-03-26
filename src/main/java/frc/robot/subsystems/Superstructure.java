@@ -35,6 +35,10 @@ public class Superstructure extends SubsystemBase {
   private final RunnableTrigger autoDropElevatorTrigger;
   private final RunnableTrigger liftIntake;
   private final DelayedOutput atL4;
+  private final DelayedOutput atL3;
+  private final DelayedOutput atL2;
+  private final DelayedOutput atL1;
+
   private final DelayedOutput atHome;
   private final DelayedOutput elevatorAtIntake;
 
@@ -53,7 +57,7 @@ public class Superstructure extends SubsystemBase {
 
         AlgaeLow(new SuperstructureTuple(EndEffectorState.AlgaeLow, ElevatorState.AlgaeLow)),
         AlgaeScore(new SuperstructureTuple(EndEffectorState.AlgaeScore, ElevatorState.L4)),
-        ScoreAlgae(new SuperstructureTuple(EndEffectorState.ScoreAlgae, ElevatorState.L4)),
+        ScoreAlgae(new SuperstructureTuple(EndEffectorState.ScoreAlgae, null)),
 
         AlgaeSpit(new SuperstructureTuple(EndEffectorState.AlgaeScore, null)),
 
@@ -92,9 +96,13 @@ public class Superstructure extends SubsystemBase {
     this.elevatorStateMachine = elevator.getStateMachine();
     this.endEffectorStateMachine = endEffector.getStateMachine();
     this.stateMachine = new StateMachine<Superstructure.SuperstructureTuple,Superstructure.SuperstructureState>(SuperstructureState.Home, () -> elevatorStateMachine.atGoalState() && endEffectorStateMachine.atGoalState());
-    this.autoDropElevatorTrigger = new RunnableTrigger(() -> autoDropElevator && endEffector.hasNoPiece() && endEffector.isScoring() && elevatorStateMachine.atState(ElevatorState.L1,ElevatorState.L2,ElevatorState.L3,ElevatorState.L4) && !endEffectorStateMachine.getGoalState().equals(EndEffectorState.AlgaeScore));
+    this.autoDropElevatorTrigger = new RunnableTrigger(() -> autoDropElevator && endEffector.hasNoPiece() && endEffector.isScoring() && elevatorStateMachine.atState(ElevatorState.L1,ElevatorState.L2,ElevatorState.L3,ElevatorState.L4) && !endEffectorStateMachine.getGoalState().equals(EndEffectorState.ScoreAlgae));
     this.liftIntake = new RunnableTrigger(() -> endEffector.hasGamePiece());  
     this.atL4 = new DelayedOutput(() -> endeffectorAtState(EndEffectorState.L4), 0.125);
+    this.atL3 = new DelayedOutput(() -> endeffectorAtState(EndEffectorState.L3), 0.125);
+    this.atL2 = new DelayedOutput(() -> endeffectorAtState(EndEffectorState.L2), 0.125);
+    this.atL1 = new DelayedOutput(() -> endeffectorAtState(EndEffectorState.L1), 0.125);
+
     this.atHome = new DelayedOutput(() -> endeffectorAtState(EndEffectorState.Home), 0.125);
     this.elevatorAtIntake = new DelayedOutput(() -> elevatorStateMachine.atState(ElevatorState.Intaking), 0.125);
 
@@ -102,6 +110,24 @@ public class Superstructure extends SubsystemBase {
     liftIntake.onTrue(setState(SuperstructureState.Align));
 
     prevState = SuperstructureState.Home;
+  }
+
+  public boolean l4Ready()
+  {
+   return atL4.getAsBoolean();
+  }
+
+  public boolean l3Ready()
+  {
+   return atL3.getAsBoolean();
+  }
+  public boolean l2Ready()
+  {
+   return atL2.getAsBoolean();
+  }
+  public boolean l1Ready()
+  {
+   return atL1.getAsBoolean();
   }
 
   public Superstructure setAutoDropElevator(boolean autoDropElevator) {
@@ -144,6 +170,10 @@ public class Superstructure extends SubsystemBase {
     stateMachine.queueState(state);
   }
 
+  public boolean drop()
+  {
+   return autoDropElevator && endEffector.hasNoPiece() && endEffector.isScoring() && elevatorStateMachine.atState(ElevatorState.L1,ElevatorState.L2,ElevatorState.L3,ElevatorState.L4) && !endEffectorStateMachine.getGoalState().equals(EndEffectorState.ScoreAlgae); 
+  }
   public InstantCommand setElevator(ElevatorState state){
     return new InstantCommand(() -> elevatorStateManager(state));
   }
@@ -204,7 +234,10 @@ public class Superstructure extends SubsystemBase {
         case L1, L2, L3, L4, AlgaeScore, AlgaeHigh, AlgaeLow:
           // if(!elevatorStateMachine.atGoalState())
           // {
-          endEffectorStateMachine.queueState(EndEffectorState.Home);
+          if(!prevState.states.endEffector.equals(EndEffectorState.AlgaeScore))
+          {
+            endEffectorStateMachine.queueState(EndEffectorState.Home);
+          }
           // }
           // else
           // {

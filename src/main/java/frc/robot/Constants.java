@@ -55,14 +55,14 @@ public interface Constants {
         //UP 40
         //LEFT SIDE 8.5
         //X 4.5                                                 
-        RobotLocalizationConfig LOCALIZATION_CONFIG = RobotLocalizationConfig.vision(0.1, 0.1, 9999)
+        RobotLocalizationConfig LOCALIZATION_CONFIG = RobotLocalizationConfig.vision(0.8, 0.8, 9999)
                                                             .setAutoPlannerPID(7,0,0, 2,0,0).setVisionEnabled(true);
         ConfigurableCamera[] CAMERAS =
          {                                                                 
-        LimeLightConfig.table("limelight-left").setUseForLocalization(false).setYawRelativeToForwards(-15).setPoseEstimateType(PoseEstimateWithLatencyType.BOT_POSE_MT2_BLUE).setLocalizationTagFilter(17,18,19,20,21,22,6,7,8,9,10,11), 
-        LimeLightConfig.table("limelight-right").setUseForLocalization(false).setYawRelativeToForwards(15).setPoseEstimateType(PoseEstimateWithLatencyType.BOT_POSE_MT2_BLUE).setLocalizationTagFilter(17,18,19,20,21,22,6,7,8,9,10,11),
-        PhotonVisionConfig.table("Tag").setUseForLocalization(false).setCameraRobotSpace(new Transform3d(-0.29845,0.2286,Units.inchesToMeters(36),new Rotation3d(0, 0, 180))).setPoseStrategy(PoseStrategy.PNP_DISTANCE_TRIG_SOLVE),
-        PhotonVisionConfig.table("TagFront").setUseForLocalization(true).setCameraRobotSpace(new Transform3d(-Units.inchesToMeters(7),-Units.inchesToMeters(8.5),Units.inchesToMeters(36),new Rotation3d(0, 0, 0))).setPoseStrategy(PoseStrategy.PNP_DISTANCE_TRIG_SOLVE)
+        LimeLightConfig.table("limelight-left").setUseForLocalization(true).setYawRelativeToForwards(-15).setPoseEstimateType(PoseEstimateWithLatencyType.BOT_POSE_MT2_BLUE).setLocalizationTagFilter(17,18,19,20,21,22,6,7,8,9,10,11), 
+        LimeLightConfig.table("limelight-right").setUseForLocalization(true).setYawRelativeToForwards(15).setPoseEstimateType(PoseEstimateWithLatencyType.BOT_POSE_MT2_BLUE).setLocalizationTagFilter(17,18,19,20,21,22,6,7,8,9,10,11),
+        PhotonVisionConfig.table("Tag").setUseForLocalization(true).setCameraRobotSpace(new Transform3d(-Units.inchesToMeters(10.5),-Units.inchesToMeters(9.5),Units.inchesToMeters(36),new Rotation3d(0, 0, 180))).setPoseStrategy(PoseStrategy.MULTI_TAG_PNP_ON_COPROCESSOR),
+        PhotonVisionConfig.table("TagFront").setUseForLocalization(true).setCameraRobotSpace(new Transform3d(-Units.inchesToMeters(7),Units.inchesToMeters(8.5),Units.inchesToMeters(40),new Rotation3d(0, 0, 0))).setPoseStrategy(PoseStrategy.MULTI_TAG_PNP_ON_COPROCESSOR)
 
     };
 
@@ -92,7 +92,7 @@ public interface Constants {
 
             Aligning(32.2),
 
-            AlgaeHigh(48.9),
+            AlgaeHigh(44.9),
             AlgaeLow(35.463),
             //31.5
             L2(34.78280700103924),
@@ -124,7 +124,7 @@ public interface Constants {
         int LIMIT_SWITCH = 5;
         // ProfiledPIDController CONTORLLER = new ProfiledPIDController(0.1, 0.0, 0, new Constraints(50, 10));
         // ElevatorFeedforward FEEDFORWARD = new ElevatorFeedforward(0, 0.14, 0.32,0.0);
-        ProfiledPIDController CONTORLLER = new ProfiledPIDController(0.11, 0.0, 0, new Constraints(20, 15));
+        ProfiledPIDController CONTORLLER = new ProfiledPIDController(0.11, 0.0, 0, new Constraints(80, 60));
         ElevatorFeedForwardsSendable FEEDFORWARD = new ElevatorFeedForwardsSendable(0, 0.117, 0.1,0);
 
 
@@ -148,10 +148,10 @@ public interface Constants {
 
         enum ArmState implements SetpointProvider<Double>{
             Intaking(0), //150.38085937
-            AlgaeHigh(-97.5), //52.8
-            AlgaeLow(-97.5), //52.8
-            Home(-89), //61.083
-            StartConfiguration(-90), //0
+            AlgaeHigh(-72.5), //52.8
+            AlgaeLow(-72.5), //52.8
+            Home(-92), //61.083
+            StartConfiguration(-153), //0
             Scoring(-72), //78.310546875
             TransitionState(-85), //65
             ScoringL4(-90), //60
@@ -171,12 +171,12 @@ public interface Constants {
         }
 
             enum WristState implements SetpointProvider<Double>{
-                Intaking(62),
-                Home(109.95d),
+                Intaking(40),
+                Home(120d), //110
                 Scoring(125.419921875),
                 AlgaeHigh(2.933),
                 AlgaeLow(2.933),
-                ScoringL4(80),
+                ScoringL4(60), //80
                 TransitionState(62),
                 AlgaeScore(168.92),
 
@@ -198,6 +198,10 @@ public interface Constants {
 
         enum RollerState implements SetpointProvider<Double>{
             Running(1),
+            Algae(0.25),
+            ReverseAlgae(-0.25),
+            Slow(0.5),
+            ReverseSlow(-0.5),
             Stopped(0),
             Reverse(-1);
 
@@ -219,23 +223,23 @@ public interface Constants {
         .setNeutralMode(MotorNeutralMode.Brake)
         .setEncoderGearRatio(1d/1d)
         // .setEncoderOffset(0.380126953125)
-        .setEncoderOffset(0.0)
+        .setEncoderOffset(0.7705078125)
         .setUseEncoderAbsolute(true)
         .setEncoderConversion(360)
         .setCanbus(CANIVORE_CANBUS)
-        .setTolerance(6)
+        .setTolerance(12)
         .setPID(0.007, 0, 0)
-        // .setProfiledPID(new ProfiledPIDController(0.000, 0, 0, new Constraints(0, 0)))
+        // .setProfiledPID(new ProfiledPIDController(0.000, 0, 0, new Constraints(50, 50)))
         .setCurrentLimit(60);
         
         MechanismConfig<StatefulArmMechanism<WristState>> WRIST_CONFIG = MechanismConfig.statefulArm(new ArmFeedforward(0,0,0), WristState.StartConfiguration)
         .addMotors(Motor.KRAKEN_X60, -36)
         .setEncoder(EncoderType.CTRECANcoder, 35)
         .setNeutralMode(MotorNeutralMode.Brake)
-        // .setEncoderOffset(0.2587890625)
-        .setEncoderOffset(0.0)
+        .setEncoderOffset(0.2587890625)
+        // .setEncoderOffset(0.0)
         .setEncoderGearRatio(1d/1d)
-        .setTolerance(2)
+        .setTolerance(12)
         .setUseEncoderAbsolute(true)
         .setEncoderConversion(360)
         .setCanbus(CANIVORE_CANBUS)

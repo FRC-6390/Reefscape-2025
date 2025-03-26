@@ -68,7 +68,7 @@ public class Elevator extends SubsystemBase{
     stateMachine = new StateMachine<Double, ElevatorState>(ElevatorState.HomeReset, controller::atGoal);
     idle = new RunnableTrigger(() -> lowerlimitSwitch.getAsBoolean() && !stateMachine.getGoalState().equals(ElevatorState.Intaking));
     idle.onTrue(() -> stateMachine.queueState(ElevatorState.Aligning));
-    lowerlimitSwitch.onTrue(new InstantCommand(() -> {encoder.setPosition(0); stop(); controller.setGoal(ElevatorState.HomeReset.getSetpoint());}));//.and(()->!stateMachine.atAnyState(ElevatorState.Intaking)).onTrue(() -> {});
+    lowerlimitSwitch.onTrue(new InstantCommand(() -> {encoder.setPosition(0); stop(); reset();}));//.and(()->!stateMachine.atAnyState(ElevatorState.Intaking)).onTrue(() -> {});
   }
 
   public void setCurrentLimit(double current) {
@@ -146,8 +146,8 @@ public class Elevator extends SubsystemBase{
       tab.addString("Setpoint", () -> stateMachine.getGoalState().name()).withPosition(3, 1);
       tab.addDouble("SetpoitnValue", () -> stateMachine.getGoalState().getSetpoint());
       tab.addString("Next State", () -> stateMachine.getNextState().name()).withPosition(4, 1);
-      tab.addDouble("Fused Controller Output", () -> controller.calculate(getHeightFromFloor(),stateMachine.getGoalState().getSetpoint()) + feedforward.calculate(controller.getSetpoint().velocity) / 12);
-      tab.addDouble("PID Output", () -> controller.calculate(getHeightFromFloor(), stateMachine.getGoalState().getSetpoint())).withPosition(5, 1);
+      // tab.addDouble("Fused Controller Output", () -> controller.calculate(getHeightFromFloor(),stateMachine.getGoalState().getSetpoint()) + feedforward.calculate(controller.getSetpoint().velocity) / 12);
+      // tab.addDouble("PID Output", () -> controller.calculate(getHeightFromFloor(), stateMachine.getGoalState().getSetpoint())).withPosition(5, 1);
       tab.addDouble("Feedforward Output", () -> feedforward.calculate(controller.getSetpoint().velocity));
       tab.addBoolean("State Changer", () -> stateMachine.atGoalState()).withPosition(6, 1);
       tab.addDouble("Profiled Pos Setpoint",() -> controller.getSetpoint().position);

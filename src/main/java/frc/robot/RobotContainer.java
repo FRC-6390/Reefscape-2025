@@ -32,9 +32,9 @@ import frc.robot.utils.ReefScoringPos.ReefPole;
 import frc.robot.subsystems.superstructure.EndEffector;
 
 public class RobotContainer {
-  public final RobotBase<SwerveDrivetrain> robotBase = Constants.DriveTrain.ROBOT_BASE.create();//.shuffleboard();
-  public final StatefulArmMechanism<ArmState> arm = Constants.EndEffector.ARM_CONFIG.build().shuffleboard("Arm");
-  public final StatefulArmMechanism<WristState> wrist = Constants.EndEffector.WRIST_CONFIG.build().shuffleboard("Wrist");
+  public final RobotBase<SwerveDrivetrain> robotBase = Constants.DriveTrain.ROBOT_BASE.create().shuffleboard();
+  public final StatefulArmMechanism<ArmState> arm = Constants.EndEffector.ARM_CONFIG.build();//.shuffleboard("Arm");
+  public final StatefulArmMechanism<WristState> wrist = Constants.EndEffector.WRIST_CONFIG.build();//.shuffleboard("Wrist");
   public final StatefulMechanism<RollerState> rollers = Constants.EndEffector.CORAL_ROLLERS.build();//.shuffleboard("Rollers");
   public final StatefulMechanism<RollerState> algaeRollers = Constants.EndEffector.ALGAE_ROLLERS.build();//.shuffleboard("Rollers");
 
@@ -96,7 +96,6 @@ public class RobotContainer {
 
     chooser = Autos.AUTOS.createChooser(AUTOS.LEFTSIDE);
     SmartDashboard.putData(chooser);
-  
   }
 
 
@@ -114,9 +113,9 @@ public class RobotContainer {
     driverController.leftTrigger.tiggerAt(0.5).onTrue(superstructure.setState(SuperstructureState.AlgaeLow)).onFalse(superstructure.setState(SuperstructureState.Home));
     driverController.rightTrigger.tiggerAt(0.5).onTrue(superstructure.setState(SuperstructureState.AlgaeHigh)).onFalse(superstructure.setState(SuperstructureState.Home));
 
-    driverController.pov.left.whileTrue(new TagAlign(robotBase, "limelight-left", superstructure,() -> selectedState));
-    driverController.pov.right.whileTrue(new TagAlign(robotBase, "limelight-right",superstructure ,() -> selectedState));
-    driverController.pov.up.whileTrue(superstructure.setState(SuperstructureState.ScoreAlgae)).after(0.2).onTrue(superstructure.setState(SuperstructureState.AlgaeScore));
+    driverController.pov.right.whileTrue(new TagAlign(robotBase, "limelight-left", superstructure,() -> selectedState)).onFalse(superstructure.setState(SuperstructureState.HomePID));
+    driverController.pov.left.whileTrue(new TagAlign(robotBase, "limelight-right",superstructure ,() -> selectedState)).onFalse(superstructure.setState(SuperstructureState.HomePID));
+    driverController.pov.up.whileTrue(superstructure.setState(SuperstructureState.AlgaeScore)).after(1).onTrue(superstructure.setState(SuperstructureState.ScoreAlgae));
     driverController.pov.down.onTrue(superstructure.setState(SuperstructureState.HomePID)).after(1).onTrue(superstructure.setState(SuperstructureState.Home));
 
     driverController.a.onTrue(() -> selectedState = SuperstructureState.L1);//after(0.5).onTrue(() -> selectedState = SuperstructureState.Score);

@@ -36,22 +36,22 @@ public class EndEffector extends SubsystemBase{
     
     public enum EndEffectorState implements SetpointProvider<EndEffectorTuple>
     {
-        L4(new EndEffectorTuple(RollerState.Stopped,RollerState.Stopped, ArmState.ScoringL4, WristState.ScoringL4)),
-        L3(new EndEffectorTuple(RollerState.Stopped, RollerState.Stopped, ArmState.Scoring, WristState.Scoring)),
-        L2(new EndEffectorTuple(RollerState.Stopped,RollerState.Stopped, ArmState.Scoring, WristState.Scoring)),
-        L1(new EndEffectorTuple(RollerState.Stopped, RollerState.Stopped,ArmState.Scoringl1,WristState.Scoringl1)),
+        L4(new EndEffectorTuple(null,null, ArmState.ScoringL4, WristState.ScoringL4)),
+        L3(new EndEffectorTuple(null, null, ArmState.Scoring, WristState.Scoring)),
+        L2(new EndEffectorTuple(null, null,ArmState.Scoring, WristState.Scoring)),
+        L1(new EndEffectorTuple(null, null,ArmState.Scoringl1,WristState.Scoringl1)),
         Score(new EndEffectorTuple(RollerState.Running,RollerState.Running, null,null)),
         AlgaeScore(new EndEffectorTuple(RollerState.Stopped,RollerState.Stopped, ArmState.AlgaeScore,WristState.AlgaeScore)),
-        ScoreAlgae(new EndEffectorTuple(RollerState.Running,RollerState.Running, null,null)),
+        ScoreAlgae(new EndEffectorTuple(RollerState.Stopped,RollerState.Running, ArmState.AlgaeScore, WristState.AlgaeScore)),
 
         Stop(new EndEffectorTuple(RollerState.Stopped,RollerState.Stopped, null, null)),
         StartConfiguration(new EndEffectorTuple(RollerState.Stopped, RollerState.Stopped,ArmState.StartConfiguration, WristState.StartConfiguration)),
         Home(new EndEffectorTuple(RollerState.Stopped, RollerState.Stopped,ArmState.Home, WristState.Home)),
 
         Reverse(new EndEffectorTuple(RollerState.Reverse,RollerState.Reverse, null, null)),
-        Intaking(new EndEffectorTuple(RollerState.Running, RollerState.Running, ArmState.Intaking, WristState.Intaking)),
-        AlgaeHigh(new EndEffectorTuple(RollerState.Stopped, RollerState.Reverse, ArmState.AlgaeHigh, WristState.AlgaeHigh)),
-        AlgaeLow(new EndEffectorTuple(RollerState.Stopped, RollerState.Reverse, ArmState.AlgaeLow, WristState.AlgaeLow)),
+        Intaking(new EndEffectorTuple(RollerState.Running, RollerState.Slow, ArmState.Intaking, WristState.Intaking)),
+        AlgaeHigh(new EndEffectorTuple(RollerState.Stopped, RollerState.ReverseAlgae, ArmState.AlgaeHigh, WristState.AlgaeHigh)),
+        AlgaeLow(new EndEffectorTuple(RollerState.Stopped, RollerState.ReverseAlgae, ArmState.AlgaeLow, WristState.AlgaeLow)),
         
         Transition(new EndEffectorTuple(RollerState.Stopped,RollerState.Stopped, ArmState.TransitionState, WristState.TransitionState));
 

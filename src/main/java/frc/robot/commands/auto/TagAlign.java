@@ -276,7 +276,7 @@ import frc.robot.utils.ReefScoringPos.ReefPole;
    public MedianFilter filter;
    public double thetaMeasurement;
    public ProfiledPIDController xController = new ProfiledPIDController(1, 0, 0, new Constraints(1, 1));
-   public ProfiledPIDController yController =  new ProfiledPIDController(3.5, 0, 0, new Constraints(2, 2));
+   public ProfiledPIDController yController =  new ProfiledPIDController(3.75, 0, 0, new Constraints(2, 2));
    public PIDController rController = new PIDController(0.025, 0, 0);
    public DelayedOutput endCommand;
    public DelayedOutput noTag;
@@ -313,6 +313,8 @@ import frc.robot.utils.ReefScoringPos.ReefPole;
    {
      return !ll.hasValidTarget();
    }
+
+  
    public Pose2d getBotPoseTagSpace(LimeLight ll)
    {
      double dist = ll.getPoseEstimate(PoseEstimateWithLatencyType.BOT_POSE_MT2_BLUE).getRaw()[9];
@@ -355,11 +357,11 @@ import frc.robot.utils.ReefScoringPos.ReefPole;
  
      if(ll.getPoseEstimate(PoseEstimateWithLatencyType.BOT_POSE_MT2_BLUE).getRaw()[9] > 1)
      {
-       xController.setP(2);
+       xController.setP(1.5);
      }
      else
      {
-       xController.setP(1);
+       xController.setP(0.75);
      }
  
     
@@ -367,7 +369,7 @@ import frc.robot.utils.ReefScoringPos.ReefPole;
      if(ll.hasValidTarget())
      {
  
-       double Xspeed = -xController.calculate(curPose.getX(), Units.inchesToMeters(13));
+       double Xspeed = -xController.calculate(curPose.getX(), Units.inchesToMeters(9.5));
        double YSpeed = yController.calculate(curPose.getY(),0);
        double rSpeed = rController.calculate(thetaMeasurement, 0);//* Math.copySign(1, ll.getTargetHorizontalOffset()), 0);
     
@@ -391,23 +393,35 @@ import frc.robot.utils.ReefScoringPos.ReefPole;
        base.getDrivetrain().getRobotSpeeds().stopSpeeds("feedback");
      }
 
+     if(DriverStation.isTeleop())
+    {
      if(endCommand.getAsBoolean())
      {
       if(!superstructure.stateMachine.getGoalState().equals(SuperstructureState.Score))
       {
-      superstructure.setSuper(state.get());
+      
+      if(superstructure.l4Ready() || superstructure.l3Ready() || superstructure.l2Ready() || superstructure.l1Ready())
+      {
+        if(!superstructure.drop()) {superstructure.setSuper(SuperstructureState.Score);}
+      }
+      else
+      {
+        if(!superstructure.drop()) {superstructure.setSuper(state.get());}
+      }
+
+      if(superstructure.drop())
+      {
+        superstructure.setSuper(SuperstructureState.HomePID);
+      }
       }
      }
-     else
-     {
-      superstructure.setSuper(SuperstructureState.Home);
-     }
+    }
      
    }
  
    public boolean closeEnough()
    {
-     return ll.hasValidTarget() && ll.getPoseEstimate(PoseEstimateWithLatencyType.BOT_POSE_MT2_BLUE).getRaw()[9] <= 0.525 && Math.abs(getOffsetToTarget()) < 3.5;
+     return ll.hasValidTarget() && ll.getPoseEstimate(PoseEstimateWithLatencyType.BOT_POSE_MT2_BLUE).getRaw()[9] <= 0.525 && Math.abs(getOffsetToTarget()) < 5;
    }
 
    public double getOffsetToTarget(){
