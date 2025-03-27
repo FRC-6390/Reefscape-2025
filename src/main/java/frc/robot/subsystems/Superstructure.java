@@ -41,7 +41,7 @@ public class Superstructure extends SubsystemBase {
   // private final DelayedOutput atL1;
 
   // private final DelayedOutput atHome;
-  private final DelayedOutput elevatorAtIntake;
+  // private final DelayedOutput elevatorAtIntake;
 
   private boolean autoDropElevator = true;
   private boolean endEffectorEnabled = true;
@@ -114,7 +114,7 @@ public class Superstructure extends SubsystemBase {
     this.elevatorStateMachine = elevator.getStateMachine();
     this.endEffectorStateMachine = endEffector.getStateMachine();
     this.stateMachine = new StateMachine<Superstructure.SuperstructureTuple,Superstructure.SuperstructureState>(SuperstructureState.Home, () -> elevatorStateMachine.atGoalState() && endEffectorStateMachine.atGoalState());
-    this.autoDropElevatorTrigger = new RunnableTrigger(() -> autoDropElevator && endEffector.hasNoPiece() && endEffector.isScoring() && elevatorStateMachine.atState(ElevatorState.L1,ElevatorState.L2,ElevatorState.L3,ElevatorState.L4) && !endEffectorStateMachine.isGoalState(EndEffectorState.ScoreAlgae));
+    this.autoDropElevatorTrigger = new RunnableTrigger(() -> autoDropElevator && !endEffector.hasGamePiece() && endEffector.isScoring() && elevatorStateMachine.atState(ElevatorState.L1,ElevatorState.L2,ElevatorState.L3,ElevatorState.L4) && !endEffectorStateMachine.isGoalState(EndEffectorState.ScoreAlgae));
     this.liftIntake = new RunnableTrigger(() -> endEffector.hasGamePiece());  
     // this.atL4 = new DelayedOutput(() -> endeffectorAtState(EndEffectorState.L4), 0.125);
     // this.atL3 = new DelayedOutput(() -> endeffectorAtState(EndEffectorState.L3), 0.125);
@@ -122,7 +122,7 @@ public class Superstructure extends SubsystemBase {
     // this.atL1 = new DelayedOutput(() -> endeffectorAtState(EndEffectorState.L1), 0.125);
 
     // this.atHome = new DelayedOutput(() -> endEffectorStateMachine.atState(EndEffectorState.Home), 0.125);
-    this.elevatorAtIntake = new DelayedOutput(() -> elevatorStateMachine.atState(ElevatorState.Intaking), 0.125);
+    // this.elevatorAtIntake = new DelayedOutput(() -> elevatorStateMachine.atState(ElevatorState.Intaking), 0.125);
 
     autoDropElevatorTrigger.onTrue(() -> {setSuper(SuperstructureState.HomePID);});  
     liftIntake.onTrue(setState(SuperstructureState.Align));
@@ -195,7 +195,7 @@ public class Superstructure extends SubsystemBase {
 
   public boolean drop()
   {
-   return autoDropElevator && endEffector.hasNoPiece() && endEffector.isScoring() && elevatorStateMachine.atState(ElevatorState.L1,ElevatorState.L2,ElevatorState.L3,ElevatorState.L4) && !endEffectorStateMachine.isGoalState(EndEffectorState.ScoreAlgae); 
+   return autoDropElevator && !endEffector.hasGamePiece() && endEffector.isScoring() && elevatorStateMachine.atState(ElevatorState.L1,ElevatorState.L2,ElevatorState.L3,ElevatorState.L4) && !endEffectorStateMachine.isGoalState(EndEffectorState.ScoreAlgae); 
   }
   public InstantCommand setElevator(ElevatorState state){
     return new InstantCommand(() -> elevatorStateManager(state));
@@ -238,7 +238,7 @@ public class Superstructure extends SubsystemBase {
           }
           if(state.equals(ElevatorState.Intaking))
           {
-            endEffectorStateMachine.queueState(EndEffectorState.Intaking, () -> endEffectorStateMachine.atState(EndEffectorState.Home) && elevatorAtIntake.getAsBoolean());
+            endEffectorStateMachine.queueState(EndEffectorState.Intaking, () -> endEffectorStateMachine.atState(EndEffectorState.Home) && elevatorStateMachine.atState(ElevatorState.Intaking));
           }
         }
         }

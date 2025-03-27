@@ -18,6 +18,7 @@ public class Robot extends TimedRobot {
   public Robot() {  
     m_robotContainer = new RobotContainer();
     pdh = new PowerDistribution(14, ModuleType.kRev);
+    m_robotContainer.robotBase.registerPIDCycles(this);
   }
 
   @Override

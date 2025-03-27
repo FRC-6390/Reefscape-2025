@@ -18,8 +18,8 @@ public class EndEffector extends SubsystemBase{
 
     private final StatefulArmMechanism<ArmState> joint1;
     private final StatefulArmMechanism<WristState> joint2;
-
-    private final DelayedOutput hasNoPiece;
+    private final GenericLimitSwitch proximitySensor;
+    private final DelayedOutput hasGamePiece;
 
     private final StatefulMechanism<RollerState> coralRollers;
     private final StatefulMechanism<RollerState> algaeRollers;
@@ -28,7 +28,7 @@ public class EndEffector extends SubsystemBase{
 
     private final StateMachine<EndEffectorTuple, EndEffectorState> stateMachine;
 
-    private final GenericLimitSwitch proximitySensor;
+   
 
     private EndEffectorState prevState;
 
@@ -79,7 +79,7 @@ public class EndEffector extends SubsystemBase{
         this.prevState = EndEffectorState.Home;
 
         proximitySensor = new GenericLimitSwitch(4, true);
-        hasNoPiece = new DelayedOutput(() -> !hasGamePiece(), 0.25);
+        hasGamePiece = new DelayedOutput(() -> proximitySensor.getAsBoolean(), 0.25);
 
         this.stateMachine = new StateMachine<EndEffectorTuple,EndEffectorState>(EndEffectorState.Home, () -> joint1.getStateMachine().atGoalState()&& joint2.getStateMachine().atGoalState());
         stateMachine.setAtStateDelay(0.125);
@@ -90,11 +90,7 @@ public class EndEffector extends SubsystemBase{
     }
 
     public boolean hasGamePiece(){
-        return proximitySensor.getAsBoolean();
-    }
-
-    public boolean hasNoPiece(){
-        return hasNoPiece.getAsBoolean();
+        return hasGamePiece.getAsBoolean();
     }
 
     public ShuffleboardTab shuffleboard(String tab) {

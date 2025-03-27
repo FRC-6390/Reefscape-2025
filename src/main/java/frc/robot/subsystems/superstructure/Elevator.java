@@ -34,7 +34,7 @@ public class Elevator extends SubsystemBase{
 
   public final ProfiledPIDController controller;
   private final ElevatorFeedForwardsSendable feedforward;
-  private RunnableTrigger idle;
+  // private RunnableTrigger idle;
 
   private final StateMachine<Double, ElevatorState> stateMachine;
   private final StatusSignal<Angle> getPosition;
@@ -65,8 +65,9 @@ public class Elevator extends SubsystemBase{
     controller.reset(getHeightFromFloor());
     feedforward = Constants.Elevator.FEEDFORWARD;
     stateMachine = new StateMachine<Double, ElevatorState>(ElevatorState.HomeReset, controller::atGoal);
-    idle = new RunnableTrigger(() -> lowerlimitSwitch.getAsBoolean() && !stateMachine.isGoalState(ElevatorState.Intaking));
-    idle.onTrue(() -> stateMachine.queueState(ElevatorState.Aligning));
+    lowerlimitSwitch.and(() -> !stateMachine.isGoalState(ElevatorState.Intaking)).onTrue(() -> stateMachine.queueState(ElevatorState.Aligning));
+    // idle = new RunnableTrigger(() -> lowerlimitSwitch.getAsBoolean() && !stateMachine.isGoalState(ElevatorState.Intaking));
+    // idle.onTrue(() -> ;
     lowerlimitSwitch.onTrue(new InstantCommand(() -> {encoder.setPosition(0); stop(); reset();}));//.and(()->!stateMachine.atAnyState(ElevatorState.Intaking)).onTrue(() -> {});
   }
 

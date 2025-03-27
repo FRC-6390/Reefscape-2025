@@ -56,6 +56,7 @@ public class RobotContainer {
   {
     configureBindings();
     robotBase.getDrivetrain().setDriveCommand(driverController);
+    robotBase.registerMechanism(arm, algaeRollers, wrist, rollers);
    
     arm.setPidEnabled(true);
     wrist.setPidEnabled(true);
@@ -66,7 +67,7 @@ public class RobotContainer {
     // elevator.setDefaultCommand(elevate);
     
     NamedCommands.registerCommand("Home", superstructure.setState(SuperstructureState.HomePID));
-    NamedCommands.registerCommand("Intake", Commands.either(superstructure.setState(SuperstructureState.Intaking), Commands.none(), () -> endEffector.hasNoPiece()));
+    NamedCommands.registerCommand("Intake", Commands.either(superstructure.setState(SuperstructureState.Intaking), Commands.none(), () -> !endEffector.hasGamePiece()));
 
     NamedCommands.registerCommand("L4", superstructure.setState(SuperstructureState.L4));
     NamedCommands.registerCommand("StartEject", superstructure.setState(SuperstructureState.Score));
@@ -102,7 +103,7 @@ public class RobotContainer {
     //RESET ODOMETRY
     driverController.start.onTrue(() -> robotBase.getDrivetrain().getIMU().setYaw(0)).after(2).onTrue(() -> robotBase.getLocalization().resetFieldPose(0,0, 0));
 
-    driverController.leftBumper.onTrue(Commands.either(superstructure.setState(SuperstructureState.Intaking), Commands.none(), () -> endEffector.hasNoPiece()));
+    driverController.leftBumper.onTrue(Commands.either(superstructure.setState(SuperstructureState.Intaking), Commands.none(), () -> !endEffector.hasGamePiece()));
     driverController.rightBumper.onTrue(superstructure.setState(SuperstructureState.Score));
 
     driverController.leftTrigger.tiggerAt(0.5).onTrue(superstructure.setState(SuperstructureState.AlgaeLow)).onFalse(superstructure.setState(SuperstructureState.Home));
