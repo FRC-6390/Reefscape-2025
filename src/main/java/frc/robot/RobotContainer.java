@@ -90,7 +90,7 @@ public class RobotContainer {
     NamedCommands.registerCommand("BasicAlignLeftA", Commands.sequence(superstructure.setState(SuperstructureState.Align),new BasicAlign(robotBase, "limelight-left", ReefPole.A)));
     NamedCommands.registerCommand("BasicAlignRightA", Commands.sequence(superstructure.setState(SuperstructureState.Align),new BasicAlign(robotBase, "limelight-right", ReefPole.A)));
 
-    chooser = Autos.AUTOS.createChooser(AUTOS.LEFTSIDE);
+    chooser = Autos.AUTOS.createChooser(AUTOS.LEFTSIDETEST);
     SmartDashboard.putData(chooser);
   }
 

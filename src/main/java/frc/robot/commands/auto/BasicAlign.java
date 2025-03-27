@@ -28,7 +28,7 @@ public class BasicAlign extends Command {
     public ReefPole pole;
     public boolean hasSet = false;
 
-  public PIDController controller = new PIDController(0.035, 0.004, 0);
+  public PIDController controller = new PIDController(0.0325, 0.004, 0);
   
   public double getOffsetToTarget(){
     return limeLight.getTargetHorizontalOffset() + ReefPole.getPoleFromID(limeLight.getAprilTagID(), limeLight).getOffsetInDegrees();
@@ -88,7 +88,7 @@ public class BasicAlign extends Command {
   {
     hasSet = true;
   }
-  if(Math.abs(filter.calculate(limeLight.getPoseEstimate(PoseEstimateType.TARGET_POSE_ROBOT_SPACE).getRaw()[4])) < 15)
+  if(Math.abs(filter.calculate(limeLight.getPoseEstimate(PoseEstimateType.TARGET_POSE_ROBOT_SPACE).getRaw()[4])) < 10)
     {
       double r = controller.calculate(getOffsetToTarget(), 0);
       double x = 0;
