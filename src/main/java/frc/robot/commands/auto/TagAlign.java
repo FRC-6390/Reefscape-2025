@@ -347,7 +347,14 @@ import frc.robot.utils.ReefScoringPos.ReefPole;
      }
      else
      {
+      if(DriverStation.isTeleop() || DriverStation.isTeleopEnabled())
+      {
        xController.setP(0.75);
+      }
+      else if(DriverStation.isAutonomous() || DriverStation.isAutonomousEnabled())
+      {
+        xController.setP(0.5);
+      }
      }
  
     
@@ -358,8 +365,17 @@ import frc.robot.utils.ReefScoringPos.ReefPole;
         robotSpeeds.stopSpeeds("feedback");
         return;
      }
- 
-       double Xspeed = -xController.calculate(curTranslation.getX(), Units.inchesToMeters(9.5));
+
+     double offset = 0;
+     if(DriverStation.isTeleop() || DriverStation.isTeleopEnabled())
+     {
+      offset = 9.5;
+     }
+     else if(DriverStation.isAutonomous() || DriverStation.isAutonomousEnabled())
+     {
+      offset = 12.5;
+     }
+       double Xspeed = -xController.calculate(curTranslation.getX(), Units.inchesToMeters(offset));
        double YSpeed = yController.calculate(curTranslation.getY(),0);
        double rSpeed = rController.calculate(thetaMeasurement, 0);//* Math.copySign(1, ll.getTargetHorizontalOffset()), 0);
 
