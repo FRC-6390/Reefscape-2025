@@ -248,6 +248,8 @@
 
 package frc.robot.commands.auto;
  
+import java.util.function.Supplier;
+
 import ca.frc6390.athena.controllers.DelayedOutput;
  import ca.frc6390.athena.core.RobotBase;
 import ca.frc6390.athena.core.RobotSpeeds;
@@ -263,6 +265,8 @@ import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.DriverStation;
  import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
  import edu.wpi.first.wpilibj2.command.Command;
+import frc.robot.subsystems.Superstructure;
+import frc.robot.subsystems.Superstructure.SuperstructureState;
 import frc.robot.utils.ReefScoringPos.ReefPole;
  
  public class TagAlign extends Command {
@@ -273,25 +277,30 @@ import frc.robot.utils.ReefScoringPos.ReefPole;
    public MedianFilter filter;
    public double thetaMeasurement;
    public ProfiledPIDController xController = new ProfiledPIDController(1, 0, 0, new Constraints(1, 1));
-   public ProfiledPIDController yController =  new ProfiledPIDController(3.75, 0, 0, new Constraints(2, 2));
+   public ProfiledPIDController yController =  new ProfiledPIDController(4, 0, 0, new Constraints(2, 2));
    public PIDController rController = new PIDController(0.025, 0, 0);
    public DelayedOutput endCommand;
+   public Superstructure superstructure;
    public DelayedOutput noTag;
+   public Supplier<SuperstructureState> state;
 
-   public TagAlign(RobotBase<?> base,String lltable)
+   public TagAlign(RobotBase<?> base,String lltable, Superstructure superstructure, Supplier<SuperstructureState> state)
    {
+    this.superstructure = superstructure;
+    this.state = state;
     this.robotSpeeds = base.getDrivetrain().getRobotSpeeds();
     this.ll = base.getVision().getLimelight(lltable);
    }
+
 
    @Override
    public void initialize() 
    {
      runTag = -1;
-     endCommand = new DelayedOutput(() -> closeEnough(), 0.2);
+     endCommand = new DelayedOutput(() -> closeEnough(), Units.millisecondsToSeconds(40));
      curTranslation = new Translation2d();
      filter = new MedianFilter(50);
-     noTag = new DelayedOutput(() -> hasNoTag(), 1);
+     noTag = new DelayedOutput(() -> hasNoTag(), 0.6);
      thetaMeasurement = 0;
    }
  
@@ -307,10 +316,6 @@ import frc.robot.utils.ReefScoringPos.ReefPole;
      double angle = getOffsetToTarget();
      double x = (Math.cos(Math.toRadians(angle)) * dist);
      double y = (Math.sin(Math.toRadians(angle)) * dist); 
-     SmartDashboard.putNumber("x", ll.getPoseEstimate(PoseEstimateWithLatencyType.BOT_POSE_BLUE).getLocalizationPose().getX());
-     SmartDashboard.putNumber("Y", ll.getPoseEstimate(PoseEstimateWithLatencyType.BOT_POSE_BLUE).getLocalizationPose().getY());
-     SmartDashboard.putNumber("Angle", thetaMeasurement);
-     
  
      return new Translation2d(x,y);
    }
@@ -321,8 +326,6 @@ import frc.robot.utils.ReefScoringPos.ReefPole;
    {
         
      SmartDashboard.putBoolean("ENd ",endCommand.getAsBoolean());
-     SmartDashboard.putNumber("DisToTfg ",ll.getPoseEstimate(PoseEstimateWithLatencyType.BOT_POSE_MT2_BLUE).getRaw()[9]);
-     SmartDashboard.putNumber("HOFf ",Math.abs(getOffsetToTarget()));
 
     //  return ll.hasValidTarget() && ll.getPoseEstimate(PoseEstimateWithLatencyType.BOT_POSE_MT2_BLUE).getRaw()[9] <= 0.525 && Math.abs(ll.getTargetHorizontalOffset())< 3.5;
 
@@ -358,7 +361,9 @@ import frc.robot.utils.ReefScoringPos.ReefPole;
      }
  
     
- 
+     SmartDashboard.putBoolean("at goal state",superstructure.getStateMachine().atGoalState());
+     SmartDashboard.putBoolean("at state",superstructure.getStateMachine().isGoalState(SuperstructureState.L3));
+
      if(!ll.hasValidTarget())
      {
         SmartDashboard.putBoolean("ALGIN TAKEN",false);
@@ -369,7 +374,7 @@ import frc.robot.utils.ReefScoringPos.ReefPole;
      double offset = 0;
      if(DriverStation.isTeleop() || DriverStation.isTeleopEnabled())
      {
-      offset = 9.5;
+      offset = 11;
      }
      else if(DriverStation.isAutonomous() || DriverStation.isAutonomousEnabled())
      {
@@ -384,6 +389,9 @@ import frc.robot.utils.ReefScoringPos.ReefPole;
          SmartDashboard.putBoolean("ALGIN TAKEN",true);
          robotSpeeds.setSpeeds("feedback",Xspeed, YSpeed, -rSpeed);
        }
+       else if(noTag.getAsBoolean() && DriverStation.isTeleop()){
+        robotSpeeds.setSpeeds("feedback",0, -0.1, 0);
+       }
        else
        {
          SmartDashboard.putBoolean("ALGIN TAKEN",false);
@@ -391,30 +399,48 @@ import frc.robot.utils.ReefScoringPos.ReefPole;
        }
 
 
-    //    if(DriverStation.isTeleop())
-    // {
+    if(DriverStation.isTeleop())
+    {
 
-    //  if(endCommand.getAsBoolean())
-    //  {
-    //   if(!superstructure.stateMachine.getGoalState().equals(SuperstructureState.Score))
-    //   {
       
-    //   if(superstructure.l4Ready() || superstructure.l3Ready() || superstructure.l2Ready() || superstructure.l1Ready())
-    //   {
-    //     if(!superstructure.drop()) {superstructure.setSuper(SuperstructureState.Score);}
-    //   }
-    //   else
-    //   {
-    //     if(!superstructure.drop()) {superstructure.setSuper(state.get());}
-    //   }
-
-    //   if(superstructure.drop())
-    //   {
-    //     superstructure.setSuper(SuperstructureState.HomePID);
-    //   }
-    //   }
+    if(!endCommand.getAsBoolean() && ll.getPoseEstimate(PoseEstimateWithLatencyType.BOT_POSE_MT2_BLUE).getRaw()[9] <= 1 && !superstructure.getStateMachine().atState(state.get()))
+    {
+     if(state.get().equals(SuperstructureState.L1) ||state.get().equals(SuperstructureState.L2) ||state.get().equals(SuperstructureState.L3))
+     {
+      superstructure.setSuper(state.get());
+     }
+    //  else if(state.get().equals(SuperstructureState.L4))
+    //  {
+    //   superstructure.setSuper(SuperstructureState.L3);
     //  }
-    // }
+    }
+
+     if(endCommand.getAsBoolean())
+     {
+      // if(state.get().equals(SuperstructureState.L4))
+      // {
+      //   superstructure.setSuper(SuperstructureState.L4);
+      // }
+      if(superstructure.hasPiece() && !superstructure.stateMachine.getGoalState().equals(SuperstructureState.Score))
+      {
+      
+      if(superstructure.l4Ready() || superstructure.l3Ready() || superstructure.l2Ready() || superstructure.l1Ready())
+      {
+        if(!superstructure.drop()) {superstructure.setSuper(SuperstructureState.Score);}
+      }
+      else
+      {
+        if(!superstructure.drop()) {superstructure.setSuper(state.get());}
+      }
+
+      if(superstructure.drop())
+      {
+        superstructure.setSuper(SuperstructureState.HomePID);
+      }
+      }
+     }
+    
+  }
     
    }
  
@@ -433,6 +459,7 @@ import frc.robot.utils.ReefScoringPos.ReefPole;
      
      
     robotSpeeds.stopSpeeds("feedback");
+    System.out.println("ENDED");
 
    }
  
@@ -446,7 +473,7 @@ import frc.robot.utils.ReefScoringPos.ReefPole;
      }
      else
      {
-     return endCommand.getAsBoolean();
+     return false;
      }
      
    }

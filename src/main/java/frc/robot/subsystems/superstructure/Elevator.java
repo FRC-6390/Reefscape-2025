@@ -10,11 +10,11 @@ import com.ctre.phoenix6.hardware.CANcoder;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 
-import ca.frc6390.athena.commands.RunnableTrigger;
 import ca.frc6390.athena.controllers.ElevatorFeedForwardsSendable;
 import ca.frc6390.athena.mechanisms.StateMachine;
 import ca.frc6390.athena.sensors.limitswitch.GenericLimitSwitch;
 import edu.wpi.first.math.controller.ProfiledPIDController;
+import edu.wpi.first.math.util.Units;
 import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.units.measure.Voltage;
@@ -65,9 +65,11 @@ public class Elevator extends SubsystemBase{
     controller.reset(getHeightFromFloor());
     feedforward = Constants.Elevator.FEEDFORWARD;
     stateMachine = new StateMachine<Double, ElevatorState>(ElevatorState.HomeReset, controller::atGoal);
+    stateMachine.setAtStateDelay(Units.millisecondsToSeconds(40));
     lowerlimitSwitch.and(() -> !stateMachine.isGoalState(ElevatorState.Intaking)).onTrue(() -> stateMachine.queueState(ElevatorState.Aligning));
     // idle = new RunnableTrigger(() -> lowerlimitSwitch.getAsBoolean() && !stateMachine.isGoalState(ElevatorState.Intaking));
     // idle.onTrue(() -> ;
+    encoder.setPosition(0);
     lowerlimitSwitch.onTrue(new InstantCommand(() -> {encoder.setPosition(0); stop(); reset();}));//.and(()->!stateMachine.atAnyState(ElevatorState.Intaking)).onTrue(() -> {});
   }
 

@@ -13,6 +13,7 @@ import org.photonvision.targeting.TargetCorner;
 import ca.frc6390.athena.controllers.DelayedOutput;
 import ca.frc6390.athena.core.RobotBase;
 import edu.wpi.first.math.controller.PIDController;
+import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 
@@ -36,7 +37,7 @@ public class AutoPickup extends Command {
   public void initialize() 
   {
     camera = new PhotonCamera("CoralCam");
-    end = new DelayedOutput(() -> endCommand(), 0.75);
+    end = new DelayedOutput(() -> endCommand(), Units.millisecondsToSeconds(40));
     hasSet = false;
   }
 

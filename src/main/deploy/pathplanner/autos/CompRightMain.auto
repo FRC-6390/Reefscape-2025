@@ -1,0 +1,250 @@
+{
+  "version": "2025.0",
+  "command": {
+    "type": "sequential",
+    "data": {
+      "commands": [
+        {
+          "type": "path",
+          "data": {
+            "pathName": "RightComp.0"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "TagAlignLeft"
+          }
+        },
+        {
+          "type": "sequential",
+          "data": {
+            "commands": [
+              {
+                "type": "named",
+                "data": {
+                  "name": "WaitForElevator"
+                }
+              },
+              {
+                "type": "named",
+                "data": {
+                  "name": "L4"
+                }
+              },
+              {
+                "type": "named",
+                "data": {
+                  "name": "WaitForElevator"
+                }
+              },
+              {
+                "type": "named",
+                "data": {
+                  "name": "WaitForEffector"
+                }
+              },
+              {
+                "type": "named",
+                "data": {
+                  "name": "StartEject"
+                }
+              },
+              {
+                "type": "named",
+                "data": {
+                  "name": "WaitForEjector"
+                }
+              },
+              {
+                "type": "named",
+                "data": {
+                  "name": "Home"
+                }
+              }
+            ]
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "RightComp.1"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "Intake"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "RightComp.2"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "Intake"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "RightComp.3"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "TagAlignRight"
+          }
+        },
+        {
+          "type": "sequential",
+          "data": {
+            "commands": [
+              {
+                "type": "named",
+                "data": {
+                  "name": "WaitForElevator"
+                }
+              },
+              {
+                "type": "named",
+                "data": {
+                  "name": "L4"
+                }
+              },
+              {
+                "type": "named",
+                "data": {
+                  "name": "WaitForElevator"
+                }
+              },
+              {
+                "type": "named",
+                "data": {
+                  "name": "WaitForEffector"
+                }
+              },
+              {
+                "type": "named",
+                "data": {
+                  "name": "StartEject"
+                }
+              },
+              {
+                "type": "named",
+                "data": {
+                  "name": "WaitForEjector"
+                }
+              },
+              {
+                "type": "named",
+                "data": {
+                  "name": "Home"
+                }
+              }
+            ]
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "RightComp.4"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "Intake"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "RightComp.5"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "Intake"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "RightComp.6"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "RightComp.7"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "TagAlignRight"
+          }
+        },
+        {
+          "type": "sequential",
+          "data": {
+            "commands": [
+              {
+                "type": "named",
+                "data": {
+                  "name": "WaitForElevator"
+                }
+              },
+              {
+                "type": "named",
+                "data": {
+                  "name": "L4"
+                }
+              },
+              {
+                "type": "named",
+                "data": {
+                  "name": "WaitForElevator"
+                }
+              },
+              {
+                "type": "named",
+                "data": {
+                  "name": "WaitForEffector"
+                }
+              },
+              {
+                "type": "named",
+                "data": {
+                  "name": "StartEject"
+                }
+              },
+              {
+                "type": "named",
+                "data": {
+                  "name": "WaitForEjector"
+                }
+              },
+              {
+                "type": "named",
+                "data": {
+                  "name": "Home"
+                }
+              }
+            ]
+          }
+        }
+      ]
+    }
+  },
+  "resetOdom": true,
+  "folder": null,
+  "choreoAuto": true
+}

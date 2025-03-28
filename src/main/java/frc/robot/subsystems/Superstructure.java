@@ -5,6 +5,7 @@
 package frc.robot.subsystems;
 
 import java.util.Arrays;
+import java.util.function.Supplier;
 
 import ca.frc6390.athena.commands.RunnableTrigger;
 import ca.frc6390.athena.controllers.DelayedOutput;
@@ -35,10 +36,10 @@ public class Superstructure extends SubsystemBase {
 
   private final RunnableTrigger autoDropElevatorTrigger;
   private final RunnableTrigger liftIntake;
-  // private final DelayedOutput atL4;
-  // private final DelayedOutput atL3;
-  // private final DelayedOutput atL2;
-  // private final DelayedOutput atL1;
+  private final DelayedOutput atL4;
+  private final DelayedOutput atL3;
+  private final DelayedOutput atL2;
+  private final DelayedOutput atL1;
 
   // private final DelayedOutput atHome;
   // private final DelayedOutput elevatorAtIntake;
@@ -71,7 +72,6 @@ public class Superstructure extends SubsystemBase {
         Align(new SuperstructureTuple(EndEffectorState.Home, ElevatorState.Aligning)),
         Home(new SuperstructureTuple(EndEffectorState.Home, ElevatorState.HomeReset)),
         Stopped(new SuperstructureTuple(EndEffectorState.Stop, null)),
-
         HomePID(new SuperstructureTuple(EndEffectorState.Home, ElevatorState.HomePID)),
 
         Score(new SuperstructureTuple(EndEffectorState.Score, null)),
@@ -109,6 +109,8 @@ public class Superstructure extends SubsystemBase {
 
   public Superstructure(Elevator elevator, EndEffector endEffector) 
   {
+    SmartDashboard.putBoolean("AutoScore RAN", false);
+
     this.endEffector = endEffector;
     this.elevator = elevator;
     this.elevatorStateMachine = elevator.getStateMachine();
@@ -116,13 +118,13 @@ public class Superstructure extends SubsystemBase {
     this.stateMachine = new StateMachine<Superstructure.SuperstructureTuple,Superstructure.SuperstructureState>(SuperstructureState.Home, () -> elevatorStateMachine.atGoalState() && endEffectorStateMachine.atGoalState());
     this.autoDropElevatorTrigger = new RunnableTrigger(() -> autoDropElevator && !endEffector.hasGamePiece() && endEffector.isScoring() && elevatorStateMachine.atState(ElevatorState.L1,ElevatorState.L2,ElevatorState.L3,ElevatorState.L4) && !endEffectorStateMachine.isGoalState(EndEffectorState.ScoreAlgae));
     this.liftIntake = new RunnableTrigger(() -> endEffector.hasGamePiece());  
-    // this.atL4 = new DelayedOutput(() -> endeffectorAtState(EndEffectorState.L4), 0.125);
-    // this.atL3 = new DelayedOutput(() -> endeffectorAtState(EndEffectorState.L3), 0.125);
-    // this.atL2 = new DelayedOutput(() -> endeffectorAtState(EndEffectorState.L2), 0.125);
-    // this.atL1 = new DelayedOutput(() -> endeffectorAtState(EndEffectorState.L1), 0.125);
+    this.atL4 = new DelayedOutput(() -> endeffectorAtState(EndEffectorState.L4) && elevatorStateMachine.atState(ElevatorState.L4));
+    this.atL3 = new DelayedOutput(() -> endeffectorAtState(EndEffectorState.L3) && elevatorStateMachine.atState(ElevatorState.L3));
+    this.atL2 = new DelayedOutput(() -> endeffectorAtState(EndEffectorState.L2) && elevatorStateMachine.atState(ElevatorState.L2));
+    this.atL1 = new DelayedOutput(() -> endeffectorAtState(EndEffectorState.L1) && elevatorStateMachine.atState(ElevatorState.L1));
 
-    // this.atHome = new DelayedOutput(() -> endEffectorStateMachine.atState(EndEffectorState.Home), 0.125);
-    // this.elevatorAtIntake = new DelayedOutput(() -> elevatorStateMachine.atState(ElevatorState.Intaking), 0.125);
+    // this.atHome = new DelayedOutput(() -> endEffectorStateMachine.atState(EndEffectorState.Home), Units.millisecondsToSeconds(40));
+    // this.elevatorAtIntake = new DelayedOutput(() -> elevatorStateMachine.atState(ElevatorState.Intaking), Units.millisecondsToSeconds(40));
 
     autoDropElevatorTrigger.onTrue(() -> {setSuper(SuperstructureState.HomePID);});  
     liftIntake.onTrue(setState(SuperstructureState.Align));
@@ -130,23 +132,32 @@ public class Superstructure extends SubsystemBase {
     prevState = SuperstructureState.Home;
   }
 
-  // public boolean l4Ready()
-  // {
-  //  return atL4.getAsBoolean();
-  // }
+  public StateMachine<SuperstructureTuple, SuperstructureState> getStateMachine() {
+      return stateMachine;
+  }
 
-  // public boolean l3Ready()
-  // {
-  //  return atL3.getAsBoolean();
-  // }
-  // public boolean l2Ready()
-  // {
-  //  return atL2.getAsBoolean();
-  // }
-  // public boolean l1Ready()
-  // {
-  //  return atL1.getAsBoolean();
-  // }
+  public boolean l4Ready()
+  {
+   return atL4.getAsBoolean();
+  }
+
+  public boolean l3Ready()
+  {
+    return atL3.getAsBoolean();
+  }
+  public boolean l2Ready()
+  {
+    return atL2.getAsBoolean();
+  }
+  public boolean l1Ready()
+  {
+    return atL1.getAsBoolean();
+  }
+  
+  public boolean hasPiece()
+  {
+    return endEffector.hasGamePiece();
+  }
 
   public Superstructure setAutoDropElevator(boolean autoDropElevator) {
       this.autoDropElevator = autoDropElevator;
@@ -167,9 +178,10 @@ public class Superstructure extends SubsystemBase {
     // return new WaitUntilCommand(() -> atL4.getAsBoolean());
   }
 
-  public void autoScore(SuperstructureState level){
+  public void autoScore(Supplier<SuperstructureState> level){
+    SmartDashboard.putBoolean("AutoScore RAN", true);
     if(!stateMachine.isGoalState(SuperstructureState.Score)){
-      stateMachine.queueState(level);
+      stateMachine.queueState(level.get());
       stateMachine.queueState(SuperstructureState.Score, () ->  !drop() && endEffectorStateMachine.atState(EndEffectorState.L1,EndEffectorState.L2,EndEffectorState.L3,EndEffectorState.L4));
       stateMachine.queueState(SuperstructureState.HomePID, () ->  drop());
     }
@@ -218,26 +230,27 @@ public class Superstructure extends SubsystemBase {
         {
         if((prevState.equalsElevatorState(ElevatorState.L4,ElevatorState.L3,ElevatorState.L2,ElevatorState.L1)))
         {
-          endEffectorStateMachine.queueState(EndEffectorState.Home);
-          elevatorStateMachine.queueState(prevState.getElevatorState(), () -> endEffectorStateMachine.atState(EndEffectorState.Home));  
-          if(state.equals(ElevatorState.L4))
-          {
-            endEffectorStateMachine.queueState(EndEffectorState.L4, () -> endEffectorStateMachine.atState(EndEffectorState.Home));
-          }
-          if(state.equals(ElevatorState.L3))
-          {
-            endEffectorStateMachine.queueState(EndEffectorState.L3, () -> endEffectorStateMachine.atState(EndEffectorState.Home));
-          }
-          if(state.equals(ElevatorState.L2))
-          {
-            endEffectorStateMachine.queueState(EndEffectorState.L2, () -> endEffectorStateMachine.atState(EndEffectorState.Home));
-          }
-          if(state.equals(ElevatorState.L1))
-          {
-            endEffectorStateMachine.queueState(EndEffectorState.L1, () -> endEffectorStateMachine.atState(EndEffectorState.Home));
-          }
+          
+          // if(state.equals(ElevatorState.L4))
+          // {
+          //   endEffectorStateMachine.queueState(EndEffectorState.L4);
+          // }
+          // if(state.equals(ElevatorState.L3))
+          // {
+          //   endEffectorStateMachine.queueState(EndEffectorState.L3);
+          // }
+          // if(state.equals(ElevatorState.L2))
+          // {
+          //   endEffectorStateMachine.queueState(EndEffectorState.L2);
+          // }
+          // if(state.equals(ElevatorState.L1))
+          // {
+          //   endEffectorStateMachine.queueState(EndEffectorState.L1);
+          // }
           if(state.equals(ElevatorState.Intaking))
           {
+            elevatorStateMachine.queueState(prevState.getElevatorState(), () -> endEffectorStateMachine.atState(EndEffectorState.Home));  
+            endEffectorStateMachine.queueState(EndEffectorState.Home);
             endEffectorStateMachine.queueState(EndEffectorState.Intaking, () -> endEffectorStateMachine.atState(EndEffectorState.Home) && elevatorStateMachine.atState(ElevatorState.Intaking));
           }
         }
@@ -254,7 +267,7 @@ public class Superstructure extends SubsystemBase {
     if(endEffectorEnabled){
       switch (state) {
 
-        case L1, L2, L3, L4, AlgaeScore, AlgaeHigh, AlgaeLow:
+        case L1, L2, L3, AlgaeScore, AlgaeHigh, AlgaeLow:
           // if(!elevatorStateMachine.atGoalState())
           // {
           if(!prevState.equalsEndEffectorState(EndEffectorState.AlgaeScore))
@@ -269,17 +282,19 @@ public class Superstructure extends SubsystemBase {
           
           // }
           break;
-        case Home:
-          if(prevState.equals(SuperstructureState.Intaking))
-          {
-          endEffectorStateMachine.queueState(EndEffectorState.Transition);
-          endEffectorStateMachine.queueState(EndEffectorState.Home, () -> endEffector.getJoint1().getStateMachine().atState(ArmState.TransitionState) && endEffector.getJoint2().getStateMachine().atState(WristState.TransitionState));
-          }
-          else
-          {
-          endEffectorStateMachine.queueState(state);
-          }
-          break;
+          case Score:
+            endEffectorStateMachine.queueState(state, () -> elevatorStateMachine.atGoalState());
+        // case Home:
+        //   if(prevState.equals(SuperstructureState.Intaking))
+        //   {
+        //   endEffectorStateMachine.queueState(EndEffectorState.Transition);
+        //   endEffectorStateMachine.queueState(EndEffectorState.Home, () -> endEffector.getJoint1().getStateMachine().atState(ArmState.TransitionState) && endEffector.getJoint2().getStateMachine().atState(WristState.TransitionState));
+        //   }
+        //   else
+        //   {
+        //   endEffectorStateMachine.queueState(state);
+        //   }
+        //   break;
         default:
         endEffectorStateMachine.queueState(state);
           return;
@@ -287,10 +302,10 @@ public class Superstructure extends SubsystemBase {
     }
   }
 
-  // public boolean endeffectorAtState(EndEffectorState state)
-  // {
-  //   return endEffectorStateMachine.atState(state);
-  // }
+  public boolean endeffectorAtState(EndEffectorState state)
+  {
+    return endEffectorStateMachine.atState(state);
+  }
 
   public void update(){
     elevatorStateMachine.update();

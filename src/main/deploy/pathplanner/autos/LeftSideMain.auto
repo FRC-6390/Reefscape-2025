@@ -1,0 +1,179 @@
+{
+  "version": "2025.0",
+  "command": {
+    "type": "sequential",
+    "data": {
+      "commands": [
+        {
+          "type": "parallel",
+          "data": {
+            "commands": [
+              {
+                "type": "path",
+                "data": {
+                  "pathName": "LeftSideMain.0"
+                }
+              },
+              {
+                "type": "named",
+                "data": {
+                  "name": "BasicAlignRight"
+                }
+              }
+            ]
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "TagAlignRight"
+          }
+        },
+        {
+          "type": "sequential",
+          "data": {
+            "commands": [
+              {
+                "type": "named",
+                "data": {
+                  "name": "WaitForElevator"
+                }
+              },
+              {
+                "type": "named",
+                "data": {
+                  "name": "L4"
+                }
+              },
+              {
+                "type": "named",
+                "data": {
+                  "name": "WaitForElevator"
+                }
+              },
+              {
+                "type": "named",
+                "data": {
+                  "name": "WaitForEffector"
+                }
+              },
+              {
+                "type": "named",
+                "data": {
+                  "name": "StartEject"
+                }
+              },
+              {
+                "type": "named",
+                "data": {
+                  "name": "WaitForEjector"
+                }
+              },
+              {
+                "type": "named",
+                "data": {
+                  "name": "Home"
+                }
+              }
+            ]
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "LeftSideMain.1"
+          }
+        },
+        {
+          "type": "parallel",
+          "data": {
+            "commands": [
+              {
+                "type": "path",
+                "data": {
+                  "pathName": "LeftSideMain.2"
+                }
+              },
+              {
+                "type": "named",
+                "data": {
+                  "name": "BasicAlignLeft"
+                }
+              }
+            ]
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "TagAlignLeft"
+          }
+        },
+        {
+          "type": "sequential",
+          "data": {
+            "commands": [
+              {
+                "type": "named",
+                "data": {
+                  "name": "WaitForElevator"
+                }
+              },
+              {
+                "type": "named",
+                "data": {
+                  "name": "L4"
+                }
+              },
+              {
+                "type": "named",
+                "data": {
+                  "name": "WaitForElevator"
+                }
+              },
+              {
+                "type": "named",
+                "data": {
+                  "name": "WaitForEffector"
+                }
+              },
+              {
+                "type": "named",
+                "data": {
+                  "name": "StartEject"
+                }
+              },
+              {
+                "type": "named",
+                "data": {
+                  "name": "WaitForEjector"
+                }
+              },
+              {
+                "type": "named",
+                "data": {
+                  "name": "Home"
+                }
+              }
+            ]
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "LeftSideMain.3"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "LeftSideMain.4"
+          }
+        }
+      ]
+    }
+  },
+  "resetOdom": true,
+  "folder": null,
+  "choreoAuto": true
+}

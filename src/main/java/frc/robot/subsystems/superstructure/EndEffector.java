@@ -6,6 +6,7 @@ import ca.frc6390.athena.mechanisms.StatefulMechanism;
 import ca.frc6390.athena.mechanisms.StateMachine;
 import ca.frc6390.athena.mechanisms.StateMachine.SetpointProvider;
 import ca.frc6390.athena.sensors.limitswitch.GenericLimitSwitch;
+import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
@@ -79,10 +80,10 @@ public class EndEffector extends SubsystemBase{
         this.prevState = EndEffectorState.Home;
 
         proximitySensor = new GenericLimitSwitch(4, true);
-        hasGamePiece = new DelayedOutput(() -> proximitySensor.getAsBoolean(), 0.25);
+        hasGamePiece = new DelayedOutput(() -> proximitySensor.getAsBoolean(), Units.millisecondsToSeconds(40));
 
-        this.stateMachine = new StateMachine<EndEffectorTuple,EndEffectorState>(EndEffectorState.Home, () -> joint1.getStateMachine().atGoalState()&& joint2.getStateMachine().atGoalState());
-        stateMachine.setAtStateDelay(0.125);
+        this.stateMachine = new StateMachine<EndEffectorTuple,EndEffectorState>(EndEffectorState.Home, () -> joint1.getStateMachine().atGoalState() && joint2.getStateMachine().atGoalState());
+        stateMachine.setAtStateDelay(Units.millisecondsToSeconds(40));
     }
 
     public StateMachine<EndEffectorTuple, EndEffectorState> getStateMachine() {
