@@ -93,8 +93,8 @@ public interface Constants {
 
             Aligning(33),
 
-            AlgaeHigh(47.9),
-            AlgaeLow(34.463),
+            AlgaeHigh(46.77),
+            AlgaeLow(32.545),
             //31.5
             L2(35.5),
             //47.25
@@ -149,8 +149,8 @@ public interface Constants {
 
         enum ArmState implements SetpointProvider<Double>{
             Intaking(0), //150.38085937
-            AlgaeHigh(-72.5), //52.8
-            AlgaeLow(-72.5), //52.8
+            AlgaeHigh(-112.14), //52.8
+            AlgaeLow(-113.5), //52.8
             Home(-92), //61.083
             StartConfiguration(-153), //0
             Scoring(-72), //78.310546875
@@ -175,8 +175,8 @@ public interface Constants {
                 Intaking(40),
                 Home(120d), //110
                 Scoring(120d), //125.419921875
-                AlgaeHigh(2.933),
-                AlgaeLow(2.933),
+                AlgaeHigh(-36.123),
+                AlgaeLow(-35.595),
                 ScoringL4(60), //80
                 TransitionState(62),
                 AlgaeScore(168.92),
@@ -223,8 +223,8 @@ public interface Constants {
         .setEncoder(EncoderType.CTRECANcoder, 32)
         .setNeutralMode(MotorNeutralMode.Brake)
         .setEncoderGearRatio(1d/1d)
-        // .setEncoderOffset(0.380126953125)
         .setEncoderOffset(0.7705078125)
+        // .setEncoderOffset(0.76416015625)
         .setUseEncoderAbsolute(true)
         .setEncoderConversion(360)
         .setCanbus(CANIVORE_CANBUS)
@@ -239,7 +239,7 @@ public interface Constants {
         .setEncoder(EncoderType.CTRECANcoder, 35)
         .setNeutralMode(MotorNeutralMode.Brake)
         .setEncoderOffset(0.2587890625)
-        // .setEncoderOffset(0.0)
+        // .setEncoderOffset(0.20849609375)
         .setEncoderGearRatio(1d/1d)
         .setTolerance(5)
         .setUseEncoderAbsolute(true)

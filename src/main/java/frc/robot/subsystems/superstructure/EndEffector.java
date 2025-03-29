@@ -51,8 +51,8 @@ public class EndEffector extends SubsystemBase{
 
         Reverse(new EndEffectorTuple(RollerState.Reverse,RollerState.Reverse, null, null)),
         Intaking(new EndEffectorTuple(RollerState.Running, RollerState.Slow, ArmState.Intaking, WristState.Intaking)),
-        AlgaeHigh(new EndEffectorTuple(RollerState.Stopped, RollerState.ReverseAlgae, ArmState.AlgaeHigh, WristState.AlgaeHigh)),
-        AlgaeLow(new EndEffectorTuple(RollerState.Stopped, RollerState.ReverseAlgae, ArmState.AlgaeLow, WristState.AlgaeLow)),
+        AlgaeHigh(new EndEffectorTuple(RollerState.Stopped, RollerState.Reverse, ArmState.AlgaeHigh, WristState.AlgaeHigh)),
+        AlgaeLow(new EndEffectorTuple(RollerState.Stopped, RollerState.Reverse, ArmState.AlgaeLow, WristState.AlgaeLow)),
         
         Transition(new EndEffectorTuple(RollerState.Stopped,RollerState.Stopped, ArmState.TransitionState, WristState.TransitionState));
 

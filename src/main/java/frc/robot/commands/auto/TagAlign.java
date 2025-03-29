@@ -277,7 +277,7 @@ import frc.robot.utils.ReefScoringPos.ReefPole;
    public MedianFilter filter;
    public double thetaMeasurement;
    public ProfiledPIDController xController = new ProfiledPIDController(1, 0, 0, new Constraints(1, 1));
-   public ProfiledPIDController yController =  new ProfiledPIDController(4, 0, 0, new Constraints(2, 2));
+   public ProfiledPIDController yController =  new ProfiledPIDController(3.85, 0, 0, new Constraints(2, 1.5));
    public PIDController rController = new PIDController(0.025, 0, 0);
    public DelayedOutput endCommand;
    public Superstructure superstructure;
@@ -346,13 +346,13 @@ import frc.robot.utils.ReefScoringPos.ReefPole;
  
      if(ll.getPoseEstimate(PoseEstimateWithLatencyType.BOT_POSE_MT2_BLUE).getRaw()[9] > 1)
      {
-       xController.setP(1.5);
+       xController.setP(1);
      }
      else
      {
       if(DriverStation.isTeleop() || DriverStation.isTeleopEnabled())
       {
-       xController.setP(0.75);
+       xController.setP(0.5);
       }
       else if(DriverStation.isAutonomous() || DriverStation.isAutonomousEnabled())
       {
@@ -367,14 +367,15 @@ import frc.robot.utils.ReefScoringPos.ReefPole;
      if(!ll.hasValidTarget())
      {
         SmartDashboard.putBoolean("ALGIN TAKEN",false);
-        robotSpeeds.stopSpeeds("feedback");
+        // robotSpeeds.stopSpeeds("feedback");
+        robotSpeeds.setSpeeds("feedback",-0.25, 0, 0);
         return;
      }
 
      double offset = 0;
      if(DriverStation.isTeleop() || DriverStation.isTeleopEnabled())
      {
-      offset = 11;
+      offset = 12.5;
      }
      else if(DriverStation.isAutonomous() || DriverStation.isAutonomousEnabled())
      {
@@ -389,9 +390,9 @@ import frc.robot.utils.ReefScoringPos.ReefPole;
          SmartDashboard.putBoolean("ALGIN TAKEN",true);
          robotSpeeds.setSpeeds("feedback",Xspeed, YSpeed, -rSpeed);
        }
-       else if(noTag.getAsBoolean() && DriverStation.isTeleop()){
-        robotSpeeds.setSpeeds("feedback",0, -0.1, 0);
-       }
+      //  else if(noTag.getAsBoolean() && DriverStation.isTeleop()){
+      //   robotSpeeds.setSpeeds("feedback",0, -0.1, 0);
+      //  }
        else
        {
          SmartDashboard.putBoolean("ALGIN TAKEN",false);

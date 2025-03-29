@@ -267,7 +267,7 @@ public class Superstructure extends SubsystemBase {
     if(endEffectorEnabled){
       switch (state) {
 
-        case L1, L2, L3, AlgaeScore, AlgaeHigh, AlgaeLow:
+        case L1, L2, L3, L4, AlgaeScore, AlgaeHigh, AlgaeLow:
           // if(!elevatorStateMachine.atGoalState())
           // {
           if(!prevState.equalsEndEffectorState(EndEffectorState.AlgaeScore))
@@ -283,7 +283,7 @@ public class Superstructure extends SubsystemBase {
           // }
           break;
           case Score:
-            endEffectorStateMachine.queueState(state, () -> elevatorStateMachine.atGoalState());
+            endEffectorStateMachine.queueState(state, () -> elevatorStateMachine.atGoalState() && endEffectorStateMachine.atGoalState());
         // case Home:
         //   if(prevState.equals(SuperstructureState.Intaking))
         //   {

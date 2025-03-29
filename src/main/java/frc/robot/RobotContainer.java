@@ -17,6 +17,7 @@ import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
+import edu.wpi.first.wpilibj2.command.InstantCommand;
 import frc.robot.Autos.AUTOS;
 import frc.robot.Constants.EndEffector.ArmState;
 import frc.robot.Constants.EndEffector.WristState;
@@ -42,7 +43,7 @@ public class RobotContainer {
   public final EndEffector endEffector = new EndEffector(arm, wrist, rollers, algaeRollers).setAutoEndScoring(true);
   public Superstructure superstructure = new Superstructure(elevator, endEffector);
   public CANdleSubsystem candle = new CANdleSubsystem(robotBase);
-  public static SuperstructureState selectedState = SuperstructureState.Home;
+  public static SuperstructureState selectedState = SuperstructureState.L4;
 
   private final EnhancedXboxController driverController = new EnhancedXboxController(0)
                                                               .setLeftInverted(true)
@@ -94,6 +95,9 @@ public class RobotContainer {
     NamedCommands.registerCommand("BasicAlignRightK", Commands.sequence(superstructure.setState(SuperstructureState.Align),new BasicAlign(robotBase, "limelight-right", ReefPole.K)));
     NamedCommands.registerCommand("BasicAlignLeftA", Commands.sequence(superstructure.setState(SuperstructureState.Align),new BasicAlign(robotBase, "limelight-left", ReefPole.A)));
     NamedCommands.registerCommand("BasicAlignRightA", Commands.sequence(superstructure.setState(SuperstructureState.Align),new BasicAlign(robotBase, "limelight-right", ReefPole.A)));
+    NamedCommands.registerCommand("DisableLocal", new  InstantCommand(() ->{robotBase.getVision().getLimelight("limelight-left").setUseForLocalization(false); robotBase.getVision().getLimelight("limelight-right").setUseForLocalization(false);}));
+    NamedCommands.registerCommand("EnableLocal", new InstantCommand(() ->{robotBase.getVision().getLimelight("limelight-left").setUseForLocalization(true); robotBase.getVision().getLimelight("limelight-right").setUseForLocalization(true);}));
+
 
     chooser = Autos.AUTOS.createChooser(AUTOS.RIGHTSIDE);
     SmartDashboard.putData(chooser);
@@ -118,10 +122,12 @@ public class RobotContainer {
         () -> !isIntaking()));
     driverController.rightBumper.onTrue(superstructure.setState(SuperstructureState.Score));
 
-    driverController.leftTrigger.tiggerAt(0.5).whileTrue(superstructure.setState(SuperstructureState.AlgaeLow)).onFalse(superstructure.setState(SuperstructureState.Home));
-    driverController.rightTrigger.tiggerAt(0.5).whileTrue(superstructure.setState(SuperstructureState.AlgaeHigh)).onFalse(superstructure.setState(SuperstructureState.Home));
-    driverController.pov.right.whileTrue(Commands.sequence(superstructure.setState(SuperstructureState.Align),new TagAlign(robotBase, "limelight-left", superstructure, () -> selectedState))).onFalse(superstructure.setState(SuperstructureState.HomePID));
-    driverController.pov.left.whileTrue(Commands.sequence(superstructure.setState(SuperstructureState.Align),new TagAlign(robotBase, "limelight-right", superstructure, () -> selectedState))).onFalse(superstructure.setState(SuperstructureState.HomePID));
+    // driverController.leftTrigger.tiggerAt(0.5).whileTrue(superstructure.setState(SuperstructureState.AlgaeLow)).onFalse(superstructure.setState(SuperstructureState.Home));
+    // driverController.rightTrigger.tiggerAt(0.5).whileTrue(superstructure.setState(SuperstructureState.AlgaeHigh)).onFalse(superstructure.setState(SuperstructureState.Home));
+    // driverController.pov.right.whileTrue(Commands.sequence(superstructure.setState(SuperstructureState.Align),new TagAlign(robotBase, "limelight-left", superstructure, () -> selectedState))).onFalse(superstructure.setState(SuperstructureState.HomePID));
+    driverController.leftTrigger.tiggerAt(0.5).whileTrue(Commands.sequence(superstructure.setState(SuperstructureState.Align),new TagAlign(robotBase, "limelight-right", superstructure, () -> selectedState))).onFalse(superstructure.setState(SuperstructureState.HomePID));
+    driverController.rightTrigger.tiggerAt(0.5).whileTrue(Commands.sequence(superstructure.setState(SuperstructureState.Align),new TagAlign(robotBase, "limelight-left", superstructure, () -> selectedState))).onFalse(superstructure.setState(SuperstructureState.HomePID));
+
     driverController.pov.down.onTrue(superstructure.setState(SuperstructureState.HomePID)).after(1).onTrue(superstructure.setState(SuperstructureState.Home));
 
     driverController.a.onTrue(() -> selectedState = SuperstructureState.L1);//after(0.5).onTrue(() -> selectedState = SuperstructureState.Score);
@@ -136,8 +142,10 @@ public class RobotContainer {
     driverController2.x.onTrue(superstructure.setState(SuperstructureState.L3)).after(0.75).onTrue(superstructure.setState(SuperstructureState.Score));
     driverController2.y.onTrue(superstructure.setState(SuperstructureState.L4)).after(0.75).onTrue(superstructure.setState(SuperstructureState.Score));
   
-    driverController2.rightTrigger.tiggerAt(0.5).whileTrue(superstructure.setState(SuperstructureState.AlgaeSpit)).after(1).onTrue(superstructure.setState(SuperstructureState.ScoreAlgae));
-
+    driverController2.leftTrigger.tiggerAt(0.5).whileTrue(superstructure.setState(SuperstructureState.AlgaeLow)).onFalse(superstructure.setState(SuperstructureState.Home));
+    driverController2.rightTrigger.tiggerAt(0.5).whileTrue(superstructure.setState(SuperstructureState.AlgaeHigh)).onFalse(superstructure.setState(SuperstructureState.Home));
+    
+    driverController2.start.whileTrue(superstructure.setState(SuperstructureState.AlgaeSpit)).after(1).onTrue(superstructure.setState(SuperstructureState.ScoreAlgae));
     driverController2.pov.up.onTrue(() -> elevator.nudge(1)).after(1).onTrue(() -> elevator.resetNudge());
     driverController2.pov.down.onTrue(() -> elevator.nudge(-1)).after(1).onTrue(() -> elevator.resetNudge());
     driverController2.pov.right.onTrue(() -> arm.setNudge(arm.getNudge() + 5)).after(1).onTrue(() -> arm.setNudge(0));
