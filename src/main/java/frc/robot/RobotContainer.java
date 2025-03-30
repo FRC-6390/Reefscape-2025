@@ -95,8 +95,22 @@ public class RobotContainer {
     NamedCommands.registerCommand("BasicAlignRightK", Commands.sequence(superstructure.setState(SuperstructureState.Align),new BasicAlign(robotBase, "limelight-right", ReefPole.K)));
     NamedCommands.registerCommand("BasicAlignLeftA", Commands.sequence(superstructure.setState(SuperstructureState.Align),new BasicAlign(robotBase, "limelight-left", ReefPole.A)));
     NamedCommands.registerCommand("BasicAlignRightA", Commands.sequence(superstructure.setState(SuperstructureState.Align),new BasicAlign(robotBase, "limelight-right", ReefPole.A)));
-    NamedCommands.registerCommand("DisableLocal", new  InstantCommand(() ->{robotBase.getVision().getLimelight("limelight-left").setUseForLocalization(false); robotBase.getVision().getLimelight("limelight-right").setUseForLocalization(false);}));
-    NamedCommands.registerCommand("EnableLocal", new InstantCommand(() ->{robotBase.getVision().getLimelight("limelight-left").setUseForLocalization(true); robotBase.getVision().getLimelight("limelight-right").setUseForLocalization(true);}));
+    NamedCommands.registerCommand("DisableLocal", 
+    new  InstantCommand(() ->
+    {
+      robotBase.getVision().getLimelight("limelight-left").setUseForLocalization(false);
+      robotBase.getVision().getLimelight("limelight-right").setUseForLocalization(false);
+      robotBase.getVision().getPhotonVision("Tag").setUseForLocalization(false); 
+      robotBase.getVision().getPhotonVision("TagFront").setUseForLocalization(false);
+    }));
+    NamedCommands.registerCommand("EnableLocal", 
+    new InstantCommand(() ->
+    {
+      robotBase.getVision().getLimelight("limelight-left").setUseForLocalization(true); 
+      robotBase.getVision().getLimelight("limelight-right").setUseForLocalization(true);
+      robotBase.getVision().getPhotonVision("Tag").setUseForLocalization(true); 
+      robotBase.getVision().getPhotonVision("TagFront").setUseForLocalization(true);
+    }));
 
 
     chooser = Autos.AUTOS.createChooser(AUTOS.RIGHTSIDE);

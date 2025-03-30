@@ -5,15 +5,15 @@
     "data": {
       "commands": [
         {
-          "type": "path",
-          "data": {
-            "pathName": "LeftComp.0"
-          }
-        },
-        {
           "type": "named",
           "data": {
             "name": "L3"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "LeftComp.0"
           }
         },
         {

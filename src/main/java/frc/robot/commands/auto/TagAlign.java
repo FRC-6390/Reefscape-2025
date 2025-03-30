@@ -352,7 +352,7 @@ import frc.robot.utils.ReefScoringPos.ReefPole;
      {
       if(DriverStation.isTeleop() || DriverStation.isTeleopEnabled())
       {
-       xController.setP(0.5);
+       xController.setP(1);
       }
       else if(DriverStation.isAutonomous() || DriverStation.isAutonomousEnabled())
       {
@@ -375,7 +375,7 @@ import frc.robot.utils.ReefScoringPos.ReefPole;
      double offset = 0;
      if(DriverStation.isTeleop() || DriverStation.isTeleopEnabled())
      {
-      offset = 12.5;
+      offset = 14;
      }
      else if(DriverStation.isAutonomous() || DriverStation.isAutonomousEnabled())
      {
