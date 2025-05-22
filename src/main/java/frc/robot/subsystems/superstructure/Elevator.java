@@ -13,6 +13,7 @@ import com.ctre.phoenix6.signals.NeutralModeValue;
 import ca.frc6390.athena.controllers.ElevatorFeedForwardsSendable;
 import ca.frc6390.athena.mechanisms.StateMachine;
 import ca.frc6390.athena.sensors.limitswitch.GenericLimitSwitch;
+import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.controller.ProfiledPIDController;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.units.measure.Angle;
@@ -119,10 +120,10 @@ public class Elevator extends SubsystemBase{
       speed = 0;
     }
 
-    // if(speed < 0)
-    // {
-    //   double sped = MathUtil.clamp(speed, -1, 1);
-    // }
+    if(speed < 0)
+    {
+      double sped = MathUtil.clamp(speed, -1, 1);
+    }
     // negative is up, this makes negative down
    
     leftMotor.set(speed);

@@ -6,7 +6,11 @@ package frc.robot;
 
 import ca.frc6390.athena.sensors.camera.limelight.LimeLight;
 import ca.frc6390.athena.sensors.camera.limelight.LimeLight.PoseEstimateWithLatencyType;
+import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Transform2d;
+import edu.wpi.first.math.geometry.Translation2d;
+import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.PowerDistribution;
 import edu.wpi.first.wpilibj.TimedRobot;
@@ -16,27 +20,35 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import frc.robot.subsystems.Superstructure.SuperstructureState;
+import frc.robot.utils.ReefScoringPos.ReefPole;
 
 public class Robot extends TimedRobot {
   private Command m_autonomousCommand;
   private final RobotContainer m_robotContainer;
   PowerDistribution pdh;
-  public LimeLight lleft;
-  public LimeLight llright;
   public Robot() {  
     m_robotContainer = new RobotContainer();
-     lleft = m_robotContainer.robotBase.getVision().getLimelight("limelight-left");
-     llright = m_robotContainer.robotBase.getVision().getLimelight("limelight-right");
-
     pdh = new PowerDistribution(14, ModuleType.kRev);
     m_robotContainer.robotBase.registerPIDCycles(this);
   }
 
+
+   
+   
+
+
   @Override
   public void robotPeriodic() {
-    SmartDashboard.putNumber("LeftToTag", lleft.getPoseEstimate(PoseEstimateWithLatencyType.BOT_POSE_MT2_BLUE).getRaw()[9]);
-    SmartDashboard.putNumber("RightToTag", llright.getPoseEstimate(PoseEstimateWithLatencyType.BOT_POSE_MT2_BLUE).getRaw()[9]);
-    SmartDashboard.putString("EmptyLabel", " ");
+
+    
+    SmartDashboard.putNumber("X Field", Units.metersToInches( m_robotContainer.robotBase.getLocalization().getFieldPose().getX()));
+    SmartDashboard.putNumber("Y Field",  Units.metersToInches( m_robotContainer.robotBase.getLocalization().getFieldPose().getY()));
+    SmartDashboard.putNumber("Rot Field ", m_robotContainer.robotBase.getLocalization().getFieldPose().getRotation().getDegrees());
+
+    // SmartDashboard.putNumber("W/O TRANSPose X",Units.metersToInches( noTransform.getX()));
+    // SmartDashboard.putNumber("W/O TRANSPose Y", Units.metersToInches(noTransform.getY()));
+    // SmartDashboard.putNumber("W/O TRANSRotation", noTransform.getRotation().getDegrees());
+    // SmartDashboard.putNumber("Tag Rot",    ReefPole.getPoleFromID(m_robotContainer.robotBase.getVision().getLimelight("limelight-left").getAprilTagID(), m_robotContainer.robotBase.getVision().getLimelight("limelight-left")).getPose2d().getRotation().getDegrees());
 
     CommandScheduler.getInstance().run();
   }
@@ -47,7 +59,6 @@ public class Robot extends TimedRobot {
     pdh.clearStickyFaults();
     m_robotContainer.elevator.reset();
     m_robotContainer.robotBase.resetPIDs();
-
   }
 
   @Override
@@ -89,8 +100,7 @@ public class Robot extends TimedRobot {
   public void teleopInit() {
     m_robotContainer.elevator.reset();
     m_robotContainer.robotBase.resetPIDs();
-
-
+m_robotContainer.robotBase.getLocalization().resetFieldPose(0, 0, 0);
     m_robotContainer.robotBase.getDrivetrain().getRobotSpeeds().stopSpeeds("auto");
     if (m_autonomousCommand != null) {
       m_autonomousCommand.cancel();
@@ -98,7 +108,10 @@ public class Robot extends TimedRobot {
   }
 
   @Override
-  public void teleopPeriodic() {}
+  public void teleopPeriodic() 
+  {
+    
+  }
 
   @Override
   public void teleopExit() {}
