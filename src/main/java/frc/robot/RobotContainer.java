@@ -13,6 +13,8 @@ import ca.frc6390.athena.core.RobotSendableSystem.SendableLevel;
 import ca.frc6390.athena.drivetrains.swerve.SwerveDrivetrain;
 import ca.frc6390.athena.mechanisms.ArmMechanism.StatefulArmMechanism;
 import ca.frc6390.athena.mechanisms.StatefulMechanism;
+import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
@@ -47,7 +49,9 @@ public class RobotContainer {
   public Superstructure superstructure = new Superstructure(elevator, endEffector);
   public CANdleSubsystem candle = new CANdleSubsystem(robotBase);
   public static SuperstructureState selectedState = SuperstructureState.L4;
-  public Command align = new V2(robotBase, "limelight-left");
+  public Command alignRight = new V2(robotBase, "limelight-left", true);
+  public Command alginLeft = new V2(robotBase, "limelight-right", false);
+
   private final EnhancedXboxController driverController = new EnhancedXboxController(0)
                                                               .setLeftInverted(true)
                                                               .setRightInverted(true)
@@ -75,6 +79,8 @@ public class RobotContainer {
     // elevator.setDefaultCommand(elevate);
     
     NamedCommands.registerCommand("Home", superstructure.setState(SuperstructureState.HomePID));
+    NamedCommands.registerCommand("St", new InstantCommand(() -> robotBase.getLocalization().resetRelativePose(new Pose2d(0,0, Rotation2d.fromDegrees(180)))));
+
     NamedCommands.registerCommand("Intake", Commands.either(superstructure.setState(SuperstructureState.Intaking), Commands.none(), () -> !endEffector.hasGamePiece()));
 
     NamedCommands.registerCommand("L4", superstructure.setState(SuperstructureState.L4));
@@ -133,7 +139,7 @@ public class RobotContainer {
     //----------------------------------------------------------DRIVER 1---------------------------------------------------------------//
 
     //RESET ODOMETRY
-    driverController.start.onTrue(() -> robotBase.getDrivetrain().getIMU().setYaw(0)).after(2).onTrue(() -> robotBase.getLocalization().resetFieldPose(0,0, 0));
+    driverController.start.onTrue(() -> robotBase.getDrivetrain().getIMU().setYaw(0)).after(2).onTrue(() -> {robotBase.getLocalization().resetFieldPose(0,0, 0); robotBase.getLocalization().resetRelativePose(0,0, 0);});
 
     driverController.leftBumper.onTrue(
       Commands.either(
@@ -172,7 +178,9 @@ public class RobotContainer {
     driverController2.pov.left.onTrue(() -> arm.setNudge(arm.getNudge() - 5)).after(1).onTrue(() -> arm.setNudge(0));
     driverController2.rightBumper.onTrue(() -> wrist.setNudge(wrist.getNudge() + 5)).after(1).onTrue(() -> wrist.setNudge(0));
     driverController2.leftBumper.onTrue(() -> wrist.setNudge(wrist.getNudge() - 5)).after(1).onTrue(() -> wrist.setNudge(0));
-    driverController.rightTrigger.tiggerAt(0.5).onTrue(()-> CommandScheduler.getInstance().schedule(align)).onFalse(() -> {CommandScheduler.getInstance().cancel(align);});
+    driverController.rightTrigger.tiggerAt(0.5).onTrue(()-> CommandScheduler.getInstance().schedule(alignRight)).onFalse(() -> {CommandScheduler.getInstance().cancel(alignRight);});
+    driverController.leftTrigger.tiggerAt(0.5).onTrue(()-> CommandScheduler.getInstance().schedule(alginLeft)).onFalse(() -> {CommandScheduler.getInstance().cancel(alginLeft);});
+
   }
 
   public Command getAutonomousCommand() 

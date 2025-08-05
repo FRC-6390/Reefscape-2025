@@ -5,6 +5,12 @@
     "data": {
       "commands": [
         {
+          "type": "named",
+          "data": {
+            "name": "St"
+          }
+        },
+        {
           "type": "path",
           "data": {
             "pathName": "BaseLineLeft.0"

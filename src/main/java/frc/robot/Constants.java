@@ -57,7 +57,7 @@ public interface Constants {
         //LEFT SIDE 8.5
         //X 4.5                                                 
         RobotLocalizationConfig LOCALIZATION_CONFIG = RobotLocalizationConfig.vision(0.8, 0.8, 9999)
-                                                            .setAutoPlannerPID(7,0,0, 2,0,0).setVisionEnabled(true);
+                                                            .setAutoPlannerPID(7,0,0, 2,0,0).setVisionEnabled(false);
         ConfigurableCamera[] CAMERAS =
          {                                                                 
         LimeLightConfig.table("limelight-left").setTrustDistance(1).setUseForLocalization(false).setYawRelativeToForwards(-15).setPoseEstimateType(PoseEstimateWithLatencyType.BOT_POSE_MT2_BLUE).setLocalizationTagFilter(17,18,19,20,21,22,6,7,8,9,10,11), 
