@@ -41,16 +41,19 @@ import edu.wpi.first.math.trajectory.TrajectoryConfig;
   public RobotBase<?> base;
   public boolean reached = false;
   public double thetaMeasurement = 0;
+  public int tagId = -1;
   public MedianFilter filter;
   public Trajectory trajectory; 
+  public double targetMeasurement;
   public double startTime;
   public Pose2d finalPose2d = new Pose2d(Units.inchesToMeters(5), Units.inchesToMeters(6.5),new Rotation2d());
-  public PIDController rController = new PIDController(0.025, 0, 0);
+  public PIDController rController = new PIDController(0.04, 0, 0);
 
   public HolonomicDriveController controller = new HolonomicDriveController(
                                                           new PIDController(1, 0, 0), 
                                                           new PIDController(1, 0, 0),
                                                           new ProfiledPIDController(0, 0, 0, new Constraints(0, 0)));
+  public boolean isDone = false;
 
 
 
@@ -60,25 +63,36 @@ import edu.wpi.first.math.trajectory.TrajectoryConfig;
     ll = base.getVision().getLimelight("limelight-left");
     this.base = base;
     robotSpeeds = base.getRobotSpeeds();
+    tagId = -1;
+    isDone = false;
    }
 
    @Override
    public void initialize() 
    {
     thetaMeasurement = 0;
+    isDone = false;
     filter = new MedianFilter(50);
-
+    tagId = -1;
 
     reached = false;
-    startTime = System.currentTimeMillis();
-    if(ll.hasValidTarget() || lr.hasValidTarget())
+    if(ll.hasValidTarget())
     {
       base.getLocalization()
       .resetFieldPose
       (
         getPose2d()
-        // .transformBy(new Transform2d(new Translation2d(), ReefPole.getPoleFromID(ll.getAprilTagID(), ll).getPose2d().getRotation()))
       );
+      tagId = ((int)ll.getAprilTagID());
+    } 
+    else if(lr.hasValidTarget())
+    {
+      base.getLocalization()
+      .resetFieldPose
+      (
+        getPose2d()
+      );
+      tagId = ((int)lr.getAprilTagID());
     } 
 
     // trajectory = TrajectoryGenerator.generateTrajectory(List.of(base.getLocalization().getFieldPose(), new Pose2d(0, 0, new Rotation2d())), new TrajectoryConfig(4, 4));
@@ -139,6 +153,12 @@ import edu.wpi.first.math.trajectory.TrajectoryConfig;
      return pose;
    }
 
+   public boolean closeEnough(String table)
+    {
+      LimeLight ll = base.getVision().getLimelight(table);
+      return ll.hasValidTarget() && ll.getPoseEstimate(PoseEstimateWithLatencyType.BOT_POSE_MT2_BLUE).getRaw()[9] <= 0.525 && Math.abs(ll.getTargetHorizontalOffset()) < 5;
+    }
+
  
    // Called every time the scheduler runs while the command is scheduled.
    @Override
@@ -148,70 +168,88 @@ import edu.wpi.first.math.trajectory.TrajectoryConfig;
     if(ll.hasValidTarget() || lr.hasValidTarget())
     {
       thetaMeasurement =-filter.calculate(ll.getPoseEstimate(PoseEstimateType.TARGET_POSE_ROBOT_SPACE).getRaw()[4]);
-      if(ll.hasValidTarget())
+      if(tagId == -1)
       {
-      //ReefPole.getPoleFromID(ll.getAprilTagID(), ll).getRotation()
+        if(ll.hasValidTarget())
+        {
+          tagId = (int)ll.getAprilTagID();
+        }
+        if(lr.hasValidTarget())
+        {
+          tagId = (int)lr.getAprilTagID();
+        }
+      }
+      if(ll.hasValidTarget() && (int)ll.getAprilTagID() == tagId)
+      {
       goalPose2d = new Pose2d(Units.inchesToMeters(30), Units.inchesToMeters(6),new Rotation2d()).rotateAround(new Translation2d(), ReefPole.getPoleFromID(ll.getAprilTagID(), ll).getRotation());
-      finalPose2d = new Pose2d(Units.inchesToMeters(2.5), Units.inchesToMeters(6),new Rotation2d()).rotateAround(new Translation2d(), ReefPole.getPoleFromID(ll.getAprilTagID(), ll).getRotation());
-    }
-      if(lr.hasValidTarget())
+      finalPose2d = new Pose2d(Units.inchesToMeters(9), Units.inchesToMeters(10),new Rotation2d()).rotateAround(new Translation2d(), ReefPole.getPoleFromID(ll.getAprilTagID(), ll).getRotation());
+      }
+      else if(!ll.hasValidTarget() || (int)ll.getAprilTagID() != tagId)
+      {
+        goalPose2d = base.getLocalization().getFieldPose();
+        finalPose2d = base.getLocalization().getFieldPose();
+
+      }
+      if(lr.hasValidTarget() && (int)lr.getAprilTagID() == tagId)
       {
       goalPose2d = new Pose2d(Units.inchesToMeters(30), Units.inchesToMeters(6),new Rotation2d()).rotateAround(new Translation2d(), ReefPole.getPoleFromID(lr.getAprilTagID(), lr).getRotation());
-      finalPose2d = new Pose2d(Units.inchesToMeters(2.5), Units.inchesToMeters(6),new Rotation2d()).rotateAround(new Translation2d(), ReefPole.getPoleFromID(lr.getAprilTagID(), lr).getRotation());
-    }
-      
+      finalPose2d = new Pose2d(Units.inchesToMeters(9), Units.inchesToMeters(10),new Rotation2d()).rotateAround(new Translation2d(), ReefPole.getPoleFromID(lr.getAprilTagID(), lr).getRotation());
+      }
+      else if(!lr.hasValidTarget() || (int)lr.getAprilTagID() != tagId)
+      {
+        goalPose2d = base.getLocalization().getFieldPose();
+        finalPose2d = base.getLocalization().getFieldPose();
+
+      }
+    
       base.getLocalization()
       .resetFieldPose
       (
         getPose2d()
       );
 
-      if(ll.hasValidTarget())
-      {
-      base.getLocalization().getField2dObject("GoalPose").setPose(goalPose2d.relativeTo(ReefPole.getPoleFromID(ll.getAprilTagID(), ll).getPose2d()));
-      base.getLocalization().getField2dObject("FinalPose").setPose(goalPose2d.relativeTo(ReefPole.getPoleFromID(ll.getAprilTagID(), ll).getPose2d()));
-      }
-      else if(lr.hasValidTarget())
-      {
-        base.getLocalization().getField2dObject("GoalPose").setPose(goalPose2d.relativeTo(ReefPole.getPoleFromID(lr.getAprilTagID(), lr).getPose2d()));
-        base.getLocalization().getField2dObject("FinalPose").setPose(goalPose2d.relativeTo(ReefPole.getPoleFromID(lr.getAprilTagID(), lr).getPose2d()));
-        
-      }
+      targetMeasurement = base.getLocalization().getFieldPose().getRotation().getDegrees() - thetaMeasurement;
 
     }
 
+    if(closeEnough("limelight-left") || closeEnough("limelight-right"))
+    {
+      isDone = true;
+    }
 
+    if(tagId != -1)
+    {
 
     if(base.getLocalization().getFieldPose().getTranslation().getDistance(goalPose2d.getTranslation()) > 0.075 && !reached)
-    {
-      double rSpeed = 0;
-      if(ll.hasValidTarget() || lr.hasValidTarget())
-      { 
-      rSpeed = rController.calculate(thetaMeasurement, 0);
-      }
-      trajectory = TrajectoryGenerator.generateTrajectory(List.of(base.getLocalization().getFieldPose(), goalPose2d), new TrajectoryConfig(3, 3).setEndVelocity(0));
+    {  
+    controller.getXController().setP(2);
+    controller.getYController().setP(2);
 
-    Trajectory.State goal = trajectory.sample(Units.millisecondsToSeconds(Math.abs(startTime - System.currentTimeMillis())));
-    ChassisSpeeds speed = controller.calculate(base.getLocalization().getFieldPose(), goal, new Rotation2d());
-    base.getDrivetrain().getRobotSpeeds().setSpeeds("feedback", 
-    new ChassisSpeeds(speed.vxMetersPerSecond, speed.vyMetersPerSecond, -rSpeed));
+  
+    double rSpeed = rController.calculate(base.getLocalization().getFieldPose().getRotation().getDegrees(), ReefPole.getPoleFromID(tagId, ll).getRotation().getDegrees() - 180);
+   
+    double xSpeed = controller.getXController().calculate(base.getLocalization().getFieldPose().getX(), goalPose2d.getX());
+    double ySpeed = controller.getYController().calculate(base.getLocalization().getFieldPose().getY(), goalPose2d.getY());
+    
+    base.getDrivetrain().getRobotSpeeds().setSpeeds("feedback", new ChassisSpeeds(xSpeed, ySpeed, rSpeed));
+    // base.getDrivetrain().getRobotSpeeds().setSpeeds("feedback", new ChassisSpeeds(0, 0, rSpeed));
+
     }
     else
     {
-      reached = true;
-      double rSpeed = 0;
-      if(ll.hasValidTarget() || lr.hasValidTarget())
-      { 
-      rSpeed = rController.calculate(thetaMeasurement, 0);
-      }
-      trajectory = TrajectoryGenerator.generateTrajectory(List.of(base.getLocalization().getFieldPose(), finalPose2d), new TrajectoryConfig(3, 3).setEndVelocity(0));
+    reached = true;
+    double rSpeed = rController.calculate(base.getLocalization().getFieldPose().getRotation().getDegrees(), ReefPole.getPoleFromID(tagId, ll).getRotation().getDegrees() - 180);
+    
+    controller.getXController().setP(1.25);
+    controller.getYController().setP(1.25);
+    double xSpeed = controller.getXController().calculate(base.getLocalization().getFieldPose().getX(), finalPose2d.getX());
+    double ySpeed = controller.getYController().calculate(base.getLocalization().getFieldPose().getY(), finalPose2d.getY());
+    
+    base.getDrivetrain().getRobotSpeeds().setSpeeds("feedback", new ChassisSpeeds(xSpeed, ySpeed, rSpeed));
+        // base.getDrivetrain().getRobotSpeeds().setSpeeds("feedback", new ChassisSpeeds(0, 0, rSpeed));
 
-    Trajectory.State goal = trajectory.sample(Units.millisecondsToSeconds(Math.abs(startTime - System.currentTimeMillis())));
-    ChassisSpeeds speed = controller.calculate(base.getLocalization().getFieldPose(), goal, new Rotation2d());
-
-    base.getDrivetrain().getRobotSpeeds().setSpeeds("feedback", 
-    new ChassisSpeeds(speed.vxMetersPerSecond, speed.vyMetersPerSecond, -rSpeed));
     }
+  }
    }
  
  
@@ -219,7 +257,7 @@ import edu.wpi.first.math.trajectory.TrajectoryConfig;
    @Override
    public void end(boolean interrupted) {
      
-     
+     base.getDrivetrain().getRobotSpeeds().setSpeeds("feedback", new ChassisSpeeds(0,0,0));
 
    }
  
@@ -227,6 +265,6 @@ import edu.wpi.first.math.trajectory.TrajectoryConfig;
    @Override
    public boolean isFinished() {
      
-     return false;
+     return isDone;
    }
  }

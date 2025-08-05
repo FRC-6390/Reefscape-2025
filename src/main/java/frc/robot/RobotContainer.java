@@ -17,6 +17,7 @@ import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import frc.robot.Autos.AUTOS;
@@ -46,7 +47,7 @@ public class RobotContainer {
   public Superstructure superstructure = new Superstructure(elevator, endEffector);
   public CANdleSubsystem candle = new CANdleSubsystem(robotBase);
   public static SuperstructureState selectedState = SuperstructureState.L4;
-
+  public Command align = new V2(robotBase, "limelight-left");
   private final EnhancedXboxController driverController = new EnhancedXboxController(0)
                                                               .setLeftInverted(true)
                                                               .setRightInverted(true)
@@ -171,7 +172,7 @@ public class RobotContainer {
     driverController2.pov.left.onTrue(() -> arm.setNudge(arm.getNudge() - 5)).after(1).onTrue(() -> arm.setNudge(0));
     driverController2.rightBumper.onTrue(() -> wrist.setNudge(wrist.getNudge() + 5)).after(1).onTrue(() -> wrist.setNudge(0));
     driverController2.leftBumper.onTrue(() -> wrist.setNudge(wrist.getNudge() - 5)).after(1).onTrue(() -> wrist.setNudge(0));
-    driverController.rightTrigger.tiggerAt(0.5).whileTrue(new V2(robotBase, "limelight-left")).onFalse(() -> robotBase.getDrivetrain().getRobotSpeeds().setSpeeds("feedback", new ChassisSpeeds()));
+    driverController.rightTrigger.tiggerAt(0.5).onTrue(()-> CommandScheduler.getInstance().schedule(align)).onFalse(() -> {CommandScheduler.getInstance().cancel(align);});
   }
 
   public Command getAutonomousCommand() 
