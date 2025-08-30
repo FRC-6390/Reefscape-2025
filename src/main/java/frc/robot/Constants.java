@@ -1,5 +1,7 @@
 package frc.robot;
 
+import java.util.List;
+
 import org.photonvision.PhotonPoseEstimator.PoseStrategy;
 
 import ca.frc6390.athena.controllers.ElevatorFeedForwardsSendable;
@@ -28,7 +30,9 @@ import edu.wpi.first.math.controller.ProfiledPIDController;
 import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.trajectory.TrapezoidProfile.Constraints;
-import edu.wpi.first.math.util.Units;;
+import edu.wpi.first.math.util.Units;
+import frc.robot.Constants.EndEffector.ArmState;
+import frc.robot.Constants.EndEffector.WristState;;
 
 public interface Constants {
     
@@ -83,6 +87,21 @@ public interface Constants {
 
     public interface Elevator {
 
+
+        public enum S implements SetpointProvider<List<Enum<?>>> {
+            Intaking(List.of(ArmState.Intaking, WristState.Intaking));
+
+
+            List<Enum<?>> pos;
+            private S(List<Enum<?>> pos){
+                this.pos = pos;
+            }
+
+            @Override
+            public List<Enum<?>> getSetpoint() {
+            return pos;
+            }
+        }
 
         public enum ElevatorState implements SetpointProvider<Double> {
             //ELEVATOR HEIGHT FROM FLOOR IN INCHES

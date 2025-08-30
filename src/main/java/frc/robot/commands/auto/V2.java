@@ -10,7 +10,9 @@ import ca.frc6390.athena.sensors.camera.limelight.LimeLight;
  import ca.frc6390.athena.sensors.camera.limelight.LimeLight.PoseEstimateWithLatencyType;
 
 import java.util.List;
+import java.util.function.Supplier;
 
+import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.controller.HolonomicDriveController;
 import edu.wpi.first.math.controller.PIDController;
  import edu.wpi.first.math.controller.ProfiledPIDController;
@@ -20,6 +22,7 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Transform2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
+import edu.wpi.first.math.kinematics.Kinematics;
 import edu.wpi.first.math.trajectory.TrajectoryGenerator;
 import edu.wpi.first.math.trajectory.TrajectoryGenerator.ControlVectorList;
 import edu.wpi.first.math.trajectory.TrapezoidProfile.Constraints;
@@ -27,6 +30,8 @@ import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.DriverStation;
  import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
  import edu.wpi.first.wpilibj2.command.Command;
+import frc.robot.subsystems.Superstructure;
+import frc.robot.subsystems.Superstructure.SuperstructureState;
 import frc.robot.utils.ReefScoringPos.ReefPole;
 import edu.wpi.first.math.trajectory.Trajectory;
 import edu.wpi.first.math.trajectory.TrajectoryConfig;
@@ -42,11 +47,15 @@ import edu.wpi.first.math.trajectory.TrajectoryConfig;
   public boolean reached = false;
   public boolean rightPole = false;
   public double thetaMeasurement = 0;
+  
+  public Superstructure superstructure;
+  public Supplier<SuperstructureState> state;
   public int tagId = -1;
   public MedianFilter filter;
   public Trajectory trajectory; 
   public double targetMeasurement;
   public double startTime;
+  public List<SuperstructureState> intermdiateStates;
   public Pose2d finalPose2d = new Pose2d(Units.inchesToMeters(5), Units.inchesToMeters(6.5),new Rotation2d());
   public PIDController rController = new PIDController(0.04, 0, 0);
 
@@ -58,10 +67,12 @@ import edu.wpi.first.math.trajectory.TrajectoryConfig;
 
 
 
-   public V2(RobotBase<?> base,String lltable, boolean rightPole)
+   public V2(RobotBase<?> base,String lltable, boolean rightPole, Superstructure superstructure, Supplier<SuperstructureState> state)
    {
     lr = base.getVision().getLimelight("limelight-right");
     ll = base.getVision().getLimelight("limelight-left");
+    this.superstructure = superstructure;
+    this.state = state;
     this.base = base;
     robotSpeeds = base.getRobotSpeeds();
     this.rightPole = rightPole; 
@@ -167,6 +178,7 @@ import edu.wpi.first.math.trajectory.TrajectoryConfig;
    public void execute() 
    {
 
+
     if(ll.hasValidTarget() || lr.hasValidTarget())
     {
       thetaMeasurement =-filter.calculate(ll.getPoseEstimate(PoseEstimateType.TARGET_POSE_ROBOT_SPACE).getRaw()[4]);
@@ -181,14 +193,15 @@ import edu.wpi.first.math.trajectory.TrajectoryConfig;
           tagId = (int)lr.getAprilTagID();
         }
       }
+
       if(ll.hasValidTarget() && (int)ll.getAprilTagID() == tagId)
       {
-      goalPose2d = new Pose2d(Units.inchesToMeters(30), rightPole ? Units.inchesToMeters(10) : Units.inchesToMeters(-10),new Rotation2d()).rotateAround(new Translation2d(), ReefPole.getPoleFromID(ll.getAprilTagID(), ll).getRotation());
+      goalPose2d = new Pose2d(Units.inchesToMeters(30), rightPole ? Units.inchesToMeters(0) : Units.inchesToMeters(0),new Rotation2d()).rotateAround(new Translation2d(), ReefPole.getPoleFromID(ll.getAprilTagID(), ll).getRotation());
       finalPose2d = new Pose2d(Units.inchesToMeters(9), rightPole ? Units.inchesToMeters(10) : Units.inchesToMeters(-10),new Rotation2d()).rotateAround(new Translation2d(), ReefPole.getPoleFromID(ll.getAprilTagID(), ll).getRotation());
       }
       if(lr.hasValidTarget() && (int)lr.getAprilTagID() == tagId)
       {
-      goalPose2d = new Pose2d(Units.inchesToMeters(30), rightPole ? Units.inchesToMeters(10) : Units.inchesToMeters(-10),new Rotation2d()).rotateAround(new Translation2d(), ReefPole.getPoleFromID(lr.getAprilTagID(), lr).getRotation());
+      goalPose2d = new Pose2d(Units.inchesToMeters(30), rightPole ? Units.inchesToMeters(0) : Units.inchesToMeters(0),new Rotation2d()).rotateAround(new Translation2d(), ReefPole.getPoleFromID(lr.getAprilTagID(), lr).getRotation());
       finalPose2d = new Pose2d(Units.inchesToMeters(9), rightPole ? Units.inchesToMeters(10) : Units.inchesToMeters(-10),new Rotation2d()).rotateAround(new Translation2d(), ReefPole.getPoleFromID(lr.getAprilTagID(), lr).getRotation());
       }
     
@@ -205,6 +218,7 @@ import edu.wpi.first.math.trajectory.TrajectoryConfig;
     if(closeEnough("limelight-left") || closeEnough("limelight-right"))
     {
       isDone = true;
+      superstructure.setSuper(SuperstructureState.Score);
     }
 
     if(tagId != -1)
@@ -240,7 +254,56 @@ import edu.wpi.first.math.trajectory.TrajectoryConfig;
 
     }
   }
-   }
+
+    //SUPERSTRUCTURE LOGIC-------------------------------------------------------****
+
+    
+    double distance = 9999999;
+    if(tagId != -1)
+    {
+     distance = Math.abs(base.getLocalization().getRelativePose().getTranslation().getDistance(finalPose2d.getTranslation()));
+    }
+    
+    if(state.get().equals(SuperstructureState.L4))
+    {
+      if(distance < 2 && distance > 1)
+      {
+        superstructure.setSuper(SuperstructureState.L2);
+      }
+      else if(distance < 1 && distance > 0.5)
+      {
+        superstructure.setSuper(SuperstructureState.L3);
+      }
+      else if(distance < 0.3)
+      {
+        superstructure.setSuper(SuperstructureState.L4);
+      } 
+    }
+    else if(state.get().equals(SuperstructureState.L3))
+    {
+      if(distance < 2 && distance > 1)
+      {
+        superstructure.setSuper(SuperstructureState.L2);
+      }
+      else if(distance < 1)
+      {
+        superstructure.setSuper(SuperstructureState.L3);
+      }  
+    }
+    else if(state.get().equals(SuperstructureState.L2))
+    {
+      if(distance < 1)
+      {
+        superstructure.setSuper(state.get());
+      }
+    }
+    else if(state.get().equals(SuperstructureState.L1) && isDone)
+    {
+      superstructure.setSuper(SuperstructureState.L1);
+    }
+    }
+
+    //SUPERSTRUCTURE LOGIC-------------------------------------------------------****
  
  
    // Called once the command ends or is interrupted.
@@ -248,7 +311,10 @@ import edu.wpi.first.math.trajectory.TrajectoryConfig;
    public void end(boolean interrupted) {
      
      base.getDrivetrain().getRobotSpeeds().setSpeeds("feedback", new ChassisSpeeds(0,0,0));
-
+    //  if(closeEnough("limelight-left") || closeEnough("limelight-right"))
+    //  {
+    //   superstructure.setSuper(SuperstructureState.Score);
+    //  }
    }
  
    // Returns true when the command should end.

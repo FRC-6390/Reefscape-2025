@@ -7,13 +7,32 @@
         {
           "type": "named",
           "data": {
-            "name": "St"
+            "name": "Orient"
           }
         },
         {
-          "type": "path",
+          "type": "race",
           "data": {
-            "pathName": "BaseLineLeft.0"
+            "commands": [
+              {
+                "type": "path",
+                "data": {
+                  "pathName": "BaseLineLeft.0"
+                }
+              },
+              {
+                "type": "named",
+                "data": {
+                  "name": "WaitForTag"
+                }
+              }
+            ]
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "Align"
           }
         }
       ]
