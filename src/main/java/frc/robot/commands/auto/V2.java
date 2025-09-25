@@ -27,8 +27,10 @@ import edu.wpi.first.math.trajectory.TrajectoryGenerator;
 import edu.wpi.first.math.trajectory.TrajectoryGenerator.ControlVectorList;
 import edu.wpi.first.math.trajectory.TrapezoidProfile.Constraints;
 import edu.wpi.first.math.util.Units;
+import edu.wpi.first.util.sendable.Sendable;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
+import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
  import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.subsystems.Superstructure;
@@ -38,6 +40,9 @@ import edu.wpi.first.math.trajectory.Trajectory;
 import edu.wpi.first.math.trajectory.TrajectoryConfig;
  
  public class V2 extends Command {
+
+  public SendableChooser<String> fromRelativeType;
+  public SendableChooser<String> speedType;
 
   public LimeLight ll;
   public LimeLight lr;
@@ -80,6 +85,15 @@ import edu.wpi.first.math.trajectory.TrajectoryConfig;
     this.rightPole = rightPole; 
     tagId = -1;
     isDone = false;
+    fromRelativeType.addOption("From Robot", "From Robot");
+    fromRelativeType.addOption("From Field", "From Field");
+    fromRelativeType.addOption("Neither", "Neither");
+    speedType.addOption("X", "X");
+    speedType.addOption("Y", "Y");
+    speedType.addOption("Rotation", "Rotation");
+
+
+
    }
 
    @Override
@@ -182,6 +196,8 @@ import edu.wpi.first.math.trajectory.TrajectoryConfig;
    @Override
    public void execute() 
    {
+    SmartDashboard.putData(fromRelativeType);
+    SmartDashboard.putData(speedType);
 
 
     if(ll.hasValidTarget() || lr.hasValidTarget())
@@ -231,43 +247,112 @@ import edu.wpi.first.math.trajectory.TrajectoryConfig;
 
     if(base.getLocalization().getRelativePose().getTranslation().getDistance(goalPose2d.getTranslation()) > 0.075 && !reached)
     {  
+    //UP SPEED
     controller.getXController().setP(2);
     controller.getYController().setP(2);
 
-  
-    double rSpeed = rController.calculate(base.getLocalization().getRelativePose().getRotation().getDegrees(), ReefPole.getPoleFromID(tagId, ll).getRotation(Alliance.Red).getDegrees() - 180);
-    SmartDashboard.putNumber("R speed", rSpeed);
-    SmartDashboard.putNumber("R Error", rController.getError());
-    SmartDashboard.putNumber("R Error", base.getLocalization().getRelativePose().getRotation().getDegrees());
-    SmartDashboard.putNumber("Pole", ReefPole.getPoleFromID(tagId, ll).getRotation(Alliance.Red).getDegrees() - 180);
-    
-
+    //CALCULATE SPEEDS
+    double rSpeed = rController.calculate(base.getLocalization().getRelativePose().getRotation().getDegrees(), ReefPole.getPoleFromID(tagId, ll).getRotation().getDegrees() - 180);
     double xSpeed = controller.getXController().calculate(base.getLocalization().getRelativePose().getX(), goalPose2d.getX());
     double ySpeed = controller.getYController().calculate(base.getLocalization().getRelativePose().getY(), -goalPose2d.getY());
-    
-    
-    SmartDashboard.putNumber("Y PJJKN", base.getLocalization().getRelativePose().getY());
-    SmartDashboard.putNumber("Y Set", goalPose2d.getY());
 
-    base.getDrivetrain().getRobotSpeeds().setSpeeds("feedback", new ChassisSpeeds(0, ySpeed, 0));
-    // base.getDrivetrain().getRobotSpeeds().setSpeeds("feedback", new ChassisSpeeds(0, 0, rSpeed));
-
+    //PUSH DATA
+    SmartDashboard.putData("Rotation Controller", rController);
+    SmartDashboard.putData("X Controller", controller.getXController());
+    SmartDashboard.putData("Y Controller", controller.getYController());
+    
+    if(fromRelativeType.getSelected().equals("From Robot"))
+    {
+    ChassisSpeeds spds = ChassisSpeeds.fromRobotRelativeSpeeds
+                                                (
+                                                new ChassisSpeeds
+                                                        (
+                                                          speedType.getSelected().equals("X") ? xSpeed : 0, 
+                                                          speedType.getSelected().equals("Y") ? ySpeed : 0, 
+                                                          speedType.getSelected().equals("Rotation") ? rSpeed : 0 
+                                                        ), 
+                                                base.getLocalization().getRelativePose().getRotation()
+                                                );
+    base.getDrivetrain().getRobotSpeeds().setSpeeds("feedback", spds);
+    }
+    if(fromRelativeType.getSelected().equals("From Field"))
+    {
+    ChassisSpeeds spds = ChassisSpeeds.fromFieldRelativeSpeeds
+                                                (
+                                                new ChassisSpeeds
+                                                        (
+                                                          speedType.getSelected().equals("X") ? xSpeed : 0, 
+                                                          speedType.getSelected().equals("Y") ? ySpeed : 0, 
+                                                          speedType.getSelected().equals("Rotation") ? rSpeed : 0 
+                                                        ), 
+                                                base.getLocalization().getRelativePose().getRotation()
+                                                );
+    base.getDrivetrain().getRobotSpeeds().setSpeeds("feedback", spds);
+    }
+    if(fromRelativeType.getSelected().equals("Neither"))
+    {
+    ChassisSpeeds spds = new ChassisSpeeds
+                                                        (
+                                                          speedType.getSelected().equals("X") ? xSpeed : 0, 
+                                                          speedType.getSelected().equals("Y") ? ySpeed : 0, 
+                                                          speedType.getSelected().equals("Rotation") ? rSpeed : 0 
+                                                        );
+    base.getDrivetrain().getRobotSpeeds().setSpeeds("feedback", spds);
+    }
     }
     else
     {
     reached = true;
-    double rSpeed = rController.calculate(base.getLocalization().getRelativePose().getRotation().getDegrees(), ReefPole.getPoleFromID(tagId, ll).getRotation(Alliance.Red).getDegrees() - 180);
-    
+
     controller.getXController().setP(1.25);
     controller.getYController().setP(1.25);
+
+    double rSpeed = rController.calculate(base.getLocalization().getRelativePose().getRotation().getDegrees(), ReefPole.getPoleFromID(tagId, ll).getRotation().getDegrees() - 180);
     double xSpeed = controller.getXController().calculate(base.getLocalization().getRelativePose().getX(), finalPose2d.getX());
     double ySpeed = controller.getYController().calculate(base.getLocalization().getRelativePose().getY(), -finalPose2d.getY());
-    
-    SmartDashboard.putNumber("Y PJJKN", base.getLocalization().getRelativePose().getY());
-    SmartDashboard.putNumber("Y Set", finalPose2d.getY());
-    base.getDrivetrain().getRobotSpeeds().setSpeeds("feedback", new ChassisSpeeds(0, xSpeed, 0));
-        // base.getDrivetrain().getRobotSpeeds().setSpeeds("feedback", new ChassisSpeeds(0, 0, rSpeed));
 
+    SmartDashboard.putData("Rotation Controller", rController);
+    SmartDashboard.putData("X Controller", controller.getXController());
+    SmartDashboard.putData("Y Controller", controller.getYController());
+
+    if(fromRelativeType.getSelected().equals("From Robot"))
+    {
+    ChassisSpeeds spds = ChassisSpeeds.fromRobotRelativeSpeeds
+                                                (
+                                                new ChassisSpeeds
+                                                        (
+                                                          speedType.getSelected().equals("X") ? xSpeed : 0, 
+                                                          speedType.getSelected().equals("Y") ? ySpeed : 0, 
+                                                          speedType.getSelected().equals("Rotation") ? rSpeed : 0 
+                                                        ), 
+                                                base.getLocalization().getRelativePose().getRotation()
+                                                );
+    base.getDrivetrain().getRobotSpeeds().setSpeeds("feedback", spds);
+    }
+    if(fromRelativeType.getSelected().equals("From Field"))
+    {
+    ChassisSpeeds spds = ChassisSpeeds.fromFieldRelativeSpeeds
+                                                (
+                                                new ChassisSpeeds
+                                                        (
+                                                          speedType.getSelected().equals("X") ? xSpeed : 0, 
+                                                          speedType.getSelected().equals("Y") ? ySpeed : 0, 
+                                                          speedType.getSelected().equals("Rotation") ? rSpeed : 0 
+                                                        ), 
+                                                base.getLocalization().getRelativePose().getRotation()
+                                                );
+    base.getDrivetrain().getRobotSpeeds().setSpeeds("feedback", spds);
+    }
+    if(fromRelativeType.getSelected().equals("Neither"))
+    {
+    ChassisSpeeds spds = new ChassisSpeeds
+                                                        (
+                                                          speedType.getSelected().equals("X") ? xSpeed : 0, 
+                                                          speedType.getSelected().equals("Y") ? ySpeed : 0, 
+                                                          speedType.getSelected().equals("Rotation") ? rSpeed : 0 
+                                                        );
+    base.getDrivetrain().getRobotSpeeds().setSpeeds("feedback", spds);
+    }
     }
   }
 

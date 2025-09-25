@@ -43,23 +43,23 @@ public class ReefScoringPos {
         NONE(-1, -1, new Pose2d(), new Pose2d(), null, 0),
 
         
-        A(18, 7, new Pose2d(11.757,4.200, Rotation2d.fromDegrees(180)), new Pose2d(3.241, 4.200,  Rotation2d.fromDegrees(0)), Autos.PATHS.SIDEA,0.0),
-        B(18, 7, new Pose2d(11.776,3.880, Rotation2d.fromDegrees(180)), new Pose2d(3.211,3.880, Rotation2d.fromDegrees(0)), Autos.PATHS.SIDEA,0.0),
+        A(18, 7, new Pose2d(11.757,4.200, Rotation2d.fromDegrees(0)), new Pose2d(3.241, 4.200,  Rotation2d.fromDegrees(180)), Autos.PATHS.SIDEA,0.0),
+        B(18, 7, new Pose2d(11.776,3.880, Rotation2d.fromDegrees(0)), new Pose2d(3.211,3.880, Rotation2d.fromDegrees(180)), Autos.PATHS.SIDEA,0.0),
 
-        C(17, 8, new Pose2d(12.275,3.033,  Rotation2d.fromDegrees(-120)), new Pose2d(3.699,3.033, Rotation2d.fromDegrees(60)), Autos.PATHS.SIDEC,0.0),
-        D(17, 8, new Pose2d(12.574,2.863,  Rotation2d.fromDegrees(-120)), new Pose2d(3.969,2.863, Rotation2d.fromDegrees(60)), Autos.PATHS.SIDEC,0.0),
+        C(17, 8, new Pose2d(12.275,3.033,  Rotation2d.fromDegrees(60)), new Pose2d(3.699,3.033, Rotation2d.fromDegrees(-120)), Autos.PATHS.SIDEC,0.0),
+        D(17, 8, new Pose2d(12.574,2.863,  Rotation2d.fromDegrees(60)), new Pose2d(3.969,2.863, Rotation2d.fromDegrees(-120)), Autos.PATHS.SIDEC,0.0),
 
-        E(22, 9, new Pose2d(13.561,2.863,  Rotation2d.fromDegrees(-60)), new Pose2d(4.956,2.853,  Rotation2d.fromDegrees(120)), Autos.PATHS.SIDEE,0.0),
-        F(22, 9, new Pose2d(13.861,2.993,  Rotation2d.fromDegrees(-60)), new Pose2d(5.245,2.993,  Rotation2d.fromDegrees(120)), Autos.PATHS.SIDEE,0.0),
+        E(22, 9, new Pose2d(13.561,2.863,  Rotation2d.fromDegrees(120)), new Pose2d(4.956,2.853,  Rotation2d.fromDegrees(-60)), Autos.PATHS.SIDEE,0.0),
+        F(22, 9, new Pose2d(13.861,2.993,  Rotation2d.fromDegrees(120)), new Pose2d(5.245,2.993,  Rotation2d.fromDegrees(-60)), Autos.PATHS.SIDEE,0.0),
 
-        G(21, 10, new Pose2d(14.369,3.860, Rotation2d.fromDegrees(0)), new Pose2d(5.754,3.860, Rotation2d.fromDegrees(180)), Autos.PATHS.SIDEG,0.0),
-        H(21, 10, new Pose2d(14.359,4.200, Rotation2d.fromDegrees(0)), new Pose2d(5.754,4.200, Rotation2d.fromDegrees(180)), Autos.PATHS.SIDEG,0.0),
+        G(21, 10, new Pose2d(14.369,3.860, Rotation2d.fromDegrees(180)), new Pose2d(5.754,3.860, Rotation2d.fromDegrees(0)), Autos.PATHS.SIDEG,0.0),
+        H(21, 10, new Pose2d(14.359,4.200, Rotation2d.fromDegrees(180)), new Pose2d(5.754,4.200, Rotation2d.fromDegrees(0)), Autos.PATHS.SIDEG,0.0),
 
-        I(20, 11, new Pose2d(13.880,5.007, Rotation2d.fromDegrees(60)), new Pose2d(5.285,5.007,  Rotation2d.fromDegrees(-120)), Autos.PATHS.SIDEI,0.0),
-        J(20, 11, new Pose2d(13.561,5.207, Rotation2d.fromDegrees(60)), new Pose2d(4.986,5.207,  Rotation2d.fromDegrees(-120)), Autos.PATHS.SIDEI,0.0),
+        I(20, 11, new Pose2d(13.880,5.007, Rotation2d.fromDegrees(-120)), new Pose2d(5.285,5.007,  Rotation2d.fromDegrees(60)), Autos.PATHS.SIDEI,0.0),
+        J(20, 11, new Pose2d(13.561,5.207, Rotation2d.fromDegrees(-120)), new Pose2d(4.986,5.207,  Rotation2d.fromDegrees(60)), Autos.PATHS.SIDEI,0.0),
         
-        K(19, 6, new Pose2d(12.594,5.187, Rotation2d.fromDegrees(120)), new Pose2d(3.989,5.187, Rotation2d.fromDegrees(-60)), Autos.PATHS.SIDEK,0.0),
-        L(19, 6, new Pose2d(12.325,5.027, Rotation2d.fromDegrees(120)), new Pose2d(3.719,5.027, Rotation2d.fromDegrees(-60)), Autos.PATHS.SIDEK,0.0);
+        K(19, 6, new Pose2d(12.594,5.187, Rotation2d.fromDegrees(-60)), new Pose2d(3.989,5.187, Rotation2d.fromDegrees(120)), Autos.PATHS.SIDEK,0.0),
+        L(19, 6, new Pose2d(12.325,5.027, Rotation2d.fromDegrees(-60)), new Pose2d(3.719,5.027, Rotation2d.fromDegrees(120)), Autos.PATHS.SIDEK,0.0);
     
         private final long apriltagIdRed, apriltagIdBlue;
         private final Pose2d redPose, bluePose;
