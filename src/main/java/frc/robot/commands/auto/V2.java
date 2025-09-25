@@ -28,7 +28,8 @@ import edu.wpi.first.math.trajectory.TrajectoryGenerator.ControlVectorList;
 import edu.wpi.first.math.trajectory.TrapezoidProfile.Constraints;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.DriverStation;
- import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import edu.wpi.first.wpilibj.DriverStation.Alliance;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
  import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.subsystems.Superstructure;
 import frc.robot.subsystems.Superstructure.SuperstructureState;
@@ -58,6 +59,7 @@ import edu.wpi.first.math.trajectory.TrajectoryConfig;
   public List<SuperstructureState> intermdiateStates;
   public Pose2d finalPose2d = new Pose2d(Units.inchesToMeters(5), Units.inchesToMeters(6.5),new Rotation2d());
   public PIDController rController = new PIDController(0.04, 0, 0);
+  //0.04
 
   public HolonomicDriveController controller = new HolonomicDriveController(
                                                           new PIDController(1, 0, 0), 
@@ -84,6 +86,9 @@ import edu.wpi.first.math.trajectory.TrajectoryConfig;
    public void initialize() 
    {
     thetaMeasurement = 0;
+    // rController.enableContinuousInput(-180, 180);
+    rController.setTolerance(5);
+
     isDone = false;
     filter = new MedianFilter(50);
     tagId = -1;
@@ -230,26 +235,37 @@ import edu.wpi.first.math.trajectory.TrajectoryConfig;
     controller.getYController().setP(2);
 
   
-    double rSpeed = rController.calculate(base.getLocalization().getRelativePose().getRotation().getDegrees(), ReefPole.getPoleFromID(tagId, ll).getRotation().getDegrees() - 180);
-   
-    double xSpeed = controller.getXController().calculate(base.getLocalization().getRelativePose().getX(), goalPose2d.getX());
-    double ySpeed = controller.getYController().calculate(base.getLocalization().getRelativePose().getY(), goalPose2d.getY());
+    double rSpeed = rController.calculate(base.getLocalization().getRelativePose().getRotation().getDegrees(), ReefPole.getPoleFromID(tagId, ll).getRotation(Alliance.Red).getDegrees() - 180);
+    SmartDashboard.putNumber("R speed", rSpeed);
+    SmartDashboard.putNumber("R Error", rController.getError());
+    SmartDashboard.putNumber("R Error", base.getLocalization().getRelativePose().getRotation().getDegrees());
+    SmartDashboard.putNumber("Pole", ReefPole.getPoleFromID(tagId, ll).getRotation(Alliance.Red).getDegrees() - 180);
     
-    base.getDrivetrain().getRobotSpeeds().setSpeeds("feedback", new ChassisSpeeds(xSpeed, ySpeed, rSpeed));
+
+    double xSpeed = controller.getXController().calculate(base.getLocalization().getRelativePose().getX(), goalPose2d.getX());
+    double ySpeed = controller.getYController().calculate(base.getLocalization().getRelativePose().getY(), -goalPose2d.getY());
+    
+    
+    SmartDashboard.putNumber("Y PJJKN", base.getLocalization().getRelativePose().getY());
+    SmartDashboard.putNumber("Y Set", goalPose2d.getY());
+
+    base.getDrivetrain().getRobotSpeeds().setSpeeds("feedback", new ChassisSpeeds(0, ySpeed, 0));
     // base.getDrivetrain().getRobotSpeeds().setSpeeds("feedback", new ChassisSpeeds(0, 0, rSpeed));
 
     }
     else
     {
     reached = true;
-    double rSpeed = rController.calculate(base.getLocalization().getRelativePose().getRotation().getDegrees(), ReefPole.getPoleFromID(tagId, ll).getRotation().getDegrees() - 180);
+    double rSpeed = rController.calculate(base.getLocalization().getRelativePose().getRotation().getDegrees(), ReefPole.getPoleFromID(tagId, ll).getRotation(Alliance.Red).getDegrees() - 180);
     
     controller.getXController().setP(1.25);
     controller.getYController().setP(1.25);
     double xSpeed = controller.getXController().calculate(base.getLocalization().getRelativePose().getX(), finalPose2d.getX());
-    double ySpeed = controller.getYController().calculate(base.getLocalization().getRelativePose().getY(), finalPose2d.getY());
+    double ySpeed = controller.getYController().calculate(base.getLocalization().getRelativePose().getY(), -finalPose2d.getY());
     
-    base.getDrivetrain().getRobotSpeeds().setSpeeds("feedback", new ChassisSpeeds(xSpeed, ySpeed, rSpeed));
+    SmartDashboard.putNumber("Y PJJKN", base.getLocalization().getRelativePose().getY());
+    SmartDashboard.putNumber("Y Set", finalPose2d.getY());
+    base.getDrivetrain().getRobotSpeeds().setSpeeds("feedback", new ChassisSpeeds(0, xSpeed, 0));
         // base.getDrivetrain().getRobotSpeeds().setSpeeds("feedback", new ChassisSpeeds(0, 0, rSpeed));
 
     }
