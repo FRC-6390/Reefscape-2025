@@ -204,7 +204,7 @@ import edu.wpi.first.math.trajectory.TrajectoryConfig;
 
     if(camera_left.hasValidTarget() || camera_right.hasValidTarget())
     {
-      thetaMeasurement = camera_left ? camera_left.getPoseEstimate(PoseEstimateType.TARGET_POSE_ROBOT_SPACE).getRaw()[4] : camera_right.getPoseEstimate(PoseEstimateType.TARGET_POSE_ROBOT_SPACE).getRaw()[4];
+      thetaMeasurement = camera_left.hasValidTarget() ? camera_left.getPoseEstimate(PoseEstimateType.TARGET_POSE_ROBOT_SPACE).getRaw()[4] : camera_right.getPoseEstimate(PoseEstimateType.TARGET_POSE_ROBOT_SPACE).getRaw()[4];
       thetaMeasurement = -filter.calculate(thetaMeasurement);
       if(tagId == -1)
       {
