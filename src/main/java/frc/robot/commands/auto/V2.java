@@ -61,7 +61,6 @@ import edu.wpi.first.math.trajectory.TrajectoryConfig;
   public Trajectory trajectory; 
   public double targetMeasurement;
   public double startTime;
-  public List<SuperstructureState> intermdiateStates;
   public Pose2d finalPose2d = new Pose2d(Units.inchesToMeters(5), Units.inchesToMeters(6.5),new Rotation2d());
   public PIDController rController = new PIDController(0.04, 0, 0);
   //0.04
@@ -190,7 +189,7 @@ import edu.wpi.first.math.trajectory.TrajectoryConfig;
    public boolean closeEnough(String table)
     {
       LimeLight camera = base.getVision().getLimelight(table);
-      return camera.hasValidTarget() && camera.getPoseEstimate(PoseEstimateWithLatencyType.BOT_POSE_MT2_BLUE).getRaw()[9] <= 0.525 && Math.abs(camera.getTargetHorizontalOffset()) < 5;
+      return camera.hasValidTarget() && Math.abs(camera.getPoseEstimate(PoseEstimateWithLatencyType.BOT_POSE_MT2_BLUE).getRaw()[9]) <= 0.525 && Math.abs(camera.getTargetHorizontalOffset()) < 6;
     }
 
  
@@ -198,9 +197,6 @@ import edu.wpi.first.math.trajectory.TrajectoryConfig;
    @Override
    public void execute() 
    {
-    SmartDashboard.putData(fromRelativeType);
-    SmartDashboard.putData(speedType);
-
 
     if(camera_left.hasValidTarget() || camera_right.hasValidTarget())
     {
@@ -221,13 +217,14 @@ import edu.wpi.first.math.trajectory.TrajectoryConfig;
       if(camera_left.hasValidTarget() && (int)camera_left.getAprilTagID() == tagId)
       {
       goalPose2d = new Pose2d(Units.inchesToMeters(30), rightPole ? Units.inchesToMeters(0) : Units.inchesToMeters(0),new Rotation2d()).rotateAround(new Translation2d(), ReefPole.getPoleFromID(camera_left.getAprilTagID(), camera_left).getRotation());
-      finalPose2d = new Pose2d(Units.inchesToMeters(9), rightPole ? Units.inchesToMeters(10) : Units.inchesToMeters(-10),new Rotation2d()).rotateAround(new Translation2d(), ReefPole.getPoleFromID(camera_left.getAprilTagID(), camera_left).getRotation());
+      finalPose2d = new Pose2d(Units.inchesToMeters(12), rightPole ? Units.inchesToMeters(7.5) : Units.inchesToMeters(-11.5),new Rotation2d()).rotateAround(new Translation2d(), ReefPole.getPoleFromID(camera_left.getAprilTagID(), camera_left).getRotation());
       }
       if(camera_right.hasValidTarget() && (int)camera_right.getAprilTagID() == tagId)
       {
       goalPose2d = new Pose2d(Units.inchesToMeters(30), rightPole ? Units.inchesToMeters(0) : Units.inchesToMeters(0),new Rotation2d()).rotateAround(new Translation2d(), ReefPole.getPoleFromID(camera_right.getAprilTagID(), camera_right).getRotation());
-      finalPose2d = new Pose2d(Units.inchesToMeters(9), rightPole ? Units.inchesToMeters(10) : Units.inchesToMeters(-10),new Rotation2d()).rotateAround(new Translation2d(), ReefPole.getPoleFromID(camera_right.getAprilTagID(), camera_right).getRotation());
+      finalPose2d = new Pose2d(Units.inchesToMeters(12), rightPole ? Units.inchesToMeters(7.5) : Units.inchesToMeters(-11.5),new Rotation2d()).rotateAround(new Translation2d(), ReefPole.getPoleFromID(camera_right.getAprilTagID(), camera_right).getRotation());
       }
+      
     
       base.getLocalization()
       .resetRelativePose
@@ -242,7 +239,6 @@ import edu.wpi.first.math.trajectory.TrajectoryConfig;
     if(closeEnough("limelight-left") || closeEnough("limelight-right"))
     {
       isDone = true;
-      superstructure.setSuper(SuperstructureState.Score);
     }
 
     if(tagId != -1)
@@ -257,106 +253,55 @@ import edu.wpi.first.math.trajectory.TrajectoryConfig;
     //CALCULATE SPEEDS
     double rSpeed = rController.calculate(base.getLocalization().getRelativePose().getRotation().getDegrees(), ReefPole.getPoleFromID(tagId, camera_left).getRotation().getDegrees() - 180);
     double xSpeed = controller.getXController().calculate(base.getLocalization().getRelativePose().getX(), goalPose2d.getX());
-    double ySpeed = controller.getYController().calculate(base.getLocalization().getRelativePose().getY(), -goalPose2d.getY());
+    double ySpeed = controller.getYController().calculate(base.getLocalization().getRelativePose().getY(), goalPose2d.getY());
 
     //PUSH DATA
     SmartDashboard.putData("Rotation Controller", rController);
     SmartDashboard.putData("X Controller", controller.getXController());
     SmartDashboard.putData("Y Controller", controller.getYController());
     
-    if(fromRelativeType.getSelected().equals("From Robot"))
-    {
-    ChassisSpeeds spds = ChassisSpeeds.fromRobotRelativeSpeeds
-                                                (
-                                                new ChassisSpeeds
-                                                        (
-                                                          speedType.getSelected().equals("X") ? xSpeed : 0, 
-                                                          speedType.getSelected().equals("Y") ? ySpeed : 0, 
-                                                          speedType.getSelected().equals("Rotation") ? rSpeed : 0 
-                                                        ), 
-                                                base.getLocalization().getRelativePose().getRotation()
-                                                );
-    base.getDrivetrain().getRobotSpeeds().setSpeeds("feedback", spds);
-    }
-    if(fromRelativeType.getSelected().equals("From Field"))
-    {
+    
     ChassisSpeeds spds = ChassisSpeeds.fromFieldRelativeSpeeds
                                                 (
                                                 new ChassisSpeeds
                                                         (
-                                                          speedType.getSelected().equals("X") ? xSpeed : 0, 
-                                                          speedType.getSelected().equals("Y") ? ySpeed : 0, 
-                                                          speedType.getSelected().equals("Rotation") ? rSpeed : 0 
+                                                          xSpeed, 
+                                                          ySpeed, 
+                                                          rSpeed 
                                                         ), 
                                                 base.getLocalization().getRelativePose().getRotation()
                                                 );
     base.getDrivetrain().getRobotSpeeds().setSpeeds("feedback", spds);
-    }
-    if(fromRelativeType.getSelected().equals("Neither"))
-    {
-    ChassisSpeeds spds = new ChassisSpeeds
-                                                        (
-                                                          speedType.getSelected().equals("X") ? xSpeed : 0, 
-                                                          speedType.getSelected().equals("Y") ? ySpeed : 0, 
-                                                          speedType.getSelected().equals("Rotation") ? rSpeed : 0 
-                                                        );
-    base.getDrivetrain().getRobotSpeeds().setSpeeds("feedback", spds);
-    }
     }
     else
     {
     reached = true;
 
-    controller.getXController().setP(1.25);
-    controller.getYController().setP(1.25);
+    controller.getXController().setP(1.8);
+    controller.getYController().setP(1.8);
 
     double rSpeed = rController.calculate(base.getLocalization().getRelativePose().getRotation().getDegrees(), ReefPole.getPoleFromID(tagId, camera_left).getRotation().getDegrees() - 180);
     double xSpeed = controller.getXController().calculate(base.getLocalization().getRelativePose().getX(), finalPose2d.getX());
-    double ySpeed = controller.getYController().calculate(base.getLocalization().getRelativePose().getY(), -finalPose2d.getY());
+    double ySpeed = controller.getYController().calculate(base.getLocalization().getRelativePose().getY(), finalPose2d.getY());
 
+    //PUSH DATA
     SmartDashboard.putData("Rotation Controller", rController);
     SmartDashboard.putData("X Controller", controller.getXController());
     SmartDashboard.putData("Y Controller", controller.getYController());
-
-    if(fromRelativeType.getSelected().equals("From Robot"))
-    {
-    ChassisSpeeds spds = ChassisSpeeds.fromRobotRelativeSpeeds
-                                                (
-                                                new ChassisSpeeds
-                                                        (
-                                                          speedType.getSelected().equals("X") ? xSpeed : 0, 
-                                                          speedType.getSelected().equals("Y") ? ySpeed : 0, 
-                                                          speedType.getSelected().equals("Rotation") ? rSpeed : 0 
-                                                        ), 
-                                                base.getLocalization().getRelativePose().getRotation()
-                                                );
-    base.getDrivetrain().getRobotSpeeds().setSpeeds("feedback", spds);
-    }
-    if(fromRelativeType.getSelected().equals("From Field"))
-    {
+    
+    
     ChassisSpeeds spds = ChassisSpeeds.fromFieldRelativeSpeeds
                                                 (
                                                 new ChassisSpeeds
                                                         (
-                                                          speedType.getSelected().equals("X") ? xSpeed : 0, 
-                                                          speedType.getSelected().equals("Y") ? ySpeed : 0, 
-                                                          speedType.getSelected().equals("Rotation") ? rSpeed : 0 
+                                                          xSpeed, 
+                                                          ySpeed, 
+                                                          rSpeed 
                                                         ), 
                                                 base.getLocalization().getRelativePose().getRotation()
                                                 );
     base.getDrivetrain().getRobotSpeeds().setSpeeds("feedback", spds);
-    }
-    if(fromRelativeType.getSelected().equals("Neither"))
-    {
-    ChassisSpeeds spds = new ChassisSpeeds
-                                                        (
-                                                          speedType.getSelected().equals("X") ? xSpeed : 0, 
-                                                          speedType.getSelected().equals("Y") ? ySpeed : 0, 
-                                                          speedType.getSelected().equals("Rotation") ? rSpeed : 0 
-                                                        );
-    base.getDrivetrain().getRobotSpeeds().setSpeeds("feedback", spds);
-    }
-    }
+  }
   }
 
     //SUPERSTRUCTURE LOGIC-------------------------------------------------------****
@@ -368,6 +313,8 @@ import edu.wpi.first.math.trajectory.TrajectoryConfig;
      distance = Math.abs(base.getLocalization().getRelativePose().getTranslation().getDistance(finalPose2d.getTranslation()));
     }
     
+    if(!superstructure.getStateMachine().getGoalState().equals(state.get()))
+    {
     if(state.get().equals(SuperstructureState.L4))
     {
       if(distance < 2 && distance > 1)
@@ -381,7 +328,9 @@ import edu.wpi.first.math.trajectory.TrajectoryConfig;
       else if(distance < 0.3)
       {
         superstructure.setSuper(SuperstructureState.L4);
-      } 
+        
+      }
+       
     }
     else if(state.get().equals(SuperstructureState.L3))
     {
@@ -392,6 +341,7 @@ import edu.wpi.first.math.trajectory.TrajectoryConfig;
       else if(distance < 1)
       {
         superstructure.setSuper(SuperstructureState.L3);
+        
       }  
     }
     else if(state.get().equals(SuperstructureState.L2))
@@ -399,13 +349,17 @@ import edu.wpi.first.math.trajectory.TrajectoryConfig;
       if(distance < 1)
       {
         superstructure.setSuper(state.get());
+       
       }
     }
     else if(state.get().equals(SuperstructureState.L1) && isDone)
     {
       superstructure.setSuper(SuperstructureState.L1);
+      
     }
-    }
+  }
+  }
+    // }
 
     //SUPERSTRUCTURE LOGIC-------------------------------------------------------****
  
@@ -417,7 +371,6 @@ import edu.wpi.first.math.trajectory.TrajectoryConfig;
      base.getDrivetrain().getRobotSpeeds().setSpeeds("feedback", new ChassisSpeeds(0,0,0));
     //  if(closeEnough("limelight-left") || closeEnough("limelight-right"))
     //  {
-    //   superstructure.setSuper(SuperstructureState.Score);
     //  }
    }
  

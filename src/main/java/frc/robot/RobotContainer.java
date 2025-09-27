@@ -49,14 +49,14 @@ import frc.robot.subsystems.superstructure.EndEffector;
 public class RobotContainer {
   public final RobotBase<SwerveDrivetrain> robotBase = Constants.DriveTrain.ROBOT_BASE.create().shuffleboard();
  
-  public final StatefulArmMechanism<ArmState> arm = Constants.EndEffector.ARM_CONFIG.build();//.shuffleboard("Arm", SendableLevel.COMP);
-  public final StatefulArmMechanism<WristState> wrist = Constants.EndEffector.WRIST_CONFIG.build();//.shuffleboard("Wrist", SendableLevel.COMP);
-  public final StatefulMechanism<RollerState> rollers = Constants.EndEffector.CORAL_ROLLERS.build();//.shuffleboard("Rollers", SendableLevel.COMP);;
+  public final StatefulArmMechanism<ArmState> arm = Constants.EndEffector.ARM_CONFIG.build().shuffleboard("Arm", SendableLevel.DEBUG);
+  public final StatefulArmMechanism<WristState> wrist = Constants.EndEffector.WRIST_CONFIG.build().shuffleboard("Wrist", SendableLevel.DEBUG);
+  public final StatefulMechanism<RollerState> rollers = Constants.EndEffector.CORAL_ROLLERS.build().shuffleboard("Rollers", SendableLevel.DEBUG);
   public final StatefulMechanism<RollerState> algaeRollers = Constants.EndEffector.ALGAE_ROLLERS.build();//.shuffleboard("Algae Rollers", SendableLevel.COMP);;
   // public SuperStructureTest s = SuperstructureBuilder.builder().addArms(arm, wrist).addMotors(rollers, algaeRollers).build();
   public BooleanSupplier hasTarget;
   public final Elevator elevator = new Elevator();
-  public final EndEffector endEffector = new EndEffector(arm, wrist, rollers, algaeRollers).setAutoEndScoring(true);
+  public final EndEffector endEffector = new EndEffector(arm, wrist, rollers, algaeRollers).setAutoEndScoring(false);
   public Superstructure superstructure = new Superstructure(elevator, endEffector);
   public CANdleSubsystem candle = new CANdleSubsystem(robotBase);
   public static SuperstructureState selectedState = SuperstructureState.L1;
@@ -132,7 +132,7 @@ public class RobotContainer {
     }));
 
 
-    chooser = Autos.AUTOS.createChooser(AUTOS.RIGHTSIDE);
+    chooser = Autos.AUTOS.createChooser(AUTOS.Left);
     SmartDashboard.putData(chooser);
   }
 
@@ -159,7 +159,14 @@ public class RobotContainer {
     driverController.pov.left.whileTrue(superstructure.setState(SuperstructureState.AlgaeLow)).onFalse(superstructure.setState(SuperstructureState.Home));
     driverController.pov.right.whileTrue(superstructure.setState(SuperstructureState.AlgaeHigh)).onFalse(superstructure.setState(SuperstructureState.Home));
    
-    driverController.rightTrigger.tiggerAt(0.5).onTrue(()-> CommandScheduler.getInstance().schedule(alignRight)).onFalse(() -> {CommandScheduler.getInstance().cancel(alignRight);});
+    driverController.rightTrigger.tiggerAt(0.5)
+    .onTrue(()-> CommandScheduler.getInstance().schedule(alignRight))
+    .onFalse(() -> 
+    {
+      CommandScheduler.getInstance().cancel(alignRight); 
+      // CommandScheduler.getInstance().schedule(superstructure.setState(SuperstructureState.Score));
+    }
+    );
     driverController.leftTrigger.tiggerAt(0.5).onTrue(()-> CommandScheduler.getInstance().schedule(alginLeft)).onFalse(() -> {CommandScheduler.getInstance().cancel(alginLeft);});
     driverController.pov.down.onTrue(superstructure.setState(SuperstructureState.HomePID)).after(1).onTrue(superstructure.setState(SuperstructureState.Home));
 

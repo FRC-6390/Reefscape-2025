@@ -272,14 +272,14 @@ public interface Constants {
         .addMotors(Motor.KRAKEN_X60, 37)
         .setNeutralMode(MotorNeutralMode.Brake)
         .setCanbus(CANIVORE_CANBUS)
-        .setCurrentLimit(60)
+        .setCurrentLimit(10)
         .setUseSetpointAsOutput(true);
 
         MechanismConfig<StatefulMechanism<RollerState>> ALGAE_ROLLERS = MechanismConfig.statefulGeneric(RollerState.Stopped)
         .addMotors(Motor.KRAKEN_X60, 33)
         .setNeutralMode(MotorNeutralMode.Brake)
         .setCanbus(CANIVORE_CANBUS)
-        .setCurrentLimit(60)
+        .setCurrentLimit(10)
         .setUseSetpointAsOutput(true);                                                                                                                                          
     }
 }

@@ -54,7 +54,7 @@ public class Elevator extends SubsystemBase{
     leftMotor.setNeutralMode(NeutralModeValue.Brake);
     rightMotor.setNeutralMode(NeutralModeValue.Brake);
 
-    CurrentLimitsConfigs currentLimitsConfigs = new CurrentLimitsConfigs().withStatorCurrentLimit(65);
+    CurrentLimitsConfigs currentLimitsConfigs = new CurrentLimitsConfigs().withStatorCurrentLimit(65); //65
     currentLimitsConfigs.StatorCurrentLimitEnable = true;
     leftMotor.getConfigurator().apply(currentLimitsConfigs);
     rightMotor.getConfigurator().apply(currentLimitsConfigs);
@@ -62,7 +62,7 @@ public class Elevator extends SubsystemBase{
     //CONTROL SYSTEM SETUP
     controller = Constants.Elevator.CONTORLLER;
     controller.setIntegratorRange(-1.5, 1.5);
-    controller.setTolerance(0.8);
+    controller.setTolerance(0.9);
     controller.reset(getHeightFromFloor());
     feedforward = Constants.Elevator.FEEDFORWARD;
     stateMachine = new StateMachine<Double, ElevatorState>(ElevatorState.HomeReset, controller::atGoal);

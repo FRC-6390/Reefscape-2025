@@ -17,18 +17,21 @@ public class Autos {
     
   public enum AUTOS {
         
-        LEFTSIDE("CompLeftMain", false),
-        RIGHTSIDE("CompRightMain", false),
+        // LEFTSIDE("CompLeftMain", false),
+        // RIGHTSIDE("CompRightMain", false),
 
-        // LEFTSIDEMAIN("LeftSideMain", false),
-        LEFTLOLIPOP("LeftLoliPop", false),
+        // // LEFTSIDEMAIN("LeftSideMain", false),
+        // LEFTLOLIPOP("LeftLoliPop", false),
 
 
-        BaseLineLeft("BaseLineLeft", false),
-        BaseLineMid("BaseLineMid", false),
-        BaseLineRight("BaseLineRight", false),
+        // BaseLineLeft("BaseLineLeft", false),
+        // BaseLineMid("BaseLineMid", false),
+        // BaseLineRight("BaseLineRight", false),
 
-        PreLoadMid("PreLoadMid", false);
+        Left("CompLeftSide", false),
+        Right("CompRightSide", false),
+        Mid("CompMidSide", false);
+
 
         private final String auto;
         private final boolean choreo;
