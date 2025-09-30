@@ -41,12 +41,9 @@ import edu.wpi.first.math.trajectory.TrajectoryConfig;
  
  public class V2 extends Command {
 
-  public SendableChooser<String> fromRelativeType;
-  public SendableChooser<String> speedType;
 
   public LimeLight camera_left;
   public LimeLight camera_right;
-  public RobotSpeeds robotSpeeds;
   public Pose2d goalPose2d = new Pose2d(Units.inchesToMeters(25), Units.inchesToMeters(6.5),new Rotation2d());
 
   public RobotBase<?> base;
@@ -58,13 +55,9 @@ import edu.wpi.first.math.trajectory.TrajectoryConfig;
   public Supplier<SuperstructureState> state;
   public int tagId = -1;
   public MedianFilter filter;
-  public Trajectory trajectory; 
   public double targetMeasurement;
-  public double startTime;
   public Pose2d finalPose2d = new Pose2d(Units.inchesToMeters(5), Units.inchesToMeters(6.5),new Rotation2d());
   public PIDController rController = new PIDController(0.04, 0, 0);
-  //0.04
-
   public HolonomicDriveController controller = new HolonomicDriveController(
                                                           new PIDController(1, 0, 0), 
                                                           new PIDController(1, 0, 0),
@@ -80,21 +73,9 @@ import edu.wpi.first.math.trajectory.TrajectoryConfig;
     this.superstructure = superstructure;
     this.state = state;
     this.base = base;
-    robotSpeeds = base.getRobotSpeeds();
     this.rightPole = rightPole; 
     tagId = -1;
     isDone = false;
-    fromRelativeType = new SendableChooser<>();
-    speedType = new SendableChooser<>();
-    fromRelativeType.addOption("From Robot", "From Robot");
-    fromRelativeType.addOption("From Field", "From Field");
-    fromRelativeType.addOption("Neither", "Neither");
-    speedType.addOption("X", "X");
-    speedType.addOption("Y", "Y");
-    speedType.addOption("Rotation", "Rotation");
-
-
-
    }
 
    @Override
@@ -111,25 +92,22 @@ import edu.wpi.first.math.trajectory.TrajectoryConfig;
     reached = false;
     if(camera_left.hasValidTarget())
     {
-      base.getLocalization()
-      .resetRelativePose
-      (
-        getPose2d()
-      );
+      // base.getLocalization()
+      // .resetRelativePose
+      // (
+      //   getPose2d()
+      // );
       tagId = ((int)camera_left.getAprilTagID());
     } 
     else if(camera_right.hasValidTarget())
     {
-      base.getLocalization()
-      .resetRelativePose
-      (
-        getPose2d()
-      );
+      // base.getLocalization()
+      // .resetRelativePose
+      // (
+      //   getPose2d()
+      // );
       tagId = ((int)camera_right.getAprilTagID());
     } 
-
-    // trajectory = TrajectoryGenerator.generateTrajectory(List.of(base.getLocalization().getRelativePose(), new Pose2d(0, 0, new Rotation2d())), new TrajectoryConfig(4, 4));
-
   }
  
 
@@ -200,8 +178,12 @@ import edu.wpi.first.math.trajectory.TrajectoryConfig;
 
     if(camera_left.hasValidTarget() || camera_right.hasValidTarget())
     {
+
+      //ROTATION MEASUREMENT
       thetaMeasurement = camera_left.hasValidTarget() ? camera_left.getPoseEstimate(PoseEstimateType.TARGET_POSE_ROBOT_SPACE).getRaw()[4] : camera_right.getPoseEstimate(PoseEstimateType.TARGET_POSE_ROBOT_SPACE).getRaw()[4];
       thetaMeasurement = -filter.calculate(thetaMeasurement);
+
+      //SETTING TAG ID
       if(tagId == -1)
       {
         if(camera_left.hasValidTarget())
@@ -214,6 +196,7 @@ import edu.wpi.first.math.trajectory.TrajectoryConfig;
         }
       }
 
+      //CALCULATING FINAL DESIRED POSITION 
       if(camera_left.hasValidTarget() && (int)camera_left.getAprilTagID() == tagId)
       {
       goalPose2d = new Pose2d(Units.inchesToMeters(30), rightPole ? Units.inchesToMeters(0) : Units.inchesToMeters(0),new Rotation2d()).rotateAround(new Translation2d(), ReefPole.getPoleFromID(camera_left.getAprilTagID(), camera_left).getRotation());
@@ -225,17 +208,30 @@ import edu.wpi.first.math.trajectory.TrajectoryConfig;
       finalPose2d = new Pose2d(Units.inchesToMeters(12), rightPole ? Units.inchesToMeters(7.5) : Units.inchesToMeters(-11.5),new Rotation2d()).rotateAround(new Translation2d(), ReefPole.getPoleFromID(camera_right.getAprilTagID(), camera_right).getRotation());
       }
       
-    
+      //SETTING RELATIVE POSE TO DISTANCE FROM TAG
+      if(camera_left.hasValidTarget() && (int)camera_left.getAprilTagID() == tagId)
+      {
       base.getLocalization()
       .resetRelativePose
       (
         getPose2d()
       );
+      }
+      if(camera_right.hasValidTarget() && (int)camera_right.getAprilTagID() == tagId)
+      {
+      base.getLocalization()
+      .resetRelativePose
+      (
+        getPose2d()
+      ); 
+      }
 
+      //STORES ROBOT ROTATION THAT IS SAME AS TAG ROTATION
       targetMeasurement = base.getLocalization().getRelativePose().getRotation().getDegrees() - thetaMeasurement;
 
     }
 
+    //END COMMAND
     if(closeEnough("limelight-left") || closeEnough("limelight-right"))
     {
       isDone = true;
@@ -244,6 +240,13 @@ import edu.wpi.first.math.trajectory.TrajectoryConfig;
     if(tagId != -1)
     {
 
+    //PRIORITIZE FINAL POSITION OVER TRANSITION POSITION
+    if(base.getLocalization().getRelativePose().getTranslation().getDistance(goalPose2d.getTranslation()) > base.getLocalization().getRelativePose().getTranslation().getDistance(finalPose2d.getTranslation()))
+    {
+      reached = true;
+    }
+
+  
     if(base.getLocalization().getRelativePose().getTranslation().getDistance(goalPose2d.getTranslation()) > 0.075 && !reached)
     {  
     //UP SPEED
@@ -359,25 +362,20 @@ import edu.wpi.first.math.trajectory.TrajectoryConfig;
     }
   }
   }
-    // }
 
     //SUPERSTRUCTURE LOGIC-------------------------------------------------------****
  
  
    // Called once the command ends or is interrupted.
    @Override
-   public void end(boolean interrupted) {
-     
+   public void end(boolean interrupted) {  
      base.getDrivetrain().getRobotSpeeds().setSpeeds("feedback", new ChassisSpeeds(0,0,0));
-    //  if(closeEnough("limelight-left") || closeEnough("limelight-right"))
-    //  {
-    //  }
    }
  
    // Returns true when the command should end.
    @Override
-   public boolean isFinished() {
-     
+   public boolean isFinished() 
+   {  
      return isDone;
    }
  }
