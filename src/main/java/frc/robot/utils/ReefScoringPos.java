@@ -40,39 +40,41 @@ public class ReefScoringPos {
 
      public enum ReefPole {
 
-        NONE(-1, -1, new Pose2d(), new Pose2d(), null, 0),
+        NONE(-1, -1, new Pose2d(), new Pose2d(), null, 0, new Pose2d()),
 
         
-        A(18, 7, new Pose2d(11.757,4.200, Rotation2d.fromDegrees(0)), new Pose2d(3.241, 4.200,  Rotation2d.fromDegrees(180)), Autos.PATHS.SIDEA,0.0),
-        B(18, 7, new Pose2d(11.776,3.880, Rotation2d.fromDegrees(0)), new Pose2d(3.211,3.880, Rotation2d.fromDegrees(180)), Autos.PATHS.SIDEA,0.0),
+        A(18, 7, new Pose2d(11.757,4.200, Rotation2d.fromDegrees(0)), new Pose2d(3.241, 4.200,  Rotation2d.fromDegrees(180)), Autos.PATHS.SIDEA,0.0, new Pose2d()),
+        B(18, 7, new Pose2d(11.776,3.880, Rotation2d.fromDegrees(0)), new Pose2d(3.211,3.880, Rotation2d.fromDegrees(180)), Autos.PATHS.SIDEA,0.0, new Pose2d()),
 
-        C(17, 8, new Pose2d(12.275,3.033,  Rotation2d.fromDegrees(60)), new Pose2d(3.699,3.033, Rotation2d.fromDegrees(-120)), Autos.PATHS.SIDEC,0.0),
-        D(17, 8, new Pose2d(12.574,2.863,  Rotation2d.fromDegrees(60)), new Pose2d(3.969,2.863, Rotation2d.fromDegrees(-120)), Autos.PATHS.SIDEC,0.0),
+        C(17, 8, new Pose2d(12.275,3.033,  Rotation2d.fromDegrees(60)), new Pose2d(3.699,3.033, Rotation2d.fromDegrees(-120)), Autos.PATHS.SIDEC,0.0, new Pose2d()),
+        D(17, 8, new Pose2d(12.574,2.863,  Rotation2d.fromDegrees(60)), new Pose2d(3.969,2.863, Rotation2d.fromDegrees(-120)), Autos.PATHS.SIDEC,0.0, new Pose2d()),
 
-        E(22, 9, new Pose2d(13.561,2.863,  Rotation2d.fromDegrees(120)), new Pose2d(4.956,2.853,  Rotation2d.fromDegrees(-60)), Autos.PATHS.SIDEE,0.0),
-        F(22, 9, new Pose2d(13.861,2.993,  Rotation2d.fromDegrees(120)), new Pose2d(5.245,2.993,  Rotation2d.fromDegrees(-60)), Autos.PATHS.SIDEE,0.0),
+        E(22, 9, new Pose2d(13.561,2.863,  Rotation2d.fromDegrees(120)), new Pose2d(4.956,2.853,  Rotation2d.fromDegrees(-60)), Autos.PATHS.SIDEE,0.0, new Pose2d()),
+        F(22, 9, new Pose2d(13.861,2.993,  Rotation2d.fromDegrees(120)), new Pose2d(5.245,2.993,  Rotation2d.fromDegrees(-60)), Autos.PATHS.SIDEE,0.0, new Pose2d()),
 
-        G(21, 10, new Pose2d(14.369,3.860, Rotation2d.fromDegrees(180)), new Pose2d(5.754,3.860, Rotation2d.fromDegrees(0)), Autos.PATHS.SIDEG,0.0),
-        H(21, 10, new Pose2d(14.359,4.200, Rotation2d.fromDegrees(180)), new Pose2d(5.754,4.200, Rotation2d.fromDegrees(0)), Autos.PATHS.SIDEG,0.0),
+        G(21, 10, new Pose2d(14.369,3.860, Rotation2d.fromDegrees(180)), new Pose2d(5.754,3.860, Rotation2d.fromDegrees(0)), Autos.PATHS.SIDEG,0.0, new Pose2d()),
+        H(21, 10, new Pose2d(14.359,4.200, Rotation2d.fromDegrees(180)), new Pose2d(5.754,4.200, Rotation2d.fromDegrees(0)), Autos.PATHS.SIDEG,0.0, new Pose2d()),
 
-        I(20, 11, new Pose2d(13.880,5.007, Rotation2d.fromDegrees(-120)), new Pose2d(5.285,5.007,  Rotation2d.fromDegrees(60)), Autos.PATHS.SIDEI,0.0),
-        J(20, 11, new Pose2d(13.561,5.207, Rotation2d.fromDegrees(-120)), new Pose2d(4.986,5.207,  Rotation2d.fromDegrees(60)), Autos.PATHS.SIDEI,0.0),
+        I(20, 11, new Pose2d(13.880,5.007, Rotation2d.fromDegrees(-120)), new Pose2d(5.285,5.007,  Rotation2d.fromDegrees(60)), Autos.PATHS.SIDEI,0.0, new Pose2d(0.3464769753795864,0.13341659643371773,Rotation2d.fromDegrees(-120.65686035156251))),
+        J(20, 11, new Pose2d(13.561,5.207, Rotation2d.fromDegrees(-120)), new Pose2d(4.986,5.207,  Rotation2d.fromDegrees(60)), Autos.PATHS.SIDEI,0.0, new Pose2d(0.3696211423562274, 0.643746976507688, Rotation2d.fromDegrees(-120.65686035156251))),
         
-        K(19, 6, new Pose2d(12.594,5.187, Rotation2d.fromDegrees(-60)), new Pose2d(3.989,5.187, Rotation2d.fromDegrees(120)), Autos.PATHS.SIDEK,0.0),
-        L(19, 6, new Pose2d(12.325,5.027, Rotation2d.fromDegrees(-60)), new Pose2d(3.719,5.027, Rotation2d.fromDegrees(120)), Autos.PATHS.SIDEK,0.0);
+        K(19, 6, new Pose2d(12.594,5.187, Rotation2d.fromDegrees(-60)), new Pose2d(3.989,5.187, Rotation2d.fromDegrees(120)), Autos.PATHS.SIDEK,0.0, new Pose2d(-0.11716678946362938, 0.11170796544202566, Rotation2d.fromDegrees(-60.8))),
+        L(19, 6, new Pose2d(12.325,5.027, Rotation2d.fromDegrees(-60)), new Pose2d(3.719,5.027, Rotation2d.fromDegrees(120)), Autos.PATHS.SIDEK,0.0, new Pose2d(-0.09835251441621518, 0.6477634322326651, Rotation2d.fromDegrees(-60.8)));
     
         private final long apriltagIdRed, apriltagIdBlue;
         private final Pose2d redPose, bluePose;
         private final Autos.PATHS path;
         private final double offsetInDegrees;
+        private final Pose2d relativeScoringPos;
     
-        ReefPole(long apriltagIdBlue, long apriltagIdRed, Pose2d redPose, Pose2d bluePose, Autos.PATHS path, double offsetInMetres) {
+        ReefPole(long apriltagIdBlue, long apriltagIdRed, Pose2d redPose, Pose2d bluePose, Autos.PATHS path, double offsetInMetres,Pose2d relativeScoringPos) {
             this.apriltagIdRed = apriltagIdRed;
             this.apriltagIdBlue = apriltagIdBlue;
             this.redPose = redPose;
             this.bluePose = bluePose;
             this.path = path;
             this.offsetInDegrees = offsetInMetres;
+            this.relativeScoringPos = relativeScoringPos;
 
         }
 
@@ -94,6 +96,11 @@ public class ReefScoringPos {
             {
                 return new Translation2d(13.063, 4);
             }
+        }
+
+        public Pose2d getScoringPos()
+        {
+            return relativeScoringPos;
         }
     
         public long getApriltagId(Alliance team) {

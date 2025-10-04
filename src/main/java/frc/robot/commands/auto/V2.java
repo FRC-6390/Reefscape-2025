@@ -62,7 +62,7 @@ import edu.wpi.first.math.trajectory.TrajectoryConfig;
   public double targetMeasurement;
   public double startTime;
   public Pose2d finalPose2d = new Pose2d(Units.inchesToMeters(5), Units.inchesToMeters(6.5),new Rotation2d());
-  public PIDController rController = new PIDController(0.04, 0, 0);
+  public PIDController rController = new PIDController(0.07, 0, 0);
   //0.04
 
   public HolonomicDriveController controller = new HolonomicDriveController(
@@ -189,7 +189,7 @@ import edu.wpi.first.math.trajectory.TrajectoryConfig;
    public boolean closeEnough(String table)
     {
       LimeLight camera = base.getVision().getLimelight(table);
-      return camera.hasValidTarget() && Math.abs(camera.getPoseEstimate(PoseEstimateWithLatencyType.BOT_POSE_MT2_BLUE).getRaw()[9]) <= 0.525 && Math.abs(camera.getTargetHorizontalOffset()) < 6;
+      return camera.hasValidTarget() && Math.abs(camera.getPoseEstimate(PoseEstimateWithLatencyType.BOT_POSE_MT2_BLUE).getRaw()[9]) <= 0.525 && Math.abs(camera.getTargetHorizontalOffset()) < 11;
     }
 
  
@@ -216,21 +216,35 @@ import edu.wpi.first.math.trajectory.TrajectoryConfig;
 
       if(camera_left.hasValidTarget() && (int)camera_left.getAprilTagID() == tagId)
       {
-      goalPose2d = new Pose2d(Units.inchesToMeters(30), rightPole ? Units.inchesToMeters(0) : Units.inchesToMeters(0),new Rotation2d()).rotateAround(new Translation2d(), ReefPole.getPoleFromID(camera_left.getAprilTagID(), camera_left).getRotation());
-      finalPose2d = new Pose2d(Units.inchesToMeters(12), rightPole ? Units.inchesToMeters(7.5) : Units.inchesToMeters(-11.5),new Rotation2d()).rotateAround(new Translation2d(), ReefPole.getPoleFromID(camera_left.getAprilTagID(), camera_left).getRotation());
+        // if(tagId != 19 && tagId != 20)
+        // {
+        goalPose2d = new Pose2d(Units.inchesToMeters(40), rightPole ? Units.inchesToMeters(0) : Units.inchesToMeters(0),new Rotation2d()).rotateAround(new Translation2d(0, 0), ReefPole.getPoleFromID(camera_left.getAprilTagID(), camera_left).getRotation());
+        finalPose2d = new Pose2d(Units.inchesToMeters(15.5), rightPole ? Units.inchesToMeters(6.2) : Units.inchesToMeters(-11.5),new Rotation2d()).rotateAround(new Translation2d(0, 0), ReefPole.getPoleFromID(camera_left.getAprilTagID(), camera_left).getRotation());
+        // }
+        // else
+        // {
+        // goalPose2d = new Pose2d(Units.inchesToMeters(40), rightPole ? Units.inchesToMeters(0) : Units.inchesToMeters(0),new Rotation2d()).rotateAround(new Translation2d(0, 0), ReefPole.getPoleFromID(camera_left.getAprilTagID(), camera_left).getRotation());
+        // finalPose2d = ReefPole.getPoleFromID(tagId, camera_left).getScoringPos();
+        // }
       }
+
       if(camera_right.hasValidTarget() && (int)camera_right.getAprilTagID() == tagId)
       {
-      goalPose2d = new Pose2d(Units.inchesToMeters(30), rightPole ? Units.inchesToMeters(0) : Units.inchesToMeters(0),new Rotation2d()).rotateAround(new Translation2d(), ReefPole.getPoleFromID(camera_right.getAprilTagID(), camera_right).getRotation());
-      finalPose2d = new Pose2d(Units.inchesToMeters(12), rightPole ? Units.inchesToMeters(7.5) : Units.inchesToMeters(-11.5),new Rotation2d()).rotateAround(new Translation2d(), ReefPole.getPoleFromID(camera_right.getAprilTagID(), camera_right).getRotation());
+        // if(tagId != 19 && tagId != 20)
+        // {
+        goalPose2d = new Pose2d(Units.inchesToMeters(40), rightPole ? Units.inchesToMeters(0) : Units.inchesToMeters(0),new Rotation2d()).rotateAround(new Translation2d(0, 0), ReefPole.getPoleFromID(camera_right.getAprilTagID(), camera_right).getRotation());
+        finalPose2d = new Pose2d(Units.inchesToMeters(15.5), rightPole ? Units.inchesToMeters(6.2) : Units.inchesToMeters(-11.5),new Rotation2d()).rotateAround(new Translation2d(0, 0), ReefPole.getPoleFromID(camera_right.getAprilTagID(), camera_right).getRotation());
+        // }
+        // else
+        // {
+        // goalPose2d = new Pose2d(Units.inchesToMeters(40), rightPole ? Units.inchesToMeters(0) : Units.inchesToMeters(0),new Rotation2d()).rotateAround(new Translation2d(0, 0), ReefPole.getPoleFromID(camera_right.getAprilTagID(), camera_right).getRotation());
+        // finalPose2d = ReefPole.getPoleFromID(tagId, camera_right).getScoringPos();
+        // }
       }
       
-    
-      base.getLocalization()
-      .resetRelativePose
-      (
-        getPose2d()
-      );
+      if(camera_left.getAprilTagID() == tagId && camera_right.getAprilTagID() == tagId){
+        base.getLocalization().resetRelativePose(getPose2d());
+      }
 
       targetMeasurement = base.getLocalization().getRelativePose().getRotation().getDegrees() - thetaMeasurement;
 
@@ -255,11 +269,9 @@ import edu.wpi.first.math.trajectory.TrajectoryConfig;
     double xSpeed = controller.getXController().calculate(base.getLocalization().getRelativePose().getX(), goalPose2d.getX());
     double ySpeed = controller.getYController().calculate(base.getLocalization().getRelativePose().getY(), goalPose2d.getY());
 
-    //PUSH DATA
-    SmartDashboard.putData("Rotation Controller", rController);
-    SmartDashboard.putData("X Controller", controller.getXController());
-    SmartDashboard.putData("Y Controller", controller.getYController());
-    
+    SmartDashboard.putNumber("Scoring Pos X", finalPose2d.getX());
+    SmartDashboard.putNumber("Scoring Pos Y", finalPose2d.getY());
+    SmartDashboard.putNumber("Tag ID", tagId);
     
     ChassisSpeeds spds = ChassisSpeeds.fromFieldRelativeSpeeds
                                                 (
@@ -277,8 +289,8 @@ import edu.wpi.first.math.trajectory.TrajectoryConfig;
     {
     reached = true;
 
-    controller.getXController().setP(1.8);
-    controller.getYController().setP(1.8);
+    controller.getXController().setP(1.75);
+    controller.getYController().setP(1.75);
 
     double rSpeed = rController.calculate(base.getLocalization().getRelativePose().getRotation().getDegrees(), ReefPole.getPoleFromID(tagId, camera_left).getRotation().getDegrees() - 180);
     double xSpeed = controller.getXController().calculate(base.getLocalization().getRelativePose().getX(), finalPose2d.getX());

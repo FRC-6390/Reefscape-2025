@@ -4,6 +4,7 @@
 
 package frc.robot;
 
+import ca.frc6390.athena.core.RobotBase;
 import ca.frc6390.athena.sensors.camera.limelight.LimeLight;
 import ca.frc6390.athena.sensors.camera.limelight.LimeLight.PoseEstimateWithLatencyType;
 import edu.wpi.first.math.geometry.Pose2d;
@@ -32,7 +33,56 @@ public class Robot extends TimedRobot {
     m_robotContainer.robotBase.registerPIDCycles(this);
   }
 
+  public Pose2d getPose2d(RobotBase<?> base)
+  {
 
+   LimeLight camera_left = base.getVision().getLimelight("limelight-left");
+   double dist1 = camera_left.getPoseEstimate(PoseEstimateWithLatencyType.BOT_POSE_MT2_BLUE).getRaw()[9];
+   double angle1 =  camera_left.getTargetHorizontalOffset() -base.getLocalization().getRelativePose().getRotation().getDegrees() ;
+   double x1 = (Math.cos(Math.toRadians(angle1)) * dist1) - Units.inchesToMeters(5);
+   double y1 = (Math.sin(Math.toRadians(angle1)) * dist1)- Units.inchesToMeters(10);; 
+
+   
+    LimeLight camera_right = base.getVision().getLimelight("limelight-right");
+    double dist = camera_right.getPoseEstimate(PoseEstimateWithLatencyType.BOT_POSE_MT2_BLUE).getRaw()[9];
+    double angle =  camera_right.getTargetHorizontalOffset() -base.getLocalization().getRelativePose().getRotation().getDegrees() ;
+    double x2 = (Math.cos(Math.toRadians(angle)) * dist) - Units.inchesToMeters(5);
+    double y2 = (Math.sin(Math.toRadians(angle)) * dist) + Units.inchesToMeters(10);
+    double x = 0;
+    double y = 0;
+    if(camera_left.hasValidTarget() && camera_right.hasValidTarget())
+    {
+      x = (x2 + x1)/2;
+      y = (y2 + y1)/2;
+    }
+    else if(!camera_left.hasValidTarget() && camera_right.hasValidTarget())
+    {
+      x = (x2);
+      y = (y2);
+    }
+    else if(camera_left.hasValidTarget() && !camera_right.hasValidTarget())
+    {
+      x = (x1);
+      y = (y1);
+    }
+
+    Pose2d pose = new Pose2d(-x,y,base.getLocalization().getRelativePose().getRotation());
+    if(camera_right.hasValidTarget())
+    {
+     Pose2d pole = ReefPole.getPoleFromID(camera_right.getAprilTagID(), camera_right).getPose2d();
+     base.getLocalization().getField2dObject("flipped").setPose(new Pose2d(pose.getY()+pole.getX(), pose.getX()+pole.getY(), pose.getRotation().plus(pole.getRotation())));
+    base.getLocalization().getField2dObject("RobotPose").setPose(pose.relativeTo(ReefPole.getPoleFromID(camera_right.getAprilTagID(), camera_right).getPose2d()));
+    base.getLocalization().getField2dObject("Tag").setPose(ReefPole.getPoleFromID(camera_right.getAprilTagID(), camera_right).getPose2d());
+    }
+    else if(camera_right.hasValidTarget())
+    {
+     Pose2d pole = ReefPole.getPoleFromID(camera_right.getAprilTagID(), camera_right).getPose2d();
+     base.getLocalization().getField2dObject("flipped").setPose(new Pose2d(pose.getY()+pole.getX(), pose.getX()+pole.getY(), pose.getRotation().plus(pole.getRotation())));    
+     base.getLocalization().getField2dObject("RobotPose").setPose(pose.relativeTo(ReefPole.getPoleFromID(camera_right.getAprilTagID(), camera_right).getPose2d()));
+    base.getLocalization().getField2dObject("Tag").setPose(ReefPole.getPoleFromID(camera_right.getAprilTagID(), camera_right).getPose2d());
+    }
+    return pose;
+  }
    
    
 
@@ -40,10 +90,13 @@ public class Robot extends TimedRobot {
   @Override
   public void robotPeriodic() {
 
-    
-    SmartDashboard.putNumber("X Field", Units.metersToInches( m_robotContainer.robotBase.getLocalization().getFieldPose().getX()));
-    SmartDashboard.putNumber("Y Field",  Units.metersToInches( m_robotContainer.robotBase.getLocalization().getFieldPose().getY()));
-    SmartDashboard.putNumber("Rot Field ", m_robotContainer.robotBase.getLocalization().getFieldPose().getRotation().getDegrees());
+    Pose2d pos = getPose2d(m_robotContainer.robotBase);
+    SmartDashboard.putNumber("X Calibration AutoAlign", pos.getX());
+    SmartDashboard.putNumber("Y Calibration AutoAlign",  pos.getY());
+    SmartDashboard.putNumber("Rot Calibration AutoAlign ", pos.getRotation().getDegrees());
+
+    SmartDashboard.putNumber("X Calibration AutoAlign From Bot", m_robotContainer.robotBase.getLocalization().getRelativePose().getX());
+    SmartDashboard.putNumber("Y Calibration AutoAlign From Bot",  m_robotContainer.robotBase.getLocalization().getRelativePose().getY());
 
     // SmartDashboard.putNumber("W/O TRANSPose X",Units.metersToInches( noTransform.getX()));
     // SmartDashboard.putNumber("W/O TRANSPose Y", Units.metersToInches(noTransform.getY()));
@@ -59,6 +112,7 @@ public class Robot extends TimedRobot {
     pdh.clearStickyFaults();
     m_robotContainer.elevator.reset();
     m_robotContainer.robotBase.resetPIDs();
+    m_robotContainer.robotBase.getLocalization().resetRelativePose(0, 0, 0);
   }
 
   @Override

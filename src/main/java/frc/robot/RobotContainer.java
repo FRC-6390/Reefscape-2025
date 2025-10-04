@@ -49,9 +49,9 @@ import frc.robot.subsystems.superstructure.EndEffector;
 public class RobotContainer {
   public final RobotBase<SwerveDrivetrain> robotBase = Constants.DriveTrain.ROBOT_BASE.create().shuffleboard();
  
-  public final StatefulArmMechanism<ArmState> arm = Constants.EndEffector.ARM_CONFIG.build().shuffleboard("Arm", SendableLevel.DEBUG);
-  public final StatefulArmMechanism<WristState> wrist = Constants.EndEffector.WRIST_CONFIG.build().shuffleboard("Wrist", SendableLevel.DEBUG);
-  public final StatefulMechanism<RollerState> rollers = Constants.EndEffector.CORAL_ROLLERS.build().shuffleboard("Rollers", SendableLevel.DEBUG);
+  public final StatefulArmMechanism<ArmState> arm = Constants.EndEffector.ARM_CONFIG.build();//.shuffleboard("Arm", SendableLevel.DEBUG);
+  public final StatefulArmMechanism<WristState> wrist = Constants.EndEffector.WRIST_CONFIG.build();//.shuffleboard("Wrist", SendableLevel.DEBUG);
+  public final StatefulMechanism<RollerState> rollers = Constants.EndEffector.CORAL_ROLLERS.build();//.shuffleboard("Rollers", SendableLevel.DEBUG);
   public final StatefulMechanism<RollerState> algaeRollers = Constants.EndEffector.ALGAE_ROLLERS.build();//.shuffleboard("Algae Rollers", SendableLevel.COMP);;
   // public SuperStructureTest s = SuperstructureBuilder.builder().addArms(arm, wrist).addMotors(rollers, algaeRollers).build();
   public BooleanSupplier hasTarget;
@@ -59,7 +59,7 @@ public class RobotContainer {
   public final EndEffector endEffector = new EndEffector(arm, wrist, rollers, algaeRollers).setAutoEndScoring(false);
   public Superstructure superstructure = new Superstructure(elevator, endEffector);
   public CANdleSubsystem candle = new CANdleSubsystem(robotBase);
-  public static SuperstructureState selectedState = SuperstructureState.L1;
+  public static SuperstructureState selectedState = SuperstructureState.L4;
   public Command alignRight = new V2(robotBase, "limelight-left", true, superstructure, () -> selectedState);
   public Command alginLeft = new V2(robotBase, "limelight-right", false, superstructure, () -> selectedState);
 
@@ -98,7 +98,7 @@ public class RobotContainer {
     NamedCommands.registerCommand("WaitForTag", Commands.waitUntil(hasTarget));
     
     NamedCommands.registerCommand("Home", superstructure.setState(SuperstructureState.HomePID));
-    NamedCommands.registerCommand("Orient", new InstantCommand(() -> robotBase.getLocalization().resetRelativePose(new Pose2d(0,0, Rotation2d.fromDegrees(180)))));
+    NamedCommands.registerCommand("OrientLeftSide", new InstantCommand(() -> robotBase.getLocalization().resetRelativePose(new Pose2d(0,0, Rotation2d.fromRadians(-2.3631872270622845)))));
 
     NamedCommands.registerCommand("Intake", Commands.either(superstructure.setState(SuperstructureState.Intaking), Commands.none(), () -> !endEffector.hasGamePiece()));
 
@@ -112,8 +112,8 @@ public class RobotContainer {
     NamedCommands.registerCommand("WaitForEffector",superstructure.WaitForL4());
     NamedCommands.registerCommand("WaitForEjector", superstructure.WaitForEjector());
 
-    NamedCommands.registerCommand("AlignRight", new V2(robotBase, "limelight-left", true, superstructure, () -> selectedState));
-    NamedCommands.registerCommand("AlignLeft", new V2(robotBase, "limelight-right", false, superstructure, () -> selectedState));
+    NamedCommands.registerCommand("AlignRight", alignRight);
+    NamedCommands.registerCommand("AlignLeft", alginLeft);
     NamedCommands.registerCommand("DisableLocal", 
     new  InstantCommand(() ->
     {

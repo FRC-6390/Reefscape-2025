@@ -7,13 +7,129 @@
         {
           "type": "named",
           "data": {
-            "name": "Orient"
+            "name": "OrientLeftSide"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "DisableLocal"
+          }
+        },
+        {
+          "type": "race",
+          "data": {
+            "commands": [
+              {
+                "type": "path",
+                "data": {
+                  "pathName": "CompLeftSide.0"
+                }
+              },
+              {
+                "type": "named",
+                "data": {
+                  "name": "WaitForTag"
+                }
+              }
+            ]
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "AlignLeft"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "EnableLocal"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "WaitForElevator"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "StartEject"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "WaitForEjector"
+          }
+        },
+        {
+          "type": "wait",
+          "data": {
+            "waitTime": 0.5
           }
         },
         {
           "type": "path",
           "data": {
-            "pathName": "CompLeftSide.0"
+            "pathName": "CompLeftSide.1"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "Intake"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "CompLeftSide.2"
+          }
+        },
+        {
+          "type": "race",
+          "data": {
+            "commands": [
+              {
+                "type": "path",
+                "data": {
+                  "pathName": "CompLeftSide.3"
+                }
+              },
+              {
+                "type": "named",
+                "data": {
+                  "name": "WaitForTag"
+                }
+              }
+            ]
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "AlignLeft"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "WaitForElevator"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "StartEject"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "WaitForEjector"
           }
         }
       ]
