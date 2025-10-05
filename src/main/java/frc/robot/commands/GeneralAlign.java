@@ -1,5 +1,6 @@
 package frc.robot.commands;
 
+import java.security.PublicKey;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -59,6 +60,11 @@ public class GeneralAlign {
             }
     }
     return mostFrequent;
+    }
+    
+    public int getTagId()
+    {
+        return tagId;
     }
     
     public int setTagId()

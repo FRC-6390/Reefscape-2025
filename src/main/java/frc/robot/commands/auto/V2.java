@@ -201,33 +201,18 @@ import edu.wpi.first.math.trajectory.TrajectoryConfig;
       //CALCULATING FINAL DESIRED POSITION 
       if(camera_left.hasValidTarget() && (int)camera_left.getAprilTagID() == tagId)
       {
-        // if(tagId != 19 && tagId != 20)
-        // {
         goalPose2d = new Pose2d(Units.inchesToMeters(40), rightPole ? Units.inchesToMeters(0) : Units.inchesToMeters(0),new Rotation2d()).rotateAround(new Translation2d(0, 0), ReefPole.getPoleFromID(camera_left.getAprilTagID(), camera_left).getRotation());
         finalPose2d = new Pose2d(Units.inchesToMeters(15.5), rightPole ? Units.inchesToMeters(6.2) : Units.inchesToMeters(-11.5),new Rotation2d()).rotateAround(new Translation2d(0, 0), ReefPole.getPoleFromID(camera_left.getAprilTagID(), camera_left).getRotation());
-        // }
-        // else
-        // {
-        // goalPose2d = new Pose2d(Units.inchesToMeters(40), rightPole ? Units.inchesToMeters(0) : Units.inchesToMeters(0),new Rotation2d()).rotateAround(new Translation2d(0, 0), ReefPole.getPoleFromID(camera_left.getAprilTagID(), camera_left).getRotation());
-        // finalPose2d = ReefPole.getPoleFromID(tagId, camera_left).getScoringPos();
-        // }
       }
 
       if(camera_right.hasValidTarget() && (int)camera_right.getAprilTagID() == tagId)
       {
-        // if(tagId != 19 && tagId != 20)
-        // {
         goalPose2d = new Pose2d(Units.inchesToMeters(40), rightPole ? Units.inchesToMeters(0) : Units.inchesToMeters(0),new Rotation2d()).rotateAround(new Translation2d(0, 0), ReefPole.getPoleFromID(camera_right.getAprilTagID(), camera_right).getRotation());
         finalPose2d = new Pose2d(Units.inchesToMeters(15.5), rightPole ? Units.inchesToMeters(6.2) : Units.inchesToMeters(-11.5),new Rotation2d()).rotateAround(new Translation2d(0, 0), ReefPole.getPoleFromID(camera_right.getAprilTagID(), camera_right).getRotation());
-        // }
-        // else
-        // {
-        // goalPose2d = new Pose2d(Units.inchesToMeters(40), rightPole ? Units.inchesToMeters(0) : Units.inchesToMeters(0),new Rotation2d()).rotateAround(new Translation2d(0, 0), ReefPole.getPoleFromID(camera_right.getAprilTagID(), camera_right).getRotation());
-        // finalPose2d = ReefPole.getPoleFromID(tagId, camera_right).getScoringPos();
-        // }
       }
       
-      if(camera_left.getAprilTagID() == tagId && camera_right.getAprilTagID() == tagId){
+      if(camera_left.getAprilTagID() == tagId && camera_right.getAprilTagID() == tagId)
+      {
         base.getLocalization().resetRelativePose(getPose2d());
       }
 
@@ -287,13 +272,7 @@ import edu.wpi.first.math.trajectory.TrajectoryConfig;
 
     double rSpeed = rController.calculate(base.getLocalization().getRelativePose().getRotation().getDegrees(), ReefPole.getPoleFromID(tagId, camera_left).getRotation().getDegrees() - 180);
     double xSpeed = controller.getXController().calculate(base.getLocalization().getRelativePose().getX(), finalPose2d.getX());
-    double ySpeed = controller.getYController().calculate(base.getLocalization().getRelativePose().getY(), finalPose2d.getY());
-
-    //PUSH DATA
-    SmartDashboard.putData("Rotation Controller", rController);
-    SmartDashboard.putData("X Controller", controller.getXController());
-    SmartDashboard.putData("Y Controller", controller.getYController());
-    
+    double ySpeed = controller.getYController().calculate(base.getLocalization().getRelativePose().getY(), finalPose2d.getY());   
     
     ChassisSpeeds spds = ChassisSpeeds.fromFieldRelativeSpeeds
                                                 (
@@ -364,17 +343,11 @@ import edu.wpi.first.math.trajectory.TrajectoryConfig;
     }
   }
   }
-
-    //SUPERSTRUCTURE LOGIC-------------------------------------------------------****
- 
- 
-   // Called once the command ends or is interrupted.
    @Override
    public void end(boolean interrupted) {  
      base.getDrivetrain().getRobotSpeeds().setSpeeds("feedback", new ChassisSpeeds(0,0,0));
    }
  
-   // Returns true when the command should end.
    @Override
    public boolean isFinished() 
    {  

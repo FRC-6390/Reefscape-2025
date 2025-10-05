@@ -5,43 +5,61 @@
 package frc.robot.commands.auto;
 
 import ca.frc6390.athena.core.RobotBase;
+import ca.frc6390.athena.sensors.camera.limelight.LimeLight;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Translation2d;
+import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.commands.GeneralAlign;
+import frc.robot.utils.ReefScoringPos.ReefPole;
 
 /* You should consider using the more terse Command factories API instead https://docs.wpilib.org/en/stable/docs/software/commandbased/organizing-command-based.html#defining-commands */
 public class AutoAling extends Command {
   /** Creates a new AutoAling. */
   public GeneralAlign align;
   public RobotBase<?> base;
-  public AutoAling(GeneralAlign align, RobotBase<?> base) {
+  public Pose2d goalPose2d;
+  public boolean rightPole;
+  public Pose2d finalPose2d;
+  public AutoAling(GeneralAlign align, RobotBase<?> base, boolean rightPole) {
     this.align = align;
     this.base = base;
-    // Use addRequirements() here to declare subsystem dependencies.
+    this.rightPole = rightPole;
   }
 
-  // Called when the command is initially scheduled.
   @Override
   public void initialize() 
   {
     align.reset();
   }
 
-  // Called every time the scheduler runs while the command is scheduled.
   @Override
   public void execute() 
   {
     align.setTagId();
+    LimeLight camera_left = base.getVision().getLimelight("limelight-left");
+    LimeLight camera_right = base.getVision().getLimelight("limelight-right");
+
+    if(camera_left.hasValidTarget() && (int)camera_left.getAprilTagID() == align.getTagId())
+      {      
+        goalPose2d = new Pose2d(Units.inchesToMeters(40), rightPole ? Units.inchesToMeters(0) : Units.inchesToMeters(0),new Rotation2d()).rotateAround(new Translation2d(0, 0), ReefPole.getPoleFromID(camera_left.getAprilTagID(), camera_left).getRotation());
+        finalPose2d = new Pose2d(Units.inchesToMeters(15.5), rightPole ? Units.inchesToMeters(6.2) : Units.inchesToMeters(-11.5),new Rotation2d()).rotateAround(new Translation2d(0, 0), ReefPole.getPoleFromID(camera_left.getAprilTagID(), camera_left).getRotation());  
+      }
+
+      if(camera_right.hasValidTarget() && (int)camera_right.getAprilTagID() == align.getTagId())
+      {    
+        goalPose2d = new Pose2d(Units.inchesToMeters(40), rightPole ? Units.inchesToMeters(0) : Units.inchesToMeters(0),new Rotation2d()).rotateAround(new Translation2d(0, 0), ReefPole.getPoleFromID(camera_right.getAprilTagID(), camera_right).getRotation());
+        finalPose2d = new Pose2d(Units.inchesToMeters(15.5), rightPole ? Units.inchesToMeters(6.2) : Units.inchesToMeters(-11.5),new Rotation2d()).rotateAround(new Translation2d(0, 0), ReefPole.getPoleFromID(camera_right.getAprilTagID(), camera_right).getRotation());     
+      }
+    
     align.getRobotPositionRelativeToTag(1, 1, true);
-    base.getRobotSpeeds().setSpeeds("feedback", align.calculateSpeeds(new Pose2d(3, 0, new Rotation2d()), new Pose2d(4,1, new Rotation2d()))); 
+    base.getRobotSpeeds().setSpeeds("feedback", align.calculateSpeeds(goalPose2d, finalPose2d)); 
   }
 
-  // Called once the command ends or is interrupted.
   @Override
   public void end(boolean interrupted) {}
 
-  // Returns true when the command should end.
   @Override
   public boolean isFinished() {
     return false;
