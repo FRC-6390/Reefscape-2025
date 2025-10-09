@@ -90,13 +90,19 @@
           }
         },
         {
+          "type": "path",
+          "data": {
+            "pathName": "CompLeftSide.3"
+          }
+        },
+        {
           "type": "race",
           "data": {
             "commands": [
               {
                 "type": "path",
                 "data": {
-                  "pathName": "CompLeftSide.3"
+                  "pathName": "CompLeftSide.4"
                 }
               },
               {
@@ -111,13 +117,7 @@
         {
           "type": "named",
           "data": {
-            "name": "AlignLeft"
-          }
-        },
-        {
-          "type": "named",
-          "data": {
-            "name": "WaitForElevator"
+            "name": "AlignRight"
           }
         },
         {
@@ -129,7 +129,32 @@
         {
           "type": "named",
           "data": {
-            "name": "WaitForEjector"
+            "name": "StartEject"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "StartEject"
+          }
+        },
+        {
+          "type": "race",
+          "data": {
+            "commands": [
+              {
+                "type": "named",
+                "data": {
+                  "name": "WaitForElevator"
+                }
+              },
+              {
+                "type": "wait",
+                "data": {
+                  "waitTime": 1.0
+                }
+              }
+            ]
           }
         }
       ]
