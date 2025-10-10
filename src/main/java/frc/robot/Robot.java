@@ -25,6 +25,9 @@ import frc.robot.utils.ReefScoringPos.ReefPole;
 
 public class Robot extends TimedRobot {
   private Command m_autonomousCommand;
+  private Pose2d rightGoalPos = new Pose2d();
+  private Pose2d leftGoalPos = new Pose2d();
+
   private final RobotContainer m_robotContainer;
   PowerDistribution pdh;
   public Robot() {  
@@ -91,18 +94,26 @@ public class Robot extends TimedRobot {
   public void robotPeriodic() {
 
     Pose2d pos = getPose2d(m_robotContainer.robotBase);
-    SmartDashboard.putNumber("X Calibration AutoAlign", pos.getX());
-    SmartDashboard.putNumber("Y Calibration AutoAlign",  pos.getY());
-    SmartDashboard.putNumber("Rot Calibration AutoAlign ", pos.getRotation().getDegrees());
+    Pose2d goodRight = new Pose2d();
+    Pose2d goodLeft = new Pose2d();
 
-    SmartDashboard.putNumber("X Calibration AutoAlign From Bot", m_robotContainer.robotBase.getLocalization().getRelativePose().getX());
-    SmartDashboard.putNumber("Y Calibration AutoAlign From Bot",  m_robotContainer.robotBase.getLocalization().getRelativePose().getY());
+    LimeLight camera_right = m_robotContainer.robotBase.getVision().getLimelight("limelight-right");
+    LimeLight camera_left = m_robotContainer.robotBase.getVision().getLimelight("limelight-left");
+   
+    SmartDashboard.putNumber("AutoAlignCalibration X Right", pos.getX());
+    SmartDashboard.putNumber("AutoAlignCalibration Y Right", pos.getY());
 
-    // SmartDashboard.putNumber("W/O TRANSPose X",Units.metersToInches( noTransform.getX()));
-    // SmartDashboard.putNumber("W/O TRANSPose Y", Units.metersToInches(noTransform.getY()));
-    // SmartDashboard.putNumber("W/O TRANSRotation", noTransform.getRotation().getDegrees());
-    // SmartDashboard.putNumber("Tag Rot",    ReefPole.getPoleFromID(m_robotContainer.robotBase.getVision().getLimelight("limelight-left").getAprilTagID(), m_robotContainer.robotBase.getVision().getLimelight("limelight-left")).getPose2d().getRotation().getDegrees());
 
+    // if(camera_right.hasValidTarget())
+    // {
+    // rightGoalPos = new Pose2d(Units.inchesToMeters(SmartDashboard.getNumber("AutoAlign Y Offset", 15.5)), Units.inchesToMeters(SmartDashboard.getNumber("AutoAlign X Offset Right", 11.5)),new Rotation2d()).rotateAround(new Translation2d(0, 0), ReefPole.getPoleFromID(camera_right.getAprilTagID(), camera_right).getRotation());
+    // }
+    // if(camera_left.hasValidTarget())
+    // {
+    // leftGoalPos = new Pose2d(Units.inchesToMeters(SmartDashboard.getNumber("AutoAlign Y Offset", 15.5)), Units.inchesToMeters(SmartDashboard.getNumber("AutoAlign Y Offset Left", -6.2)),new Rotation2d()).rotateAround(new Translation2d(0, 0), ReefPole.getPoleFromID(camera_left.getAprilTagID(), camera_left).getRotation());
+    // }
+    // SmartDashboard.putNumber("AutoAlign Calibration Distance To Right", pos.getTranslation().getDistance(rightGoalPos.getTranslation()));
+    // SmartDashboard.putNumber("AutoAlign Calibration Distance To Left", pos.getTranslation().getDistance(leftGoalPos.getTranslation()));
     CommandScheduler.getInstance().run();
   }
 
@@ -113,6 +124,9 @@ public class Robot extends TimedRobot {
     m_robotContainer.elevator.reset();
     m_robotContainer.robotBase.resetPIDs();
     m_robotContainer.robotBase.getLocalization().resetRelativePose(0, 0, 0);
+    // SmartDashboard.putNumber("AutoAlign Y Offset", 15.5);
+    // SmartDashboard.putNumber("AutoAlign X Offset Left", 11.5);
+    // SmartDashboard.putNumber("AutoAlign X Offset Right", -6.2);
   }
 
   @Override

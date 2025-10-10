@@ -55,7 +55,8 @@ public interface Constants {
                                                             )   
                                                     .setEncoderOffset(ENCODER_OFFSETS)
                                                     .setCanbus(CANIVORE_CANBUS)
-                                                    .setCurrentLimit(80);
+                                                    
+                                                    .setCurrentLimit(60);
 
         //UP 40
         //LEFT SIDE 8.5

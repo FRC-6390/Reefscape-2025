@@ -8,6 +8,7 @@ import ca.frc6390.athena.sensors.camera.limelight.LimeLightConfig;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
+import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import frc.robot.Autos;
@@ -42,24 +43,25 @@ public class ReefScoringPos {
 
         NONE(-1, -1, new Pose2d(), new Pose2d(), null, 0, new Pose2d()),
 
-        
-        A(18, 7, new Pose2d(11.757,4.200, Rotation2d.fromDegrees(0)), new Pose2d(3.241, 4.200,  Rotation2d.fromDegrees(180)), Autos.PATHS.SIDEA,0.0, new Pose2d()),
-        B(18, 7, new Pose2d(11.776,3.880, Rotation2d.fromDegrees(0)), new Pose2d(3.211,3.880, Rotation2d.fromDegrees(180)), Autos.PATHS.SIDEA,0.0, new Pose2d()),
+        //LEFT
+        A(18, 7, new Pose2d(11.757,4.200, Rotation2d.fromDegrees(0)), new Pose2d(3.241, 4.200,  Rotation2d.fromDegrees(180)), Autos.PATHS.SIDEA,0.0, new Pose2d(Units.inchesToMeters(15.5), Units.inchesToMeters(-11.5),new Rotation2d())),
+        //RIGHT
+        B(18, 7, new Pose2d(11.776,3.880, Rotation2d.fromDegrees(0)), new Pose2d(3.211,3.880, Rotation2d.fromDegrees(180)), Autos.PATHS.SIDEA,0.0, new Pose2d(Units.inchesToMeters(15.5), Units.inchesToMeters(6.2),new Rotation2d())),
 
-        C(17, 8, new Pose2d(12.275,3.033,  Rotation2d.fromDegrees(60)), new Pose2d(3.699,3.033, Rotation2d.fromDegrees(-120)), Autos.PATHS.SIDEC,0.0, new Pose2d()),
-        D(17, 8, new Pose2d(12.574,2.863,  Rotation2d.fromDegrees(60)), new Pose2d(3.969,2.863, Rotation2d.fromDegrees(-120)), Autos.PATHS.SIDEC,0.0, new Pose2d()),
+        C(17, 8, new Pose2d(12.275,3.033,  Rotation2d.fromDegrees(60)), new Pose2d(3.699,3.033, Rotation2d.fromDegrees(-120)), Autos.PATHS.SIDEC,0.0, new Pose2d(Units.inchesToMeters(15.5), Units.inchesToMeters(-11.5),new Rotation2d())),
+        D(17, 8, new Pose2d(12.574,2.863,  Rotation2d.fromDegrees(60)), new Pose2d(3.969,2.863, Rotation2d.fromDegrees(-120)), Autos.PATHS.SIDEC,0.0, new Pose2d(Units.inchesToMeters(15.5), Units.inchesToMeters(-6.2),new Rotation2d())),
 
-        E(22, 9, new Pose2d(13.561,2.863,  Rotation2d.fromDegrees(120)), new Pose2d(4.956,2.853,  Rotation2d.fromDegrees(-60)), Autos.PATHS.SIDEE,0.0, new Pose2d()),
-        F(22, 9, new Pose2d(13.861,2.993,  Rotation2d.fromDegrees(120)), new Pose2d(5.245,2.993,  Rotation2d.fromDegrees(-60)), Autos.PATHS.SIDEE,0.0, new Pose2d()),
+        E(22, 9, new Pose2d(13.561,2.863,  Rotation2d.fromDegrees(120)), new Pose2d(4.956,2.853,  Rotation2d.fromDegrees(-60)), Autos.PATHS.SIDEE,0.0, new Pose2d(Units.inchesToMeters(15.5), Units.inchesToMeters(-11.5),new Rotation2d())),
+        F(22, 9, new Pose2d(13.861,2.993,  Rotation2d.fromDegrees(120)), new Pose2d(5.245,2.993,  Rotation2d.fromDegrees(-60)), Autos.PATHS.SIDEE,0.0, new Pose2d(Units.inchesToMeters(15.5), Units.inchesToMeters(6.2),new Rotation2d())),
 
-        G(21, 10, new Pose2d(14.369,3.860, Rotation2d.fromDegrees(180)), new Pose2d(5.754,3.860, Rotation2d.fromDegrees(0)), Autos.PATHS.SIDEG,0.0, new Pose2d()),
-        H(21, 10, new Pose2d(14.359,4.200, Rotation2d.fromDegrees(180)), new Pose2d(5.754,4.200, Rotation2d.fromDegrees(0)), Autos.PATHS.SIDEG,0.0, new Pose2d()),
+        G(21, 10, new Pose2d(14.369,3.860, Rotation2d.fromDegrees(180)), new Pose2d(5.754,3.860, Rotation2d.fromDegrees(0)), Autos.PATHS.SIDEG,0.0, new Pose2d(Units.inchesToMeters(15.5), Units.inchesToMeters(-11.5),new Rotation2d())),
+        H(21, 10, new Pose2d(14.359,4.200, Rotation2d.fromDegrees(180)), new Pose2d(5.754,4.200, Rotation2d.fromDegrees(0)), Autos.PATHS.SIDEG,0.0, new Pose2d(Units.inchesToMeters(15.5), Units.inchesToMeters(-6.2),new Rotation2d())),
 
-        I(20, 11, new Pose2d(13.880,5.007, Rotation2d.fromDegrees(-120)), new Pose2d(5.285,5.007,  Rotation2d.fromDegrees(60)), Autos.PATHS.SIDEI,0.0, new Pose2d(0.3464769753795864,0.13341659643371773,Rotation2d.fromDegrees(-120.65686035156251))),
-        J(20, 11, new Pose2d(13.561,5.207, Rotation2d.fromDegrees(-120)), new Pose2d(4.986,5.207,  Rotation2d.fromDegrees(60)), Autos.PATHS.SIDEI,0.0, new Pose2d(0.3696211423562274, 0.643746976507688, Rotation2d.fromDegrees(-120.65686035156251))),
-        
-        K(19, 6, new Pose2d(12.594,5.187, Rotation2d.fromDegrees(-60)), new Pose2d(3.989,5.187, Rotation2d.fromDegrees(120)), Autos.PATHS.SIDEK,0.0, new Pose2d(-0.11716678946362938, 0.11170796544202566, Rotation2d.fromDegrees(-60.8))),
-        L(19, 6, new Pose2d(12.325,5.027, Rotation2d.fromDegrees(-60)), new Pose2d(3.719,5.027, Rotation2d.fromDegrees(120)), Autos.PATHS.SIDEK,0.0, new Pose2d(-0.09835251441621518, 0.6477634322326651, Rotation2d.fromDegrees(-60.8)));
+        I(20, 11, new Pose2d(13.880,5.007, Rotation2d.fromDegrees(-120)), new Pose2d(5.285,5.007,  Rotation2d.fromDegrees(60)), Autos.PATHS.SIDEI,0.0, new Pose2d(0, 0.4761612290704572,new Rotation2d())),
+        J(20, 11, new Pose2d(13.561,5.207, Rotation2d.fromDegrees(-120)), new Pose2d(4.986,5.207,  Rotation2d.fromDegrees(60)), Autos.PATHS.SIDEI,0.0, new Pose2d(-0.24, 0.313,new Rotation2d())),
+        //new Pose2d(Units.inchesToMeters(24), Units.inchesToMeters(-7.8),new Rotation2d())
+        K(19, 6, new Pose2d(12.594,5.187, Rotation2d.fromDegrees(-60)), new Pose2d(3.989,5.187, Rotation2d.fromDegrees(120)), Autos.PATHS.SIDEK,0.0, new Pose2d(Units.inchesToMeters(15.2), Units.inchesToMeters(-9.378669263596116),new Rotation2d())),
+        L(19, 6, new Pose2d(12.325,5.027, Rotation2d.fromDegrees(-60)), new Pose2d(3.719,5.027, Rotation2d.fromDegrees(120)), Autos.PATHS.SIDEK,0.0, new Pose2d(Units.inchesToMeters(15.2), Units.inchesToMeters(5.68),new Rotation2d()));
     
         private final long apriltagIdRed, apriltagIdBlue;
         private final Pose2d redPose, bluePose;

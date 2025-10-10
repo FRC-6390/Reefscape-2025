@@ -57,7 +57,7 @@ import edu.wpi.first.math.trajectory.TrajectoryConfig;
   public MedianFilter filter;
   public double targetMeasurement;
   public Pose2d finalPose2d = new Pose2d(Units.inchesToMeters(5), Units.inchesToMeters(6.5),new Rotation2d());
-  public PIDController rController = new PIDController(0.07, 0, 0);
+  public PIDController rController = new PIDController(0.11, 0, 0);
   //0.04
 
   public HolonomicDriveController controller = new HolonomicDriveController(
@@ -121,15 +121,15 @@ import edu.wpi.first.math.trajectory.TrajectoryConfig;
     LimeLight camera_left = base.getVision().getLimelight("limelight-left");
     double dist1 = camera_left.getPoseEstimate(PoseEstimateWithLatencyType.BOT_POSE_MT2_BLUE).getRaw()[9];
     double angle1 =  camera_left.getTargetHorizontalOffset() -base.getLocalization().getRelativePose().getRotation().getDegrees() ;
-    double x1 = (Math.cos(Math.toRadians(angle1)) * dist1) - Units.inchesToMeters(5);
-    double y1 = (Math.sin(Math.toRadians(angle1)) * dist1)- Units.inchesToMeters(10);; 
+    double x1 = (Math.cos(Math.toRadians(angle1)) * dist1) - Units.inchesToMeters(0.5);
+    double y1 = (Math.sin(Math.toRadians(angle1)) * dist1)- Units.inchesToMeters(9.25);; 
 
     
      LimeLight camera_right = base.getVision().getLimelight("limelight-right");
      double dist = camera_right.getPoseEstimate(PoseEstimateWithLatencyType.BOT_POSE_MT2_BLUE).getRaw()[9];
      double angle =  camera_right.getTargetHorizontalOffset() -base.getLocalization().getRelativePose().getRotation().getDegrees() ;
-     double x2 = (Math.cos(Math.toRadians(angle)) * dist) - Units.inchesToMeters(5);
-     double y2 = (Math.sin(Math.toRadians(angle)) * dist) + Units.inchesToMeters(10);
+     double x2 = (Math.cos(Math.toRadians(angle)) * dist) - Units.inchesToMeters(0.5);
+     double y2 = (Math.sin(Math.toRadians(angle)) * dist) + Units.inchesToMeters(9.25);
      double x = 0;
      double y = 0;
      if(camera_left.hasValidTarget() && camera_right.hasValidTarget())
@@ -169,7 +169,7 @@ import edu.wpi.first.math.trajectory.TrajectoryConfig;
    public boolean closeEnough(String table)
     {
       LimeLight camera = base.getVision().getLimelight(table);
-      return camera.hasValidTarget() && Math.abs(camera.getPoseEstimate(PoseEstimateWithLatencyType.BOT_POSE_MT2_BLUE).getRaw()[9]) <= 0.525 && Math.abs(camera.getTargetHorizontalOffset()) < 11;
+      return camera.hasValidTarget() && Math.abs(camera.getPoseEstimate(PoseEstimateWithLatencyType.BOT_POSE_MT2_BLUE).getRaw()[9]) <= 0.525 && Math.abs(camera.getTargetHorizontalOffset()) < 5;
     }
 
  
@@ -201,14 +201,22 @@ import edu.wpi.first.math.trajectory.TrajectoryConfig;
       //CALCULATING FINAL DESIRED POSITION 
       if(camera_left.hasValidTarget() && (int)camera_left.getAprilTagID() == tagId)
       {
+        ReefPole pole = ReefPole.getPoleFromID(camera_left.getAprilTagID(), rightPole ? camera_left : camera_right);
+        double x = pole.getScoringPos().getX();
+        double y = pole.getScoringPos().getY();
+
         goalPose2d = new Pose2d(Units.inchesToMeters(40), rightPole ? Units.inchesToMeters(0) : Units.inchesToMeters(0),new Rotation2d()).rotateAround(new Translation2d(0, 0), ReefPole.getPoleFromID(camera_left.getAprilTagID(), camera_left).getRotation());
-        finalPose2d = new Pose2d(Units.inchesToMeters(15.5), rightPole ? Units.inchesToMeters(6.2) : Units.inchesToMeters(-11.5),new Rotation2d()).rotateAround(new Translation2d(0, 0), ReefPole.getPoleFromID(camera_left.getAprilTagID(), camera_left).getRotation());
+        finalPose2d = new Pose2d(x, y,new Rotation2d());//.rotateAround(new Translation2d(0, 0), ReefPole.getPoleFromID(camera_left.getAprilTagID(), camera_left).getRotation());
       }
 
       if(camera_right.hasValidTarget() && (int)camera_right.getAprilTagID() == tagId)
       {
+        ReefPole pole = ReefPole.getPoleFromID(camera_right.getAprilTagID(), rightPole ? camera_left : camera_right);
+        double x = pole.getScoringPos().getX();
+        double y = pole.getScoringPos().getY();
+
         goalPose2d = new Pose2d(Units.inchesToMeters(40), rightPole ? Units.inchesToMeters(0) : Units.inchesToMeters(0),new Rotation2d()).rotateAround(new Translation2d(0, 0), ReefPole.getPoleFromID(camera_right.getAprilTagID(), camera_right).getRotation());
-        finalPose2d = new Pose2d(Units.inchesToMeters(15.5), rightPole ? Units.inchesToMeters(6.2) : Units.inchesToMeters(-11.5),new Rotation2d()).rotateAround(new Translation2d(0, 0), ReefPole.getPoleFromID(camera_right.getAprilTagID(), camera_right).getRotation());
+        finalPose2d = new Pose2d(x, y, new Rotation2d());//.rotateAround(new Translation2d(0, 0), ReefPole.getPoleFromID(camera_right.getAprilTagID(), camera_right).getRotation());
       }
       
       if(camera_left.getAprilTagID() == tagId && camera_right.getAprilTagID() == tagId)
