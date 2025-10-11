@@ -20,100 +20,29 @@ import edu.wpi.first.wpilibj.PowerDistribution.ModuleType;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
+import frc.robot.commands.auto.V2;
 import frc.robot.subsystems.Superstructure.SuperstructureState;
 import frc.robot.utils.ReefScoringPos.ReefPole;
 
 public class Robot extends TimedRobot {
   private Command m_autonomousCommand;
-  private Pose2d rightGoalPos = new Pose2d();
-  private Pose2d leftGoalPos = new Pose2d();
 
   private final RobotContainer m_robotContainer;
+  public V2 calibrate; //= new V2(m_robotContainer.robotBase, "limelight-right", false, m_robotContainer.superstructure, () -> m_robotContainer.selectedState);
+
   PowerDistribution pdh;
   public Robot() {  
+    
     m_robotContainer = new RobotContainer();
     pdh = new PowerDistribution(14, ModuleType.kRev);
     m_robotContainer.robotBase.registerPIDCycles(this);
+    calibrate = new V2(m_robotContainer.robotBase, "limelight-right", false, m_robotContainer.superstructure, () -> m_robotContainer.selectedState);
+
   }
-
-  public Pose2d getPose2d(RobotBase<?> base)
-  {
-
-   LimeLight camera_left = base.getVision().getLimelight("limelight-left");
-   double dist1 = camera_left.getPoseEstimate(PoseEstimateWithLatencyType.BOT_POSE_MT2_BLUE).getRaw()[9];
-   double angle1 =  camera_left.getTargetHorizontalOffset() -base.getLocalization().getRelativePose().getRotation().getDegrees() ;
-   double x1 = (Math.cos(Math.toRadians(angle1)) * dist1) - Units.inchesToMeters(5);
-   double y1 = (Math.sin(Math.toRadians(angle1)) * dist1)- Units.inchesToMeters(10);; 
-
-   
-    LimeLight camera_right = base.getVision().getLimelight("limelight-right");
-    double dist = camera_right.getPoseEstimate(PoseEstimateWithLatencyType.BOT_POSE_MT2_BLUE).getRaw()[9];
-    double angle =  camera_right.getTargetHorizontalOffset() -base.getLocalization().getRelativePose().getRotation().getDegrees() ;
-    double x2 = (Math.cos(Math.toRadians(angle)) * dist) - Units.inchesToMeters(5);
-    double y2 = (Math.sin(Math.toRadians(angle)) * dist) + Units.inchesToMeters(10);
-    double x = 0;
-    double y = 0;
-    if(camera_left.hasValidTarget() && camera_right.hasValidTarget())
-    {
-      x = (x2 + x1)/2;
-      y = (y2 + y1)/2;
-    }
-    else if(!camera_left.hasValidTarget() && camera_right.hasValidTarget())
-    {
-      x = (x2);
-      y = (y2);
-    }
-    else if(camera_left.hasValidTarget() && !camera_right.hasValidTarget())
-    {
-      x = (x1);
-      y = (y1);
-    }
-
-    Pose2d pose = new Pose2d(-x,y,base.getLocalization().getRelativePose().getRotation());
-    if(camera_right.hasValidTarget())
-    {
-     Pose2d pole = ReefPole.getPoleFromID(camera_right.getAprilTagID(), camera_right).getPose2d();
-     base.getLocalization().getField2dObject("flipped").setPose(new Pose2d(pose.getY()+pole.getX(), pose.getX()+pole.getY(), pose.getRotation().plus(pole.getRotation())));
-    base.getLocalization().getField2dObject("RobotPose").setPose(pose.relativeTo(ReefPole.getPoleFromID(camera_right.getAprilTagID(), camera_right).getPose2d()));
-    base.getLocalization().getField2dObject("Tag").setPose(ReefPole.getPoleFromID(camera_right.getAprilTagID(), camera_right).getPose2d());
-    }
-    else if(camera_right.hasValidTarget())
-    {
-     Pose2d pole = ReefPole.getPoleFromID(camera_right.getAprilTagID(), camera_right).getPose2d();
-     base.getLocalization().getField2dObject("flipped").setPose(new Pose2d(pose.getY()+pole.getX(), pose.getX()+pole.getY(), pose.getRotation().plus(pole.getRotation())));    
-     base.getLocalization().getField2dObject("RobotPose").setPose(pose.relativeTo(ReefPole.getPoleFromID(camera_right.getAprilTagID(), camera_right).getPose2d()));
-    base.getLocalization().getField2dObject("Tag").setPose(ReefPole.getPoleFromID(camera_right.getAprilTagID(), camera_right).getPose2d());
-    }
-    return pose;
-  }
-   
-   
 
 
   @Override
   public void robotPeriodic() {
-
-    Pose2d pos = getPose2d(m_robotContainer.robotBase);
-    Pose2d goodRight = new Pose2d();
-    Pose2d goodLeft = new Pose2d();
-
-    LimeLight camera_right = m_robotContainer.robotBase.getVision().getLimelight("limelight-right");
-    LimeLight camera_left = m_robotContainer.robotBase.getVision().getLimelight("limelight-left");
-   
-    SmartDashboard.putNumber("AutoAlignCalibration X Right", pos.getX());
-    SmartDashboard.putNumber("AutoAlignCalibration Y Right", pos.getY());
-
-
-    // if(camera_right.hasValidTarget())
-    // {
-    // rightGoalPos = new Pose2d(Units.inchesToMeters(SmartDashboard.getNumber("AutoAlign Y Offset", 15.5)), Units.inchesToMeters(SmartDashboard.getNumber("AutoAlign X Offset Right", 11.5)),new Rotation2d()).rotateAround(new Translation2d(0, 0), ReefPole.getPoleFromID(camera_right.getAprilTagID(), camera_right).getRotation());
-    // }
-    // if(camera_left.hasValidTarget())
-    // {
-    // leftGoalPos = new Pose2d(Units.inchesToMeters(SmartDashboard.getNumber("AutoAlign Y Offset", 15.5)), Units.inchesToMeters(SmartDashboard.getNumber("AutoAlign Y Offset Left", -6.2)),new Rotation2d()).rotateAround(new Translation2d(0, 0), ReefPole.getPoleFromID(camera_left.getAprilTagID(), camera_left).getRotation());
-    // }
-    // SmartDashboard.putNumber("AutoAlign Calibration Distance To Right", pos.getTranslation().getDistance(rightGoalPos.getTranslation()));
-    // SmartDashboard.putNumber("AutoAlign Calibration Distance To Left", pos.getTranslation().getDistance(leftGoalPos.getTranslation()));
     CommandScheduler.getInstance().run();
   }
 
@@ -139,10 +68,15 @@ public class Robot extends TimedRobot {
   }
 
   @Override
-  public void disabledPeriodic() {}
+  public void disabledPeriodic() 
+  {
+        calibrate.GetController();
+  }
 
   @Override
-  public void disabledExit() {}
+  public void disabledExit() 
+  {
+ }
 
   @Override
   public void autonomousInit() {

@@ -9,6 +9,7 @@ import ca.frc6390.athena.sensors.camera.limelight.LimeLight;
  import ca.frc6390.athena.sensors.camera.limelight.LimeLight.PoseEstimateType;
  import ca.frc6390.athena.sensors.camera.limelight.LimeLight.PoseEstimateWithLatencyType;
 
+import java.text.NumberFormat.Style;
 import java.util.List;
 import java.util.function.Supplier;
 
@@ -56,7 +57,7 @@ import edu.wpi.first.math.trajectory.TrajectoryConfig;
   public int tagId = -1;
   public MedianFilter filter;
   public double targetMeasurement;
-  public Pose2d finalPose2d = new Pose2d(Units.inchesToMeters(5), Units.inchesToMeters(6.5),new Rotation2d());
+  public Pose2d finalPose2d;
   public PIDController rController = new PIDController(0.11, 0, 0);
   //0.04
 
@@ -169,14 +170,55 @@ import edu.wpi.first.math.trajectory.TrajectoryConfig;
    public boolean closeEnough(String table)
     {
       LimeLight camera = base.getVision().getLimelight(table);
-      return camera.hasValidTarget() && Math.abs(camera.getPoseEstimate(PoseEstimateWithLatencyType.BOT_POSE_MT2_BLUE).getRaw()[9]) <= 0.525 && Math.abs(camera.getTargetHorizontalOffset()) < 5;
+      return camera.hasValidTarget() && Math.abs(camera.getPoseEstimate(PoseEstimateWithLatencyType.BOT_POSE_MT2_BLUE).getRaw()[9]) <= 0.525 && Math.abs(camera.getTargetHorizontalOffset()) < 10;
     }
 
+   public void GetController()
+   {
+    if(camera_left.hasValidTarget() && camera_right.hasValidTarget())
+    {
+    base.getLocalization().resetRelativePose(getPose2d());
+    }
+    if(camera_left.hasValidTarget())
+        {
+          tagId = (int)camera_left.getAprilTagID();
+        }
+        if(camera_right.hasValidTarget())
+        {
+          tagId = (int)camera_right.getAprilTagID();
+        }
+    if(camera_left.hasValidTarget() && (int)camera_left.getAprilTagID() == tagId)
+      {
+        ReefPole pole = ReefPole.getPoleFromID(camera_left.getAprilTagID(), rightPole ? camera_left : camera_right);
+        double x = pole.getScoringPos().getX();
+        double y = pole.getScoringPos().getY();
+        finalPose2d = new Pose2d(x, y,new Rotation2d());//.rotateAround(new Translation2d(0, 0), ReefPole.getPoleFromID(camera_left.getAprilTagID(), camera_left).getRotation());
+      }
+
+    if(camera_right.hasValidTarget() && (int)camera_right.getAprilTagID() == tagId)
+      {
+        ReefPole pole = ReefPole.getPoleFromID(camera_right.getAprilTagID(), rightPole ? camera_left : camera_right);
+        double x = pole.getScoringPos().getX();
+        double y = pole.getScoringPos().getY();
+        finalPose2d = new Pose2d(x, y, new Rotation2d());//.rotateAround(new Translation2d(0, 0), ReefPole.getPoleFromID(camera_right.getAprilTagID(), camera_right).getRotation());
+      }
+    if(finalPose2d != null)
+    {
+    controller.getXController().calculate(base.getLocalization().getRelativePose().getX(), finalPose2d.getX());
+    controller.getYController().calculate(base.getLocalization().getRelativePose().getY(), finalPose2d.getY());
+    }
+
+    SmartDashboard.putData("Auto Align Controller X",controller.getXController());
+    SmartDashboard.putData("Auto Align Controller Y",controller.getYController());
+
+   }
  
    // Called every time the scheduler runs while the command is scheduled.
    @Override
    public void execute() 
    {
+      SmartDashboard.putData("X controller", controller.getXController());
+
 
     if(camera_left.hasValidTarget() || camera_right.hasValidTarget())
     {
@@ -205,6 +247,9 @@ import edu.wpi.first.math.trajectory.TrajectoryConfig;
         double x = pole.getScoringPos().getX();
         double y = pole.getScoringPos().getY();
 
+        // double x = Units.inchesToMeters(15.5);
+        // double y = rightPole ? Units.inchesToMeters(-11.5): Units.inchesToMeters(6.2);
+
         goalPose2d = new Pose2d(Units.inchesToMeters(40), rightPole ? Units.inchesToMeters(0) : Units.inchesToMeters(0),new Rotation2d()).rotateAround(new Translation2d(0, 0), ReefPole.getPoleFromID(camera_left.getAprilTagID(), camera_left).getRotation());
         finalPose2d = new Pose2d(x, y,new Rotation2d());//.rotateAround(new Translation2d(0, 0), ReefPole.getPoleFromID(camera_left.getAprilTagID(), camera_left).getRotation());
       }
@@ -214,6 +259,9 @@ import edu.wpi.first.math.trajectory.TrajectoryConfig;
         ReefPole pole = ReefPole.getPoleFromID(camera_right.getAprilTagID(), rightPole ? camera_left : camera_right);
         double x = pole.getScoringPos().getX();
         double y = pole.getScoringPos().getY();
+        
+        // double x = Units.inchesToMeters(15.5);
+        // double y = rightPole ? Units.inchesToMeters(-11.5): Units.inchesToMeters(6.2);
 
         goalPose2d = new Pose2d(Units.inchesToMeters(40), rightPole ? Units.inchesToMeters(0) : Units.inchesToMeters(0),new Rotation2d()).rotateAround(new Translation2d(0, 0), ReefPole.getPoleFromID(camera_right.getAprilTagID(), camera_right).getRotation());
         finalPose2d = new Pose2d(x, y, new Rotation2d());//.rotateAround(new Translation2d(0, 0), ReefPole.getPoleFromID(camera_right.getAprilTagID(), camera_right).getRotation());
@@ -277,6 +325,8 @@ import edu.wpi.first.math.trajectory.TrajectoryConfig;
 
     controller.getXController().setP(1.75);
     controller.getYController().setP(1.75);
+
+
 
     double rSpeed = rController.calculate(base.getLocalization().getRelativePose().getRotation().getDegrees(), ReefPole.getPoleFromID(tagId, camera_left).getRotation().getDegrees() - 180);
     double xSpeed = controller.getXController().calculate(base.getLocalization().getRelativePose().getX(), finalPose2d.getX());
@@ -353,6 +403,7 @@ import edu.wpi.first.math.trajectory.TrajectoryConfig;
   }
    @Override
    public void end(boolean interrupted) {  
+    System.out.println("NIGGER");
      base.getDrivetrain().getRobotSpeeds().setSpeeds("feedback", new ChassisSpeeds(0,0,0));
    }
  

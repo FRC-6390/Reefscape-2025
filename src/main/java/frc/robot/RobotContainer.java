@@ -46,6 +46,9 @@ import frc.robot.subsystems.superstructure.Elevator;
 import frc.robot.utils.ReefScoringPos.ReefPole;
 import frc.robot.subsystems.superstructure.EndEffector;
 
+//TODO
+//CHECK IF IT WORKS ON RED AND ANOTHER SIDE, CHECK IF AUTO WORKS, CHECK 
+
 public class RobotContainer {
   public final RobotBase<SwerveDrivetrain> robotBase = Constants.DriveTrain.ROBOT_BASE.create().shuffleboard();
  
@@ -60,8 +63,8 @@ public class RobotContainer {
   public Superstructure superstructure = new Superstructure(elevator, endEffector);
   public CANdleSubsystem candle = new CANdleSubsystem(robotBase);
   public static SuperstructureState selectedState = SuperstructureState.L4;
-  public Command alignRight = new V2(robotBase, "limelight-left", true, superstructure, () -> selectedState);
-  public Command alginLeft = new V2(robotBase, "limelight-right", false, superstructure, () -> selectedState);
+  public V2 alignRight = new V2(robotBase, "limelight-left", true, superstructure, () -> selectedState);
+  public V2 alginLeft = new V2(robotBase, "limelight-right", false, superstructure, () -> selectedState);
 
   private final EnhancedXboxController driverController = new EnhancedXboxController(0)
                                                               .setLeftInverted(true)
