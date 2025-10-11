@@ -7,7 +7,7 @@ import org.photonvision.PhotonPoseEstimator.PoseStrategy;
 import ca.frc6390.athena.controllers.ElevatorFeedForwardsSendable;
 import ca.frc6390.athena.core.RobotBase.RobotBaseConfig;
 import ca.frc6390.athena.core.RobotDrivetrain.RobotDrivetrainIDs.DrivetrainIDs;
-import ca.frc6390.athena.core.RobotLocalization.RobotLocalizationConfig;
+import ca.frc6390.athena.core.localization.RobotLocalizationConfig;
 import ca.frc6390.athena.devices.EncoderConfig.EncoderType;
 import ca.frc6390.athena.devices.IMU.IMUType;
 import ca.frc6390.athena.devices.MotorController.Motor;
@@ -18,6 +18,8 @@ import ca.frc6390.athena.drivetrains.swerve.modules.SwerveVendorSDS;
 import ca.frc6390.athena.mechanisms.MechanismConfig;
 import ca.frc6390.athena.mechanisms.ArmMechanism.StatefulArmMechanism;
 import ca.frc6390.athena.mechanisms.ElevatorMechanism.StatefulElevatorMechanism;
+import ca.frc6390.athena.mechanisms.MechanismConfig.ElevatorSimulationParameters;
+import ca.frc6390.athena.mechanisms.sim.MechanismVisualizationConfig;
 import ca.frc6390.athena.mechanisms.StatefulMechanism;
 import ca.frc6390.athena.mechanisms.StateMachine.SetpointProvider;
 import ca.frc6390.athena.sensors.camera.limelight.LimeLight.PoseEstimateWithLatencyType;
@@ -27,10 +29,13 @@ import ca.frc6390.athena.sensors.camera.limelight.LimeLightConfig;
 import edu.wpi.first.math.controller.ArmFeedforward;
 import edu.wpi.first.math.controller.ElevatorFeedforward;
 import edu.wpi.first.math.controller.ProfiledPIDController;
+import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.trajectory.TrapezoidProfile.Constraints;
 import edu.wpi.first.math.util.Units;
+import edu.wpi.first.units.Unit;
+import edu.wpi.first.wpilibj.RobotBase;
 import frc.robot.Constants.EndEffector.ArmState;
 import frc.robot.Constants.EndEffector.WristState;;
 
@@ -55,22 +60,21 @@ public interface Constants {
                                                             )   
                                                     .setEncoderOffset(ENCODER_OFFSETS)
                                                     .setCanbus(CANIVORE_CANBUS)
-                                                    
-                                                    .setCurrentLimit(60);
+                                                    .setDriveCurrentLimit(60)
+                                                    .setSteerCurrentLimit(40);
 
         //UP 40
         //LEFT SIDE 8.5
         //X 4.5                                                 
         RobotLocalizationConfig LOCALIZATION_CONFIG = RobotLocalizationConfig.vision(0.8, 0.8, 9999)
-                                                            .setAutoPlannerPID(7,0,0, 2,0,0).setVisionEnabled(false);
+                                                            .setAutoPlannerPID(7,0,0, 2,0,0).setVisionEnabled(true);
         ConfigurableCamera[] CAMERAS =
-         {                                                                 
-        LimeLightConfig.table("limelight-left").setTrustDistance(1).setUseForLocalization(false).setYawRelativeToForwards(-15).setPoseEstimateType(PoseEstimateWithLatencyType.BOT_POSE_MT2_BLUE).setLocalizationTagFilter(17,18,19,20,21,22,6,7,8,9,10,11), 
-        LimeLightConfig.table("limelight-right").setTrustDistance(1).setUseForLocalization(false).setYawRelativeToForwards(15).setPoseEstimateType(PoseEstimateWithLatencyType.BOT_POSE_MT2_BLUE).setLocalizationTagFilter(17,18,19,20,21,22,6,7,8,9,10,11),
-        PhotonVisionConfig.table("Tag").setTrustDistance(1).setUseForLocalization(false).setCameraRobotSpace(new Transform3d(-Units.inchesToMeters(10.5),-Units.inchesToMeters(9.5),Units.inchesToMeters(36),new Rotation3d(0, 0, 180))).setPoseStrategy(PoseStrategy.MULTI_TAG_PNP_ON_COPROCESSOR),
-        PhotonVisionConfig.table("TagFront").setTrustDistance(1).setUseForLocalization(false).setCameraRobotSpace(new Transform3d(-Units.inchesToMeters(7),Units.inchesToMeters(8.5),Units.inchesToMeters(40),new Rotation3d(0, 0, 0))).setPoseStrategy(PoseStrategy.MULTI_TAG_PNP_ON_COPROCESSOR)
-
-    };
+        {                                                                 
+        LimeLightConfig.table("limelight-left").setTrustDistance(100).setUseForLocalization(true).setCameraRobotSpace(new Transform3d(Units.inchesToMeters(-0.5),Units.inchesToMeters(9.25),Units.inchesToMeters(8),new Rotation3d(0, Units.degreesToRadians(-15), Units.degreesToRadians(-15)))).setPoseEstimateType(PoseEstimateWithLatencyType.BOT_POSE_MT2_BLUE).setLocalizationTagFilter(17,18,19,20,21,22,6,7,8,9,10,11), 
+        LimeLightConfig.table("limelight-right").setTrustDistance(100).setUseForLocalization(true).setCameraRobotSpace(new Transform3d(Units.inchesToMeters(-0.5),Units.inchesToMeters(-9.25),Units.inchesToMeters(8),new Rotation3d(0,  Units.degreesToRadians(-15), Units.degreesToRadians(15)))).setPoseEstimateType(PoseEstimateWithLatencyType.BOT_POSE_MT2_BLUE).setLocalizationTagFilter(17,18,19,20,21,22,6,7,8,9,10,11),
+        // PhotonVisionConfig.table("Tag").setTrustDistance(1).setUseForLocalization(false).setCameraRobotSpace(new Transform3d(-Units.inchesToMeters(10.5),-Units.inchesToMeters(9.5),Units.inchesToMeters(36),new Rotation3d(0, 0, 180))).setPoseStrategy(PoseStrategy.MULTI_TAG_PNP_ON_COPROCESSOR),
+        // PhotonVisionConfig.table("TagFront").setTrustDistance(1).setUseForLocalization(false).setCameraRobotSpace(new Transform3d(-Units.inchesToMeters(7),Units.inchesToMeters(8.5),Units.inchesToMeters(40),new Rotation3d(0, 0, 0))).setPoseStrategy(PoseStrategy.MULTI_TAG_PNP_ON_COPROCESSOR)
+        };
 
         //X -11.75
         //Y 9 inches
@@ -143,8 +147,7 @@ public interface Constants {
         double ENCODER_GEAR_RATIO = 1d/1d;
         double MOTOR_GEAR_RATIO = 7d/1d;
         int LIMIT_SWITCH = 5;
-        // ProfiledPIDController CONTORLLER = new ProfiledPIDController(0.1, 0.0, 0, new Constraints(50, 10));
-        // ElevatorFeedforward FEEDFORWARD = new ElevatorFeedforward(0, 0.14, 0.32,0.0);
+    
         ProfiledPIDController CONTORLLER = new ProfiledPIDController(0.11, 0.0, 0, new Constraints(80, 70));
         ElevatorFeedForwardsSendable FEEDFORWARD = new ElevatorFeedForwardsSendable(0, 0.117, 0.1,0);
 
@@ -156,11 +159,19 @@ public interface Constants {
         .setEncoderConversion(3d)
         .setTolerance(1)
         .setCanbus(CANIVORE_CANBUS)
-        .setProfiledPID(0.11, 0, 0, 80 ,60)
+        .setProfiledPID(0.11, 0, 0, 80 ,70)
         .setCurrentLimit(60)
         .addLowerLimitSwitch(-5, 24, true)
         .setStateActionSupressMotors(mech -> mech.setSpeed(-0.25), ElevatorState.HomeReset, ElevatorState.Intaking)
-        .setStateMachineDelay(Units.millisecondsToSeconds(40));
+        .setStateMachineDelay(Units.millisecondsToSeconds(40))
+        .setSimulationElevator(
+            new ElevatorSimulationParameters()
+            .setCarriageMassKg(Units.lbsToKilograms(25))
+            .setDrumRadiusMeters(Units.inchesToMeters(GEAR_DIAMETER_INCHES) / 2.0)
+            .setNominalVoltage(12)
+            .setSimulateGravity(true)
+            .setStartingHeightMeters(Units.inchesToMeters(24))
+            .setRangeMeters(Units.inchesToMeters(24), Units.inchesToMeters(76)));
     }
 
     public interface EndEffector {

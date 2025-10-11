@@ -4,25 +4,16 @@
 
 package frc.robot;
 
-import ca.frc6390.athena.core.RobotBase;
-import ca.frc6390.athena.sensors.camera.limelight.LimeLight;
-import ca.frc6390.athena.sensors.camera.limelight.LimeLight.PoseEstimateWithLatencyType;
-import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.math.geometry.Transform2d;
-import edu.wpi.first.math.geometry.Translation2d;
-import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.PowerDistribution;
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.PowerDistribution.ModuleType;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import frc.robot.commands.auto.V2;
 import frc.robot.subsystems.Superstructure.SuperstructureState;
-import frc.robot.utils.ReefScoringPos.ReefPole;
 
 public class Robot extends TimedRobot {
   private Command m_autonomousCommand;
@@ -40,7 +31,6 @@ public class Robot extends TimedRobot {
 
   }
 
-
   @Override
   public void robotPeriodic() {
     CommandScheduler.getInstance().run();
@@ -50,20 +40,12 @@ public class Robot extends TimedRobot {
   public void robotInit() 
   {
     pdh.clearStickyFaults();
-    m_robotContainer.elevator.reset();
-    m_robotContainer.robotBase.resetPIDs();
     m_robotContainer.robotBase.getLocalization().resetRelativePose(0, 0, 0);
-    // SmartDashboard.putNumber("AutoAlign Y Offset", 15.5);
-    // SmartDashboard.putNumber("AutoAlign X Offset Left", 11.5);
-    // SmartDashboard.putNumber("AutoAlign X Offset Right", -6.2);
   }
 
   @Override
   public void disabledInit() 
   {
-    m_robotContainer.elevator.reset();
-    m_robotContainer.robotBase.resetPIDs();
-
     m_robotContainer.superstructure.setSuper(SuperstructureState.Home);
   }
 
@@ -80,9 +62,6 @@ public class Robot extends TimedRobot {
 
   @Override
   public void autonomousInit() {
-    m_robotContainer.elevator.reset();
-    m_robotContainer.robotBase.resetPIDs();
-
     m_autonomousCommand = m_robotContainer.getAutonomousCommand();
     if (m_autonomousCommand != null) {
       m_autonomousCommand.schedule();
@@ -100,9 +79,7 @@ public class Robot extends TimedRobot {
 
   @Override
   public void teleopInit() {
-    m_robotContainer.elevator.reset();
-    m_robotContainer.robotBase.resetPIDs();
-m_robotContainer.robotBase.getLocalization().resetFieldPose(0, 0, 0);
+    m_robotContainer.robotBase.getLocalization().resetFieldPose(0, 0, 0);
     m_robotContainer.robotBase.getDrivetrain().getRobotSpeeds().stopSpeeds("auto");
     if (m_autonomousCommand != null) {
       m_autonomousCommand.cancel();

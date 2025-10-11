@@ -3,6 +3,7 @@ package frc.robot.utils;
 import com.pathplanner.lib.path.PathPlannerPath;
 
 import ca.frc6390.athena.core.RobotBase;
+import ca.frc6390.athena.sensors.camera.LocalizationCamera;
 import ca.frc6390.athena.sensors.camera.limelight.LimeLight;
 import ca.frc6390.athena.sensors.camera.limelight.LimeLightConfig;
 import edu.wpi.first.math.geometry.Pose2d;
@@ -14,27 +15,6 @@ import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import frc.robot.Autos;
 import frc.robot.Robot;
 public class ReefScoringPos {
-
-    public static LimeLight currentLL = new LimeLight(new LimeLightConfig("limelight-left"));
-
-    public static LimeLight getLimelightFacing(RobotBase<?> base)
-    {
-      LimeLight ll = base.getVision().getLimelight("limelight-left");
-      LimeLight lr = base.getVision().getLimelight("limelight-right");
-  
-      ReefPole leftPole = ReefPole.getPoleFromID(ll.getAprilTagID(), ll);
-      ReefPole rightPole = ReefPole.getPoleFromID(lr.getAprilTagID(), lr);
-      if(leftPole != null)
-      {
-        currentLL = ll;
-      }
-      if(rightPole != null)
-      {
-        currentLL = lr;
-      }
-  
-      return currentLL;
-    }
 
     private final ReefLevel level;
     private final ReefPole side;
@@ -119,71 +99,53 @@ public class ReefScoringPos {
 
         public static ReefPole getPoleFromID(long id, LimeLight ll)
         {
-            switch ((int)id) {
+            if (ll == null) {
+                return ReefPole.NONE;
+            }
+            return getPoleFromID(id, ll.config.table());
+        }
+
+        public static ReefPole getPoleFromID(long id, LocalizationCamera camera)
+        {
+            if (camera == null || camera.getConfig() == null) {
+                return ReefPole.NONE;
+            }
+            return getPoleFromID(id, camera.getConfig().getTable());
+        }
+
+        public static ReefPole getPoleFromID(long id, String cameraTableName)
+        {
+            boolean leftCamera = isLeftCamera(cameraTableName);
+            switch ((int) id) {
                 case 6:
                 case 19:
-                    if(ll.config.table() == "limelight-left")
-                    {
-                        return ReefPole.L;
-                    }
-                    else
-                    {
-                        return ReefPole.K;
-                    }
+                    return leftCamera ? ReefPole.L : ReefPole.K;
                 case 7:
                 case 18:
-                if(ll.config.table() == "limelight-left")
-                {
-                    return ReefPole.B;
-                }
-                else
-                {
-                    return ReefPole.A;
-                }
+                    return leftCamera ? ReefPole.B : ReefPole.A;
                 case 8:
                 case 17:
-                if(ll.config.table() == "limelight-left")
-                {
-                    return ReefPole.D;
-                }
-                else
-                {
-                    return ReefPole.C;
-                }
+                    return leftCamera ? ReefPole.D : ReefPole.C;
                 case 9:
                 case 22:
-                if(ll.config.table() == "limelight-left")
-                {
-                    return ReefPole.F;
-                }
-                else
-                {
-                    return ReefPole.E;
-                }
+                    return leftCamera ? ReefPole.F : ReefPole.E;
                 case 10:
                 case 21:
-                if(ll.config.table() == "limelight-left")
-                {
-                    return ReefPole.H;
-                }
-                else
-                {
-                    return ReefPole.G;
-                }
+                    return leftCamera ? ReefPole.H : ReefPole.G;
                 case 11:
                 case 20:
-                if(ll.config.table() == "limelight-left")
-                {
-                    return ReefPole.J;
-                }
-                else
-                {
-                    return ReefPole.I;
-                }
-
+                    return leftCamera ? ReefPole.J : ReefPole.I;
                 default:
                     return ReefPole.NONE;
             }
+        }
+
+        private static boolean isLeftCamera(String cameraTableName) {
+            if (cameraTableName == null) {
+                return false;
+            }
+            String normalized = cameraTableName.trim().toLowerCase();
+            return normalized.contains("left");
         }
 
         public Translation2d getTranslation() {

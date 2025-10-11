@@ -4,9 +4,6 @@
 
 package frc.robot;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 import java.util.function.BooleanSupplier;
 
 import com.pathplanner.lib.auto.NamedCommands;
@@ -17,11 +14,11 @@ import ca.frc6390.athena.core.RobotBase;
 import ca.frc6390.athena.core.RobotSendableSystem.SendableLevel;
 import ca.frc6390.athena.drivetrains.swerve.SwerveDrivetrain;
 import ca.frc6390.athena.mechanisms.ArmMechanism.StatefulArmMechanism;
-import ca.frc6390.athena.mechanisms.StateMachine.SetpointProvider;
+import ca.frc6390.athena.mechanisms.ElevatorMechanism.StatefulElevatorMechanism;
 import ca.frc6390.athena.mechanisms.StatefulMechanism;
+import ca.frc6390.athena.sensors.camera.LocalizationCamera;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -29,36 +26,27 @@ import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import frc.robot.Autos.AUTOS;
-import frc.robot.Constants.Elevator.S;
+import frc.robot.Constants.Elevator.ElevatorState;
 import frc.robot.Constants.EndEffector.ArmState;
 import frc.robot.Constants.EndEffector.WristState;
 import frc.robot.Constants.EndEffector.RollerState;
-import frc.robot.commands.auto.AlgaeAlign;
-import frc.robot.commands.auto.BasicAlign;
-import frc.robot.commands.auto.TagAlign;
 import frc.robot.commands.auto.V2;
 import frc.robot.subsystems.Superstructure;
-import frc.robot.subsystems.Experimental.SuperStructureTest;
-import frc.robot.subsystems.Experimental.SuperstructureBuilder;
 import frc.robot.subsystems.Superstructure.SuperstructureState;
 import frc.robot.subsystems.superstructure.CANdleSubsystem;
-import frc.robot.subsystems.superstructure.Elevator;
-import frc.robot.utils.ReefScoringPos.ReefPole;
 import frc.robot.subsystems.superstructure.EndEffector;
 
-//TODO
-//CHECK IF IT WORKS ON RED AND ANOTHER SIDE, CHECK IF AUTO WORKS, CHECK 
-
 public class RobotContainer {
-  public final RobotBase<SwerveDrivetrain> robotBase = Constants.DriveTrain.ROBOT_BASE.create().shuffleboard();
+  public final RobotBase<SwerveDrivetrain> robotBase = Constants.DriveTrain.ROBOT_BASE.create().shuffleboard(SendableLevel.DEBUG);
  
   public final StatefulArmMechanism<ArmState> arm = Constants.EndEffector.ARM_CONFIG.build();//.shuffleboard("Arm", SendableLevel.DEBUG);
   public final StatefulArmMechanism<WristState> wrist = Constants.EndEffector.WRIST_CONFIG.build();//.shuffleboard("Wrist", SendableLevel.DEBUG);
   public final StatefulMechanism<RollerState> rollers = Constants.EndEffector.CORAL_ROLLERS.build();//.shuffleboard("Rollers", SendableLevel.DEBUG);
   public final StatefulMechanism<RollerState> algaeRollers = Constants.EndEffector.ALGAE_ROLLERS.build();//.shuffleboard("Algae Rollers", SendableLevel.COMP);;
+  public final StatefulElevatorMechanism<ElevatorState> elevator = Constants.Elevator.ELEVATOR_CONFIG.build() ;//.shuffleboard("Elevator", SendableLevel.DEBUG);
   // public SuperStructureTest s = SuperstructureBuilder.builder().addArms(arm, wrist).addMotors(rollers, algaeRollers).build();
   public BooleanSupplier hasTarget;
-  public final Elevator elevator = new Elevator();
+  // public final Elevator elevator = new Elevator();
   public final EndEffector endEffector = new EndEffector(arm, wrist, rollers, algaeRollers).setAutoEndScoring(false);
   public Superstructure superstructure = new Superstructure(elevator, endEffector);
   public CANdleSubsystem candle = new CANdleSubsystem(robotBase);
@@ -70,8 +58,7 @@ public class RobotContainer {
                                                               .setLeftInverted(true)
                                                               .setRightInverted(true)
                                                               .setSticksDeadzone(0.15)
-                                                              .setLeftSlewrate(1)
-                                                              ;
+                                                              .setLeftSlewrate(5);
 
                                                         
                                                               
@@ -83,10 +70,9 @@ public class RobotContainer {
   
   public RobotContainer() 
   {
-    Enum<?> state = ArmState.Intaking;
     configureBindings();
     robotBase.getDrivetrain().setDriveCommand(driverController);
-    robotBase.registerMechanism(arm, algaeRollers, wrist, rollers);
+    robotBase.registerMechanism(arm, algaeRollers, wrist, rollers, elevator);
     robotBase.getLocalization().setSuppressUpdates(false);
     arm.setPidEnabled(true);
     wrist.setPidEnabled(true);
@@ -94,10 +80,15 @@ public class RobotContainer {
     wrist.setFeedforwardEnabled(false);
 
 
-    elevator.shuffleboard("Elevator");
+    elevator.shuffleboard("Elevator", SendableLevel.DEBUG);
 
   
-    hasTarget = () -> robotBase.getVision().getLimelight("limelight-left").hasValidTarget();
+    hasTarget = () -> {
+      if (robotBase.getVision() == null) {
+        return false;
+      }
+      return robotBase.getVision().getCameras().values().stream().anyMatch(LocalizationCamera::hasValidTarget);
+    };
     NamedCommands.registerCommand("WaitForTag", Commands.waitUntil(hasTarget));
     
     NamedCommands.registerCommand("Home", superstructure.setState(SuperstructureState.HomePID));
@@ -117,21 +108,19 @@ public class RobotContainer {
 
     NamedCommands.registerCommand("AlignRight", alignRight);
     NamedCommands.registerCommand("AlignLeft", alginLeft);
-    NamedCommands.registerCommand("DisableLocal", 
-    new  InstantCommand(() ->
-    {
-      robotBase.getVision().getLimelight("limelight-left").setUseForLocalization(false);
-      robotBase.getVision().getLimelight("limelight-right").setUseForLocalization(false);
-      robotBase.getVision().getPhotonVision("Tag").setUseForLocalization(false); 
-      robotBase.getVision().getPhotonVision("TagFront").setUseForLocalization(false);
+    NamedCommands.registerCommand("DisableLocal",
+    new  InstantCommand(() -> {
+      if (robotBase.getVision() == null) {
+        return;
+      }
+      robotBase.getVision().getCameras().values().forEach(camera -> camera.setUseForLocalization(false));
     }));
-    NamedCommands.registerCommand("EnableLocal", 
-    new InstantCommand(() ->
-    {
-      robotBase.getVision().getLimelight("limelight-left").setUseForLocalization(true); 
-      robotBase.getVision().getLimelight("limelight-right").setUseForLocalization(true);
-      robotBase.getVision().getPhotonVision("Tag").setUseForLocalization(true); 
-      robotBase.getVision().getPhotonVision("TagFront").setUseForLocalization(true);
+    NamedCommands.registerCommand("EnableLocal",
+    new InstantCommand(() -> {
+      if (robotBase.getVision() == null) {
+        return;
+      }
+      robotBase.getVision().getCameras().values().forEach(camera -> camera.setUseForLocalization(true));
     }));
 
 
@@ -187,8 +176,8 @@ public class RobotContainer {
   
     driverController2.start.whileTrue(superstructure.setState(SuperstructureState.AlgaeSpit)).after(1).onTrue(superstructure.setState(SuperstructureState.ScoreAlgae));
     // driverController2.start.onTrue(() -> s.requestState2(S.Intaking.getSetpoint()));
-    driverController2.pov.up.onTrue(() -> elevator.nudge(1)).after(1).onTrue(() -> elevator.resetNudge());
-    driverController2.pov.down.onTrue(() -> elevator.nudge(-1)).after(1).onTrue(() -> elevator.resetNudge());
+    // driverController2.pov.up.onTrue(() -> elevator.nudge(1)).after(1).onTrue(() -> elevator.resetNudge());
+    // driverController2.pov.down.onTrue(() -> elevator.nudge(-1)).after(1).onTrue(() -> elevator.resetNudge());
     driverController2.pov.right.onTrue(() -> arm.setNudge(arm.getNudge() + 5)).after(1).onTrue(() -> arm.setNudge(0));
     driverController2.pov.left.onTrue(() -> arm.setNudge(arm.getNudge() - 5)).after(1).onTrue(() -> arm.setNudge(0));
     driverController2.rightBumper.onTrue(() -> wrist.setNudge(wrist.getNudge() + 5)).after(1).onTrue(() -> wrist.setNudge(0));

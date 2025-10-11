@@ -1,0 +1,82 @@
+[
+  {
+    "name": "/Sim/Mechanisms/StatefulElevatorMechanism/LimitSwitch-5/Override",
+    "type": "boolean",
+    "value": false,
+    "properties": {
+      "persistent": true
+    }
+  },
+  {
+    "name": "/Sim/Mechanisms/StatefulElevatorMechanism/LimitSwitch-5/ManualValue",
+    "type": "boolean",
+    "value": false,
+    "properties": {
+      "persistent": true
+    }
+  },
+  {
+    "name": "/Preferences/RobotLocalization/FieldPoseX",
+    "type": "double",
+    "value": 11.71170887872963,
+    "properties": {
+      "persistent": true
+    }
+  },
+  {
+    "name": "/Preferences/RobotLocalization/FieldPoseY",
+    "type": "double",
+    "value": 3.836488251976405,
+    "properties": {
+      "persistent": true
+    }
+  },
+  {
+    "name": "/Preferences/RobotLocalization/FieldPoseZ",
+    "type": "double",
+    "value": -0.00046161809505127605,
+    "properties": {
+      "persistent": true
+    }
+  },
+  {
+    "name": "/Preferences/RobotLocalization/FieldPoseRollDeg",
+    "type": "double",
+    "value": 0.0007346065180666885,
+    "properties": {
+      "persistent": true
+    }
+  },
+  {
+    "name": "/Preferences/RobotLocalization/FieldPosePitchDeg",
+    "type": "double",
+    "value": 0.0004529218814568286,
+    "properties": {
+      "persistent": true
+    }
+  },
+  {
+    "name": "/Preferences/RobotLocalization/FieldPoseYawDeg",
+    "type": "double",
+    "value": -0.7640965140780615,
+    "properties": {
+      "persistent": true
+    }
+  },
+  {
+    "name": "/Preferences/RobotLocalization/DriverYawDeg",
+    "type": "double",
+    "value": -4.628290782570747e-05,
+    "properties": {
+      "persistent": true
+    }
+  },
+  {
+    "name": "/Preferences/RobotLocalization/Valid",
+    "type": "boolean",
+    "value": true,
+    "properties": {
+      "persistent": true
+    }
+  }
+]

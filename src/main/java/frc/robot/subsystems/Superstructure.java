@@ -9,6 +9,7 @@ import java.util.function.Supplier;
 
 import ca.frc6390.athena.commands.RunnableTrigger;
 import ca.frc6390.athena.controllers.DelayedOutput;
+import ca.frc6390.athena.mechanisms.ElevatorMechanism.StatefulElevatorMechanism;
 import ca.frc6390.athena.mechanisms.StateMachine;
 import ca.frc6390.athena.mechanisms.StateMachine.SetpointProvider;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
@@ -31,7 +32,7 @@ public class Superstructure extends SubsystemBase {
 
   public final StateMachine<SuperstructureTuple, SuperstructureState> stateMachine;
 
-  public Elevator elevator;
+  public StatefulElevatorMechanism<ElevatorState> elevator;
   private final EndEffector endEffector;
 
   private final RunnableTrigger autoDropElevatorTrigger;
@@ -107,7 +108,7 @@ public class Superstructure extends SubsystemBase {
         }
     }
 
-  public Superstructure(Elevator elevator, EndEffector endEffector) 
+  public Superstructure(StatefulElevatorMechanism<ElevatorState> elevator, EndEffector endEffector) 
   {
     SmartDashboard.putBoolean("AutoScore RAN", false);
 
