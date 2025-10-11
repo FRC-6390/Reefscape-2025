@@ -71,8 +71,8 @@ import edu.wpi.first.math.trajectory.TrajectoryConfig;
 
    public V2(RobotBase<?> base,String lltable, boolean rightPole, Superstructure superstructure, Supplier<SuperstructureState> state)
    {
-    camera_right = base.getVision().getLimelight("limelight-right");
-    camera_left = base.getVision().getLimelight("limelight-left");
+    // camera_right = base.getVision().getLimelight("limelight-right");
+    // camera_left = base.getVision().getLimelight("limelight-left");
     this.superstructure = superstructure;
     this.state = state;
     this.base = base;
@@ -81,335 +81,335 @@ import edu.wpi.first.math.trajectory.TrajectoryConfig;
     isDone = false;
    }
 
-   @Override
-   public void initialize() 
-   {
-    thetaMeasurement = 0;
-    rController.enableContinuousInput(-180, 180);
-    rController.setTolerance(5);
+  //  @Override
+  //  public void initialize() 
+  //  {
+  //   thetaMeasurement = 0;
+  //   rController.enableContinuousInput(-180, 180);
+  //   rController.setTolerance(5);
 
-    isDone = false;
-    filter = new MedianFilter(50);
-    tagId = -1;
+  //   isDone = false;
+  //   filter = new MedianFilter(50);
+  //   tagId = -1;
 
-    reached = false;
-    if(camera_left.hasValidTarget())
-    {
-      // base.getLocalization()
-      // .resetRelativePose
-      // (
-      //   getPose2d()
-      // );
-      tagId = ((int)camera_left.getAprilTagID());
-    } 
-    else if(camera_right.hasValidTarget())
-    {
-      // base.getLocalization()
-      // .resetRelativePose
-      // (
-      //   getPose2d()
-      // );
-      tagId = ((int)camera_right.getAprilTagID());
-    } 
-  }
+  //   reached = false;
+  //   if(camera_left.hasValidTarget())
+  //   {
+  //     // base.getLocalization()
+  //     // .resetRelativePose
+  //     // (
+  //     //   getPose2d()
+  //     // );
+  //     tagId = ((int)camera_left.getAprilTagID());
+  //   } 
+  //   else if(camera_right.hasValidTarget())
+  //   {
+  //     // base.getLocalization()
+  //     // .resetRelativePose
+  //     // (
+  //     //   getPose2d()
+  //     // );
+  //     tagId = ((int)camera_right.getAprilTagID());
+  //   } 
+  // }
  
 
   
   
-   public Pose2d getPose2d()
-   {
+  //  public Pose2d getPose2d()
+  //  {
 
-    LimeLight camera_left = base.getVision().getLimelight("limelight-left");
-    double dist1 = camera_left.getPoseEstimate(PoseEstimateWithLatencyType.BOT_POSE_MT2_BLUE).getRaw()[9];
-    double angle1 =  camera_left.getTargetHorizontalOffset() -base.getLocalization().getRelativePose().getRotation().getDegrees() ;
-    double x1 = (Math.cos(Math.toRadians(angle1)) * dist1) - Units.inchesToMeters(0.5);
-    double y1 = (Math.sin(Math.toRadians(angle1)) * dist1)- Units.inchesToMeters(9.25);; 
+  //   LimeLight camera_left = base.getVision().getLimelight("limelight-left");
+  //   double dist1 = camera_left.getPoseEstimate(PoseEstimateWithLatencyType.BOT_POSE_MT2_BLUE).getRaw()[9];
+  //   double angle1 =  camera_left.getTargetHorizontalOffset() -base.getLocalization().getRelativePose().getRotation().getDegrees() ;
+  //   double x1 = (Math.cos(Math.toRadians(angle1)) * dist1) - Units.inchesToMeters(0.5);
+  //   double y1 = (Math.sin(Math.toRadians(angle1)) * dist1)- Units.inchesToMeters(9.25);; 
 
     
-     LimeLight camera_right = base.getVision().getLimelight("limelight-right");
-     double dist = camera_right.getPoseEstimate(PoseEstimateWithLatencyType.BOT_POSE_MT2_BLUE).getRaw()[9];
-     double angle =  camera_right.getTargetHorizontalOffset() -base.getLocalization().getRelativePose().getRotation().getDegrees() ;
-     double x2 = (Math.cos(Math.toRadians(angle)) * dist) - Units.inchesToMeters(0.5);
-     double y2 = (Math.sin(Math.toRadians(angle)) * dist) + Units.inchesToMeters(9.25);
-     double x = 0;
-     double y = 0;
-     if(camera_left.hasValidTarget() && camera_right.hasValidTarget())
-     {
-       x = (x2 + x1)/2;
-       y = (y2 + y1)/2;
-     }
-     else if(!camera_left.hasValidTarget() && camera_right.hasValidTarget())
-     {
-       x = (x2);
-       y = (y2);
-     }
-     else if(camera_left.hasValidTarget() && !camera_right.hasValidTarget())
-     {
-       x = (x1);
-       y = (y1);
-     }
+  //    LimeLight camera_right = base.getVision().getLimelight("limelight-right");
+  //    double dist = camera_right.getPoseEstimate(PoseEstimateWithLatencyType.BOT_POSE_MT2_BLUE).getRaw()[9];
+  //    double angle =  camera_right.getTargetHorizontalOffset() -base.getLocalization().getRelativePose().getRotation().getDegrees() ;
+  //    double x2 = (Math.cos(Math.toRadians(angle)) * dist) - Units.inchesToMeters(0.5);
+  //    double y2 = (Math.sin(Math.toRadians(angle)) * dist) + Units.inchesToMeters(9.25);
+  //    double x = 0;
+  //    double y = 0;
+  //    if(camera_left.hasValidTarget() && camera_right.hasValidTarget())
+  //    {
+  //      x = (x2 + x1)/2;
+  //      y = (y2 + y1)/2;
+  //    }
+  //    else if(!camera_left.hasValidTarget() && camera_right.hasValidTarget())
+  //    {
+  //      x = (x2);
+  //      y = (y2);
+  //    }
+  //    else if(camera_left.hasValidTarget() && !camera_right.hasValidTarget())
+  //    {
+  //      x = (x1);
+  //      y = (y1);
+  //    }
 
-     Pose2d pose = new Pose2d(-x,y,base.getLocalization().getRelativePose().getRotation());
-     if(camera_right.hasValidTarget())
-     {
-      Pose2d pole = ReefPole.getPoleFromID(camera_right.getAprilTagID(), camera_right).getPose2d();
-      base.getLocalization().getField2dObject("flipped").setPose(new Pose2d(pose.getY()+pole.getX(), pose.getX()+pole.getY(), pose.getRotation().plus(pole.getRotation())));
-     base.getLocalization().getField2dObject("RobotPose").setPose(pose.relativeTo(ReefPole.getPoleFromID(camera_right.getAprilTagID(), camera_right).getPose2d()));
-     base.getLocalization().getField2dObject("Tag").setPose(ReefPole.getPoleFromID(camera_right.getAprilTagID(), camera_right).getPose2d());
-     }
-     else if(camera_right.hasValidTarget())
-     {
-      Pose2d pole = ReefPole.getPoleFromID(camera_right.getAprilTagID(), camera_right).getPose2d();
-      base.getLocalization().getField2dObject("flipped").setPose(new Pose2d(pose.getY()+pole.getX(), pose.getX()+pole.getY(), pose.getRotation().plus(pole.getRotation())));    
-      base.getLocalization().getField2dObject("RobotPose").setPose(pose.relativeTo(ReefPole.getPoleFromID(camera_right.getAprilTagID(), camera_right).getPose2d()));
-     base.getLocalization().getField2dObject("Tag").setPose(ReefPole.getPoleFromID(camera_right.getAprilTagID(), camera_right).getPose2d());
-     }
-     return pose;
-   }
+  //    Pose2d pose = new Pose2d(-x,y,base.getLocalization().getRelativePose().getRotation());
+  //    if(camera_right.hasValidTarget())
+  //    {
+  //     Pose2d pole = ReefPole.getPoleFromID(camera_right.getAprilTagID(), camera_right).getPose2d();
+  //     base.getLocalization().getField2dObject("flipped").setPose(new Pose2d(pose.getY()+pole.getX(), pose.getX()+pole.getY(), pose.getRotation().plus(pole.getRotation())));
+  //    base.getLocalization().getField2dObject("RobotPose").setPose(pose.relativeTo(ReefPole.getPoleFromID(camera_right.getAprilTagID(), camera_right).getPose2d()));
+  //    base.getLocalization().getField2dObject("Tag").setPose(ReefPole.getPoleFromID(camera_right.getAprilTagID(), camera_right).getPose2d());
+  //    }
+  //    else if(camera_right.hasValidTarget())
+  //    {
+  //     Pose2d pole = ReefPole.getPoleFromID(camera_right.getAprilTagID(), camera_right).getPose2d();
+  //     base.getLocalization().getField2dObject("flipped").setPose(new Pose2d(pose.getY()+pole.getX(), pose.getX()+pole.getY(), pose.getRotation().plus(pole.getRotation())));    
+  //     base.getLocalization().getField2dObject("RobotPose").setPose(pose.relativeTo(ReefPole.getPoleFromID(camera_right.getAprilTagID(), camera_right).getPose2d()));
+  //    base.getLocalization().getField2dObject("Tag").setPose(ReefPole.getPoleFromID(camera_right.getAprilTagID(), camera_right).getPose2d());
+  //    }
+  //    return pose;
+  //  }
 
-   public boolean closeEnough(String table)
-    {
-      LimeLight camera = base.getVision().getLimelight(table);
-      return camera.hasValidTarget() && Math.abs(camera.getPoseEstimate(PoseEstimateWithLatencyType.BOT_POSE_MT2_BLUE).getRaw()[9]) <= 0.525 && Math.abs(camera.getTargetHorizontalOffset()) < 10;
-    }
+  //  public boolean closeEnough(String table)
+  //   {
+  //     LimeLight camera = base.getVision().getLimelight(table);
+  //     return camera.hasValidTarget() && Math.abs(camera.getPoseEstimate(PoseEstimateWithLatencyType.BOT_POSE_MT2_BLUE).getRaw()[9]) <= 0.525 && Math.abs(camera.getTargetHorizontalOffset()) < 10;
+  //   }
 
-   public void GetController()
-   {
-    if(camera_left.hasValidTarget() && camera_right.hasValidTarget())
-    {
-    base.getLocalization().resetRelativePose(getPose2d());
-    }
-    if(camera_left.hasValidTarget())
-        {
-          tagId = (int)camera_left.getAprilTagID();
-        }
-        if(camera_right.hasValidTarget())
-        {
-          tagId = (int)camera_right.getAprilTagID();
-        }
-    if(camera_left.hasValidTarget() && (int)camera_left.getAprilTagID() == tagId)
-      {
-        ReefPole pole = ReefPole.getPoleFromID(camera_left.getAprilTagID(), rightPole ? camera_left : camera_right);
-        double x = pole.getScoringPos().getX();
-        double y = pole.getScoringPos().getY();
-        finalPose2d = new Pose2d(x, y,new Rotation2d());//.rotateAround(new Translation2d(0, 0), ReefPole.getPoleFromID(camera_left.getAprilTagID(), camera_left).getRotation());
-      }
+  //  public void GetController()
+  //  {
+  //   if(camera_left.hasValidTarget() && camera_right.hasValidTarget())
+  //   {
+  //   base.getLocalization().resetRelativePose(getPose2d());
+  //   }
+  //   if(camera_left.hasValidTarget())
+  //       {
+  //         tagId = (int)camera_left.getAprilTagID();
+  //       }
+  //       if(camera_right.hasValidTarget())
+  //       {
+  //         tagId = (int)camera_right.getAprilTagID();
+  //       }
+  //   if(camera_left.hasValidTarget() && (int)camera_left.getAprilTagID() == tagId)
+  //     {
+  //       ReefPole pole = ReefPole.getPoleFromID(camera_left.getAprilTagID(), rightPole ? camera_left : camera_right);
+  //       double x = pole.getScoringPos().getX();
+  //       double y = pole.getScoringPos().getY();
+  //       finalPose2d = new Pose2d(x, y,new Rotation2d());//.rotateAround(new Translation2d(0, 0), ReefPole.getPoleFromID(camera_left.getAprilTagID(), camera_left).getRotation());
+  //     }
 
-    if(camera_right.hasValidTarget() && (int)camera_right.getAprilTagID() == tagId)
-      {
-        ReefPole pole = ReefPole.getPoleFromID(camera_right.getAprilTagID(), rightPole ? camera_left : camera_right);
-        double x = pole.getScoringPos().getX();
-        double y = pole.getScoringPos().getY();
-        finalPose2d = new Pose2d(x, y, new Rotation2d());//.rotateAround(new Translation2d(0, 0), ReefPole.getPoleFromID(camera_right.getAprilTagID(), camera_right).getRotation());
-      }
-    if(finalPose2d != null)
-    {
-    controller.getXController().calculate(base.getLocalization().getRelativePose().getX(), finalPose2d.getX());
-    controller.getYController().calculate(base.getLocalization().getRelativePose().getY(), finalPose2d.getY());
-    }
+  //   if(camera_right.hasValidTarget() && (int)camera_right.getAprilTagID() == tagId)
+  //     {
+  //       ReefPole pole = ReefPole.getPoleFromID(camera_right.getAprilTagID(), rightPole ? camera_left : camera_right);
+  //       double x = pole.getScoringPos().getX();
+  //       double y = pole.getScoringPos().getY();
+  //       finalPose2d = new Pose2d(x, y, new Rotation2d());//.rotateAround(new Translation2d(0, 0), ReefPole.getPoleFromID(camera_right.getAprilTagID(), camera_right).getRotation());
+  //     }
+  //   if(finalPose2d != null)
+  //   {
+  //   controller.getXController().calculate(base.getLocalization().getRelativePose().getX(), finalPose2d.getX());
+  //   controller.getYController().calculate(base.getLocalization().getRelativePose().getY(), finalPose2d.getY());
+  //   }
 
-    SmartDashboard.putData("Auto Align Controller X",controller.getXController());
-    SmartDashboard.putData("Auto Align Controller Y",controller.getYController());
+  //   SmartDashboard.putData("Auto Align Controller X",controller.getXController());
+  //   SmartDashboard.putData("Auto Align Controller Y",controller.getYController());
 
-   }
+  //  }
  
-   // Called every time the scheduler runs while the command is scheduled.
-   @Override
-   public void execute() 
-   {
-      SmartDashboard.putData("X controller", controller.getXController());
+  //  // Called every time the scheduler runs while the command is scheduled.
+  //  @Override
+  //  public void execute() 
+  //  {
+  //     SmartDashboard.putData("X controller", controller.getXController());
 
 
-    if(camera_left.hasValidTarget() || camera_right.hasValidTarget())
-    {
+  //   if(camera_left.hasValidTarget() || camera_right.hasValidTarget())
+  //   {
 
-      //ROTATION MEASUREMENT
-      thetaMeasurement = camera_left.hasValidTarget() ? camera_left.getPoseEstimate(PoseEstimateType.TARGET_POSE_ROBOT_SPACE).getRaw()[4] : camera_right.getPoseEstimate(PoseEstimateType.TARGET_POSE_ROBOT_SPACE).getRaw()[4];
-      thetaMeasurement = -filter.calculate(thetaMeasurement);
+  //     //ROTATION MEASUREMENT
+  //     thetaMeasurement = camera_left.hasValidTarget() ? camera_left.getPoseEstimate(PoseEstimateType.TARGET_POSE_ROBOT_SPACE).getRaw()[4] : camera_right.getPoseEstimate(PoseEstimateType.TARGET_POSE_ROBOT_SPACE).getRaw()[4];
+  //     thetaMeasurement = -filter.calculate(thetaMeasurement);
 
-      //SETTING TAG ID
-      if(tagId == -1)
-      {
-        if(camera_left.hasValidTarget())
-        {
-          tagId = (int)camera_left.getAprilTagID();
-        }
-        if(camera_right.hasValidTarget())
-        {
-          tagId = (int)camera_right.getAprilTagID();
-        }
-      }
+  //     //SETTING TAG ID
+  //     if(tagId == -1)
+  //     {
+  //       if(camera_left.hasValidTarget())
+  //       {
+  //         tagId = (int)camera_left.getAprilTagID();
+  //       }
+  //       if(camera_right.hasValidTarget())
+  //       {
+  //         tagId = (int)camera_right.getAprilTagID();
+  //       }
+  //     }
 
-      //CALCULATING FINAL DESIRED POSITION 
-      if(camera_left.hasValidTarget() && (int)camera_left.getAprilTagID() == tagId)
-      {
-        ReefPole pole = ReefPole.getPoleFromID(camera_left.getAprilTagID(), rightPole ? camera_left : camera_right);
-        double x = pole.getScoringPos().getX();
-        double y = pole.getScoringPos().getY();
+  //     //CALCULATING FINAL DESIRED POSITION 
+  //     if(camera_left.hasValidTarget() && (int)camera_left.getAprilTagID() == tagId)
+  //     {
+  //       ReefPole pole = ReefPole.getPoleFromID(camera_left.getAprilTagID(), rightPole ? camera_left : camera_right);
+  //       double x = pole.getScoringPos().getX();
+  //       double y = pole.getScoringPos().getY();
 
-        // double x = Units.inchesToMeters(15.5);
-        // double y = rightPole ? Units.inchesToMeters(-11.5): Units.inchesToMeters(6.2);
+  //       // double x = Units.inchesToMeters(15.5);
+  //       // double y = rightPole ? Units.inchesToMeters(-11.5): Units.inchesToMeters(6.2);
 
-        goalPose2d = new Pose2d(Units.inchesToMeters(40), rightPole ? Units.inchesToMeters(0) : Units.inchesToMeters(0),new Rotation2d()).rotateAround(new Translation2d(0, 0), ReefPole.getPoleFromID(camera_left.getAprilTagID(), camera_left).getRotation());
-        finalPose2d = new Pose2d(x, y,new Rotation2d());//.rotateAround(new Translation2d(0, 0), ReefPole.getPoleFromID(camera_left.getAprilTagID(), camera_left).getRotation());
-      }
+  //       goalPose2d = new Pose2d(Units.inchesToMeters(40), rightPole ? Units.inchesToMeters(0) : Units.inchesToMeters(0),new Rotation2d()).rotateAround(new Translation2d(0, 0), ReefPole.getPoleFromID(camera_left.getAprilTagID(), camera_left).getRotation());
+  //       finalPose2d = new Pose2d(x, y,new Rotation2d());//.rotateAround(new Translation2d(0, 0), ReefPole.getPoleFromID(camera_left.getAprilTagID(), camera_left).getRotation());
+  //     }
 
-      if(camera_right.hasValidTarget() && (int)camera_right.getAprilTagID() == tagId)
-      {
-        ReefPole pole = ReefPole.getPoleFromID(camera_right.getAprilTagID(), rightPole ? camera_left : camera_right);
-        double x = pole.getScoringPos().getX();
-        double y = pole.getScoringPos().getY();
+  //     if(camera_right.hasValidTarget() && (int)camera_right.getAprilTagID() == tagId)
+  //     {
+  //       ReefPole pole = ReefPole.getPoleFromID(camera_right.getAprilTagID(), rightPole ? camera_left : camera_right);
+  //       double x = pole.getScoringPos().getX();
+  //       double y = pole.getScoringPos().getY();
         
-        // double x = Units.inchesToMeters(15.5);
-        // double y = rightPole ? Units.inchesToMeters(-11.5): Units.inchesToMeters(6.2);
+  //       // double x = Units.inchesToMeters(15.5);
+  //       // double y = rightPole ? Units.inchesToMeters(-11.5): Units.inchesToMeters(6.2);
 
-        goalPose2d = new Pose2d(Units.inchesToMeters(40), rightPole ? Units.inchesToMeters(0) : Units.inchesToMeters(0),new Rotation2d()).rotateAround(new Translation2d(0, 0), ReefPole.getPoleFromID(camera_right.getAprilTagID(), camera_right).getRotation());
-        finalPose2d = new Pose2d(x, y, new Rotation2d());//.rotateAround(new Translation2d(0, 0), ReefPole.getPoleFromID(camera_right.getAprilTagID(), camera_right).getRotation());
-      }
+  //       goalPose2d = new Pose2d(Units.inchesToMeters(40), rightPole ? Units.inchesToMeters(0) : Units.inchesToMeters(0),new Rotation2d()).rotateAround(new Translation2d(0, 0), ReefPole.getPoleFromID(camera_right.getAprilTagID(), camera_right).getRotation());
+  //       finalPose2d = new Pose2d(x, y, new Rotation2d());//.rotateAround(new Translation2d(0, 0), ReefPole.getPoleFromID(camera_right.getAprilTagID(), camera_right).getRotation());
+  //     }
       
-      if(camera_left.getAprilTagID() == tagId && camera_right.getAprilTagID() == tagId)
-      {
-        base.getLocalization().resetRelativePose(getPose2d());
-      }
+  //     if(camera_left.getAprilTagID() == tagId && camera_right.getAprilTagID() == tagId)
+  //     {
+  //       base.getLocalization().resetRelativePose(getPose2d());
+  //     }
 
-      targetMeasurement = base.getLocalization().getRelativePose().getRotation().getDegrees() - thetaMeasurement;
+  //     targetMeasurement = base.getLocalization().getRelativePose().getRotation().getDegrees() - thetaMeasurement;
 
-    }
+  //   }
 
-    //END COMMAND
-    if(closeEnough("limelight-left") || closeEnough("limelight-right"))
-    {
-      isDone = true;
-    }
+  //   //END COMMAND
+  //   if(closeEnough("limelight-left") || closeEnough("limelight-right"))
+  //   {
+  //     isDone = true;
+  //   }
 
-    if(tagId != -1)
-    {
+  //   if(tagId != -1)
+  //   {
 
-    //PRIORITIZE FINAL POSITION OVER TRANSITION POSITION
-    if(base.getLocalization().getRelativePose().getTranslation().getDistance(goalPose2d.getTranslation()) > base.getLocalization().getRelativePose().getTranslation().getDistance(finalPose2d.getTranslation()))
-    {
-      reached = true;
-    }
+  //   //PRIORITIZE FINAL POSITION OVER TRANSITION POSITION
+  //   if(base.getLocalization().getRelativePose().getTranslation().getDistance(goalPose2d.getTranslation()) > base.getLocalization().getRelativePose().getTranslation().getDistance(finalPose2d.getTranslation()))
+  //   {
+  //     reached = true;
+  //   }
 
   
-    if(base.getLocalization().getRelativePose().getTranslation().getDistance(goalPose2d.getTranslation()) > 0.075 && !reached)
-    {  
-    //UP SPEED
-    controller.getXController().setP(2);
-    controller.getYController().setP(2);
+  //   if(base.getLocalization().getRelativePose().getTranslation().getDistance(goalPose2d.getTranslation()) > 0.075 && !reached)
+  //   {  
+  //   //UP SPEED
+  //   controller.getXController().setP(2);
+  //   controller.getYController().setP(2);
 
-    //CALCULATE SPEEDS
-    double rSpeed = rController.calculate(base.getLocalization().getRelativePose().getRotation().getDegrees(), ReefPole.getPoleFromID(tagId, camera_left).getRotation().getDegrees() - 180);
-    double xSpeed = controller.getXController().calculate(base.getLocalization().getRelativePose().getX(), goalPose2d.getX());
-    double ySpeed = controller.getYController().calculate(base.getLocalization().getRelativePose().getY(), goalPose2d.getY());
+  //   //CALCULATE SPEEDS
+  //   double rSpeed = rController.calculate(base.getLocalization().getRelativePose().getRotation().getDegrees(), ReefPole.getPoleFromID(tagId, camera_left).getRotation().getDegrees() - 180);
+  //   double xSpeed = controller.getXController().calculate(base.getLocalization().getRelativePose().getX(), goalPose2d.getX());
+  //   double ySpeed = controller.getYController().calculate(base.getLocalization().getRelativePose().getY(), goalPose2d.getY());
 
-    SmartDashboard.putNumber("Scoring Pos X", finalPose2d.getX());
-    SmartDashboard.putNumber("Scoring Pos Y", finalPose2d.getY());
-    SmartDashboard.putNumber("Tag ID", tagId);
+  //   SmartDashboard.putNumber("Scoring Pos X", finalPose2d.getX());
+  //   SmartDashboard.putNumber("Scoring Pos Y", finalPose2d.getY());
+  //   SmartDashboard.putNumber("Tag ID", tagId);
     
-    ChassisSpeeds spds = ChassisSpeeds.fromFieldRelativeSpeeds
-                                                (
-                                                new ChassisSpeeds
-                                                        (
-                                                          xSpeed, 
-                                                          ySpeed, 
-                                                          rSpeed 
-                                                        ), 
-                                                base.getLocalization().getRelativePose().getRotation()
-                                                );
-    base.getDrivetrain().getRobotSpeeds().setSpeeds("feedback", spds);
-    }
-    else
-    {
-    reached = true;
+  //   ChassisSpeeds spds = ChassisSpeeds.fromFieldRelativeSpeeds
+  //                                               (
+  //                                               new ChassisSpeeds
+  //                                                       (
+  //                                                         xSpeed, 
+  //                                                         ySpeed, 
+  //                                                         rSpeed 
+  //                                                       ), 
+  //                                               base.getLocalization().getRelativePose().getRotation()
+  //                                               );
+  //   base.getDrivetrain().getRobotSpeeds().setSpeeds("feedback", spds);
+  //   }
+  //   else
+  //   {
+  //   reached = true;
 
-    controller.getXController().setP(1.75);
-    controller.getYController().setP(1.75);
+  //   controller.getXController().setP(1.75);
+  //   controller.getYController().setP(1.75);
 
 
 
-    double rSpeed = rController.calculate(base.getLocalization().getRelativePose().getRotation().getDegrees(), ReefPole.getPoleFromID(tagId, camera_left).getRotation().getDegrees() - 180);
-    double xSpeed = controller.getXController().calculate(base.getLocalization().getRelativePose().getX(), finalPose2d.getX());
-    double ySpeed = controller.getYController().calculate(base.getLocalization().getRelativePose().getY(), finalPose2d.getY());   
+  //   double rSpeed = rController.calculate(base.getLocalization().getRelativePose().getRotation().getDegrees(), ReefPole.getPoleFromID(tagId, camera_left).getRotation().getDegrees() - 180);
+  //   double xSpeed = controller.getXController().calculate(base.getLocalization().getRelativePose().getX(), finalPose2d.getX());
+  //   double ySpeed = controller.getYController().calculate(base.getLocalization().getRelativePose().getY(), finalPose2d.getY());   
     
-    ChassisSpeeds spds = ChassisSpeeds.fromFieldRelativeSpeeds
-                                                (
-                                                new ChassisSpeeds
-                                                        (
-                                                          xSpeed, 
-                                                          ySpeed, 
-                                                          rSpeed 
-                                                        ), 
-                                                base.getLocalization().getRelativePose().getRotation()
-                                                );
-    base.getDrivetrain().getRobotSpeeds().setSpeeds("feedback", spds);
-  }
-  }
+  //   ChassisSpeeds spds = ChassisSpeeds.fromFieldRelativeSpeeds
+  //                                               (
+  //                                               new ChassisSpeeds
+  //                                                       (
+  //                                                         xSpeed, 
+  //                                                         ySpeed, 
+  //                                                         rSpeed 
+  //                                                       ), 
+  //                                               base.getLocalization().getRelativePose().getRotation()
+  //                                               );
+  //   base.getDrivetrain().getRobotSpeeds().setSpeeds("feedback", spds);
+  // }
+  // }
 
-    //SUPERSTRUCTURE LOGIC-------------------------------------------------------****
+  //   //SUPERSTRUCTURE LOGIC-------------------------------------------------------****
 
     
-    double distance = 9999999;
-    if(tagId != -1)
-    {
-     distance = Math.abs(base.getLocalization().getRelativePose().getTranslation().getDistance(finalPose2d.getTranslation()));
-    }
+  //   double distance = 9999999;
+  //   if(tagId != -1)
+  //   {
+  //    distance = Math.abs(base.getLocalization().getRelativePose().getTranslation().getDistance(finalPose2d.getTranslation()));
+  //   }
     
-    if(!superstructure.getStateMachine().getGoalState().equals(state.get()))
-    {
-    if(state.get().equals(SuperstructureState.L4))
-    {
-      if(distance < 2 && distance > 1)
-      {
-        superstructure.setSuper(SuperstructureState.L2);
-      }
-      else if(distance < 1 && distance > 0.5)
-      {
-        superstructure.setSuper(SuperstructureState.L3);
-      }
-      else if(distance < 0.3)
-      {
-        superstructure.setSuper(SuperstructureState.L4);
+  //   if(!superstructure.getStateMachine().getGoalState().equals(state.get()))
+  //   {
+  //   if(state.get().equals(SuperstructureState.L4))
+  //   {
+  //     if(distance < 2 && distance > 1)
+  //     {
+  //       superstructure.setSuper(SuperstructureState.L2);
+  //     }
+  //     else if(distance < 1 && distance > 0.5)
+  //     {
+  //       superstructure.setSuper(SuperstructureState.L3);
+  //     }
+  //     else if(distance < 0.3)
+  //     {
+  //       superstructure.setSuper(SuperstructureState.L4);
         
-      }
+  //     }
        
-    }
-    else if(state.get().equals(SuperstructureState.L3))
-    {
-      if(distance < 2 && distance > 1)
-      {
-        superstructure.setSuper(SuperstructureState.L2);
-      }
-      else if(distance < 1)
-      {
-        superstructure.setSuper(SuperstructureState.L3);
+  //   }
+  //   else if(state.get().equals(SuperstructureState.L3))
+  //   {
+  //     if(distance < 2 && distance > 1)
+  //     {
+  //       superstructure.setSuper(SuperstructureState.L2);
+  //     }
+  //     else if(distance < 1)
+  //     {
+  //       superstructure.setSuper(SuperstructureState.L3);
         
-      }  
-    }
-    else if(state.get().equals(SuperstructureState.L2))
-    {
-      if(distance < 1)
-      {
-        superstructure.setSuper(state.get());
+  //     }  
+  //   }
+  //   else if(state.get().equals(SuperstructureState.L2))
+  //   {
+  //     if(distance < 1)
+  //     {
+  //       superstructure.setSuper(state.get());
        
-      }
-    }
-    else if(state.get().equals(SuperstructureState.L1) && isDone)
-    {
-      superstructure.setSuper(SuperstructureState.L1);
+  //     }
+  //   }
+  //   else if(state.get().equals(SuperstructureState.L1) && isDone)
+  //   {
+  //     superstructure.setSuper(SuperstructureState.L1);
       
-    }
-  }
-  }
-   @Override
-   public void end(boolean interrupted) {  
-    System.out.println("NIGGER");
-     base.getDrivetrain().getRobotSpeeds().setSpeeds("feedback", new ChassisSpeeds(0,0,0));
-   }
+  //   }
+  // }
+  // }
+  //  @Override
+  //  public void end(boolean interrupted) {  
+  //   System.out.println("NIGGER");
+  //    base.getDrivetrain().getRobotSpeeds().setSpeeds("feedback", new ChassisSpeeds(0,0,0));
+  //  }
  
-   @Override
-   public boolean isFinished() 
-   {  
-     return isDone;
-   }
+  //  @Override
+  //  public boolean isFinished() 
+  //  {  
+  //    return isDone;
+  //  }
  }

@@ -37,18 +37,12 @@ import frc.robot.subsystems.superstructure.CANdleSubsystem;
 import frc.robot.subsystems.superstructure.EndEffector;
 
 public class RobotContainer {
-  public final RobotBase<SwerveDrivetrain> robotBase = Constants.DriveTrain.ROBOT_BASE.create().shuffleboard(SendableLevel.DEBUG);
  
-  public final StatefulArmMechanism<ArmState> arm = Constants.EndEffector.ARM_CONFIG.build();//.shuffleboard("Arm", SendableLevel.DEBUG);
-  public final StatefulArmMechanism<WristState> wrist = Constants.EndEffector.WRIST_CONFIG.build();//.shuffleboard("Wrist", SendableLevel.DEBUG);
-  public final StatefulMechanism<RollerState> rollers = Constants.EndEffector.CORAL_ROLLERS.build();//.shuffleboard("Rollers", SendableLevel.DEBUG);
-  public final StatefulMechanism<RollerState> algaeRollers = Constants.EndEffector.ALGAE_ROLLERS.build();//.shuffleboard("Algae Rollers", SendableLevel.COMP);;
-  public final StatefulElevatorMechanism<ElevatorState> elevator = Constants.Elevator.ELEVATOR_CONFIG.build() ;//.shuffleboard("Elevator", SendableLevel.DEBUG);
   // public SuperStructureTest s = SuperstructureBuilder.builder().addArms(arm, wrist).addMotors(rollers, algaeRollers).build();
   public BooleanSupplier hasTarget;
   // public final Elevator elevator = new Elevator();
-  public final EndEffector endEffector = new EndEffector(arm, wrist, rollers, algaeRollers).setAutoEndScoring(false);
-  public Superstructure superstructure = new Superstructure(elevator, endEffector);
+  
+  
   public CANdleSubsystem candle = new CANdleSubsystem(robotBase);
   public static SuperstructureState selectedState = SuperstructureState.L4;
   public V2 alignRight = new V2(robotBase, "limelight-left", true, superstructure, () -> selectedState);
@@ -74,10 +68,7 @@ public class RobotContainer {
     robotBase.getDrivetrain().setDriveCommand(driverController);
     robotBase.registerMechanism(arm, algaeRollers, wrist, rollers, elevator);
     robotBase.getLocalization().setSuppressUpdates(false);
-    arm.setPidEnabled(true);
-    wrist.setPidEnabled(true);
-    arm.setFeedforwardEnabled(false);
-    wrist.setFeedforwardEnabled(false);
+    
 
 
     elevator.shuffleboard("Elevator", SendableLevel.DEBUG);

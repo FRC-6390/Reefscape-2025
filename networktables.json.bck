@@ -18,7 +18,7 @@
   {
     "name": "/Preferences/RobotLocalization/FieldPoseX",
     "type": "double",
-    "value": 11.71170887872963,
+    "value": 12.17154965948698,
     "properties": {
       "persistent": true
     }
@@ -26,7 +26,7 @@
   {
     "name": "/Preferences/RobotLocalization/FieldPoseY",
     "type": "double",
-    "value": 3.836488251976405,
+    "value": 6.335811573260999,
     "properties": {
       "persistent": true
     }
@@ -34,7 +34,7 @@
   {
     "name": "/Preferences/RobotLocalization/FieldPoseZ",
     "type": "double",
-    "value": -0.00046161809505127605,
+    "value": 0.0,
     "properties": {
       "persistent": true
     }
@@ -42,7 +42,7 @@
   {
     "name": "/Preferences/RobotLocalization/FieldPoseRollDeg",
     "type": "double",
-    "value": 0.0007346065180666885,
+    "value": 0.0,
     "properties": {
       "persistent": true
     }
@@ -50,7 +50,7 @@
   {
     "name": "/Preferences/RobotLocalization/FieldPosePitchDeg",
     "type": "double",
-    "value": 0.0004529218814568286,
+    "value": 0.0,
     "properties": {
       "persistent": true
     }
@@ -58,7 +58,7 @@
   {
     "name": "/Preferences/RobotLocalization/FieldPoseYawDeg",
     "type": "double",
-    "value": -0.7640965140780615,
+    "value": 176.1201877107843,
     "properties": {
       "persistent": true
     }
@@ -66,7 +66,7 @@
   {
     "name": "/Preferences/RobotLocalization/DriverYawDeg",
     "type": "double",
-    "value": -4.628290782570747e-05,
+    "value": 16.730379638510296,
     "properties": {
       "persistent": true
     }
@@ -75,6 +75,22 @@
     "name": "/Preferences/RobotLocalization/Valid",
     "type": "boolean",
     "value": true,
+    "properties": {
+      "persistent": true
+    }
+  },
+  {
+    "name": "/Shuffleboard/Elevator/Sim/StatefulElevatorMechanism/LimitSwitch-5/Override",
+    "type": "boolean",
+    "value": false,
+    "properties": {
+      "persistent": true
+    }
+  },
+  {
+    "name": "/Shuffleboard/Elevator/Sim/StatefulElevatorMechanism/LimitSwitch-5/ManualValue",
+    "type": "boolean",
+    "value": false,
     "properties": {
       "persistent": true
     }

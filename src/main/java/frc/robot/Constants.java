@@ -155,23 +155,24 @@ public interface Constants {
         .addMotors(Motor.KRAKEN_X60, 20, -21)
         .setEncoder(EncoderType.CTRECANcoder, 42)
         .setNeutralMode(MotorNeutralMode.Brake)
-        .setEncoderOffset(24)
         .setEncoderConversion(3d)
+        .setEncoderConversionOffset(OFFSET_FROM_FLOOR)
         .setTolerance(1)
         .setCanbus(CANIVORE_CANBUS)
         .setProfiledPID(0.11, 0, 0, 80 ,70)
         .setCurrentLimit(60)
-        .addLowerLimitSwitch(-5, 24, true)
+        .addLowerLimitSwitch(-5, OFFSET_FROM_FLOOR, true)
         .setStateActionSupressMotors(mech -> mech.setSpeed(-0.25), ElevatorState.HomeReset, ElevatorState.Intaking)
         .setStateMachineDelay(Units.millisecondsToSeconds(40))
         .setSimulationElevator(
             new ElevatorSimulationParameters()
-            .setCarriageMassKg(Units.lbsToKilograms(25))
+            .setCarriageMassKg(Units.lbsToKilograms(30))
             .setDrumRadiusMeters(Units.inchesToMeters(GEAR_DIAMETER_INCHES) / 2.0)
             .setNominalVoltage(12)
             .setSimulateGravity(true)
-            .setStartingHeightMeters(Units.inchesToMeters(24))
-            .setRangeMeters(Units.inchesToMeters(24), Units.inchesToMeters(76)));
+            .setStartingHeightMeters(Units.inchesToMeters(OFFSET_FROM_FLOOR))
+            .setRangeMeters(Units.inchesToMeters(OFFSET_FROM_FLOOR), Units.inchesToMeters(76))
+            .setUnitsPerMeter(Units.metersToInches(1)));
     }
 
     public interface EndEffector {
