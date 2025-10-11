@@ -1,19 +1,10 @@
 package frc.robot.utils;
 
-import com.pathplanner.lib.path.PathPlannerPath;
-
-import ca.frc6390.athena.core.RobotBase;
-import ca.frc6390.athena.sensors.camera.LocalizationCamera;
-import ca.frc6390.athena.sensors.camera.limelight.LimeLight;
-import ca.frc6390.athena.sensors.camera.limelight.LimeLightConfig;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.math.geometry.Translation2d;
-import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
-import frc.robot.Autos;
-import frc.robot.Robot;
+
 public class ReefScoringPos {
 
     private final ReefLevel level;
@@ -21,68 +12,44 @@ public class ReefScoringPos {
 
      public enum ReefPole {
 
-        NONE(-1, -1, new Pose2d(), new Pose2d(), null, 0, new Pose2d()),
+        NONE(-1, -1, new Pose2d()),
 
         //LEFT
-        A(18, 7, new Pose2d(11.757,4.200, Rotation2d.fromDegrees(0)), new Pose2d(3.241, 4.200,  Rotation2d.fromDegrees(180)), Autos.PATHS.SIDEA,0.0, new Pose2d(0, 0.0,new Rotation2d())),
+        A(18, 7,new Pose2d(0, 0.0,new Rotation2d())),
         //RIGHT
-        B(18, 7, new Pose2d(11.776,3.880, Rotation2d.fromDegrees(180)), new Pose2d(3.211,3.880, Rotation2d.fromDegrees(180)), Autos.PATHS.SIDEA,0.0, new Pose2d(0, 0.0,new Rotation2d())),
+        B(18, 7, new Pose2d(0, 0.0,new Rotation2d())),
 
-        C(17, 8, new Pose2d(12.275,3.033,  Rotation2d.fromDegrees(-120)), new Pose2d(3.699,3.033, Rotation2d.fromDegrees(-120)), Autos.PATHS.SIDEC,0.0, new Pose2d(0, 0.0,new Rotation2d())),
-        D(17, 8, new Pose2d(12.574,2.863,  Rotation2d.fromDegrees(-120)), new Pose2d(3.969,2.863, Rotation2d.fromDegrees(-120)), Autos.PATHS.SIDEC,0.0, new Pose2d(0, 0.0,new Rotation2d())),
+        C(17, 8,new Pose2d(0, 0.0,new Rotation2d())),
+        D(17, 8, new Pose2d(0, 0.0,new Rotation2d())),
 
-        E(22, 9, new Pose2d(13.561,2.863,  Rotation2d.fromDegrees(-60)), new Pose2d(4.956,2.853,  Rotation2d.fromDegrees(-60)), Autos.PATHS.SIDEE,0.0, new Pose2d(0, 0.0,new Rotation2d())),
-        F(22, 9, new Pose2d(13.861,2.993,  Rotation2d.fromDegrees(-60)), new Pose2d(5.245,2.993,  Rotation2d.fromDegrees(-60)), Autos.PATHS.SIDEE,0.0, new Pose2d(0, 0.0,new Rotation2d())),
+        E(22, 9,  new Pose2d(0, 0.0,new Rotation2d())),
+        F(22, 9,  new Pose2d(0, 0.0,new Rotation2d())),
 
-        G(21, 10, new Pose2d(14.369,3.860, Rotation2d.fromDegrees(0)), new Pose2d(5.754,3.860, Rotation2d.fromDegrees(0)), Autos.PATHS.SIDEG,0.0, new Pose2d(0, 0.0,new Rotation2d())),
-        H(21, 10, new Pose2d(14.359,4.200, Rotation2d.fromDegrees(0)), new Pose2d(5.754,4.200, Rotation2d.fromDegrees(0)), Autos.PATHS.SIDEG,0.0, new Pose2d(0, 0.0,new Rotation2d())),
+        G(21, 10,  new Pose2d(0, 0.0,new Rotation2d())),
+        H(21, 10,  new Pose2d(0, 0.0,new Rotation2d())),
 
-        I(20, 11, new Pose2d(13.880,5.007, Rotation2d.fromDegrees(60)), new Pose2d(5.285,5.007,  Rotation2d.fromDegrees(60)), Autos.PATHS.SIDEI,0.0, new Pose2d(0.37, 0.34,new Rotation2d())),
-        J(20, 11, new Pose2d(13.561,5.207, Rotation2d.fromDegrees(60)), new Pose2d(4.986,5.207,  Rotation2d.fromDegrees(60)), Autos.PATHS.SIDEI,0.0, new Pose2d(0.12, 0.47,new Rotation2d())),
-        //new Pose2d(Units.inchesToMeters(24), Units.inchesToMeters(-7.8),new Rotation2d())
-        K(19, 6, new Pose2d(12.594,5.187, Rotation2d.fromDegrees(120)), new Pose2d(3.989,5.187, Rotation2d.fromDegrees(120)), Autos.PATHS.SIDEK,0.0, new Pose2d(-0.1, 0.48,new Rotation2d())),
-        L(19, 6, new Pose2d(12.325,5.027, Rotation2d.fromDegrees(120)), new Pose2d(3.719,5.027, Rotation2d.fromDegrees(120)), Autos.PATHS.SIDEK,0.0, new Pose2d(-0.1, 0.48,new Rotation2d()));
+        I(20, 11,  new Pose2d(0.37, 0.34,new Rotation2d())),
+        J(20, 11, new Pose2d(0.12, 0.47,new Rotation2d())),
+
+        K(19, 6, new Pose2d(-0.1, 0.48,new Rotation2d())),
+        L(19, 6,  new Pose2d(-0.1, 0.48,new Rotation2d()));
 
         private final long apriltagIdRed, apriltagIdBlue;
-        private final Pose2d redPose, bluePose;
-        private final Autos.PATHS path;
-        private final double offsetInDegrees;
-        private final Pose2d relativeScoringPos;
+        private final Pose2d offset;
     
-        ReefPole(long apriltagIdBlue, long apriltagIdRed, Pose2d redPose, Pose2d bluePose, Autos.PATHS path, double offsetInMetres,Pose2d relativeScoringPos) {
+        ReefPole(long apriltagIdBlue, long apriltagIdRed,Pose2d offset) {
             this.apriltagIdRed = apriltagIdRed;
             this.apriltagIdBlue = apriltagIdBlue;
-            this.redPose = redPose;
-            this.bluePose = bluePose;
-            this.path = path;
-            this.offsetInDegrees = offsetInMetres;
-            this.relativeScoringPos = relativeScoringPos;
+            this.offset = offset;
 
+        }
+
+        public Pose2d getOffset() {
+            return offset;
         }
 
         public long getApriltagId() {
            return getApriltagId(DriverStation.getAlliance().get());
-        }
-
-        public double getOffsetInDegrees() {
-            return offsetInDegrees;
-         }
-
-        public static Translation2d getCenterReef()
-        {
-            if(DriverStation.getAlliance().orElse(Robot.isSimulation() ? Alliance.Blue : null).equals(Alliance.Blue))
-            {
-                return new Translation2d(4.477, 4);
-            }
-            else
-            {
-                return new Translation2d(13.063, 4);
-            }
-        }
-
-        public Pose2d getScoringPos()
-        {
-            return relativeScoringPos;
         }
     
         public long getApriltagId(Alliance team) {
@@ -97,93 +64,32 @@ public class ReefScoringPos {
             }
         }
 
-        public static ReefPole getPoleFromID(long id, LimeLight ll)
+        public static ReefPole getPoleFromID(long id, boolean isRightPole)
         {
-            if (ll == null) {
-                return ReefPole.NONE;
-            }
-            return getPoleFromID(id, ll.config.table());
-        }
-
-        public static ReefPole getPoleFromID(long id, LocalizationCamera camera)
-        {
-            if (camera == null || camera.getConfig() == null) {
-                return ReefPole.NONE;
-            }
-            return getPoleFromID(id, camera.getConfig().getTable());
-        }
-
-        public static ReefPole getPoleFromID(long id, String cameraTableName)
-        {
-            boolean leftCamera = isLeftCamera(cameraTableName);
             switch ((int) id) {
                 case 6:
                 case 19:
-                    return leftCamera ? ReefPole.L : ReefPole.K;
+                    return isRightPole ?  ReefPole.K : ReefPole.L;
                 case 7:
                 case 18:
-                    return leftCamera ? ReefPole.B : ReefPole.A;
+                    return isRightPole ?  ReefPole.A : ReefPole.B;
                 case 8:
                 case 17:
-                    return leftCamera ? ReefPole.D : ReefPole.C;
+                    return isRightPole ?  ReefPole.C : ReefPole.D;
                 case 9:
                 case 22:
-                    return leftCamera ? ReefPole.F : ReefPole.E;
+                    return isRightPole ?  ReefPole.E : ReefPole.F;
                 case 10:
                 case 21:
-                    return leftCamera ? ReefPole.H : ReefPole.G;
+                    return isRightPole ?  ReefPole.G : ReefPole.H;
                 case 11:
                 case 20:
-                    return leftCamera ? ReefPole.J : ReefPole.I;
+                    return isRightPole ?  ReefPole.I : ReefPole.J;
                 default:
                     return ReefPole.NONE;
             }
         }
 
-        private static boolean isLeftCamera(String cameraTableName) {
-            if (cameraTableName == null) {
-                return false;
-            }
-            String normalized = cameraTableName.trim().toLowerCase();
-            return normalized.contains("left");
-        }
-
-        public Translation2d getTranslation() {
-            return getTranslation(DriverStation.getAlliance().orElse(Robot.isSimulation() ? Alliance.Blue : null));
-         }
-     
-         public Translation2d getTranslation(Alliance team) {
-            return getPose2d(team).getTranslation();
-         }
-
-         public Rotation2d getRotation() {
-            return getRotation(DriverStation.getAlliance().orElse(Robot.isSimulation() ? Alliance.Blue : null));
-         }
-     
-         public Rotation2d getRotation(Alliance team) {
-            return getPose2d(team).getRotation();
-         }
-
-         public Pose2d getPose2d() {
-            return getPose2d(DriverStation.getAlliance().orElse(Robot.isSimulation() ? Alliance.Blue : null));
-         }
-     
-         public Pose2d getPose2d(Alliance team) {
-             switch (team) {
-                 case Red:
-                     return redPose;
-                 case Blue:
-                     return bluePose;
-                 default:
-                     DriverStation.reportError("Cant Find Team!!!", new IllegalArgumentException("Unknown team: " + team).getStackTrace());
-                     return null;
-             }
-         }
-
-         public PathPlannerPath getPath()
-         {
-           return path.getPath();
-         }
     }
 
     public enum ReefLevel {
@@ -212,29 +118,5 @@ public class ReefScoringPos {
 
     public long getApriltagId(Alliance team) {
         return side.getApriltagId(team);
-    }
-
-    public Translation2d getTranslation() {
-        return side.getTranslation();
-    }
-
-    public Translation2d getTranslation(Alliance team) {
-        return side.getTranslation(team);
-    }
-
-    public Rotation2d getRotation() {
-        return side.getRotation();
-    }
-
-    public Rotation2d getRotation(Alliance team) {
-        return side.getRotation(team);
-    }
-
-    public Pose2d getPose2d() {
-        return side.getPose2d();
-    }
-
-    public Pose2d getPose2d(Alliance team) {
-        return side.getPose2d(team);
     }
 }

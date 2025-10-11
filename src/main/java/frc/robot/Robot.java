@@ -5,12 +5,15 @@
 package frc.robot;
 
 import ca.frc6390.athena.controllers.EnhancedXboxController;
+import ca.frc6390.athena.core.RobotAuto;
 import ca.frc6390.athena.core.RobotBase;
 import ca.frc6390.athena.core.RobotSendableSystem.SendableLevel;
 import ca.frc6390.athena.drivetrains.swerve.SwerveDrivetrain;
 import ca.frc6390.athena.mechanisms.ArmMechanism.StatefulArmMechanism;
 import ca.frc6390.athena.mechanisms.ElevatorMechanism.StatefulElevatorMechanism;
 import ca.frc6390.athena.mechanisms.StatefulMechanism;
+import ca.frc6390.athena.sensors.camera.LocalizationCamera;
+import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.PowerDistribution;
@@ -80,7 +83,7 @@ public class Robot extends RobotBase<SwerveDrivetrain> {
   }
 
   @Override
-  public void autonomousExit() {
+  public void onAutonomousExit() {
     Rotation2d offset = Rotation2d.fromDegrees(DriverStation.getAlliance().get().equals(Alliance.Blue) ? 0 : 180);
     getIMU().setVirtualAxis("driver", getIMU().getVirtualAxis("field").minus(offset));
   }
@@ -88,7 +91,8 @@ public class Robot extends RobotBase<SwerveDrivetrain> {
   public void configureDriverController(EnhancedXboxController controller)
   {
 
-    controller.start.onTrue(() -> getDrivetrain().getIMU().setYaw(0)).after(2).onTrue(() -> {getLocalization().resetFieldPose(0,0, 0); getLocalization().resetRelativePose(0,0, 0);});
+    controller.start.onTrue(() -> getDrivetrain().getIMU().setYaw(0))
+                    .after(2).onTrue(() -> {getLocalization().resetFieldPose(0,0, 0); getLocalization().resetRelativePose(0,0, 0);});
 
     controller.leftBumper.onTrue(
       Commands.either(
@@ -133,7 +137,35 @@ public class Robot extends RobotBase<SwerveDrivetrain> {
       controller.rightBumper.onTrue(() -> wrist.setNudge(wrist.getNudge() + 5)).after(1).onTrue(() -> wrist.setNudge(0));
       controller.leftBumper.onTrue(() -> wrist.setNudge(wrist.getNudge() - 5)).after(1).onTrue(() -> wrist.setNudge(0));
       controller.setLeftInverted(true).setRightInverted(true).setSticksDeadzone(0.15).setLeftSlewrate(5);
-      getDrivetrain().setDriveCommand(controller);
+  }
+
+  public void configureAutos(RobotAuto auto){
+
+    auto.registerNamedCommand("WaitForTag", Commands.waitUntil(() -> getVision().getCameras().values().stream().anyMatch(LocalizationCamera::hasValidTarget)));
+    
+    auto.registerNamedCommand("Home", superstructure.setState(SuperstructureState.HomePID));
+    auto.registerNamedCommand("OrientLeftSide", () -> getLocalization().resetRelativePose(new Pose2d(0,0, Rotation2d.fromRadians(-2.3631872270622845))));
+
+    auto.registerNamedCommand("Intake", Commands.either(superstructure.setState(SuperstructureState.Intaking), Commands.none(), () -> !endEffector.hasGamePiece()));
+
+    auto.registerNamedCommand("L4", superstructure.setState(SuperstructureState.L4));
+    auto.registerNamedCommand("L3", superstructure.setState(SuperstructureState.L3));
+    auto.registerNamedCommand("L2", superstructure.setState(SuperstructureState.L2));
+    auto.registerNamedCommand("L1", superstructure.setState(SuperstructureState.L1));
+
+    auto.registerNamedCommand("StartEject", superstructure.setState(SuperstructureState.Score));
+    auto.registerNamedCommand("WaitForElevator",superstructure.WaitForElevator());
+    auto.registerNamedCommand("WaitForEffector",superstructure.WaitForL4());
+    auto.registerNamedCommand("WaitForEjector", superstructure.WaitForEjector());
+
+    auto.registerNamedCommand("AlignRight", alignRight);
+    auto.registerNamedCommand("AlignLeft", alginLeft);
+    auto.registerNamedCommand("DisableLocal", () -> getVision().getCameras().values().forEach(camera -> camera.setUseForLocalization(false)));
+    auto.registerNamedCommand("EnableLocal", () -> getVision().getCameras().values().forEach(camera -> camera.setUseForLocalization(true)));
+
+    auto.registerPathPlannerAuto("Left", "CompLeftSide");
+    auto.registerPathPlannerAuto("Right", "CompMidSide");
+    auto.registerPathPlannerAuto("Mid", "CompMidSide");
   }
 
 }

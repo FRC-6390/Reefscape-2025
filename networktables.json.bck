@@ -18,7 +18,7 @@
   {
     "name": "/Preferences/RobotLocalization/FieldPoseX",
     "type": "double",
-    "value": 12.17154965948698,
+    "value": 3.3365133609365727,
     "properties": {
       "persistent": true
     }
@@ -26,7 +26,7 @@
   {
     "name": "/Preferences/RobotLocalization/FieldPoseY",
     "type": "double",
-    "value": 6.335811573260999,
+    "value": 7.215248975951684,
     "properties": {
       "persistent": true
     }
@@ -58,7 +58,7 @@
   {
     "name": "/Preferences/RobotLocalization/FieldPoseYawDeg",
     "type": "double",
-    "value": 176.1201877107843,
+    "value": -73.91213835343741,
     "properties": {
       "persistent": true
     }
@@ -66,7 +66,7 @@
   {
     "name": "/Preferences/RobotLocalization/DriverYawDeg",
     "type": "double",
-    "value": 16.730379638510296,
+    "value": -72.01628727689422,
     "properties": {
       "persistent": true
     }
@@ -91,6 +91,70 @@
     "name": "/Shuffleboard/Elevator/Sim/StatefulElevatorMechanism/LimitSwitch-5/ManualValue",
     "type": "boolean",
     "value": false,
+    "properties": {
+      "persistent": true
+    }
+  },
+  {
+    "name": "/Preferences/Shuffleboard/Localization/Save Data/FieldPoseX",
+    "type": "double",
+    "value": 10.464022784095235,
+    "properties": {
+      "persistent": true
+    }
+  },
+  {
+    "name": "/Preferences/Shuffleboard/Localization/Save Data/FieldPoseY",
+    "type": "double",
+    "value": 2.913054427608836,
+    "properties": {
+      "persistent": true
+    }
+  },
+  {
+    "name": "/Preferences/Shuffleboard/Localization/Save Data/FieldPoseZ",
+    "type": "double",
+    "value": 0.0,
+    "properties": {
+      "persistent": true
+    }
+  },
+  {
+    "name": "/Preferences/Shuffleboard/Localization/Save Data/FieldPoseRollDeg",
+    "type": "double",
+    "value": 0.0,
+    "properties": {
+      "persistent": true
+    }
+  },
+  {
+    "name": "/Preferences/Shuffleboard/Localization/Save Data/FieldPosePitchDeg",
+    "type": "double",
+    "value": 0.0,
+    "properties": {
+      "persistent": true
+    }
+  },
+  {
+    "name": "/Preferences/Shuffleboard/Localization/Save Data/FieldPoseYawDeg",
+    "type": "double",
+    "value": -13.61125155129508,
+    "properties": {
+      "persistent": true
+    }
+  },
+  {
+    "name": "/Preferences/Shuffleboard/Localization/Save Data/DriverYawDeg",
+    "type": "double",
+    "value": 161.88567457103287,
+    "properties": {
+      "persistent": true
+    }
+  },
+  {
+    "name": "/Preferences/Shuffleboard/Localization/Save Data/Valid",
+    "type": "boolean",
+    "value": true,
     "properties": {
       "persistent": true
     }

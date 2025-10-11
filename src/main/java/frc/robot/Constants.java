@@ -2,8 +2,6 @@ package frc.robot;
 
 import java.util.List;
 
-import org.photonvision.PhotonPoseEstimator.PoseStrategy;
-
 import ca.frc6390.athena.controllers.ElevatorFeedForwardsSendable;
 import ca.frc6390.athena.core.RobotBase.RobotBaseConfig;
 import ca.frc6390.athena.core.RobotDrivetrain.RobotDrivetrainIDs.DrivetrainIDs;
@@ -19,23 +17,18 @@ import ca.frc6390.athena.mechanisms.MechanismConfig;
 import ca.frc6390.athena.mechanisms.ArmMechanism.StatefulArmMechanism;
 import ca.frc6390.athena.mechanisms.ElevatorMechanism.StatefulElevatorMechanism;
 import ca.frc6390.athena.mechanisms.MechanismConfig.ElevatorSimulationParameters;
-import ca.frc6390.athena.mechanisms.sim.MechanismVisualizationConfig;
 import ca.frc6390.athena.mechanisms.StatefulMechanism;
 import ca.frc6390.athena.mechanisms.StateMachine.SetpointProvider;
 import ca.frc6390.athena.sensors.camera.limelight.LimeLight.PoseEstimateWithLatencyType;
-import ca.frc6390.athena.sensors.camera.photonvision.PhotonVisionConfig;
 import ca.frc6390.athena.sensors.camera.ConfigurableCamera;
 import ca.frc6390.athena.sensors.camera.limelight.LimeLightConfig;
 import edu.wpi.first.math.controller.ArmFeedforward;
 import edu.wpi.first.math.controller.ElevatorFeedforward;
 import edu.wpi.first.math.controller.ProfiledPIDController;
-import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.trajectory.TrapezoidProfile.Constraints;
 import edu.wpi.first.math.util.Units;
-import edu.wpi.first.units.Unit;
-import edu.wpi.first.wpilibj.RobotBase;
 import frc.robot.Constants.EndEffector.ArmState;
 import frc.robot.Constants.EndEffector.WristState;;
 
@@ -169,7 +162,7 @@ public interface Constants {
             .setCarriageMassKg(Units.lbsToKilograms(30))
             .setDrumRadiusMeters(Units.inchesToMeters(GEAR_DIAMETER_INCHES) / 2.0)
             .setNominalVoltage(12)
-            .setSimulateGravity(true)
+            .setSimulateGravity(false)
             .setStartingHeightMeters(Units.inchesToMeters(OFFSET_FROM_FLOOR))
             .setRangeMeters(Units.inchesToMeters(OFFSET_FROM_FLOOR), Units.inchesToMeters(76))
             .setUnitsPerMeter(Units.metersToInches(1)));
