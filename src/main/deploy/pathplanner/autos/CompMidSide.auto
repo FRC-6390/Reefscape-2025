@@ -1,0 +1,80 @@
+{
+  "version": "2025.0",
+  "command": {
+    "type": "sequential",
+    "data": {
+      "commands": [
+        {
+          "type": "named",
+          "data": {
+            "name": "OrientMidSide"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "DisableLocal"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "CompMidSide.0"
+          }
+        },
+        {
+          "type": "race",
+          "data": {
+            "commands": [
+              {
+                "type": "path",
+                "data": {
+                  "pathName": "CompMidSide.1"
+                }
+              },
+              {
+                "type": "named",
+                "data": {
+                  "name": "WaitForTag"
+                }
+              }
+            ]
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "AlignLeft"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "WaitForElevator"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "StartEject"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "StartEject"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "StartEject"
+          }
+        }
+      ]
+    }
+  },
+  "resetOdom": true,
+  "folder": null,
+  "choreoAuto": true
+}

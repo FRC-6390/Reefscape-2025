@@ -1,0 +1,160 @@
+{
+  "version": "2025.0",
+  "command": {
+    "type": "sequential",
+    "data": {
+      "commands": [
+        {
+          "type": "named",
+          "data": {
+            "name": "OrientLeftSide"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "DisableLocal"
+          }
+        },
+        {
+          "type": "race",
+          "data": {
+            "commands": [
+              {
+                "type": "path",
+                "data": {
+                  "pathName": "CompRightSide.0"
+                }
+              },
+              {
+                "type": "named",
+                "data": {
+                  "name": "WaitForTag"
+                }
+              }
+            ]
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "AlignLeft"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "EnableLocal"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "WaitForElevator"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "StartEject"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "WaitForEjector"
+          }
+        },
+        {
+          "type": "wait",
+          "data": {
+            "waitTime": 0.5
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "CompRightSide.1"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "Intake"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "CompRightSide.2"
+          }
+        },
+        {
+          "type": "race",
+          "data": {
+            "commands": [
+              {
+                "type": "path",
+                "data": {
+                  "pathName": "CompRightSide.3"
+                }
+              },
+              {
+                "type": "named",
+                "data": {
+                  "name": "WaitForTag"
+                }
+              }
+            ]
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "AlignRight"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "StartEject"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "StartEject"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "StartEject"
+          }
+        },
+        {
+          "type": "race",
+          "data": {
+            "commands": [
+              {
+                "type": "named",
+                "data": {
+                  "name": "WaitForElevator"
+                }
+              },
+              {
+                "type": "wait",
+                "data": {
+                  "waitTime": 1.0
+                }
+              }
+            ]
+          }
+        }
+      ]
+    }
+  },
+  "resetOdom": true,
+  "folder": null,
+  "choreoAuto": true
+}

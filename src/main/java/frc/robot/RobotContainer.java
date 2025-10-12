@@ -54,7 +54,7 @@ public class RobotContainer {
  
   public final StatefulArmMechanism<ArmState> arm = Constants.EndEffector.ARM_CONFIG.build();//.shuffleboard("Arm", SendableLevel.DEBUG);
   public final StatefulArmMechanism<WristState> wrist = Constants.EndEffector.WRIST_CONFIG.build();//.shuffleboard("Wrist", SendableLevel.DEBUG);
-  public final StatefulMechanism<RollerState> rollers = Constants.EndEffector.CORAL_ROLLERS.build();//.shuffleboard("Rollers", SendableLevel.DEBUG);
+  public final StatefulMechanism<RollerState> rollers = Constants.EndEffector.CORAL_ROLLERS.build();///.shuffleboard("Rollers", SendableLevel.DEBUG);
   public final StatefulMechanism<RollerState> algaeRollers = Constants.EndEffector.ALGAE_ROLLERS.build();//.shuffleboard("Algae Rollers", SendableLevel.COMP);;
   // public SuperStructureTest s = SuperstructureBuilder.builder().addArms(arm, wrist).addMotors(rollers, algaeRollers).build();
   public BooleanSupplier hasTarget;
@@ -96,12 +96,16 @@ public class RobotContainer {
 
     elevator.shuffleboard("Elevator");
 
-  
+    //NEEED TOO DEPLOY 
+    //--------------------oFYUEIWHUIFWHEUIRHFIEU--------------///
     hasTarget = () -> robotBase.getVision().getLimelight("limelight-left").hasValidTarget();
     NamedCommands.registerCommand("WaitForTag", Commands.waitUntil(hasTarget));
     
     NamedCommands.registerCommand("Home", superstructure.setState(SuperstructureState.HomePID));
     NamedCommands.registerCommand("OrientLeftSide", new InstantCommand(() -> robotBase.getLocalization().resetRelativePose(new Pose2d(0,0, Rotation2d.fromRadians(-2.3631872270622845)))));
+    NamedCommands.registerCommand("OrientRightSide", new InstantCommand(() -> robotBase.getLocalization().resetRelativePose(new Pose2d(0,0, Rotation2d.fromRadians(2.3631872270622845)))));
+    NamedCommands.registerCommand("OrientLeftSide", new InstantCommand(() -> robotBase.getLocalization().resetRelativePose(new Pose2d(0,0, Rotation2d.fromRadians(-2.3631872270622845)))));
+
 
     NamedCommands.registerCommand("Intake", Commands.either(superstructure.setState(SuperstructureState.Intaking), Commands.none(), () -> !endEffector.hasGamePiece()));
 
@@ -187,6 +191,7 @@ public class RobotContainer {
   
     driverController2.start.whileTrue(superstructure.setState(SuperstructureState.AlgaeSpit)).after(1).onTrue(superstructure.setState(SuperstructureState.ScoreAlgae));
     // driverController2.start.onTrue(() -> s.requestState2(S.Intaking.getSetpoint()));
+    driverController2.leftStick.and(driverController2.rightStick).onTrue(() -> {arm.setNudge(0); wrist.setNudge(0); elevator.resetNudge();});
     driverController2.pov.up.onTrue(() -> elevator.nudge(1)).after(1).onTrue(() -> elevator.resetNudge());
     driverController2.pov.down.onTrue(() -> elevator.nudge(-1)).after(1).onTrue(() -> elevator.resetNudge());
     driverController2.pov.right.onTrue(() -> arm.setNudge(arm.getNudge() + 5)).after(1).onTrue(() -> arm.setNudge(0));

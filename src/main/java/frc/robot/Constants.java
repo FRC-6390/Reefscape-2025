@@ -113,14 +113,14 @@ public interface Constants {
 
             Aligning(33),
 
-            AlgaeHigh(46.77),
-            AlgaeLow(32.545),
+            AlgaeHigh(46.81),
+            AlgaeLow(32.587),
             //31.5
-            L2(35.5),
+            L2(34.4625),
             //47.25
-            L3(49.5),
-            //72
-            L4(76.23066732041963);
+            L3(48.513),
+            //
+            L4(74);
 
 
             double pos;
@@ -169,13 +169,13 @@ public interface Constants {
 
         enum ArmState implements SetpointProvider<Double>{
             Intaking(0), //150.38085937
-            AlgaeHigh(-112.14), //52.8
+            AlgaeHigh(-113.466), //52.8
             AlgaeLow(-113.5), //52.8
             Home(-92), //61.083
             StartConfiguration(-153), //0
-            Scoring(-72), //78.310546875
+            Scoring(-44), //-49 //-44  //78.310546875
             TransitionState(-85), //65
-            ScoringL4(-90), //60
+            ScoringL4(-80), //60
             AlgaeScore(-30), //120.58
             Scoringl1(-84); //66.08
 
@@ -194,10 +194,10 @@ public interface Constants {
             enum WristState implements SetpointProvider<Double>{
                 Intaking(40),
                 Home(120d), //110
-                Scoring(120d), //125.419921875
-                AlgaeHigh(-36.123),
-                AlgaeLow(-35.595),
-                ScoringL4(60), //80
+                Scoring(154d), //154 //125.419921875
+                AlgaeHigh(-38.23),
+                AlgaeLow(-38.23),
+                ScoringL4(91), //80
                 TransitionState(62),
                 AlgaeScore(168.92),
 

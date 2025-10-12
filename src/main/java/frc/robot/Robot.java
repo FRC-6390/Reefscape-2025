@@ -50,9 +50,10 @@ public class Robot extends TimedRobot {
   public void robotInit() 
   {
     pdh.clearStickyFaults();
+
     m_robotContainer.elevator.reset();
     m_robotContainer.robotBase.resetPIDs();
-    m_robotContainer.robotBase.getLocalization().resetRelativePose(0, 0, 0);
+    m_robotContainer.robotBase.getLocalization().resetRelativePose(new Pose2d());
     // SmartDashboard.putNumber("AutoAlign Y Offset", 15.5);
     // SmartDashboard.putNumber("AutoAlign X Offset Left", 11.5);
     // SmartDashboard.putNumber("AutoAlign X Offset Right", -6.2);
