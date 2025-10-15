@@ -1,0 +1,28 @@
+// Copyright (c) FIRST and other WPILib contributors.
+// Open Source Software; you can modify and/or share it under the terms of
+// the WPILib BSD license file in the root directory of this project.
+
+package frc.robot.subsystems.Experimental;
+
+import java.util.List;
+import frc.robot.Constants.EndEffector.WristState;
+import frc.robot.Constants.EndEffector.ArmState;
+import frc.robot.Constants.EndEffector.RollerState;
+
+
+public enum SuperStructureStates
+    {
+        Intaking(List.of(WristState.Intaking, ArmState.Intaking, RollerState.Running)),
+        Home(List.of(WristState.Home, ArmState.Home, RollerState.Stopped));
+
+        private List<Enum<?>> states;
+        private SuperStructureStates(List<Enum<?>> states)
+        {
+            this.states = states;
+        }
+
+        public List<Enum<?>> getStates()
+        {
+            return states;
+        }
+    }
