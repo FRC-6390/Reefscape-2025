@@ -104,7 +104,7 @@ public class RobotContainer {
     NamedCommands.registerCommand("Home", superstructure.setState(SuperstructureState.HomePID));
     NamedCommands.registerCommand("OrientLeftSide", new InstantCommand(() -> robotBase.getLocalization().resetRelativePose(new Pose2d(0,0, Rotation2d.fromRadians(-2.3631872270622845)))));
     NamedCommands.registerCommand("OrientRightSide", new InstantCommand(() -> robotBase.getLocalization().resetRelativePose(new Pose2d(0,0, Rotation2d.fromRadians(2.3631872270622845)))));
-    NamedCommands.registerCommand("OrientLeftSide", new InstantCommand(() -> robotBase.getLocalization().resetRelativePose(new Pose2d(0,0, Rotation2d.fromRadians(-2.3631872270622845)))));
+    NamedCommands.registerCommand("OrientMidSide", new InstantCommand(() -> robotBase.getLocalization().resetRelativePose(new Pose2d(0,0, Rotation2d.fromRadians(3.141592653589793)))));
 
 
     NamedCommands.registerCommand("Intake", Commands.either(superstructure.setState(SuperstructureState.Intaking), Commands.none(), () -> !endEffector.hasGamePiece()));
@@ -113,6 +113,8 @@ public class RobotContainer {
     NamedCommands.registerCommand("L3", superstructure.setState(SuperstructureState.L3));
     NamedCommands.registerCommand("L2", superstructure.setState(SuperstructureState.L2));
     NamedCommands.registerCommand("L1", superstructure.setState(SuperstructureState.L1));
+    NamedCommands.registerCommand("AlgaeLow", superstructure.setState(SuperstructureState.AlgaeLow));
+
 
     NamedCommands.registerCommand("StartEject", superstructure.setState(SuperstructureState.Score));
     NamedCommands.registerCommand("WaitForElevator",superstructure.WaitForElevator());
@@ -198,7 +200,7 @@ public class RobotContainer {
     driverController2.pov.left.onTrue(() -> arm.setNudge(arm.getNudge() - 5)).after(1).onTrue(() -> arm.setNudge(0));
     driverController2.rightBumper.onTrue(() -> wrist.setNudge(wrist.getNudge() + 5)).after(1).onTrue(() -> wrist.setNudge(0));
     driverController2.leftBumper.onTrue(() -> wrist.setNudge(wrist.getNudge() - 5)).after(1).onTrue(() -> wrist.setNudge(0));
-
+    // driverController2.rightTrigger.tiggerAt(0.5).whileTrue(() -> {rollers.setMotors(1);}).onFalse(() -> rollers.setMotors(0));
     
 
   }

@@ -114,9 +114,10 @@ public interface Constants {
             Aligning(33),
 
             AlgaeHigh(46.81),
-            AlgaeLow(32.587),
+            AlgaeLow(33.587),
             //31.5
-            L2(34.4625),
+            //34.4625
+            L2(36.25),
             //47.25
             L3(48.513),
             //

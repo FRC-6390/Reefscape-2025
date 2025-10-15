@@ -17,34 +17,21 @@
           }
         },
         {
-          "type": "path",
+          "type": "named",
           "data": {
-            "pathName": "CompMidSide.0"
+            "name": "Home"
           }
         },
         {
-          "type": "race",
+          "type": "path",
           "data": {
-            "commands": [
-              {
-                "type": "path",
-                "data": {
-                  "pathName": "CompMidSide.1"
-                }
-              },
-              {
-                "type": "named",
-                "data": {
-                  "name": "WaitForTag"
-                }
-              }
-            ]
+            "pathName": "CompMidSide"
           }
         },
         {
           "type": "named",
           "data": {
-            "name": "AlignLeft"
+            "name": "AlignRight"
           }
         },
         {
@@ -69,6 +56,30 @@
           "type": "named",
           "data": {
             "name": "StartEject"
+          }
+        },
+        {
+          "type": "wait",
+          "data": {
+            "waitTime": 1.0
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "AlgaeLow"
+          }
+        },
+        {
+          "type": "wait",
+          "data": {
+            "waitTime": 3.0
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "Home"
           }
         }
       ]
