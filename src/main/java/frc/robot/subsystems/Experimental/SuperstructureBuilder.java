@@ -14,7 +14,8 @@ public class SuperstructureBuilder {
     private final List<StatefulElevatorMechanism<?>> elevators = new ArrayList<>();
     private final List<StatefulMechanism<?>> motors = new ArrayList<>();
     private final List<Constraint<?>> constraints = new ArrayList<>();
-    private final Map<?, ?> transitions = new HashMap<>();
+    private final List<ActionableConstraint<?>> actionableConstraints = new ArrayList<>();
+
 
     private SuperstructureBuilder() {
     }
@@ -43,10 +44,11 @@ public class SuperstructureBuilder {
         return this;
     }
 
-    public <E extends Enum<E> & SetpointProvider<?>> SuperstructureBuilder addTransition(E from, E to) {
-        ((Map<E, E>) transitions).put(from, to);
+    public SuperstructureBuilder addActionableConstraint(ActionableConstraint<?> constraint) {
+        actionableConstraints.add(constraint);
         return this;
     }
+
 
     public SuperStructureTest build() {
         // Replace nulls with empty lists if necessary
@@ -55,7 +57,8 @@ public class SuperstructureBuilder {
                 elevators.isEmpty() ? Collections.emptyList() : elevators,
                 motors.isEmpty() ? Collections.emptyList() : motors,
                 constraints.isEmpty() ? Collections.emptyList() : constraints,
-                transitions.isEmpty() ? Collections.emptyMap() : transitions
+                actionableConstraints.isEmpty() ? Collections.emptyList() : actionableConstraints
+
         );
     }
 }

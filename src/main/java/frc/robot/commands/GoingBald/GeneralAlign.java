@@ -1,28 +1,22 @@
-package frc.robot.commands;
+package frc.robot.commands.GoingBald;
 
-import java.security.PublicKey;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import javax.print.attribute.standard.Media;
-
 import ca.frc6390.athena.core.RobotBase;
 import ca.frc6390.athena.sensors.camera.limelight.LimeLight;
-import ca.frc6390.athena.sensors.camera.limelight.LimeLightConfig;
-import ca.frc6390.athena.sensors.camera.limelight.LimeLight.PoseEstimateType;
 import ca.frc6390.athena.sensors.camera.limelight.LimeLight.PoseEstimateWithLatencyType;
 import edu.wpi.first.math.controller.HolonomicDriveController;
 import edu.wpi.first.math.controller.PIDController;
-import edu.wpi.first.math.controller.ProfiledPIDController;
-import edu.wpi.first.math.filter.MedianFilter;
 import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
-import edu.wpi.first.math.trajectory.TrapezoidProfile.Constraints;
-import edu.wpi.first.math.util.Units;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
-import frc.robot.utils.ReefScoringPos.ReefPole;
+import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
+import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
+import frc.robot.commands.GoingBald.AprilTagMap.AprilTags;
 
 public class GeneralAlign {
 
@@ -32,13 +26,19 @@ public class GeneralAlign {
     public boolean reached;
     public RobotBase<?> base;
     public LimeLight[] limelights;
+    public Pose2d generalPosition;
+    public Pose2d scoringPose;
+    public ShuffleboardTab tab;
 
-    public GeneralAlign(RobotBase<?> base,PIDController rController, HolonomicDriveController controller, LimeLight... limelights)
+    GeneralAlign(RobotBase<?> base,PIDController rController, HolonomicDriveController controller, Pose2d generalPosition, Pose2d scoringPose2d, LimeLight... limelights)
     {
         this.base = base;
         this.limelights = limelights;
         this.rController = rController;
         this.controller = controller;
+        this.generalPosition = generalPosition;
+        this.scoringPose = scoringPose2d;
+        tab = Shuffleboard.getTab("Auto Align");
     }
 
     public static int findMostFrequent(List<Integer> nums) 
@@ -66,7 +66,17 @@ public class GeneralAlign {
     {
         return tagId;
     }
+
+    public void shuffleboard()
+    {
+        tab.add("Controller", controller);
+        tab.add("Rotation Controller", rController);
+        tab.add("Tag Id", getTagId());
+        tab.add("Relative Pose From Local (Field Relative Pose)", base.getLocalization().getRelativePose());
+        tab.add("Tag Relative Pose", getRobotPositionRelativeToTag(0, 0));
+    }
     
+    //Chooses the tag that most limelights see
     public int setTagId()
     {
         List<Integer> ids = new ArrayList<>();
@@ -86,18 +96,47 @@ public class GeneralAlign {
         return tagId;
     }
 
+    //Resets the autoalign
     public void reset()
     {
         tagId = -1;
         reached = false;   
     }
-    
-    public Pose2d getRobotPositionRelativeToTag(double limelightToFloorInches, double targetToFloorInches)
-    {
-        return getRobotPositionRelativeToTag(limelightToFloorInches, targetToFloorInches,false);
-    }
 
-    public Pose2d getRobotPositionRelativeToTag(double limelightToFloorInches, double targetToFloorInches, boolean shouldSetPose)
+    //Set the localization relative pose of the robot
+    public void updateBotpose()
+    {
+        base.getLocalization().resetRelativePose(convertToFieldRelativeAxises(getRobotPositionRelativeToTag(0, 0), tagId));
+    }
+   
+   //Converts tag relative position to field relative position
+   public Pose2d convertToFieldRelativeAxises(Pose2d tagRelativePose, long id) 
+   {
+    Rotation2d tagRotation = AprilTags.getRotation2d(id);
+
+    Translation2d rotatedTranslation = tagRelativePose.getTranslation().rotateBy(tagRotation);
+
+    Rotation2d robotRotation = tagRotation.plus(tagRelativePose.getRotation());
+
+    return new Pose2d(rotatedTranslation, robotRotation);
+   }
+
+   //Gets tag relative translation
+   public Translation2d getTagRelativeTranslation(LimeLight limeLight)
+   {
+    double straigtLineDistToTag = limeLight.getPoseEstimate(PoseEstimateWithLatencyType.BOT_POSE_MT2_BLUE).getRaw()[9];
+    double angleTX =  limeLight.getTargetHorizontalOffset();
+    double angleTY =  limeLight.getTargetVerticalOffset();
+    double planeStraightDist = (Math.cos(Math.toRadians(angleTY)) * straigtLineDistToTag);
+
+    double x1 = (Math.cos(Math.toRadians(angleTX)) * planeStraightDist) - limeLight.config.cameraRobotSpace().getX();
+    double y1 = (Math.sin(Math.toRadians(angleTX)) * planeStraightDist)- limeLight.config.cameraRobotSpace().getY();
+
+    return new Translation2d(x1, y1);
+   }
+
+    //Averages all the positions calculated by each limelight
+    public Pose2d getRobotPositionRelativeToTag(double limelightToFloorInches, double targetToFloorInches)
     {
     double x = 0;
     double y = 0;
@@ -105,32 +144,33 @@ public class GeneralAlign {
 
     for (LimeLight limeLight : limelights) 
     {   
-    double straigtLineDistToTag = limeLight.getPoseEstimate(PoseEstimateWithLatencyType.BOT_POSE_MT2_BLUE).getRaw()[9];
-    double angleTX =  limeLight.getTargetHorizontalOffset() -base.getLocalization().getRelativePose().getRotation().getDegrees();
-    double angleTY =  limeLight.getTargetVerticalOffset();
-    double planeStraightDist = (Math.cos(Math.toRadians(angleTY)) * straigtLineDistToTag);
-
-    double x1 = (Math.cos(Math.toRadians(angleTX)) * planeStraightDist) - limeLight.config.cameraRobotSpace().getX();
-    double y1 = (Math.sin(Math.toRadians(angleTX)) * planeStraightDist)- limeLight.config.cameraRobotSpace().getY();
-
     if(limeLight.getAprilTagID() == tagId)
-    {
-    x += x1;
-    y += y1;
-    count += 1;
-    }
+        {
+            x += getTagRelativeTranslation(limeLight).getX();
+            y += getTagRelativeTranslation(limeLight).getY();
+            count += 1;
+        }
     }
 
     x = x/count;
     y = y/count;
     
-
     Pose2d pose = new Pose2d(-x,y, base.getLocalization().getRelativePose().getRotation());
-    base.getLocalization().resetRelativePose(pose);
     return pose;
     }
 
-    public ChassisSpeeds calculateSpeeds(Pose2d generalPosition, Pose2d scoringPose)
+    public void setGeneralPosition(Pose2d pose)
+    {
+        generalPosition = pose;
+    }
+
+    public void setScoringPos(Pose2d pose)
+    {
+        scoringPose = pose;
+    }
+
+    //Calculating the speed to the robot
+    public ChassisSpeeds calculateSpeeds()
     {
     boolean preciseMode = (base.getLocalization().getRelativePose().getTranslation().getDistance(generalPosition.getTranslation()) > 0.075 && !reached);
   

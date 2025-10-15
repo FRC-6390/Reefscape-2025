@@ -29,45 +29,119 @@ public class SuperStructureTest<E extends Enum<E> & SetpointProvider<?>> {
     private final List<StatefulElevatorMechanism<?>> elevators;
     private final List<StatefulMechanism<?>> motors;
 
-    private final List<Constraint<E>> constraints;
-    private final Map<E, E> transitions;
-    private E currentState;
+    private final List<Constraint<SuperStructureStates>> constraints;
+    private final List<ActionableConstraint<SuperStructureStates>> actionableConstraints;
+
+    private SuperStructureStates currentState = SuperStructureStates.Home;
+    private SuperStructureStates prevStates = SuperStructureStates.Home;
 
     public SuperStructureTest(
         List<StatefulArmMechanism<?>> arms,
         List<StatefulElevatorMechanism<?>> elevators,
         List<StatefulMechanism<?>> motors,
 
-        List<Constraint<E>> constraints,
-        Map<E, E> transitions
+        List<Constraint<SuperStructureStates>> constraints,
+        List<ActionableConstraint<SuperStructureStates>> actionableConstraints
+
     ) {
         this.arms = arms;
         this.elevators = elevators;
         this.motors = motors;
         this.constraints = constraints;
-        this.transitions = transitions;
+        this.actionableConstraints = actionableConstraints;
     }
 
-    // public void requestState(E desiredState) 
-    // {
-    //      E transition = transitions.getOrDefault(desiredState, desiredState); 
-    //      boolean valid = constraints.stream().allMatch(c -> c.isValid(transition)); 
-    //      if (valid) 
-    //      { 
-    //         this.currentState = transition; 
-    //         arms.forEach(m -> m.getStateMachine().queueState(transition)); 
-    //     } 
-    //     else 
-    //     { 
-    //         System.out.println("Constraint failed: cannot move to " + transition); 
-    //     }  
-    // }
-
-
-    public void requestState2(List<Enum<?>> stateList) 
+    public SuperStructureStates getCurrentStates()
     {
+        return currentState;
+    }
+    public SuperStructureStates getPrevStates()
+    {
+        return prevStates;
+    }
 
+    public void setGoalState(SuperStructureStates states)
+    {
+        prevStates = currentState;
+        currentState = states;
+    }
 
+    public boolean atState(SuperStructureStates states)
+    {
+        List<Enum<?>> stateList = states.getStates();
+        boolean armsAt = false;
+        boolean rollersAt = false;
+        boolean elevatorsAt = false;
+        int armCount = 0;
+        int rollerCount = 0;
+        int elevatorCount = 0;
+
+        for (Enum<?> state : stateList) 
+        {
+
+            //CHECK IF ALL ARMS ARE IN POSITION
+            for (StatefulArmMechanism<?> arm : arms) {
+                
+                if(arm.getStateMachine().getGoalState().getClass().isInstance(state))
+                {
+                     if (((StateMachine) arm.getStateMachine()).atState(state)) armCount++;
+                }
+            }
+            if(armCount == arms.size()) armsAt = true;
+
+            //CHECK IF ALL ELEVATORS ARE IN POSITION
+            for (StatefulElevatorMechanism<?> elevator : elevators) {
+                
+                if(elevator.getStateMachine().getGoalState().getClass().isInstance(state))
+                {
+                     if (((StateMachine) elevator.getStateMachine()).atState(state)) elevatorCount++;
+                }
+            }
+            
+            if(elevatorCount == elevators.size()) elevatorsAt = true;
+
+            //CHECK IF ALL MOTORS ARE AT STATE
+             for (StatefulMechanism<?> motor : motors) {
+                
+                if(motor.getStateMachine().getGoalState().getClass().isInstance(state))
+                {
+                     if (((StateMachine) motor.getStateMachine()).atState(state)) rollerCount++;
+                }
+            }
+            if(rollerCount == motors.size()) rollersAt = true;
+
+        }
+        return (rollersAt && armsAt && elevatorsAt);
+
+    }
+
+    public void requestState(SuperStructureStates states) 
+    {   
+        currentState = states;
+        Constraint<SuperStructureStates> currentConstraint = new Constraint<SuperStructureStates>(states, () -> {return true;});
+        ActionableConstraint<SuperStructureStates> currentActionableConstraint = new ActionableConstraint<SuperStructureStates>(states, null, () -> {return true;});
+
+        for (Constraint<SuperStructureStates> constraint : constraints) 
+        {
+         SuperStructureStates constrainedState = constraint.getTargetState();
+         if(states.equals(constrainedState))   
+         {
+            currentConstraint = constraint;
+         }
+        }
+
+        for (ActionableConstraint<SuperStructureStates> constraint : actionableConstraints) 
+        {
+         SuperStructureStates constrainedState = constraint.getTargetState();
+         if(states.equals(constrainedState))   
+         {
+            currentActionableConstraint = constraint;
+         }
+        }
+
+        if(currentConstraint.isValid() && currentActionableConstraint.isValid())
+        {
+        List<Enum<?>> stateList = states.getStates();
         for (Enum<?> state : stateList) 
         {
             for (StatefulArmMechanism<?> arm : arms) {
@@ -91,12 +165,19 @@ public class SuperStructureTest<E extends Enum<E> & SetpointProvider<?>> {
                 }
             }
         }
+        }
+        }
         
-    }
-
-   
+    
 
     public void update() {
+        setGoalState(currentState);
+        if(!prevStates.equals(currentState))
+        {
+            requestState(currentState);
+        }
         arms.forEach(StatefulArmMechanism::update);
+        elevators.forEach(StatefulElevatorMechanism::update);
+        motors.forEach(StatefulMechanism::update);
     }
 }

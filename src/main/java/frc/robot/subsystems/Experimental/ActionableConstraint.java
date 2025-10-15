@@ -6,13 +6,15 @@ package frc.robot.subsystems.Experimental;
 
 import java.util.function.BooleanSupplier;
 
-public class Constraint<SuperStructureStates extends Enum<SuperStructureStates>> {
+public class ActionableConstraint<SuperStructureStates extends Enum<SuperStructureStates>> {
     private final SuperStructureStates targetState;
+    private final SuperStructureStates transitionState;
     private final BooleanSupplier condition;
 
-    public Constraint(SuperStructureStates targetState, BooleanSupplier condition) {
+    public ActionableConstraint(SuperStructureStates targetState, SuperStructureStates transitionState, BooleanSupplier condition) {
         this.targetState = targetState;
         this.condition = condition;
+        this.transitionState = transitionState;
     }
 
     public boolean isValid() {
@@ -21,5 +23,8 @@ public class Constraint<SuperStructureStates extends Enum<SuperStructureStates>>
 
     public SuperStructureStates getTargetState() {
         return targetState;
+    }
+     public SuperStructureStates getTransition() {
+        return transitionState;
     }
 }
