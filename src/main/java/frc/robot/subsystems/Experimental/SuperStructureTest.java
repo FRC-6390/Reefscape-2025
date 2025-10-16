@@ -12,25 +12,29 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.ctre.phoenix6.configs.DigitalInputsConfigs;
+
 import ca.frc6390.athena.mechanisms.ArmMechanism.StatefulArmMechanism;
 import ca.frc6390.athena.mechanisms.ElevatorMechanism.StatefulElevatorMechanism;
 import ca.frc6390.athena.mechanisms.SimpleMotorMechanism.StatefulSimpleMotorMechanism;
 import ca.frc6390.athena.mechanisms.StateMachine;
 import ca.frc6390.athena.mechanisms.StatefulMechanism;
 import ca.frc6390.athena.mechanisms.StateMachine.SetpointProvider;
+import edu.wpi.first.wpilibj.DigitalInput;
 import frc.robot.subsystems.Superstructure;
 import frc.robot.subsystems.Superstructure.SuperstructureState;
 import frc.robot.subsystems.Superstructure.SuperstructureTuple;
 
 import ca.frc6390.athena.mechanisms.StateMachine.SetpointProvider;
 
-public class SuperStructureTest<E extends Enum<E> & SetpointProvider<?>> {
+public class SuperStructureTest<E extends Enum<E>> {
     private final List<StatefulArmMechanism<?>> arms;
     private final List<StatefulElevatorMechanism<?>> elevators;
     private final List<StatefulMechanism<?>> motors;
 
     private final List<Constraint<SuperStructureStates>> constraints;
     private final List<ActionableConstraint<SuperStructureStates>> actionableConstraints;
+    private final List<DigitalSensor> sensors;
 
     private SuperStructureStates currentState = SuperStructureStates.Home;
     private SuperStructureStates prevStates = SuperStructureStates.Home;
@@ -41,7 +45,9 @@ public class SuperStructureTest<E extends Enum<E> & SetpointProvider<?>> {
         List<StatefulMechanism<?>> motors,
 
         List<Constraint<SuperStructureStates>> constraints,
-        List<ActionableConstraint<SuperStructureStates>> actionableConstraints
+        List<ActionableConstraint<SuperStructureStates>> actionableConstraints,
+        List<DigitalSensor> sensors
+
 
     ) {
         this.arms = arms;
@@ -49,6 +55,7 @@ public class SuperStructureTest<E extends Enum<E> & SetpointProvider<?>> {
         this.motors = motors;
         this.constraints = constraints;
         this.actionableConstraints = actionableConstraints;
+        this.sensors = sensors;
     }
 
     public SuperStructureStates getCurrentStates()
@@ -64,6 +71,20 @@ public class SuperStructureTest<E extends Enum<E> & SetpointProvider<?>> {
     {
         prevStates = currentState;
         currentState = states;
+        System.out.println("Goal State Set");
+    }
+
+    public DigitalSensor getSensor(String name)
+    {
+        DigitalSensor s = null;
+        for (DigitalSensor sensor : sensors) 
+        {
+        if(sensor.getName() == name)
+        {
+            s = sensor;
+        }    
+        }
+        return s;
     }
 
     public boolean atState(SuperStructureStates states)
@@ -174,6 +195,7 @@ public class SuperStructureTest<E extends Enum<E> & SetpointProvider<?>> {
         setGoalState(currentState);
         if(!prevStates.equals(currentState))
         {
+            System.out.println("Request State");
             requestState(currentState);
         }
         arms.forEach(StatefulArmMechanism::update);

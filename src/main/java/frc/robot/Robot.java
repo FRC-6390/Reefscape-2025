@@ -28,7 +28,7 @@ public class Robot extends TimedRobot {
   private Command m_autonomousCommand;
 
   private final RobotContainer m_robotContainer;
-  public V2 calibrate; //= new V2(m_robotContainer.robotBase, "limelight-right", false, m_robotContainer.superstructure, () -> m_robotContainer.selectedState);
+  // public V2 calibrate; //= new V2(m_robotContainer.robotBase, "limelight-right", false, m_robotContainer.superstructure, () -> m_robotContainer.selectedState);
 
   PowerDistribution pdh;
   public Robot() {  
@@ -36,13 +36,14 @@ public class Robot extends TimedRobot {
     m_robotContainer = new RobotContainer();
     pdh = new PowerDistribution(14, ModuleType.kRev);
     m_robotContainer.robotBase.registerPIDCycles(this);
-    calibrate = new V2(m_robotContainer.robotBase, "limelight-right", false, m_robotContainer.superstructure, () -> m_robotContainer.selectedState);
+    // calibrate = new V2(m_robotContainer.robotBase, "limelight-right", false, m_robotContainer.superstructure, () -> m_robotContainer.selectedState);
 
   }
 
 
   @Override
   public void robotPeriodic() {
+    m_robotContainer.s.update();
     CommandScheduler.getInstance().run();
   }
 
@@ -51,7 +52,7 @@ public class Robot extends TimedRobot {
   {
     pdh.clearStickyFaults();
 
-    m_robotContainer.elevator.reset();
+    // m_robotContainer.elevator.reset();
     m_robotContainer.robotBase.resetPIDs();
     m_robotContainer.robotBase.getLocalization().resetRelativePose(new Pose2d());
     // SmartDashboard.putNumber("AutoAlign Y Offset", 15.5);
@@ -62,16 +63,16 @@ public class Robot extends TimedRobot {
   @Override
   public void disabledInit() 
   {
-    m_robotContainer.elevator.reset();
+    // m_robotContainer.elevator.reset();
     m_robotContainer.robotBase.resetPIDs();
 
-    m_robotContainer.superstructure.setSuper(SuperstructureState.Home);
+    // m_robotContainer.superstructure.setSuper(SuperstructureState.Home);
   }
 
   @Override
   public void disabledPeriodic() 
   {
-        calibrate.GetController();
+        // calibrate.GetController();
   }
 
   @Override
@@ -81,7 +82,7 @@ public class Robot extends TimedRobot {
 
   @Override
   public void autonomousInit() {
-    m_robotContainer.elevator.reset();
+    // m_robotContainer.elevator.reset();
     m_robotContainer.robotBase.resetPIDs();
 
     m_autonomousCommand = m_robotContainer.getAutonomousCommand();
@@ -101,7 +102,7 @@ public class Robot extends TimedRobot {
 
   @Override
   public void teleopInit() {
-    m_robotContainer.elevator.reset();
+    // m_robotContainer.elevator.reset();
     m_robotContainer.robotBase.resetPIDs();
 m_robotContainer.robotBase.getLocalization().resetFieldPose(0, 0, 0);
     m_robotContainer.robotBase.getDrivetrain().getRobotSpeeds().stopSpeeds("auto");

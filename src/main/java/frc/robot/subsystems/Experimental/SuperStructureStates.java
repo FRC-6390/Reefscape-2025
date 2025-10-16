@@ -12,13 +12,14 @@ import frc.robot.Constants.EndEffector.RollerState;
 
 public enum SuperStructureStates
     {
-        Intaking(List.of(WristState.Intaking, ArmState.Intaking, RollerState.Running)),
-        Home(List.of(WristState.Home, ArmState.Home, RollerState.Stopped));
+
+        Intaking(WristState.Intaking, ArmState.Intaking, RollerState.Running),
+        Home(WristState.Home, ArmState.Home, RollerState.Stopped);
 
         private List<Enum<?>> states;
-        private SuperStructureStates(List<Enum<?>> states)
+        private SuperStructureStates(Enum<?>... states)
         {
-            this.states = states;
+            this.states = List.of(states);
         }
 
         public List<Enum<?>> getStates()
