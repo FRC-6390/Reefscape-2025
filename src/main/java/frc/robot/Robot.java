@@ -43,7 +43,6 @@ public class Robot extends TimedRobot {
 
   @Override
   public void robotPeriodic() {
-    m_robotContainer.s.update();
     CommandScheduler.getInstance().run();
   }
 
@@ -51,6 +50,7 @@ public class Robot extends TimedRobot {
   public void robotInit() 
   {
     pdh.clearStickyFaults();
+    m_robotContainer.alingLeft.align.shuffleboard();
 
     // m_robotContainer.elevator.reset();
     m_robotContainer.robotBase.resetPIDs();

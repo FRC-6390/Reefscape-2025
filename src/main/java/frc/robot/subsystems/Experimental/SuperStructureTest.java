@@ -69,7 +69,6 @@ public class SuperStructureTest<E extends Enum<E>> {
 
     public void setGoalState(SuperStructureStates states)
     {
-        prevStates = currentState;
         currentState = states;
         System.out.println("Goal State Set");
     }
@@ -201,5 +200,6 @@ public class SuperStructureTest<E extends Enum<E>> {
         arms.forEach(StatefulArmMechanism::update);
         elevators.forEach(StatefulElevatorMechanism::update);
         motors.forEach(StatefulMechanism::update);
+        prevStates = currentState;
     }
 }
