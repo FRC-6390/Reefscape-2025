@@ -26,13 +26,14 @@ public class AutoAling extends Command {
   public void initialize() 
   {
     align.reset();
+        align.shuffleboard();
+
   }
 
   @Override
   public void execute() 
   {
     align.setTagId();
-    // align.shuffleboard();
     LimeLight camera_left = base.getVision().getLimelight("limelight-left");
     LimeLight camera_right = base.getVision().getLimelight("limelight-right");
 

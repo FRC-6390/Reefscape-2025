@@ -14,6 +14,8 @@ public enum SuperStructureStates
     {
 
         Intaking(WristState.Intaking, ArmState.Intaking, RollerState.Running),
+        Score(RollerState.Running),
+
         Home(WristState.Home, ArmState.Home, RollerState.Stopped);
 
         private List<Enum<?>> states;

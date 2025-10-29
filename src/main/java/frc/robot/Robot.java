@@ -44,13 +44,14 @@ public class Robot extends TimedRobot {
   @Override
   public void robotPeriodic() {
     CommandScheduler.getInstance().run();
+    m_robotContainer.s.update();
   }
 
   @Override
   public void robotInit() 
   {
     pdh.clearStickyFaults();
-    m_robotContainer.alingLeft.align.shuffleboard();
+    // m_robotContainer.alingLeft.align.shuffleboard();
 
     // m_robotContainer.elevator.reset();
     m_robotContainer.robotBase.resetPIDs();

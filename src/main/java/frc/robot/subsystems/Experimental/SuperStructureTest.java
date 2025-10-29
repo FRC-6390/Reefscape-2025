@@ -32,20 +32,21 @@ public class SuperStructureTest<E extends Enum<E>> {
     private final List<StatefulElevatorMechanism<?>> elevators;
     private final List<StatefulMechanism<?>> motors;
 
-    private final List<Constraint<SuperStructureStates>> constraints;
-    private final List<ActionableConstraint<SuperStructureStates>> actionableConstraints;
+    private ArrayList<Constraint<SuperStructureStates>> constraints;
+    private ArrayList<ActionableConstraint<SuperStructureStates>> actionableConstraints;
     private final List<DigitalSensor> sensors;
 
     private SuperStructureStates currentState = SuperStructureStates.Home;
     private SuperStructureStates prevStates = SuperStructureStates.Home;
+    private ActionableConstraint<SuperStructureStates> nextState;
 
     public SuperStructureTest(
         List<StatefulArmMechanism<?>> arms,
         List<StatefulElevatorMechanism<?>> elevators,
         List<StatefulMechanism<?>> motors,
 
-        List<Constraint<SuperStructureStates>> constraints,
-        List<ActionableConstraint<SuperStructureStates>> actionableConstraints,
+        ArrayList<Constraint<SuperStructureStates>> constraints,
+        ArrayList<ActionableConstraint<SuperStructureStates>> actionableConstraints,
         List<DigitalSensor> sensors
 
 
@@ -69,8 +70,46 @@ public class SuperStructureTest<E extends Enum<E>> {
 
     public void setGoalState(SuperStructureStates states)
     {
+        Constraint<SuperStructureStates> currentConstraint = new Constraint<SuperStructureStates>(states, () -> {return true;});
+        ActionableConstraint<SuperStructureStates> currentActionableConstraint = new ActionableConstraint<SuperStructureStates>(states, null, () -> {return true;});
+
+        for (Constraint<SuperStructureStates> constraint : constraints) 
+        {
+         SuperStructureStates constrainedState = constraint.getTargetState();
+         if(states.equals(constrainedState))   
+         {
+            currentConstraint = constraint;
+         }
+        }
+
+        for (ActionableConstraint<SuperStructureStates> constraint : actionableConstraints) 
+        {
+         SuperStructureStates constrainedState = constraint.getTargetState();
+         if(states.equals(constrainedState))   
+         {
+            currentActionableConstraint = constraint;
+         }
+        }
+        if(currentConstraint.isValid() && currentActionableConstraint.isValid())
+        {
+        System.out.println("HJKHJKSHF");
         currentState = states;
-        System.out.println("Goal State Set");
+        }
+        else if(currentConstraint.isValid() && !currentActionableConstraint.isValid())
+        {
+        currentState = currentActionableConstraint.getTransition();
+        nextState = currentActionableConstraint;
+        }
+    }
+
+    public void addConstraint(Constraint<SuperStructureStates> constraint)
+    {
+        constraints.add(constraint);
+    }
+
+    public void addActionableConstraint(ActionableConstraint<SuperStructureStates> constraint)
+    {
+        actionableConstraints.add(constraint);
     }
 
     public DigitalSensor getSensor(String name)
@@ -137,30 +176,10 @@ public class SuperStructureTest<E extends Enum<E>> {
 
     public void requestState(SuperStructureStates states) 
     {   
+
         currentState = states;
-        Constraint<SuperStructureStates> currentConstraint = new Constraint<SuperStructureStates>(states, () -> {return true;});
-        ActionableConstraint<SuperStructureStates> currentActionableConstraint = new ActionableConstraint<SuperStructureStates>(states, null, () -> {return true;});
+        
 
-        for (Constraint<SuperStructureStates> constraint : constraints) 
-        {
-         SuperStructureStates constrainedState = constraint.getTargetState();
-         if(states.equals(constrainedState))   
-         {
-            currentConstraint = constraint;
-         }
-        }
-
-        for (ActionableConstraint<SuperStructureStates> constraint : actionableConstraints) 
-        {
-         SuperStructureStates constrainedState = constraint.getTargetState();
-         if(states.equals(constrainedState))   
-         {
-            currentActionableConstraint = constraint;
-         }
-        }
-
-        if(currentConstraint.isValid() && currentActionableConstraint.isValid())
-        {
         List<Enum<?>> stateList = states.getStates();
         for (Enum<?> state : stateList) 
         {
@@ -185,17 +204,27 @@ public class SuperStructureTest<E extends Enum<E>> {
                 }
             }
         }
-        }
+        
         }
         
     
 
     public void update() {
-        setGoalState(currentState);
+        // setGoalState(currentState);
         if(!prevStates.equals(currentState))
         {
             System.out.println("Request State");
             requestState(currentState);
+        }
+        if(nextState != null)
+        {
+            if(nextState.isValid())
+            {
+                System.out.println("Moving on");
+
+                requestState(nextState.getTargetState());
+                nextState = null;
+            }
         }
         arms.forEach(StatefulArmMechanism::update);
         elevators.forEach(StatefulElevatorMechanism::update);

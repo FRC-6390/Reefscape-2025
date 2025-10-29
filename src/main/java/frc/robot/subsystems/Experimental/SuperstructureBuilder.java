@@ -64,8 +64,8 @@ public class SuperstructureBuilder {
                 arms,
                 elevators.isEmpty() ? Collections.emptyList() : elevators,
                 motors.isEmpty() ? Collections.emptyList() : motors,
-                constraints.isEmpty() ? Collections.emptyList() : constraints,
-                actionableConstraints.isEmpty() ? Collections.emptyList() : actionableConstraints,
+                constraints.isEmpty() ? new ArrayList<>(Collections.emptyList()) :  new ArrayList<>(constraints),
+                actionableConstraints.isEmpty() ? new ArrayList<>(Collections.emptyList()) :  new ArrayList<>(actionableConstraints),
                 sensors.isEmpty() ? Collections.emptyList() : sensors
 
         );
