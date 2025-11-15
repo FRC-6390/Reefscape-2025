@@ -13,14 +13,20 @@ public class AlignCamera
     public double xOffsetFromCenter;
     public double yOffsetFromCenter;
     public double heighOffGround;
-    public AlignCamera(LimeLight ll, double x, double y, double height)
+    public double yaw;
+    public AlignCamera(LimeLight ll, double x, double y, double yaw, double height)
     {
         this.ll = ll;
         this.xOffsetFromCenter = x;
         this.yOffsetFromCenter = y;
+        this.yaw = yaw;
         this.heighOffGround = height;
     }
 
+    public double getYaw()
+    {
+        return yaw;
+    }
     public double getXOffset()
     {
         return xOffsetFromCenter;

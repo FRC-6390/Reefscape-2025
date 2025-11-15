@@ -46,6 +46,7 @@ import frc.robot.commands.auto.AlgaeAlign;
 import frc.robot.commands.auto.BasicAlign;
 import frc.robot.commands.auto.TagAlign;
 import frc.robot.commands.auto.V2;
+import frc.robot.commands.rookie.Aim;
 import frc.robot.subsystems.Superstructure;
 import frc.robot.subsystems.Experimental.ActionableConstraint;
 import frc.robot.subsystems.Experimental.Constraint;
@@ -66,8 +67,8 @@ public class RobotContainer {
   public final RobotBase<SwerveDrivetrain> robotBase = Constants.DriveTrain.ROBOT_BASE.create().shuffleboard();
  
   public PIDController rController = new PIDController(0.11, 0, 0);
-  public AlignCamera camLeft = new AlignCamera(robotBase.getVision().getLimelight("limelight-left"), -Units.inchesToMeters(0.5), Units.inchesToMeters(9.25), 0);
-    public AlignCamera camRight = new AlignCamera(robotBase.getVision().getLimelight("limelight-right"), -Units.inchesToMeters(0.5), Units.inchesToMeters(9.25), 0);
+  public AlignCamera camLeft = new AlignCamera(robotBase.getVision().getLimelight("limelight-left"), -Units.inchesToMeters(0.5), -Units.inchesToMeters(9.25), 15, 0);
+    public AlignCamera camRight = new AlignCamera(robotBase.getVision().getLimelight("limelight-right"), -Units.inchesToMeters(0.5), Units.inchesToMeters(9.25), -15, 0);
 
 
   public HolonomicDriveController controller = new HolonomicDriveController(
@@ -78,6 +79,7 @@ public class RobotContainer {
   public final StatefulArmMechanism<WristState> wrist = Constants.EndEffector.WRIST_CONFIG.build();//.shuffleboard("Wrist", SendableLevel.DEBUG);
   public final StatefulMechanism<RollerState> rollers = Constants.EndEffector.CORAL_ROLLERS.build();///.shuffleboard("Rollers", SendableLevel.DEBUG);
   public final StatefulMechanism<RollerState> algaeRollers = Constants.EndEffector.ALGAE_ROLLERS.build();//.shuffleboard("Algae Rollers", SendableLevel.COMP);;
+
   public SuperStructureTest<SuperStructureStates> s = SuperstructureBuilder.builder()
                                                             .addArms(arm, wrist).addMotors(rollers, algaeRollers)
                                                             .addSensors(new DigitalSensor("Intake", new DigitalInput(4), true))
@@ -88,7 +90,7 @@ public class RobotContainer {
   // public Superstructure superstructure = new Superstructure(elevator, endEffector);
   // public CANdleSubsystem candle = new CANdleSubsystem(robotBase);
   // public static SuperstructureState selectedState = SuperstructureState.L4;
-  public AutoAling alingLeft = new AutoAling(new GeneralAlign(robotBase, rController, controller, new Pose2d(), new Pose2d(), camLeft, camRight), robotBase, false);
+  public AutoAling alingLeft = new AutoAling(new GeneralAlign(robotBase, rController, controller, new Pose2d(Units.inchesToMeters(-20),Units.inchesToMeters(-6), new Rotation2d()), new Pose2d(Units.inchesToMeters(-10),Units.inchesToMeters(-6), new Rotation2d()), camLeft, camRight), robotBase, false);
   // public AutoAling alingRight = new AutoAling(new GeneralAlign(robotBase, rController, controller, new Pose2d(), new Pose2d(), camLeft, camRight), robotBase, true);
 
   private final EnhancedXboxController driverController = new EnhancedXboxController(0)
@@ -117,6 +119,7 @@ public class RobotContainer {
     wrist.setPidEnabled(true);
     arm.setFeedforwardEnabled(false);
     wrist.setFeedforwardEnabled(false);
+    
     s.addActionableConstraint(new ActionableConstraint<SuperStructureStates>(SuperStructureStates.Intaking,SuperStructureStates.Score, () -> !s.getSensor("Intake").getSensorStatus()));
 
     // elevator.shuffleboard("Elevator");
@@ -184,6 +187,7 @@ public class RobotContainer {
     driverController.rightBumper.onTrue(() -> s.setGoalState(SuperStructureStates.Home));
 
 
+    driverController.rightStick.onTrue(new Aim(robotBase.getVision().getLimelight("limelight-left"), robotBase));
     //----------------------------------------------------------DRIVER 1---------------------------------------------------------------//
 
     driverController.start.onTrue(() -> robotBase.getDrivetrain().getIMU().setYaw(0)).after(2).onTrue(() -> {robotBase.getLocalization().resetFieldPose(0,0, 0); robotBase.getLocalization().resetRelativePose(0,0, 0);});

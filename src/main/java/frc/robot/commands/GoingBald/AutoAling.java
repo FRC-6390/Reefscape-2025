@@ -39,14 +39,14 @@ public class AutoAling extends Command {
 
     if(camera_left.hasValidTarget() && (int)camera_left.getAprilTagID() == align.getTagId())
       {      
-        goalPose2d = new Pose2d(Units.inchesToMeters(40), rightPole ? Units.inchesToMeters(0) : Units.inchesToMeters(0),new Rotation2d()).rotateAround(new Translation2d(0, 0), ReefPole.getPoleFromID(camera_left.getAprilTagID(), camera_left).getRotation());
-        finalPose2d = new Pose2d(Units.inchesToMeters(15.5), rightPole ? Units.inchesToMeters(6.2) : Units.inchesToMeters(-11.5),new Rotation2d()).rotateAround(new Translation2d(0, 0), ReefPole.getPoleFromID(camera_left.getAprilTagID(), camera_left).getRotation());  
+        goalPose2d = new Pose2d(Units.inchesToMeters(40), rightPole ? Units.inchesToMeters(0) : Units.inchesToMeters(0),new Rotation2d());
+        finalPose2d = new Pose2d(Units.inchesToMeters(10), rightPole ? Units.inchesToMeters(6) : Units.inchesToMeters(-6),new Rotation2d());  
       }
 
     if(camera_right.hasValidTarget() && (int)camera_right.getAprilTagID() == align.getTagId())
       {    
-        goalPose2d = new Pose2d(Units.inchesToMeters(40), rightPole ? Units.inchesToMeters(0) : Units.inchesToMeters(0),new Rotation2d()).rotateAround(new Translation2d(0, 0), ReefPole.getPoleFromID(camera_right.getAprilTagID(), camera_right).getRotation());
-        finalPose2d = new Pose2d(Units.inchesToMeters(15.5), rightPole ? Units.inchesToMeters(6.2) : Units.inchesToMeters(-11.5),new Rotation2d()).rotateAround(new Translation2d(0, 0), ReefPole.getPoleFromID(camera_right.getAprilTagID(), camera_right).getRotation());     
+        goalPose2d = new Pose2d(Units.inchesToMeters(40), rightPole ? Units.inchesToMeters(0) : Units.inchesToMeters(0),new Rotation2d());
+        finalPose2d = new Pose2d(Units.inchesToMeters(10), rightPole ? Units.inchesToMeters(6) : Units.inchesToMeters(-6),new Rotation2d());     
       }
 
     align.setGeneralPosition(goalPose2d);
