@@ -46,7 +46,7 @@ import frc.robot.commands.auto.AlgaeAlign;
 import frc.robot.commands.auto.BasicAlign;
 import frc.robot.commands.auto.TagAlign;
 import frc.robot.commands.auto.V2;
-import frc.robot.commands.rookie.Aim;
+// import frc.robot.commands.rookie.Aim;
 import frc.robot.subsystems.Superstructure;
 import frc.robot.subsystems.Experimental.ActionableConstraint;
 import frc.robot.subsystems.Experimental.Constraint;
@@ -57,6 +57,8 @@ import frc.robot.subsystems.Experimental.SuperstructureBuilder;
 import frc.robot.subsystems.Superstructure.SuperstructureState;
 import frc.robot.subsystems.superstructure.CANdleSubsystem;
 import frc.robot.subsystems.superstructure.Elevator;
+import frc.robot.utils.Interpolation.Log;
+import frc.robot.utils.Interpolation.Logger;
 import frc.robot.utils.ReefScoringPos.ReefPole;
 import frc.robot.subsystems.superstructure.EndEffector;
 
@@ -102,7 +104,12 @@ public class RobotContainer {
 
                                                         
                                                               
-
+  public Log logCommand = new Log
+                              (
+                                "ShooterPositions.json", 
+                                new Logger("Wrist", ()->wrist.getPosition()), 
+                                new Logger("Arm", () -> arm.getPosition())
+                              );
   private final EnhancedXboxController driverController2 = new EnhancedXboxController(1).setSticksDeadzone(Constants.Controllers.STICK_DEADZONE); 
   public SendableChooser<Command> chooser;
 
@@ -182,12 +189,13 @@ public class RobotContainer {
   private void configureBindings() 
   {
 
+    
+
     s.getSensor("Intake").getTrigger().onTrue(() -> s.setGoalState(SuperStructureStates.Home));
     driverController.leftBumper.onTrue(() -> s.setGoalState(SuperStructureStates.Intaking));
     driverController.rightBumper.onTrue(() -> s.setGoalState(SuperStructureStates.Home));
 
-
-    driverController.rightStick.onTrue(new Aim(robotBase.getVision().getLimelight("limelight-left"), robotBase));
+    // driverController.rightStick.onTrue(new Aim(robotBase.getVision().getLimelight("limelight-left"), robotBase));
     //----------------------------------------------------------DRIVER 1---------------------------------------------------------------//
 
     driverController.start.onTrue(() -> robotBase.getDrivetrain().getIMU().setYaw(0)).after(2).onTrue(() -> {robotBase.getLocalization().resetFieldPose(0,0, 0); robotBase.getLocalization().resetRelativePose(0,0, 0);});

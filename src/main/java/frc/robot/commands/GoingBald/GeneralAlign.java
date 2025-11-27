@@ -16,6 +16,7 @@ import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
+import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardContainer;
 import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
 import frc.robot.commands.GoingBald.AprilTagMap.AprilTags;
 import frc.robot.utils.ReefScoringPos.ReefPole;
@@ -45,6 +46,7 @@ public class GeneralAlign {
 
     public static int findMostFrequent(List<Integer> nums) 
     {
+        
     Map<Integer, Integer> frequencyMap = new HashMap<>();
     for (int num : nums) 
     {
@@ -82,7 +84,7 @@ public class GeneralAlign {
 
         tab.addNumber("X Distancceee", () -> Units.metersToInches(getRobotPositionRelativeToTag().getX()));
         tab.addNumber("Y Distancceee", () -> Units.metersToInches(getRobotPositionRelativeToTag().getY()));
-
+        
         tab.addNumber("X FIELD  Distancceee", () -> Units.metersToInches(base.getLocalization().getRelativePose().getX()));
         tab.addNumber("Y FIELD Distancceee", () -> Units.metersToInches(base.getLocalization().getRelativePose().getY()));
 
