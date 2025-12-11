@@ -1,6 +1,7 @@
 package frc.robot;
 
 import java.util.List;
+import java.util.function.DoubleSupplier;
 
 import org.photonvision.PhotonPoseEstimator.PoseStrategy;
 
@@ -169,51 +170,57 @@ public interface Constants {
         int CANDLE_ID = 22;
 
         enum ArmState implements SetpointProvider<Double>{
-            Intaking(0), //150.38085937
-            AlgaeHigh(-113.466), //52.8
-            AlgaeLow(-113.5), //52.8
-            Home(-92), //61.083
-            StartConfiguration(-153), //0
-            Scoring(-44), //-49 //-44  //78.310546875
-            TransitionState(-85), //65
-            ScoringL4(-80), //60
-            AlgaeScore(-30), //120.58
-            Scoringl1(-84); //66.08
+            Intaking(() -> 0), //150.38085937
+            AlgaeHigh(() -> -113.466), //52.8
+            AlgaeLow(() -> -113.5), //52.8
+            Home(() -> -92), //61.083
+            StartConfiguration(() -> -153), //0
+            Scoring(() -> -44), //-49 //-44  //78.310546875
+            TransitionState(() -> -85), //65
+            ScoringL4(() -> -80), //60
+            AlgaeScore(() -> -30), //120.58
+            Dynamic(() -> Robot.m_robotContainer.armSupplier),
+            Scoringl1(() -> -84); //66.08
 
-            double angle;
-            ArmState(double angle){
+
+            DoubleSupplier angle;
+          
+            ArmState(DoubleSupplier angle){
                 this.angle = angle;
             }
 
             @Override
             public Double getSetpoint() {
-               return angle;
+               return angle.getAsDouble();
             }
+
 
         }
 
             enum WristState implements SetpointProvider<Double>{
-                Intaking(40),
-                Home(120d), //110
-                Scoring(154d), //154 //125.419921875
-                AlgaeHigh(-38.23),
-                AlgaeLow(-38.23),
-                ScoringL4(91), //80
-                TransitionState(62),
-                AlgaeScore(168.92),
+                Intaking(() -> 40),
+                Home(() -> 120d), //110
+                Scoring(() -> 154d), //154 //125.419921875
+                AlgaeHigh(() -> -38.23),
+                AlgaeLow(() -> -38.23),
+                ScoringL4(() -> 91), //80
+                TransitionState(() -> 62),
+                AlgaeScore(() -> 168.92),
+                Dynamic(() -> 55),
 
-                StartConfiguration(0),
-                Scoringl1(109.95);
+
+                StartConfiguration(() -> 0),
+                Scoringl1(() -> 109.95);
 
     
-                double angle;
-                WristState(double angle){
+                DoubleSupplier angle;
+                WristState(DoubleSupplier angle){
                     this.angle = angle;
                 }
     
                 @Override
                 public Double getSetpoint() {
-                   return angle;
+                   return angle.getAsDouble();
                 }
     
             }

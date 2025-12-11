@@ -8,6 +8,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.function.BooleanSupplier;
+import java.util.function.DoubleSupplier;
 
 import com.pathplanner.lib.auto.NamedCommands;
 import com.pathplanner.lib.commands.PathPlannerAuto;
@@ -57,6 +58,7 @@ import frc.robot.subsystems.Experimental.SuperstructureBuilder;
 import frc.robot.subsystems.Superstructure.SuperstructureState;
 import frc.robot.subsystems.superstructure.CANdleSubsystem;
 import frc.robot.subsystems.superstructure.Elevator;
+import frc.robot.commands.GoingBald.Aim;
 import frc.robot.utils.Interpolation.Log;
 import frc.robot.utils.Interpolation.Logger;
 import frc.robot.utils.ReefScoringPos.ReefPole;
@@ -77,8 +79,8 @@ public class RobotContainer {
                                                           new PIDController(1, 0, 0), 
                                                           new PIDController(1, 0, 0),
                                                           new ProfiledPIDController(0, 0, 0, new Constraints(0, 0)));
-  public final StatefulArmMechanism<ArmState> arm = Constants.EndEffector.ARM_CONFIG.build();//.shuffleboard("Arm", SendableLevel.DEBUG);
-  public final StatefulArmMechanism<WristState> wrist = Constants.EndEffector.WRIST_CONFIG.build();//.shuffleboard("Wrist", SendableLevel.DEBUG);
+  public final StatefulArmMechanism<ArmState> arm = Constants.EndEffector.ARM_CONFIG.build().shuffleboard("Arm", SendableLevel.DEBUG);
+  public final StatefulArmMechanism<WristState> wrist = Constants.EndEffector.WRIST_CONFIG.build().shuffleboard("Wrist", SendableLevel.DEBUG);
   public final StatefulMechanism<RollerState> rollers = Constants.EndEffector.CORAL_ROLLERS.build();///.shuffleboard("Rollers", SendableLevel.DEBUG);
   public final StatefulMechanism<RollerState> algaeRollers = Constants.EndEffector.ALGAE_ROLLERS.build();//.shuffleboard("Algae Rollers", SendableLevel.COMP);;
 
@@ -86,6 +88,7 @@ public class RobotContainer {
                                                             .addArms(arm, wrist).addMotors(rollers, algaeRollers)
                                                             .addSensors(new DigitalSensor("Intake", new DigitalInput(4), true))
                                                             .build();
+  
   // public BooleanSupplier hasTarget;
   // public final Elevator elevator = new Elevator();
   // public final EndEffector endEffector = new EndEffector(arm, wrist, rollers, algaeRollers).setAutoEndScoring(false);
@@ -112,6 +115,9 @@ public class RobotContainer {
                               );
   private final EnhancedXboxController driverController2 = new EnhancedXboxController(1).setSticksDeadzone(Constants.Controllers.STICK_DEADZONE); 
   public SendableChooser<Command> chooser;
+  public double armSupplier = -92d;
+  public double wristSupplier = 120d;
+
 
   
   
@@ -179,6 +185,7 @@ public class RobotContainer {
 
     chooser = Autos.AUTOS.createChooser(AUTOS.Left);
     SmartDashboard.putData(chooser);
+    SmartDashboard.putData("Logger",logCommand);
   }
 
   // public boolean isIntaking()
@@ -188,12 +195,10 @@ public class RobotContainer {
 
   private void configureBindings() 
   {
-
-    
-
     s.getSensor("Intake").getTrigger().onTrue(() -> s.setGoalState(SuperStructureStates.Home));
-    driverController.leftBumper.onTrue(() -> s.setGoalState(SuperStructureStates.Intaking));
-    driverController.rightBumper.onTrue(() -> s.setGoalState(SuperStructureStates.Home));
+    driverController.b.onTrue(new Aim(camLeft, s));
+    driverController.a.onTrue(() -> s.setGoalState(SuperStructureStates.Home));
+  
 
     // driverController.rightStick.onTrue(new Aim(robotBase.getVision().getLimelight("limelight-left"), robotBase));
     //----------------------------------------------------------DRIVER 1---------------------------------------------------------------//

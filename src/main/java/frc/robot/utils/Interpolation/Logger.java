@@ -10,11 +10,11 @@ import ca.frc6390.athena.commands.RunnableTrigger;
 import edu.wpi.first.wpilibj.DigitalInput;
 
 /** Add your docs here. */
-public class LogData 
+public class Logger 
 {
     public DoubleSupplier supplier;
     public String name;
-    public LogData(String name,DoubleSupplier supplier)
+    public Logger(String name,DoubleSupplier supplier)
     {
         this.name = name;
         this.supplier = supplier;

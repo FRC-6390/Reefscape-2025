@@ -27,7 +27,7 @@ import frc.robot.utils.ReefScoringPos.ReefPole;
 public class Robot extends TimedRobot {
   private Command m_autonomousCommand;
 
-  private final RobotContainer m_robotContainer;
+  public static RobotContainer m_robotContainer;
   // public V2 calibrate; //= new V2(m_robotContainer.robotBase, "limelight-right", false, m_robotContainer.superstructure, () -> m_robotContainer.selectedState);
 
   PowerDistribution pdh;
@@ -45,6 +45,7 @@ public class Robot extends TimedRobot {
   public void robotPeriodic() {
     CommandScheduler.getInstance().run();
     m_robotContainer.s.update();
+    SmartDashboard.putNumber("Distance", m_robotContainer.robotBase.getVision().getLimelight("limelight-left").getPoseEstimate(PoseEstimateWithLatencyType.BOT_POSE_MT2_BLUE).getRaw()[9]);
   }
 
   @Override
