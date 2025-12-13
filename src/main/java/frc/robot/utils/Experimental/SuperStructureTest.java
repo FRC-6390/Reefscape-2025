@@ -21,9 +21,6 @@ import ca.frc6390.athena.mechanisms.StateMachine;
 import ca.frc6390.athena.mechanisms.StatefulMechanism;
 import ca.frc6390.athena.mechanisms.StateMachine.SetpointProvider;
 import edu.wpi.first.wpilibj.DigitalInput;
-import frc.robot.subsystems.Superstructure;
-import frc.robot.subsystems.Superstructure.SuperstructureState;
-import frc.robot.subsystems.Superstructure.SuperstructureTuple;
 
 import ca.frc6390.athena.mechanisms.StateMachine.SetpointProvider;
 

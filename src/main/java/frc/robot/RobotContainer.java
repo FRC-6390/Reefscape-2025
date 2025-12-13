@@ -43,70 +43,39 @@ import frc.robot.Constants.Elevator.S;
 import frc.robot.Constants.EndEffector.ArmState;
 import frc.robot.Constants.EndEffector.WristState;
 import frc.robot.Constants.EndEffector.RollerState;
-import frc.robot.commands.GoingBald.AlignCamera;
-import frc.robot.commands.GoingBald.AutoAling;
-import frc.robot.commands.GoingBald.GeneralAlign;
-import frc.robot.commands.auto.AlgaeAlign;
-import frc.robot.commands.auto.BasicAlign;
-import frc.robot.commands.auto.TagAlign;
-import frc.robot.commands.auto.V2;
-// import frc.robot.commands.rookie.Aim;
-import frc.robot.subsystems.Superstructure;
-import frc.robot.subsystems.Superstructure.SuperstructureState;
-import frc.robot.subsystems.superstructure.CANdleSubsystem;
-import frc.robot.subsystems.superstructure.Elevator;
+import frc.robot.utils.Align.AlignCamera;
+import frc.robot.utils.Align.AutoAling;
+import frc.robot.utils.Align.GeneralAlign;
 import frc.robot.utils.Experimental.ActionableConstraint;
 import frc.robot.utils.Experimental.Constraint;
 import frc.robot.utils.Experimental.DigitalSensor;
 import frc.robot.utils.Experimental.SuperStructureStates;
 import frc.robot.utils.Experimental.SuperStructureTest;
 import frc.robot.utils.Experimental.SuperstructureBuilder;
-import frc.robot.utils.ReefScoringPos.ReefPole;
-import frc.robot.subsystems.superstructure.EndEffector;
 
-//TODO
-//CHECK IF IT WORKS ON RED AND ANOTHER SIDE, CHECK IF AUTO WORKS, CHECK 
 
 public class RobotContainer {
   public final RobotBase<SwerveDrivetrain> robotBase = Constants.DriveTrain.ROBOT_BASE.create().shuffleboard();
  
-  public PIDController rController = new PIDController(0.11, 0, 0);
   public AlignCamera camLeft = new AlignCamera(robotBase.getVision().getLimelight("limelight-left"), -Units.inchesToMeters(0.5), -Units.inchesToMeters(9.25), 15, 0);
-    public AlignCamera camRight = new AlignCamera(robotBase.getVision().getLimelight("limelight-right"), -Units.inchesToMeters(0.5), Units.inchesToMeters(9.25), -15, 0);
+  public AlignCamera camRight = new AlignCamera(robotBase.getVision().getLimelight("limelight-right"), -Units.inchesToMeters(0.5), Units.inchesToMeters(9.25), -15, 0);
 
-
-  public HolonomicDriveController controller = new HolonomicDriveController(
-                                                          new PIDController(1, 0, 0), 
-                                                          new PIDController(1, 0, 0),
-                                                          new ProfiledPIDController(0, 0, 0, new Constraints(0, 0)));
   public final StatefulArmMechanism<ArmState> arm = Constants.EndEffector.ARM_CONFIG.build().shuffleboard("Arm", SendableLevel.DEBUG);
   public final StatefulArmMechanism<WristState> wrist = Constants.EndEffector.WRIST_CONFIG.build().shuffleboard("Wrist", SendableLevel.DEBUG);
-  public final StatefulMechanism<RollerState> rollers = Constants.EndEffector.CORAL_ROLLERS.build();///.shuffleboard("Rollers", SendableLevel.DEBUG);
-  public final StatefulMechanism<RollerState> algaeRollers = Constants.EndEffector.ALGAE_ROLLERS.build();//.shuffleboard("Algae Rollers", SendableLevel.COMP);;
+  public final StatefulMechanism<RollerState> rollers = Constants.EndEffector.CORAL_ROLLERS.build().shuffleboard("Rollers", SendableLevel.COMP);
+  public final StatefulMechanism<RollerState> algaeRollers = Constants.EndEffector.ALGAE_ROLLERS.build().shuffleboard("Algae Rollers", SendableLevel.COMP);;
 
   public SuperStructureTest<SuperStructureStates> s = SuperstructureBuilder.builder()
                                                             .addArms(arm, wrist).addMotors(rollers, algaeRollers)
                                                             .addSensors(new DigitalSensor("Intake", new DigitalInput(4), true))
                                                             .build();
   
-  // public BooleanSupplier hasTarget;
-  // public final Elevator elevator = new Elevator();
-  // public final EndEffector endEffector = new EndEffector(arm, wrist, rollers, algaeRollers).setAutoEndScoring(false);
-  // public Superstructure superstructure = new Superstructure(elevator, endEffector);
-  // public CANdleSubsystem candle = new CANdleSubsystem(robotBase);
-  // public static SuperstructureState selectedState = SuperstructureState.L4;
-  public AutoAling alingLeft = new AutoAling(new GeneralAlign(robotBase, rController, controller, new Pose2d(Units.inchesToMeters(-20),Units.inchesToMeters(-6), new Rotation2d()), new Pose2d(Units.inchesToMeters(-10),Units.inchesToMeters(-6), new Rotation2d()), camLeft, camRight), robotBase, false);
-  // public AutoAling alingRight = new AutoAling(new GeneralAlign(robotBase, rController, controller, new Pose2d(), new Pose2d(), camLeft, camRight), robotBase, true);
-
   private final EnhancedXboxController driverController = new EnhancedXboxController(0)
                                                               .setLeftInverted(true)
                                                               .setRightInverted(true)
                                                               .setSticksDeadzone(0.15)
                                                               .setLeftSlewrate(1)
                                                               ;
-
-                                                        
-                                                              
 
   private final EnhancedXboxController driverController2 = new EnhancedXboxController(1).setSticksDeadzone(Constants.Controllers.STICK_DEADZONE); 
   public SendableChooser<Command> chooser;
@@ -149,7 +118,6 @@ public class RobotContainer {
 
   public RobotContainer() 
   {
-    // Enum<?> state = ArmState.Intaking;
     configureBindings();
     robotBase.getDrivetrain().setDriveCommand(driverController);
     robotBase.registerMechanism(arm, algaeRollers, wrist, rollers);
@@ -160,46 +128,21 @@ public class RobotContainer {
     wrist.setFeedforwardEnabled(false);
     
     s.addActionableConstraint(new ActionableConstraint<SuperStructureStates>(SuperStructureStates.Intaking,SuperStructureStates.Score, () -> !s.getSensor("Intake").getSensorStatus()));
-    s.addUpdateEvent(
-    () -> 
-    {
-    double d = camLeft.getLimelight().getPoseEstimate(PoseEstimateWithLatencyType.BOT_POSE_MT2_BLUE).getRaw()[9];
-    if(d > 0)
-    {
-      dist = d;
-    }
-    armSupplier = interpolate(Constants.EndEffector.distanceAndArm, dist);
-    });
-    // elevator.shuffleboard("Elevator");
+    s.addUpdateEvent(() -> 
+      {
+        double d = camLeft.getLimelight().getPoseEstimate(PoseEstimateWithLatencyType.BOT_POSE_MT2_BLUE).getRaw()[9];
+        if(d > 0)
+        {
+          dist = d;
+        }
+        armSupplier = interpolate(Constants.EndEffector.distanceAndArm, dist);
+      }
+    );
 
-    // //NEEED TOO DEPLOY 
-    // //--------------------oFYUEIWHUIFWHEUIRHFIEU--------------///
-    // hasTarget = () -> robotBase.getVision().getLimelight("limelight-left").hasValidTarget();
-    
-    // NamedCommands.registerCommand("WaitForTag", Commands.waitUntil(hasTarget));
-    
-    // NamedCommands.registerCommand("Home", superstructure.setState(SuperstructureState.HomePID));
     NamedCommands.registerCommand("OrientLeftSide", new InstantCommand(() -> robotBase.getLocalization().resetRelativePose(new Pose2d(0,0, Rotation2d.fromRadians(-2.3631872270622845)))));
     NamedCommands.registerCommand("OrientRightSide", new InstantCommand(() -> robotBase.getLocalization().resetRelativePose(new Pose2d(0,0, Rotation2d.fromRadians(2.3631872270622845)))));
     NamedCommands.registerCommand("OrientMidSide", new InstantCommand(() -> robotBase.getLocalization().resetRelativePose(new Pose2d(0,0, Rotation2d.fromRadians(3.141592653589793)))));
-    
-
-    // NamedCommands.registerCommand("Intake", Commands.either(superstructure.setState(SuperstructureState.Intaking), Commands.none(), () -> !endEffector.hasGamePiece()));
-
-    // NamedCommands.registerCommand("L4", superstructure.setState(SuperstructureState.L4));
-    // NamedCommands.registerCommand("L3", superstructure.setState(SuperstructureState.L3));
-    // NamedCommands.registerCommand("L2", superstructure.setState(SuperstructureState.L2));
-    // NamedCommands.registerCommand("L1", superstructure.setState(SuperstructureState.L1));
-    // NamedCommands.registerCommand("AlgaeLow", superstructure.setState(SuperstructureState.AlgaeLow));
-
-
-    // NamedCommands.registerCommand("StartEject", superstructure.setState(SuperstructureState.Score));
-    // NamedCommands.registerCommand("WaitForElevator",superstructure.WaitForElevator());
-    // NamedCommands.registerCommand("WaitForEffector",superstructure.WaitForL4());
-    // NamedCommands.registerCommand("WaitForEjector", superstructure.WaitForEjector());
-
-    // NamedCommands.registerCommand("AlignRight", alignRight);
-    // NamedCommands.registerCommand("AlignLeft", alginLeft);
+   
     NamedCommands.registerCommand("DisableLocal", 
     new  InstantCommand(() ->
     {
@@ -208,6 +151,7 @@ public class RobotContainer {
       robotBase.getVision().getPhotonVision("Tag").setUseForLocalization(false); 
       robotBase.getVision().getPhotonVision("TagFront").setUseForLocalization(false);
     }));
+    
     NamedCommands.registerCommand("EnableLocal", 
     new InstantCommand(() ->
     {
@@ -222,68 +166,16 @@ public class RobotContainer {
     SmartDashboard.putData(chooser);
   }
 
-  // public boolean isIntaking()
-  // {
-  //   return superstructure.stateMachine.getGoalState().equals(SuperstructureState.Intaking);
-  // }
-
   private void configureBindings() 
   {
     s.getSensor("Intake").getTrigger().onTrue(() -> s.setGoalState(SuperStructureStates.Home));
-    driverController.b.onTrue(() -> s.setGoalState(SuperStructureStates.Aim));
+    driverController.leftTrigger.tiggerAt(0.5).onTrue(() -> s.setGoalState(SuperStructureStates.Aim));
+    driverController.leftTrigger.tiggerAt(0.5).onFalse(() -> s.setGoalState(SuperStructureStates.Home));
+    driverController.rightTrigger.tiggerAt(0.5).onTrue(() -> s.setGoalState(SuperStructureStates.Score));
+    
     driverController.a.onTrue(() -> s.setGoalState(SuperStructureStates.Home));
   
-
-    // driverController.rightStick.onTrue(new Aim(robotBase.getVision().getLimelight("limelight-left"), robotBase));
-    //----------------------------------------------------------DRIVER 1---------------------------------------------------------------//
-
     driverController.start.onTrue(() -> robotBase.getDrivetrain().getIMU().setYaw(0)).after(2).onTrue(() -> {robotBase.getLocalization().resetFieldPose(0,0, 0); robotBase.getLocalization().resetRelativePose(0,0, 0);});
-
-    // driverController.leftBumper.onTrue(
-    //   Commands.either(
-    //     Commands.either(superstructure.setState(SuperstructureState.Intaking), Commands.none(), () -> !endEffector.hasGamePiece())re
-    //     superstructure.setState(SuperstructureState.HomePID),
-    //     () -> !isIntaking()));
-
-    // driverController.rightBumper.onTrue(superstructure.setState(SuperstructureState.Score));
-
-    // driverController.pov.left.whileTrue(superstructure.setState(SuperstructureState.AlgaeLow)).onFalse(superstructure.setState(SuperstructureState.Home));
-    // driverController.pov.right.whileTrue(superstructure.setState(SuperstructureState.AlgaeHigh)).onFalse(superstructure.setState(SuperstructureState.Home));
-   
-    // driverController.rightTrigger.tiggerAt(0.5)
-    // .onFalse(() -> 
-    // {
-    //   CommandScheduler.getInstance().cancel(alingRight); 
-    //   // CommandScheduler.getInstance().schedule(superstructure.setState(SuperstructureState.Score));
-    // }
-    // );
-    driverController.leftTrigger.tiggerAt(0.5).onTrue(()-> CommandScheduler.getInstance().schedule(alingLeft)).onFalse(() -> {CommandScheduler.getInstance().cancel(alingLeft);});
-    // driverController.pov.down.onTrue(superstructure.setState(SuperstructureState.HomePID)).after(1).onTrue(superstructure.setState(SuperstructureState.Home));
-
-    // driverController.a.onTrue(() -> selectedState = SuperstructureState.L1);//after(0.5).onTrue(() -> selectedState = SuperstructureState.Score);
-    // driverController.b.onTrue(() -> selectedState = SuperstructureState.L2);//.after(0.5).onTrue(() -> selectedState = SuperstructureState.Score);
-    // driverController.x.onTrue(() -> selectedState = SuperstructureState.L3);//.after(0.5).onTrue(() -> selectedState = SuperstructureState.Score);
-    // driverController.y.onTrue(() -> selectedState = SuperstructureState.L4);//.after(0.5).onTrue(() -> selectedState = SuperstructureState.Score);
-
-    // //---------------------------------------------------------DRIVER 2--------------------------------------------------//
-
-    // driverController2.a.onTrue(superstructure.setState(SuperstructureState.L1)).after(0.75).onTrue(superstructure.setState(SuperstructureState.Score));
-    // driverController2.b.onTrue(superstructure.setState(SuperstructureState.L2)).after(0.75).onTrue(superstructure.setState(SuperstructureState.Score));
-    // driverController2.x.onTrue(superstructure.setState(SuperstructureState.L3)).after(0.75).onTrue(superstructure.setState(SuperstructureState.Score));
-    // driverController2.y.onTrue(superstructure.setState(SuperstructureState.L4)).after(0.75).onTrue(superstructure.setState(SuperstructureState.Score));
-  
-    // driverController2.start.whileTrue(superstructure.setState(SuperstructureState.AlgaeSpit)).after(1).onTrue(superstructure.setState(SuperstructureState.ScoreAlgae));
-    // // driverController2.start.onTrue(() -> s.requestState2(S.Intaking.getSetpoint()));
-    // driverController2.leftStick.and(driverController2.rightStick).onTrue(() -> {arm.setNudge(0); wrist.setNudge(0); elevator.resetNudge();});
-    // driverController2.pov.up.onTrue(() -> elevator.nudge(1)).after(1).onTrue(() -> elevator.resetNudge());
-    // driverController2.pov.down.onTrue(() -> elevator.nudge(-1)).after(1).onTrue(() -> elevator.resetNudge());
-    driverController2.pov.right.onTrue(() -> arm.setNudge(arm.getNudge() + 5)).after(1).onTrue(() -> arm.setNudge(0));
-    driverController2.pov.left.onTrue(() -> arm.setNudge(arm.getNudge() - 5)).after(1).onTrue(() -> arm.setNudge(0));
-    driverController2.rightBumper.onTrue(() -> wrist.setNudge(wrist.getNudge() + 5)).after(1).onTrue(() -> wrist.setNudge(0));
-    driverController2.leftBumper.onTrue(() -> wrist.setNudge(wrist.getNudge() - 5)).after(1).onTrue(() -> wrist.setNudge(0));
-    // driverController2.rightTrigger.tiggerAt(0.5).whileTrue(() -> {rollers.setMotors(1);}).onFalse(() -> rollers.setMotors(0));
-    
-
   }
 
   public Command getAutonomousCommand() 

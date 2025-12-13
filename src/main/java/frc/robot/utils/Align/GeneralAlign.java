@@ -1,4 +1,4 @@
-package frc.robot.commands.GoingBald;
+package frc.robot.utils.Align;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -18,8 +18,7 @@ import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardContainer;
 import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
-import frc.robot.commands.GoingBald.AprilTagMap.AprilTags;
-import frc.robot.utils.ReefScoringPos.ReefPole;
+import frc.robot.utils.Align.AprilTagMap.AprilTags;
 
 public class GeneralAlign {
 
@@ -78,12 +77,12 @@ public class GeneralAlign {
 
         // tab.add("Rotation Controller Auto Align", rController);
        
-        Pose2d general = new Pose2d(convertToFieldRelativeAxises(generalPosition), generalPosition.getRotation());
-        Pose2d scoring = new Pose2d(convertToFieldRelativeAxises(scoringPose), scoringPose.getRotation());
+        Pose2d general = new Pose2d(convertToTagRelativePose(generalPosition), generalPosition.getRotation());
+        Pose2d scoring = new Pose2d(convertToTagRelativePose(scoringPose), scoringPose.getRotation());
 
 
-        tab.addNumber("X Distancceee", () -> Units.metersToInches(getRobotPositionRelativeToTag().getX()));
-        tab.addNumber("Y Distancceee", () -> Units.metersToInches(getRobotPositionRelativeToTag().getY()));
+        tab.addNumber("X Distancceee", () -> Units.metersToInches(getAveragePositions().getX()));
+        tab.addNumber("Y Distancceee", () -> Units.metersToInches(getAveragePositions().getY()));
         
         tab.addNumber("X FIELD  Distancceee", () -> Units.metersToInches(base.getLocalization().getRelativePose().getX()));
         tab.addNumber("Y FIELD Distancceee", () -> Units.metersToInches(base.getLocalization().getRelativePose().getY()));
@@ -97,7 +96,7 @@ public class GeneralAlign {
     }
     
     //Chooses the tag that most limelights see
-    public int setTagId()
+    public void setUp()
     {
         List<Integer> ids = new ArrayList<>();
 
@@ -114,8 +113,11 @@ public class GeneralAlign {
         {
         tagId = findMostFrequent(ids);
         }
-        return tagId;
+
+        base.getLocalization().resetRelativePose(new Pose2d(0,0,Rotation2d.fromDegrees(base.getLocalization().getRelativePose().getRotation().getDegrees() - AprilTagMap.AprilTags.getRotation2d(tagId).getDegrees())));
     }
+
+    
 
     //Resets the autoalign
     public void reset()
@@ -127,17 +129,18 @@ public class GeneralAlign {
     //Set the localization relative pose of the robot
     public void updateBotpose()
     {
-        Translation2d t = convertToFieldRelativeAxises(getRobotPositionRelativeToTag());
+        Translation2d t = convertToTagRelativePose(getAveragePositions());
         base.getLocalization().resetRelativePose(t.getX(), t.getY());
     }
    
    //Converts tag relative position to field relative position
-   public Translation2d convertToFieldRelativeAxises(Pose2d robotRelativePose) 
+   public Translation2d convertToTagRelativePose(Pose2d robotRelativePose) 
    {
     double hyp = Math.pow(robotRelativePose.getX(), 2) + Math.pow(robotRelativePose.getY(), 2);
     hyp = Math.sqrt(hyp);
-    double angle = Math.atan(robotRelativePose.getY()/ robotRelativePose.getX());
-    double finAngle = base.getLocalization().getRelativePose().getRotation().getDegrees() + Math.toDegrees(angle);
+    double angle = Math.atan(robotRelativePose.getY() / robotRelativePose.getX());
+    double fullRotation = AprilTagMap.AprilTags.getRotation2d((long)tagId).getDegrees() - base.getLocalization().getRelativePose().getRotation().getDegrees();
+    double finAngle = fullRotation - angle;
     
     double x1 = (Math.cos(Math.toRadians(finAngle)));
     double y1 = (Math.sin(Math.toRadians(finAngle)));
@@ -147,7 +150,9 @@ public class GeneralAlign {
     }
 
    //Gets tag relative translation
-   public Translation2d getTagRelativeTranslation(AlignCamera cam)
+   //Tag rotation - Robot gyro rotation = full rotation
+   //Full rotation - cam offset - cam tx = angle between straigth
+   public Translation2d getRobotRelativeTranslation(AlignCamera cam)
    {
     LimeLight limeLight = cam.getLimelight();
     double straigtLineDistToTag = limeLight.getPoseEstimate(PoseEstimateWithLatencyType.BOT_POSE_MT2_BLUE).getRaw()[9];
@@ -162,7 +167,7 @@ public class GeneralAlign {
    }
 
     //Averages all the positions calculated by each limelight
-    public Pose2d getRobotPositionRelativeToTag()
+    public Pose2d getAveragePositions()
     {
     double x = 0;
     double y = 0;
@@ -174,8 +179,8 @@ public class GeneralAlign {
     System.out.println(limeLight.config.getTable());
     if(limeLight.getAprilTagID() == tagId)
         {
-            x += getTagRelativeTranslation(cam).getX();
-            y += getTagRelativeTranslation(cam).getY();
+            x += getRobotRelativeTranslation(cam).getX();
+            y += getRobotRelativeTranslation(cam).getY();
             count += 1;
         }
     }
@@ -201,8 +206,8 @@ public class GeneralAlign {
     public ChassisSpeeds calculateSpeeds()
     {
     boolean preciseMode = (base.getLocalization().getRelativePose().getTranslation().getDistance(generalPosition.getTranslation()) > 0.075 && !reached);
-    Pose2d general = new Pose2d(convertToFieldRelativeAxises(generalPosition), generalPosition.getRotation());
-    Pose2d scoring = new Pose2d(convertToFieldRelativeAxises(scoringPose), scoringPose.getRotation());
+    Pose2d general = generalPosition;
+    Pose2d scoring = scoringPose;
 
     double rSpeed = rController.calculate(base.getLocalization().getRelativePose().getRotation().getDegrees(), preciseMode ? general.getRotation().getDegrees() : scoring.getRotation().getDegrees());
     double xSpeed = controller.getXController().calculate(base.getLocalization().getRelativePose().getX(), preciseMode ? general.getX() : scoring.getX());

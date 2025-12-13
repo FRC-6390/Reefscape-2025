@@ -1,4 +1,4 @@
-package frc.robot.commands.GoingBald;
+package frc.robot.utils.Align;
 
 import ca.frc6390.athena.core.RobotBase;
 import ca.frc6390.athena.sensors.camera.limelight.LimeLight;
@@ -8,7 +8,6 @@ import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj2.command.Command;
-import frc.robot.utils.ReefScoringPos.ReefPole;
 
 public class AutoAling extends Command {
   public GeneralAlign align;
@@ -33,7 +32,7 @@ public class AutoAling extends Command {
   @Override
   public void execute() 
   {
-    align.setTagId();
+    align.setUp();
     LimeLight camera_left = base.getVision().getLimelight("limelight-left");
     LimeLight camera_right = base.getVision().getLimelight("limelight-right");
 
