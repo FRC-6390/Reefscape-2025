@@ -4,6 +4,8 @@
 
 package frc.robot;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -20,6 +22,7 @@ import ca.frc6390.athena.drivetrains.swerve.SwerveDrivetrain;
 import ca.frc6390.athena.mechanisms.ArmMechanism.StatefulArmMechanism;
 import ca.frc6390.athena.mechanisms.StateMachine.SetpointProvider;
 import ca.frc6390.athena.mechanisms.StatefulMechanism;
+import ca.frc6390.athena.sensors.camera.limelight.LimeLight.PoseEstimateWithLatencyType;
 import edu.wpi.first.math.controller.HolonomicDriveController;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.controller.ProfiledPIDController;
@@ -49,18 +52,15 @@ import frc.robot.commands.auto.TagAlign;
 import frc.robot.commands.auto.V2;
 // import frc.robot.commands.rookie.Aim;
 import frc.robot.subsystems.Superstructure;
-import frc.robot.subsystems.Experimental.ActionableConstraint;
-import frc.robot.subsystems.Experimental.Constraint;
-import frc.robot.subsystems.Experimental.DigitalSensor;
-import frc.robot.subsystems.Experimental.SuperStructureStates;
-import frc.robot.subsystems.Experimental.SuperStructureTest;
-import frc.robot.subsystems.Experimental.SuperstructureBuilder;
 import frc.robot.subsystems.Superstructure.SuperstructureState;
 import frc.robot.subsystems.superstructure.CANdleSubsystem;
 import frc.robot.subsystems.superstructure.Elevator;
-import frc.robot.commands.GoingBald.Aim;
-import frc.robot.utils.Interpolation.Log;
-import frc.robot.utils.Interpolation.Logger;
+import frc.robot.utils.Experimental.ActionableConstraint;
+import frc.robot.utils.Experimental.Constraint;
+import frc.robot.utils.Experimental.DigitalSensor;
+import frc.robot.utils.Experimental.SuperStructureStates;
+import frc.robot.utils.Experimental.SuperStructureTest;
+import frc.robot.utils.Experimental.SuperstructureBuilder;
 import frc.robot.utils.ReefScoringPos.ReefPole;
 import frc.robot.subsystems.superstructure.EndEffector;
 
@@ -107,20 +107,46 @@ public class RobotContainer {
 
                                                         
                                                               
-  public Log logCommand = new Log
-                              (
-                                "ShooterPositions.json", 
-                                new Logger("Wrist", ()->wrist.getPosition()), 
-                                new Logger("Arm", () -> arm.getPosition())
-                              );
+
   private final EnhancedXboxController driverController2 = new EnhancedXboxController(1).setSticksDeadzone(Constants.Controllers.STICK_DEADZONE); 
   public SendableChooser<Command> chooser;
+
+
+  public double dist = 0;
   public double armSupplier = -92d;
-  public double wristSupplier = 120d;
 
+  public double interpolate(Map<Double, Double> ogMap, double x) {
+    
+    HashMap<Double, Double> map = new HashMap<Double,Double>(ogMap);
+    if (map == null || map.isEmpty()) return 0;
 
-  
-  
+    
+    List<Double> keys = new ArrayList<>(map.keySet());
+    Collections.sort(keys);
+
+    if (x <= keys.get(0)) return map.get(keys.get(0));
+    if (x >= keys.get(keys.size() - 1)) return map.get(keys.get(keys.size() - 1));
+
+    double lowerKey = keys.get(0);
+    double upperKey = keys.get(keys.size() - 1);
+
+    for (int i = 0; i < keys.size() - 1; i++) {
+        double k1 = keys.get(i);
+        double k2 = keys.get(i + 1);
+
+        if (x >= k1 && x <= k2) {
+            lowerKey = k1;
+            upperKey = k2;
+            break;
+        }
+    }
+
+    double y1 = map.get(lowerKey);
+    double y2 = map.get(upperKey);
+
+    return y1 + (x - lowerKey) * ( (y2 - y1) / (upperKey - lowerKey) );
+}
+
   public RobotContainer() 
   {
     // Enum<?> state = ArmState.Intaking;
@@ -134,7 +160,16 @@ public class RobotContainer {
     wrist.setFeedforwardEnabled(false);
     
     s.addActionableConstraint(new ActionableConstraint<SuperStructureStates>(SuperStructureStates.Intaking,SuperStructureStates.Score, () -> !s.getSensor("Intake").getSensorStatus()));
-
+    s.addUpdateEvent(
+    () -> 
+    {
+    double d = camLeft.getLimelight().getPoseEstimate(PoseEstimateWithLatencyType.BOT_POSE_MT2_BLUE).getRaw()[9];
+    if(d > 0)
+    {
+      dist = d;
+    }
+    armSupplier = interpolate(Constants.EndEffector.distanceAndArm, dist);
+    });
     // elevator.shuffleboard("Elevator");
 
     // //NEEED TOO DEPLOY 
@@ -185,7 +220,6 @@ public class RobotContainer {
 
     chooser = Autos.AUTOS.createChooser(AUTOS.Left);
     SmartDashboard.putData(chooser);
-    SmartDashboard.putData("Logger",logCommand);
   }
 
   // public boolean isIntaking()
@@ -196,7 +230,7 @@ public class RobotContainer {
   private void configureBindings() 
   {
     s.getSensor("Intake").getTrigger().onTrue(() -> s.setGoalState(SuperStructureStates.Home));
-    driverController.b.onTrue(new Aim(camLeft, s));
+    driverController.b.onTrue(() -> s.setGoalState(SuperStructureStates.Aim));
     driverController.a.onTrue(() -> s.setGoalState(SuperStructureStates.Home));
   
 

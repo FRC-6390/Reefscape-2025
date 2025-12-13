@@ -2,7 +2,7 @@
 // Open Source Software; you can modify and/or share it under the terms of
 // the WPILib BSD license file in the root directory of this project.
 
-package frc.robot.subsystems.Experimental;
+package frc.robot.utils.Experimental;
 
 import java.util.List;
 import frc.robot.Constants.EndEffector.WristState;
@@ -14,7 +14,7 @@ public enum SuperStructureStates
     {
 
         Intaking(WristState.Intaking, ArmState.Intaking, RollerState.Running),
-        Dynamic(WristState.Dynamic, ArmState.Dynamic, RollerState.Stopped),
+        Aim(WristState.Aim, ArmState.Aim, RollerState.Stopped),
 
         Score(RollerState.Running),
 

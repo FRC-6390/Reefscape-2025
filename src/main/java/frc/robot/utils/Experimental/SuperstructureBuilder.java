@@ -1,4 +1,4 @@
-package frc.robot.subsystems.Experimental;
+package frc.robot.utils.Experimental;
 
 import java.util.*;
 
@@ -17,6 +17,7 @@ public class SuperstructureBuilder {
     private final List<Constraint<?>> constraints = new ArrayList<>();
     private final List<ActionableConstraint<?>> actionableConstraints = new ArrayList<>();
     private final List<DigitalSensor> sensors = new ArrayList<>();
+    private final List<Runnable> updateEvents = new ArrayList<>();
 
 
 
@@ -57,6 +58,11 @@ public class SuperstructureBuilder {
         return this;
     }
 
+     public SuperstructureBuilder addUpdateEvent(Runnable runnable) {
+        updateEvents.add(runnable);
+        return this;
+    }
+
 
     public SuperStructureTest<SuperStructureStates> build() {
         // Replace nulls with empty lists if necessary
@@ -66,6 +72,7 @@ public class SuperstructureBuilder {
                 motors.isEmpty() ? Collections.emptyList() : motors,
                 constraints.isEmpty() ? new ArrayList<>(Collections.emptyList()) :  new ArrayList<>(constraints),
                 actionableConstraints.isEmpty() ? new ArrayList<>(Collections.emptyList()) :  new ArrayList<>(actionableConstraints),
+                updateEvents.isEmpty() ? new ArrayList<>(Collections.emptyList()) : new ArrayList<>(updateEvents),
                 sensors.isEmpty() ? Collections.emptyList() : sensors
 
         );

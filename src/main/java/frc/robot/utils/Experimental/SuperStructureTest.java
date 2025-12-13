@@ -2,7 +2,7 @@
 // Open Source Software; you can modify and/or share it under the terms of
 // the WPILib BSD license file in the root directory of this project.
 
-package frc.robot.subsystems.Experimental;
+package frc.robot.utils.Experimental;
 
 import java.util.List;
 
@@ -32,9 +32,13 @@ public class SuperStructureTest<E extends Enum<E>> {
     private final List<StatefulElevatorMechanism<?>> elevators;
     private final List<StatefulMechanism<?>> motors;
 
+
     private ArrayList<Constraint<SuperStructureStates>> constraints;
     private ArrayList<ActionableConstraint<SuperStructureStates>> actionableConstraints;
+    private ArrayList<Runnable> updateEvents;
+
     private final List<DigitalSensor> sensors;
+    
 
     private SuperStructureStates currentState = SuperStructureStates.Home;
     private SuperStructureStates prevStates = SuperStructureStates.Home;
@@ -44,9 +48,10 @@ public class SuperStructureTest<E extends Enum<E>> {
         List<StatefulArmMechanism<?>> arms,
         List<StatefulElevatorMechanism<?>> elevators,
         List<StatefulMechanism<?>> motors,
-
+        ArrayList<Runnable> updateEvents,
         ArrayList<Constraint<SuperStructureStates>> constraints,
         ArrayList<ActionableConstraint<SuperStructureStates>> actionableConstraints,
+
         List<DigitalSensor> sensors
 
 
@@ -55,6 +60,7 @@ public class SuperStructureTest<E extends Enum<E>> {
         this.elevators = elevators;
         this.motors = motors;
         this.constraints = constraints;
+        this.updateEvents = updateEvents;
         this.actionableConstraints = actionableConstraints;
         this.sensors = sensors;
     }
@@ -110,6 +116,11 @@ public class SuperStructureTest<E extends Enum<E>> {
     public void addActionableConstraint(ActionableConstraint<SuperStructureStates> constraint)
     {
         actionableConstraints.add(constraint);
+    }
+
+    public void addUpdateEvent(Runnable runnable)
+    {
+        updateEvents.add(runnable);
     }
 
     public DigitalSensor getSensor(String name)

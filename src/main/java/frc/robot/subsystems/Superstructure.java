@@ -326,6 +326,7 @@ public class Superstructure extends SubsystemBase {
       }
     }
 
+    
     // if(endEffector.isAutoEndScoring() && endEffector.isScoring() && !endEffector.hasGamePiece()) {
     //   stateMachine.queueState(SuperstructureState.Home);
     // }

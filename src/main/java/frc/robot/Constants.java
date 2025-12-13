@@ -1,6 +1,8 @@
 package frc.robot;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.function.DoubleSupplier;
 
 import org.photonvision.PhotonPoseEstimator.PoseStrategy;
@@ -81,7 +83,9 @@ public interface Constants {
                                                                       .setVision(CAMERAS);
 
         
-    }
+    
+    
+                                                                    }
 
     public interface Controllers {
         double STICK_DEADZONE = 0.15;      
@@ -169,6 +173,13 @@ public interface Constants {
 
         int CANDLE_ID = 22;
 
+        Map<Double, Double> distanceAndArm = new HashMap<Double, Double>() 
+        {{
+        put(1.85d, -72d);
+        put(2.73d, -40d);
+        put(3.64d, -15d);
+        }};
+
         enum ArmState implements SetpointProvider<Double>{
             Intaking(() -> 0), //150.38085937
             AlgaeHigh(() -> -113.466), //52.8
@@ -179,7 +190,7 @@ public interface Constants {
             TransitionState(() -> -85), //65
             ScoringL4(() -> -80), //60
             AlgaeScore(() -> -30), //120.58
-            Dynamic(() -> Robot.m_robotContainer.armSupplier),
+            Aim(() -> Robot.m_robotContainer.armSupplier),
             Scoringl1(() -> -84); //66.08
 
 
@@ -206,7 +217,7 @@ public interface Constants {
                 ScoringL4(() -> 91), //80
                 TransitionState(() -> 62),
                 AlgaeScore(() -> 168.92),
-                Dynamic(() -> 55),
+                Aim(() -> 55),
 
 
                 StartConfiguration(() -> 0),
