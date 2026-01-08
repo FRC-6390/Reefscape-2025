@@ -43,6 +43,7 @@ import frc.robot.Constants.Elevator.S;
 import frc.robot.Constants.EndEffector.ArmState;
 import frc.robot.Constants.EndEffector.WristState;
 import frc.robot.Constants.EndEffector.RollerState;
+import frc.robot.utils.Interpolator;
 import frc.robot.utils.Align.AlignCamera;
 import frc.robot.utils.Align.AutoAling;
 import frc.robot.utils.Align.GeneralAlign;
@@ -59,7 +60,7 @@ public class RobotContainer {
  
   public AlignCamera camLeft = new AlignCamera(robotBase.getVision().getLimelight("limelight-left"), -Units.inchesToMeters(0.5), -Units.inchesToMeters(9.25), 15, 0);
   public AlignCamera camRight = new AlignCamera(robotBase.getVision().getLimelight("limelight-right"), -Units.inchesToMeters(0.5), Units.inchesToMeters(9.25), -15, 0);
-
+  
   public final StatefulArmMechanism<ArmState> arm = Constants.EndEffector.ARM_CONFIG.build().shuffleboard("Arm", SendableLevel.DEBUG);
   public final StatefulArmMechanism<WristState> wrist = Constants.EndEffector.WRIST_CONFIG.build().shuffleboard("Wrist", SendableLevel.DEBUG);
   public final StatefulMechanism<RollerState> rollers = Constants.EndEffector.CORAL_ROLLERS.build().shuffleboard("Rollers", SendableLevel.COMP);
@@ -84,37 +85,7 @@ public class RobotContainer {
   public double dist = 0;
   public double armSupplier = -92d;
 
-  public double interpolate(Map<Double, Double> ogMap, double x) {
-    
-    HashMap<Double, Double> map = new HashMap<Double,Double>(ogMap);
-    if (map == null || map.isEmpty()) return 0;
-
-    
-    List<Double> keys = new ArrayList<>(map.keySet());
-    Collections.sort(keys);
-
-    if (x <= keys.get(0)) return map.get(keys.get(0));
-    if (x >= keys.get(keys.size() - 1)) return map.get(keys.get(keys.size() - 1));
-
-    double lowerKey = keys.get(0);
-    double upperKey = keys.get(keys.size() - 1);
-
-    for (int i = 0; i < keys.size() - 1; i++) {
-        double k1 = keys.get(i);
-        double k2 = keys.get(i + 1);
-
-        if (x >= k1 && x <= k2) {
-            lowerKey = k1;
-            upperKey = k2;
-            break;
-        }
-    }
-
-    double y1 = map.get(lowerKey);
-    double y2 = map.get(upperKey);
-
-    return y1 + (x - lowerKey) * ( (y2 - y1) / (upperKey - lowerKey) );
-}
+  
 
   public RobotContainer() 
   {
@@ -135,7 +106,7 @@ public class RobotContainer {
         {
           dist = d;
         }
-        armSupplier = interpolate(Constants.EndEffector.distanceAndArm, dist);
+        armSupplier = Interpolator.interpolate(Constants.EndEffector.distanceAndArm, dist);
       }
     );
 
@@ -172,6 +143,16 @@ public class RobotContainer {
     driverController.leftTrigger.tiggerAt(0.5).onTrue(() -> s.setGoalState(SuperStructureStates.Aim));
     driverController.leftTrigger.tiggerAt(0.5).onFalse(() -> s.setGoalState(SuperStructureStates.Home));
     driverController.rightTrigger.tiggerAt(0.5).onTrue(() -> s.setGoalState(SuperStructureStates.Score));
+
+     PIDController rController = new PIDController(0.11, 0, 0);
+
+
+     HolonomicDriveController controller = new HolonomicDriveController(
+                                                          new PIDController(1, 0, 0), 
+                                                          new PIDController(1, 0, 0),
+                                                          new ProfiledPIDController(0, 0, 0, new Constraints(0, 0)));
+
+    driverController.leftBumper.whileTrue(new AutoAling(new GeneralAlign(robotBase, rController, controller, null, null, camLeft, camRight)));
     
     driverController.a.onTrue(() -> s.setGoalState(SuperStructureStates.Home));
   

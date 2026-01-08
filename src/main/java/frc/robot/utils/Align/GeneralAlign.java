@@ -77,25 +77,49 @@ public class GeneralAlign {
 
         // tab.add("Rotation Controller Auto Align", rController);
        
-        Pose2d general = new Pose2d(convertToTagRelativePose(generalPosition), generalPosition.getRotation());
-        Pose2d scoring = new Pose2d(convertToTagRelativePose(scoringPose), scoringPose.getRotation());
+        Pose2d general = convertToFieldRelativePose(generalPosition);
+        Pose2d scoring = convertToFieldRelativePose(scoringPose);
 
 
-        tab.addNumber("X Distancceee", () -> Units.metersToInches(getAveragePositions().getX()));
-        tab.addNumber("Y Distancceee", () -> Units.metersToInches(getAveragePositions().getY()));
-        
-        tab.addNumber("X FIELD  Distancceee", () -> Units.metersToInches(base.getLocalization().getRelativePose().getX()));
-        tab.addNumber("Y FIELD Distancceee", () -> Units.metersToInches(base.getLocalization().getRelativePose().getY()));
+        tab.addNumber("X Field", () -> Units.metersToInches(getPose2d(limelights).getX()));
+        tab.addNumber("Y Field", () -> Units.metersToInches(getPose2d(limelights).getY()));
 
-        tab.addNumber("Scoring X FIELD  Distancceee", () -> Units.metersToInches(general.getX()));
-        tab.addNumber("Scoring Y FIELD Distancceee", () -> Units.metersToInches(general.getY()));
-        
-        tab.addNumber("General X FIELD  Distancceee", () -> Units.metersToInches(scoring.getX()));
-        tab.addNumber("General Y FIELD Distancceee", () -> Units.metersToInches(scoring.getY()));
+        tab.addNumber("X Tag", () -> Units.metersToInches(convertToTagRelativePose(getPose2d(limelights)).getX()));
+        tab.addNumber("Y Tag", () -> Units.metersToInches(convertToTagRelativePose(getPose2d(limelights)).getY()));
+
+        tab.addNumber("X Scoring Tag", () -> Units.metersToInches(scoringPose.getX()));
+        tab.addNumber("Y Scoring Tag", () -> Units.metersToInches(scoringPose.getY()));
+
+        tab.addNumber("X Scoring Field", () -> Units.metersToInches(scoring.getX()));
+        tab.addNumber("Y Scoring Field", () -> Units.metersToInches(scoring.getY()));
         
     }
+
+    public Pose2d convertToFieldRelativePose(Pose2d tagRelativePose)
+    {
+        if(tagRelativePose != null)
+        {
+        return tagRelativePose.rotateBy(AprilTagMap.AprilTags.getRotation2d(tagId));
+        }
+        else
+        {
+        return new Pose2d();
+        }
+
+    }
+
+    public Pose2d convertToTagRelativePose(Pose2d field)
+    {
+        if(field != null)
+        {
+        return field.rotateBy(Rotation2d.fromDegrees(AprilTagMap.AprilTags.getRotation2d(tagId).getDegrees() * -1));
+        }
+        else
+        {
+        return new Pose2d();
+        }
+    }
     
-    //Chooses the tag that most limelights see
     public void setUp()
     {
         List<Integer> ids = new ArrayList<>();
@@ -114,10 +138,9 @@ public class GeneralAlign {
         tagId = findMostFrequent(ids);
         }
 
-        base.getLocalization().resetRelativePose(new Pose2d(0,0,Rotation2d.fromDegrees(base.getLocalization().getRelativePose().getRotation().getDegrees() - AprilTagMap.AprilTags.getRotation2d(tagId).getDegrees())));
+        // base.getLocalization().resetRelativePose(new Pose2d(0,0,Rotation2d.fromDegrees(base.getLocalization().getRelativePose().getRotation().getDegrees() - AprilTagMap.AprilTags.getRotation2d(tagId).getDegrees())));
     }
 
-    
 
     //Resets the autoalign
     public void reset()
@@ -129,69 +152,39 @@ public class GeneralAlign {
     //Set the localization relative pose of the robot
     public void updateBotpose()
     {
-        Translation2d t = convertToTagRelativePose(getAveragePositions());
+        Pose2d t = getPose2d(limelights);
         base.getLocalization().resetRelativePose(t.getX(), t.getY());
     }
-   
-   //Converts tag relative position to field relative position
-   public Translation2d convertToTagRelativePose(Pose2d robotRelativePose) 
+
+    public Pose2d getPose2d(AlignCamera... cams)
    {
-    double hyp = Math.pow(robotRelativePose.getX(), 2) + Math.pow(robotRelativePose.getY(), 2);
-    hyp = Math.sqrt(hyp);
-    double angle = Math.atan(robotRelativePose.getY() / robotRelativePose.getX());
-    double fullRotation = AprilTagMap.AprilTags.getRotation2d((long)tagId).getDegrees() - base.getLocalization().getRelativePose().getRotation().getDegrees();
-    double finAngle = fullRotation - angle;
-    
-    double x1 = (Math.cos(Math.toRadians(finAngle)));
-    double y1 = (Math.sin(Math.toRadians(finAngle)));
+    double count = cams.length;
+    double totalX = 0;
+    double totalY = 0;
 
-    
-    return new Translation2d(x1, y1);
-    }
-
-   //Gets tag relative translation
-   //Tag rotation - Robot gyro rotation = full rotation
-   //Full rotation - cam offset - cam tx = angle between straigth
-   public Translation2d getRobotRelativeTranslation(AlignCamera cam)
-   {
-    LimeLight limeLight = cam.getLimelight();
-    double straigtLineDistToTag = limeLight.getPoseEstimate(PoseEstimateWithLatencyType.BOT_POSE_MT2_BLUE).getRaw()[9];
-    double angleTX =  limeLight.getTargetHorizontalOffset();
-    double angleTY =  limeLight.getTargetVerticalOffset();
-    // double planeStraightDist = (Math.cos(Math.toRadians(angleTY)) * straigtLineDistToTag);
-
-    double x1 = (Math.cos(Math.toRadians(angleTX + cam.getYaw())) * straigtLineDistToTag);
-    double y1 = (Math.sin(Math.toRadians(angleTX + cam.getYaw())) * straigtLineDistToTag);
-
-    return new Translation2d(x1 + cam.getXOffset(), y1 + cam.getYOffset());
-   }
-
-    //Averages all the positions calculated by each limelight
-    public Pose2d getAveragePositions()
+    for (AlignCamera alignCamera : cams) 
     {
-    double x = 0;
-    double y = 0;
-    double count = 0;
-
-    for (AlignCamera cam : limelights) 
-    {  
-    LimeLight limeLight = cam.getLimelight(); 
-    System.out.println(limeLight.config.getTable());
-    if(limeLight.getAprilTagID() == tagId)
-        {
-            x += getRobotRelativeTranslation(cam).getX();
-            y += getRobotRelativeTranslation(cam).getY();
-            count += 1;
-        }
+      if(alignCamera.getLimelight().getAprilTagID() == tagId)
+      {
+        LimeLight camera = base.getVision().getLimelight("limelight-left");
+        double dist = camera.getPoseEstimate(PoseEstimateWithLatencyType.BOT_POSE_MT2_BLUE).getRaw()[9];
+        double angle =  camera.getTargetHorizontalOffset() -base.getLocalization().getRelativePose().getRotation().getDegrees() ;
+        double x = (Math.cos(Math.toRadians(angle + alignCamera.getYaw())) * dist) - Units.inchesToMeters(0.5);
+        double y = (Math.sin(Math.toRadians(angle + alignCamera.getYaw())) * dist)- Units.inchesToMeters(9.25);
+        totalX += x;
+        totalY += y;
+        count++;
+      }  
     }
 
-    x = x/count;
-    y = y/count;
+    double x = totalX / count;
+    double y = totalY / count;
+
+    Pose2d pose = new Pose2d(-x,y,base.getLocalization().getRelativePose().getRotation());
     
-    Pose2d pose = new Pose2d(-x,y, base.getLocalization().getRelativePose().getRotation());
     return pose;
-    }
-
+   }
+   
     public void setGeneralPosition(Pose2d pose)
     {
         generalPosition = pose;
@@ -205,9 +198,10 @@ public class GeneralAlign {
     //Calculating the speed to the robot
     public ChassisSpeeds calculateSpeeds()
     {
+    Pose2d general = convertToFieldRelativePose(generalPosition);
+    Pose2d scoring = convertToFieldRelativePose(scoringPose);
     boolean preciseMode = (base.getLocalization().getRelativePose().getTranslation().getDistance(generalPosition.getTranslation()) > 0.075 && !reached);
-    Pose2d general = generalPosition;
-    Pose2d scoring = scoringPose;
+    
 
     double rSpeed = rController.calculate(base.getLocalization().getRelativePose().getRotation().getDegrees(), preciseMode ? general.getRotation().getDegrees() : scoring.getRotation().getDegrees());
     double xSpeed = controller.getXController().calculate(base.getLocalization().getRelativePose().getX(), preciseMode ? general.getX() : scoring.getX());

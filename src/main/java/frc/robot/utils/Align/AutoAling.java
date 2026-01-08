@@ -13,20 +13,17 @@ public class AutoAling extends Command {
   public GeneralAlign align;
   public RobotBase<?> base;
   public Pose2d goalPose2d;
-  public boolean rightPole;
   public Pose2d finalPose2d;
-  public AutoAling(GeneralAlign align, RobotBase<?> base, boolean rightPole) {
+  public AutoAling(GeneralAlign align) {
     this.align = align;
-    this.base = base;
-    this.rightPole = rightPole;
+    this.base = align.base;
   }
 
   @Override
   public void initialize() 
   {
     align.reset();
-        align.shuffleboard();
-
+    align.shuffleboard();
   }
 
   @Override
@@ -38,14 +35,13 @@ public class AutoAling extends Command {
 
     if(camera_left.hasValidTarget() && (int)camera_left.getAprilTagID() == align.getTagId())
       {      
-        goalPose2d = new Pose2d(Units.inchesToMeters(40), rightPole ? Units.inchesToMeters(0) : Units.inchesToMeters(0),new Rotation2d());
-        finalPose2d = new Pose2d(Units.inchesToMeters(10), rightPole ? Units.inchesToMeters(6) : Units.inchesToMeters(-6),new Rotation2d());  
+        goalPose2d = new Pose2d(Units.inchesToMeters(40), Units.inchesToMeters(0),new Rotation2d());
+        finalPose2d = new Pose2d(Units.inchesToMeters(20), Units.inchesToMeters(0),new Rotation2d());  
       }
-
     if(camera_right.hasValidTarget() && (int)camera_right.getAprilTagID() == align.getTagId())
       {    
-        goalPose2d = new Pose2d(Units.inchesToMeters(40), rightPole ? Units.inchesToMeters(0) : Units.inchesToMeters(0),new Rotation2d());
-        finalPose2d = new Pose2d(Units.inchesToMeters(10), rightPole ? Units.inchesToMeters(6) : Units.inchesToMeters(-6),new Rotation2d());     
+        goalPose2d = new Pose2d(Units.inchesToMeters(40), Units.inchesToMeters(0),new Rotation2d());
+        finalPose2d = new Pose2d(Units.inchesToMeters(20), Units.inchesToMeters(0),new Rotation2d());     
       }
 
     align.setGeneralPosition(goalPose2d);

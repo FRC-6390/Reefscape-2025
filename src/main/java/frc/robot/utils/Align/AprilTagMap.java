@@ -21,7 +21,7 @@ public class AprilTagMap {
 
         NONE(-1, -1, Rotation2d.fromDegrees(0)),
 
-        A(-1, -1, Rotation2d.fromDegrees(0)),
+        A(1, 1, Rotation2d.fromDegrees(60)),
 
         C(-1, -1, Rotation2d.fromDegrees(0)),
 
