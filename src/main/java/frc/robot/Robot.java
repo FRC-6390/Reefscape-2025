@@ -4,18 +4,13 @@
 
 package frc.robot;
 
-import com.pathplanner.lib.auto.NamedCommands;
-
-import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.wpilibj.PowerDistribution;
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.PowerDistribution.ModuleType;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
-import frc.robot.commands.auto.BasicAlign;
-import frc.robot.subsystems.Superstructure.SuperstructureState;
-import frc.robot.utils.ReefScoringPos;
+
+
 
 public class Robot extends TimedRobot {
   private Command m_autonomousCommand;
@@ -29,18 +24,12 @@ public class Robot extends TimedRobot {
   @Override
   public void robotPeriodic() {
     CommandScheduler.getInstance().run();
-      Pose2d relativePose = m_robotContainer.robotBase.getLocalization().getRelativePose();
-    SmartDashboard.putNumber("Skew", m_robotContainer.robotBase.getVision().getLimelight("limelight-right").getTargetSkew());
-    if(m_robotContainer.lasLeft.getMeasurement() != null) SmartDashboard.putNumber("Las Left",m_robotContainer.lasLeft.getMeasurement().distance_mm);
-    if(m_robotContainer.lasRight.getMeasurement() != null) SmartDashboard.putNumber("Las Right",m_robotContainer.lasRight.getMeasurement().distance_mm);
-
   }
 
   @Override
   public void robotInit() 
   {
     pdh.clearStickyFaults();
-    // CanBridge.runTCP();
   }
 
   @Override
