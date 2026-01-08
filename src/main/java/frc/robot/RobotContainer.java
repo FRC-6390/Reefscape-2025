@@ -27,7 +27,7 @@ public class RobotContainer {
 
   private final EnhancedXboxController driverController = new EnhancedXboxController(0)
                                                               .setLeftInverted(true)
-                                                              .setRightInverted(true)
+                                                              .setRightInverted(false)
                                                               .setSticksDeadzone(Constants.Controllers.STICK_DEADZONE)
                                                               .setLeftSlewrate(2);
 
@@ -53,6 +53,7 @@ NamedCommands.registerCommand("Weewoo", new InstantCommand( () -> System.out.pri
      chooser = RobotAuto.getSendableChooser("Better auto");
     
     SmartDashboard.putData(chooser);
+    robotBase.getDrivetrain().setDefaultCommand(robotBase.getDrivetrain().getDriveCommand(driverController.leftX, driverController.leftY, driverController.rightX));
 
     
   }

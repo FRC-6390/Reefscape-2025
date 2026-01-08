@@ -22,14 +22,18 @@ public interface Constants {
         
         SwerveDrivetrainConfig DRIVETRAIN_CONFIG = SwerveDrivetrainConfig.standard(TRACKWIDTH_METERS)
                                                                         .modules(
-                                                                            SwerveVendorSDS.MK4i.L3.config(Motor.KRAKEN_X60, EncoderType.CTRECANcoder).setP(0.5),
-                                                                            SwerveVendorSDS.MK4i.L3.config(Motor.KRAKEN_X60, EncoderType.CTRECANcoder).setP(0.5),
-                                                                            SwerveVendorSDS.MK4i.L3.config(Motor.KRAKEN_X60, EncoderType.CTRECANcoder).setP(0.5),
-                                                                            SwerveVendorSDS.MK4i.L3.config(Motor.KRAKEN_X60, EncoderType.CTRECANcoder).setP(0.5)
+                                                                            SwerveVendorSDS.MK4i.L3.config(Motor.KRAKEN_X60, Motor.FALCON_500, EncoderType.CTRECANcoder).setP(0.5),
+                                                                            SwerveVendorSDS.MK4i.L3.config(Motor.KRAKEN_X60, Motor.FALCON_500, EncoderType.CTRECANcoder).setP(0.5),
+                                                                            SwerveVendorSDS.MK4i.L3.config(Motor.KRAKEN_X60, Motor.FALCON_500, EncoderType.CTRECANcoder).setP(0.5),
+                                                                            SwerveVendorSDS.MK4i.L3.config(Motor.KRAKEN_X60, Motor.FALCON_500, EncoderType.CTRECANcoder).setP(0.5)
                                                                         )
                                                                         .setIMU(IMUType.CTREPigeon2, false)
                                                                         .setCanbus(CANIVORE_CANBUS)
-                                                                        .setEncoderOffset(0.86572265625+0.5,0.1965332031+0.5,0.667724609375+0.5,0.883544921875+0.5);
+                                                                        .setEncoderOffset(0.859375,0.20751953124999997,0.6708984375,0.88720703125);
+
+                                                                        // .setEncoderOffset(0.36669,0.20385,0.182,0.87255);
+
+                                                                        // .setEncoderOffset(0.86572265625+0.5,0.1965332031+0.5,0.667724609375+0.5,0.883544921875+0.5);
         RobotLocalizationConfig LOCALIZATION_CONFIG = RobotLocalizationConfig.defualt().setAutoPlannerPID(7, 0, 0, 2, 0,
                 0);
         
