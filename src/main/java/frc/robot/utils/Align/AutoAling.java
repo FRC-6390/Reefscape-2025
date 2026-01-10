@@ -10,11 +10,9 @@ import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj2.command.Command;
 
 public class AutoAling extends Command {
-  public GeneralAlign align;
+  public AlignHelper align;
   public RobotBase<?> base;
-  public Pose2d goalPose2d = new Pose2d();
-  public Pose2d finalPose2d = new Pose2d();
-  public AutoAling(GeneralAlign align) {
+  public AutoAling(AlignHelper align) {
     this.align = align;
     this.base = align.base;
   }
@@ -22,7 +20,7 @@ public class AutoAling extends Command {
   @Override
   public void initialize() 
   {
-    align.reset();
+    align.init();
   }
 
   @Override
@@ -33,21 +31,8 @@ public class AutoAling extends Command {
     LimeLight camera_right = base.getVision().getLimelight("limelight-right");
     
 
-    if(camera_left.hasValidTarget() && (int)camera_left.getAprilTagID() == align.getTagId())
-      {      
-        goalPose2d = new Pose2d(Units.inchesToMeters(40), Units.inchesToMeters(0),new Rotation2d());
-        finalPose2d = new Pose2d(Units.inchesToMeters(20), Units.inchesToMeters(0),new Rotation2d());  
-      }
-    if(camera_right.hasValidTarget() && (int)camera_right.getAprilTagID() == align.getTagId())
-      {    
-        goalPose2d = new Pose2d(Units.inchesToMeters(40), Units.inchesToMeters(0),new Rotation2d());
-        finalPose2d = new Pose2d(Units.inchesToMeters(20), Units.inchesToMeters(0),new Rotation2d());     
-      }
-
-    align.setUp();
-    align.setGeneralPosition(goalPose2d);
-    align.setScoringPos(finalPose2d);
-    align.updateBotpose();
+    align.setId();
+    align.setRelativePose();
     base.getRobotSpeeds().setSpeeds("feedback", align.calculateSpeeds()); 
   }
 

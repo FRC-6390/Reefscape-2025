@@ -48,8 +48,7 @@ import frc.robot.Constants.EndEffector.RollerState;
 import frc.robot.utils.Interpolator;
 import frc.robot.utils.Align.AlignCamera;
 import frc.robot.utils.Align.AutoAling;
-import frc.robot.utils.Align.GeneralAlign;
-import frc.robot.utils.Align.V2;
+import frc.robot.utils.Align.AlignHelper;
 import frc.robot.utils.Experimental.ActionableConstraint;
 import frc.robot.utils.Experimental.Constraint;
 import frc.robot.utils.Experimental.DigitalSensor;
@@ -82,7 +81,6 @@ public class RobotContainer {
                                                           new PIDController(1, 0, 0),
                                                           new ProfiledPIDController(0, 0, 0, new Constraints(0, 0)));
 
-  public GeneralAlign align = new GeneralAlign(robotBase, rController, controller, new Pose2d(), new Pose2d(), camLeft, camRight);
 
   
   private final EnhancedXboxController driverController = new EnhancedXboxController(0)
@@ -159,7 +157,16 @@ public class RobotContainer {
     driverController.leftTrigger.tiggerAt(0.5).onFalse(() -> s.setGoalState(SuperStructureStates.Home));
     driverController.rightTrigger.tiggerAt(0.5).onTrue(() -> s.setGoalState(SuperStructureStates.Score));
 
-    driverController.leftBumper.whileTrue(new V2(robotBase, camLeft, camRight, false));
+    driverController.leftBumper.whileTrue(
+      new AutoAling(new AlignHelper(
+        robotBase, 
+        rController, 
+        controller, 
+        new Pose2d(Units.inchesToMeters(40), Units.inchesToMeters(0), new Rotation2d()), 
+        new Pose2d(Units.inchesToMeters(20), Units.inchesToMeters(0), new Rotation2d()), 
+        camLeft, camRight
+      )
+    ));
     
     driverController.a.onTrue(() -> s.setGoalState(SuperStructureStates.Home));
   
