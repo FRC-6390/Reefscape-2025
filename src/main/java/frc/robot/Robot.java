@@ -86,6 +86,8 @@ public class Robot extends TimedRobot {
 
   @Override
   public void teleopInit() {
+        // m_robotContainer.align.shuffleboard();
+
     m_robotContainer.robotBase.resetPIDs();
 m_robotContainer.robotBase.getLocalization().resetFieldPose(0, 0, 0);
     m_robotContainer.robotBase.getDrivetrain().getRobotSpeeds().stopSpeeds("auto");
@@ -97,7 +99,9 @@ m_robotContainer.robotBase.getLocalization().resetFieldPose(0, 0, 0);
   @Override
   public void teleopPeriodic() 
   {
-    
+    SmartDashboard.putNumber("F X", Units.metersToInches(m_robotContainer.robotBase.getLocalization().getRelativePose().getX()));
+      SmartDashboard.putNumber("F Y", Units.metersToInches(m_robotContainer.robotBase.getLocalization().getRelativePose().getY()));
+
   }
 
   @Override

@@ -12,8 +12,8 @@ import edu.wpi.first.wpilibj2.command.Command;
 public class AutoAling extends Command {
   public GeneralAlign align;
   public RobotBase<?> base;
-  public Pose2d goalPose2d;
-  public Pose2d finalPose2d;
+  public Pose2d goalPose2d = new Pose2d();
+  public Pose2d finalPose2d = new Pose2d();
   public AutoAling(GeneralAlign align) {
     this.align = align;
     this.base = align.base;
@@ -23,15 +23,15 @@ public class AutoAling extends Command {
   public void initialize() 
   {
     align.reset();
-    align.shuffleboard();
   }
 
   @Override
   public void execute() 
   {
-    align.setUp();
+
     LimeLight camera_left = base.getVision().getLimelight("limelight-left");
     LimeLight camera_right = base.getVision().getLimelight("limelight-right");
+    
 
     if(camera_left.hasValidTarget() && (int)camera_left.getAprilTagID() == align.getTagId())
       {      
@@ -44,6 +44,7 @@ public class AutoAling extends Command {
         finalPose2d = new Pose2d(Units.inchesToMeters(20), Units.inchesToMeters(0),new Rotation2d());     
       }
 
+    align.setUp();
     align.setGeneralPosition(goalPose2d);
     align.setScoringPos(finalPose2d);
     align.updateBotpose();

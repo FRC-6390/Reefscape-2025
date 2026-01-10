@@ -28,8 +28,8 @@ public class GeneralAlign {
     public boolean reached;
     public RobotBase<?> base;
     public AlignCamera[] limelights;
-    public Pose2d generalPosition;
-    public Pose2d scoringPose;
+    public Pose2d generalPosition = new Pose2d();
+    public Pose2d scoringPose = new Pose2d();
     public ShuffleboardTab tab;
 
     public GeneralAlign(RobotBase<?> base,PIDController rController, HolonomicDriveController controller, Pose2d generalPosition, Pose2d scoringPose2d, AlignCamera... limelights)
@@ -38,8 +38,8 @@ public class GeneralAlign {
         this.limelights = limelights;
         this.rController = rController;
         this.controller = controller;
-        this.generalPosition = generalPosition;
-        this.scoringPose = scoringPose2d;
+        // this.generalPosition = generalPosition;
+        // this.scoringPose = scoringPose2d;
         tab = Shuffleboard.getTab("Auto Align");
     }
 
@@ -133,7 +133,7 @@ public class GeneralAlign {
             }
         }
         
-        if(tagId == -1)
+        if(tagId == -1 && !ids.isEmpty())
         {
         tagId = findMostFrequent(ids);
         }

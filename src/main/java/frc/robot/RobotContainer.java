@@ -12,6 +12,8 @@ import java.util.Map;
 import java.util.function.BooleanSupplier;
 import java.util.function.DoubleSupplier;
 
+import javax.sound.midi.SysexMessage;
+
 import com.pathplanner.lib.auto.NamedCommands;
 import com.pathplanner.lib.commands.PathPlannerAuto;
 
@@ -47,6 +49,7 @@ import frc.robot.utils.Interpolator;
 import frc.robot.utils.Align.AlignCamera;
 import frc.robot.utils.Align.AutoAling;
 import frc.robot.utils.Align.GeneralAlign;
+import frc.robot.utils.Align.V2;
 import frc.robot.utils.Experimental.ActionableConstraint;
 import frc.robot.utils.Experimental.Constraint;
 import frc.robot.utils.Experimental.DigitalSensor;
@@ -70,6 +73,17 @@ public class RobotContainer {
                                                             .addArms(arm, wrist).addMotors(rollers, algaeRollers)
                                                             .addSensors(new DigitalSensor("Intake", new DigitalInput(4), true))
                                                             .build();
+
+  public PIDController rController = new PIDController(0.11, 0, 0);
+
+
+  public HolonomicDriveController controller = new HolonomicDriveController(
+                                                          new PIDController(1, 0, 0), 
+                                                          new PIDController(1, 0, 0),
+                                                          new ProfiledPIDController(0, 0, 0, new Constraints(0, 0)));
+
+  public GeneralAlign align = new GeneralAlign(robotBase, rController, controller, new Pose2d(), new Pose2d(), camLeft, camRight);
+
   
   private final EnhancedXboxController driverController = new EnhancedXboxController(0)
                                                               .setLeftInverted(true)
@@ -107,6 +121,7 @@ public class RobotContainer {
           dist = d;
         }
         armSupplier = Interpolator.interpolate(Constants.EndEffector.distanceAndArm, dist);
+        System.out.println(armSupplier);
       }
     );
 
@@ -144,15 +159,7 @@ public class RobotContainer {
     driverController.leftTrigger.tiggerAt(0.5).onFalse(() -> s.setGoalState(SuperStructureStates.Home));
     driverController.rightTrigger.tiggerAt(0.5).onTrue(() -> s.setGoalState(SuperStructureStates.Score));
 
-     PIDController rController = new PIDController(0.11, 0, 0);
-
-
-     HolonomicDriveController controller = new HolonomicDriveController(
-                                                          new PIDController(1, 0, 0), 
-                                                          new PIDController(1, 0, 0),
-                                                          new ProfiledPIDController(0, 0, 0, new Constraints(0, 0)));
-
-    driverController.leftBumper.whileTrue(new AutoAling(new GeneralAlign(robotBase, rController, controller, null, null, camLeft, camRight)));
+    driverController.leftBumper.whileTrue(new V2(robotBase, camLeft, camRight, false));
     
     driverController.a.onTrue(() -> s.setGoalState(SuperStructureStates.Home));
   

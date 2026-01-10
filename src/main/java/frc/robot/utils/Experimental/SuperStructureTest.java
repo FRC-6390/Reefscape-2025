@@ -234,6 +234,10 @@ public class SuperStructureTest<E extends Enum<E>> {
                 nextState = null;
             }
         }
+
+        for (Runnable runnable : updateEvents) {
+            runnable.run();
+        }
         arms.forEach(StatefulArmMechanism::update);
         elevators.forEach(StatefulElevatorMechanism::update);
         motors.forEach(StatefulMechanism::update);
