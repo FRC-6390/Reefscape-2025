@@ -1,10 +1,6 @@
 
 
-<<<<<<< Updated upstream
-package frc.robot.commands.auto;
-=======
 package frc.robot.utils.Align;
->>>>>>> Stashed changes
  
 import ca.frc6390.athena.controllers.DelayedOutput;
  import ca.frc6390.athena.core.RobotBase;
@@ -13,11 +9,8 @@ import ca.frc6390.athena.sensors.camera.limelight.LimeLight;
  import ca.frc6390.athena.sensors.camera.limelight.LimeLight.PoseEstimateType;
  import ca.frc6390.athena.sensors.camera.limelight.LimeLight.PoseEstimateWithLatencyType;
 
-<<<<<<< Updated upstream
-=======
 import static edu.wpi.first.units.Units.Rotation;
 
->>>>>>> Stashed changes
 import java.text.NumberFormat.Style;
 import java.util.List;
 import java.util.function.Supplier;
@@ -43,12 +36,6 @@ import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
  import edu.wpi.first.wpilibj2.command.Command;
-<<<<<<< Updated upstream
-import frc.robot.subsystems.Superstructure;
-import frc.robot.subsystems.Superstructure.SuperstructureState;
-import frc.robot.utils.ReefScoringPos.ReefPole;
-=======
->>>>>>> Stashed changes
 import edu.wpi.first.math.trajectory.Trajectory;
 import edu.wpi.first.math.trajectory.TrajectoryConfig;
  
@@ -57,12 +44,9 @@ import edu.wpi.first.math.trajectory.TrajectoryConfig;
 
   public LimeLight camera_left;
   public LimeLight camera_right;
-<<<<<<< Updated upstream
-=======
   public AlignCamera camLeft;
     public AlignCamera camRight;
 
->>>>>>> Stashed changes
   public Pose2d goalPose2d = new Pose2d(Units.inchesToMeters(25), Units.inchesToMeters(6.5),new Rotation2d());
 
   public RobotBase<?> base;
@@ -70,11 +54,6 @@ import edu.wpi.first.math.trajectory.TrajectoryConfig;
   public boolean rightPole = false;
   public double thetaMeasurement = 0;
   
-<<<<<<< Updated upstream
-  public Superstructure superstructure;
-  public Supplier<SuperstructureState> state;
-=======
->>>>>>> Stashed changes
   public int tagId = -1;
   public MedianFilter filter;
   public double targetMeasurement;
@@ -90,21 +69,12 @@ import edu.wpi.first.math.trajectory.TrajectoryConfig;
 
 
 
-<<<<<<< Updated upstream
-   public V2(RobotBase<?> base,String lltable, boolean rightPole, Superstructure superstructure, Supplier<SuperstructureState> state)
-   {
-    camera_right = base.getVision().getLimelight("limelight-right");
-    camera_left = base.getVision().getLimelight("limelight-left");
-    this.superstructure = superstructure;
-    this.state = state;
-=======
    public V2(RobotBase<?> base,AlignCamera camLeft, AlignCamera camRight, boolean rightPole)
    {
     camera_right = camRight.getLimelight();
     camera_left = camLeft.getLimelight();
     this.camLeft = camLeft;
     this.camRight = camRight;
->>>>>>> Stashed changes
     this.base = base;
     this.rightPole = rightPole; 
     tagId = -1;
@@ -151,22 +121,14 @@ import edu.wpi.first.math.trajectory.TrajectoryConfig;
 
     LimeLight camera_left = base.getVision().getLimelight("limelight-left");
     double dist1 = camera_left.getPoseEstimate(PoseEstimateWithLatencyType.BOT_POSE_MT2_BLUE).getRaw()[9];
-<<<<<<< Updated upstream
-    double angle1 =  camera_left.getTargetHorizontalOffset() -base.getLocalization().getRelativePose().getRotation().getDegrees() ;
-=======
     double angle1 =  camera_left.getTargetHorizontalOffset() - camLeft.getYaw() -base.getLocalization().getRelativePose().getRotation().getDegrees() ;
->>>>>>> Stashed changes
     double x1 = (Math.cos(Math.toRadians(angle1)) * dist1) - Units.inchesToMeters(0.5);
     double y1 = (Math.sin(Math.toRadians(angle1)) * dist1)- Units.inchesToMeters(9.25);; 
 
     
      LimeLight camera_right = base.getVision().getLimelight("limelight-right");
      double dist = camera_right.getPoseEstimate(PoseEstimateWithLatencyType.BOT_POSE_MT2_BLUE).getRaw()[9];
-<<<<<<< Updated upstream
-     double angle =  camera_right.getTargetHorizontalOffset() -base.getLocalization().getRelativePose().getRotation().getDegrees() ;
-=======
      double angle =  camera_right.getTargetHorizontalOffset() - camRight.getYaw() -base.getLocalization().getRelativePose().getRotation().getDegrees() ;
->>>>>>> Stashed changes
      double x2 = (Math.cos(Math.toRadians(angle)) * dist) - Units.inchesToMeters(0.5);
      double y2 = (Math.sin(Math.toRadians(angle)) * dist) + Units.inchesToMeters(9.25);
      double x = 0;
@@ -188,22 +150,6 @@ import edu.wpi.first.math.trajectory.TrajectoryConfig;
      }
 
      Pose2d pose = new Pose2d(-x,y,base.getLocalization().getRelativePose().getRotation());
-<<<<<<< Updated upstream
-     if(camera_right.hasValidTarget())
-     {
-      Pose2d pole = ReefPole.getPoleFromID(camera_right.getAprilTagID(), camera_right).getPose2d();
-      base.getLocalization().getField2dObject("flipped").setPose(new Pose2d(pose.getY()+pole.getX(), pose.getX()+pole.getY(), pose.getRotation().plus(pole.getRotation())));
-     base.getLocalization().getField2dObject("RobotPose").setPose(pose.relativeTo(ReefPole.getPoleFromID(camera_right.getAprilTagID(), camera_right).getPose2d()));
-     base.getLocalization().getField2dObject("Tag").setPose(ReefPole.getPoleFromID(camera_right.getAprilTagID(), camera_right).getPose2d());
-     }
-     else if(camera_right.hasValidTarget())
-     {
-      Pose2d pole = ReefPole.getPoleFromID(camera_right.getAprilTagID(), camera_right).getPose2d();
-      base.getLocalization().getField2dObject("flipped").setPose(new Pose2d(pose.getY()+pole.getX(), pose.getX()+pole.getY(), pose.getRotation().plus(pole.getRotation())));    
-      base.getLocalization().getField2dObject("RobotPose").setPose(pose.relativeTo(ReefPole.getPoleFromID(camera_right.getAprilTagID(), camera_right).getPose2d()));
-     base.getLocalization().getField2dObject("Tag").setPose(ReefPole.getPoleFromID(camera_right.getAprilTagID(), camera_right).getPose2d());
-     }
-=======
      
     SmartDashboard.putNumber("Field X", Units.metersToInches(pose.getX()));
     SmartDashboard.putNumber("Field Y", Units.metersToInches(pose.getY()));
@@ -222,7 +168,6 @@ import edu.wpi.first.math.trajectory.TrajectoryConfig;
 
 
 
->>>>>>> Stashed changes
      return pose;
    }
 
@@ -232,58 +177,10 @@ import edu.wpi.first.math.trajectory.TrajectoryConfig;
       return camera.hasValidTarget() && Math.abs(camera.getPoseEstimate(PoseEstimateWithLatencyType.BOT_POSE_MT2_BLUE).getRaw()[9]) <= 0.525 && Math.abs(camera.getTargetHorizontalOffset()) < 10;
     }
 
-<<<<<<< Updated upstream
-   public void GetController()
-   {
-    if(camera_left.hasValidTarget() && camera_right.hasValidTarget())
-    {
-    base.getLocalization().resetRelativePose(getPose2d());
-    }
-    if(camera_left.hasValidTarget())
-        {
-          tagId = (int)camera_left.getAprilTagID();
-        }
-        if(camera_right.hasValidTarget())
-        {
-          tagId = (int)camera_right.getAprilTagID();
-        }
-    if(camera_left.hasValidTarget() && (int)camera_left.getAprilTagID() == tagId)
-      {
-        ReefPole pole = ReefPole.getPoleFromID(camera_left.getAprilTagID(), rightPole ? camera_left : camera_right);
-        double x = pole.getScoringPos().getX();
-        double y = pole.getScoringPos().getY();
-        finalPose2d = new Pose2d(x, y,new Rotation2d());//.rotateAround(new Translation2d(0, 0), ReefPole.getPoleFromID(camera_left.getAprilTagID(), camera_left).getRotation());
-      }
-
-    if(camera_right.hasValidTarget() && (int)camera_right.getAprilTagID() == tagId)
-      {
-        ReefPole pole = ReefPole.getPoleFromID(camera_right.getAprilTagID(), rightPole ? camera_left : camera_right);
-        double x = pole.getScoringPos().getX();
-        double y = pole.getScoringPos().getY();
-        finalPose2d = new Pose2d(x, y, new Rotation2d());//.rotateAround(new Translation2d(0, 0), ReefPole.getPoleFromID(camera_right.getAprilTagID(), camera_right).getRotation());
-      }
-    if(finalPose2d != null)
-    {
-    controller.getXController().calculate(base.getLocalization().getRelativePose().getX(), finalPose2d.getX());
-    controller.getYController().calculate(base.getLocalization().getRelativePose().getY(), finalPose2d.getY());
-    }
-
-    SmartDashboard.putData("Auto Align Controller X",controller.getXController());
-    SmartDashboard.putData("Auto Align Controller Y",controller.getYController());
-
-   }
- 
-=======
->>>>>>> Stashed changes
    // Called every time the scheduler runs while the command is scheduled.
    @Override
    public void execute() 
    {
-<<<<<<< Updated upstream
-      SmartDashboard.putData("X controller", controller.getXController());
-
-=======
->>>>>>> Stashed changes
 
     if(camera_left.hasValidTarget() || camera_right.hasValidTarget())
     {
@@ -308,39 +205,15 @@ import edu.wpi.first.math.trajectory.TrajectoryConfig;
       //CALCULATING FINAL DESIRED POSITION 
       if(camera_left.hasValidTarget() && (int)camera_left.getAprilTagID() == tagId)
       {
-<<<<<<< Updated upstream
-        ReefPole pole = ReefPole.getPoleFromID(camera_left.getAprilTagID(), rightPole ? camera_left : camera_right);
-        double x = pole.getScoringPos().getX();
-        double y = pole.getScoringPos().getY();
-
-        // double x = Units.inchesToMeters(15.5);
-        // double y = rightPole ? Units.inchesToMeters(-11.5): Units.inchesToMeters(6.2);
-
-        goalPose2d = new Pose2d(Units.inchesToMeters(40), rightPole ? Units.inchesToMeters(0) : Units.inchesToMeters(0),new Rotation2d()).rotateAround(new Translation2d(0, 0), ReefPole.getPoleFromID(camera_left.getAprilTagID(), camera_left).getRotation());
-        finalPose2d = new Pose2d(x, y,new Rotation2d());//.rotateAround(new Translation2d(0, 0), ReefPole.getPoleFromID(camera_left.getAprilTagID(), camera_left).getRotation());
-=======
        
         goalPose2d = new Pose2d(Units.inchesToMeters(40), Units.inchesToMeters(0), new Rotation2d());
         finalPose2d = new Pose2d(Units.inchesToMeters(30), Units.inchesToMeters(10),new Rotation2d());//.rotateAround(new Translation2d(0, 0), ReefPole.getPoleFromID(camera_left.getAprilTagID(), camera_left).getRotation());
->>>>>>> Stashed changes
       }
 
       if(camera_right.hasValidTarget() && (int)camera_right.getAprilTagID() == tagId)
       {
-<<<<<<< Updated upstream
-        ReefPole pole = ReefPole.getPoleFromID(camera_right.getAprilTagID(), rightPole ? camera_left : camera_right);
-        double x = pole.getScoringPos().getX();
-        double y = pole.getScoringPos().getY();
-        
-        // double x = Units.inchesToMeters(15.5);
-        // double y = rightPole ? Units.inchesToMeters(-11.5): Units.inchesToMeters(6.2);
-
-        goalPose2d = new Pose2d(Units.inchesToMeters(40), rightPole ? Units.inchesToMeters(0) : Units.inchesToMeters(0),new Rotation2d()).rotateAround(new Translation2d(0, 0), ReefPole.getPoleFromID(camera_right.getAprilTagID(), camera_right).getRotation());
-        finalPose2d = new Pose2d(x, y, new Rotation2d());//.rotateAround(new Translation2d(0, 0), ReefPole.getPoleFromID(camera_right.getAprilTagID(), camera_right).getRotation());
-=======
         goalPose2d = new Pose2d(Units.inchesToMeters(40), Units.inchesToMeters(0), new Rotation2d());
         finalPose2d = new Pose2d(Units.inchesToMeters(30), Units.inchesToMeters(10),new Rotation2d());//.rotateAround(new Translation2d(0, 0), ReefPole.getPoleFromID(camera_left.getAprilTagID(), camera_left).getRotation());
->>>>>>> Stashed changes
       }
       
       if(camera_left.getAprilTagID() == tagId && camera_right.getAprilTagID() == tagId)
@@ -353,17 +226,10 @@ import edu.wpi.first.math.trajectory.TrajectoryConfig;
     }
 
     //END COMMAND
-<<<<<<< Updated upstream
-    if(closeEnough("limelight-left") || closeEnough("limelight-right"))
-    {
-      isDone = true;
-    }
-=======
     // if(closeEnough("limelight-left") || closeEnough("limelight-right"))
     // {
     //   isDone = true;
     // }
->>>>>>> Stashed changes
 
     if(tagId != -1)
     {
@@ -382,21 +248,11 @@ import edu.wpi.first.math.trajectory.TrajectoryConfig;
     controller.getYController().setP(2);
 
     //CALCULATE SPEEDS
-<<<<<<< Updated upstream
-    double rSpeed = rController.calculate(base.getLocalization().getRelativePose().getRotation().getDegrees(), ReefPole.getPoleFromID(tagId, camera_left).getRotation().getDegrees() - 180);
-    double xSpeed = controller.getXController().calculate(base.getLocalization().getRelativePose().getX(), goalPose2d.getX());
-    double ySpeed = controller.getYController().calculate(base.getLocalization().getRelativePose().getY(), goalPose2d.getY());
-
-    SmartDashboard.putNumber("Scoring Pos X", finalPose2d.getX());
-    SmartDashboard.putNumber("Scoring Pos Y", finalPose2d.getY());
-    SmartDashboard.putNumber("Tag ID", tagId);
-=======
     double rSpeed = rController.calculate(base.getLocalization().getRelativePose().getRotation().getDegrees(), AprilTagMap.AprilTags.getRotation2d(tagId).getDegrees() - 180);
     double xSpeed = controller.getXController().calculate(base.getLocalization().getRelativePose().getX(), goalPose2d.rotateBy(AprilTagMap.AprilTags.getRotation2d(tagId)).getX() * -1);
     double ySpeed = controller.getYController().calculate(base.getLocalization().getRelativePose().getY(), goalPose2d.rotateBy(AprilTagMap.AprilTags.getRotation2d(tagId)).getY() * -1);
 
     
->>>>>>> Stashed changes
     
     ChassisSpeeds spds = ChassisSpeeds.fromFieldRelativeSpeeds
                                                 (
@@ -419,15 +275,9 @@ import edu.wpi.first.math.trajectory.TrajectoryConfig;
 
 
 
-<<<<<<< Updated upstream
-    double rSpeed = rController.calculate(base.getLocalization().getRelativePose().getRotation().getDegrees(), ReefPole.getPoleFromID(tagId, camera_left).getRotation().getDegrees() - 180);
-    double xSpeed = controller.getXController().calculate(base.getLocalization().getRelativePose().getX(), finalPose2d.getX());
-    double ySpeed = controller.getYController().calculate(base.getLocalization().getRelativePose().getY(), finalPose2d.getY());   
-=======
     double rSpeed = rController.calculate(base.getLocalization().getRelativePose().getRotation().getDegrees(), AprilTagMap.AprilTags.getRotation2d(tagId).getDegrees());
     double xSpeed = controller.getXController().calculate(base.getLocalization().getRelativePose().getX(), finalPose2d.rotateBy(AprilTagMap.AprilTags.getRotation2d(tagId)).getX() * -1);
     double ySpeed = controller.getYController().calculate(base.getLocalization().getRelativePose().getY(), finalPose2d.rotateBy(AprilTagMap.AprilTags.getRotation2d(tagId)).getY() * -1);   
->>>>>>> Stashed changes
     
     ChassisSpeeds spds = ChassisSpeeds.fromFieldRelativeSpeeds
                                                 (
@@ -443,72 +293,11 @@ import edu.wpi.first.math.trajectory.TrajectoryConfig;
   }
   }
 
-<<<<<<< Updated upstream
-    //SUPERSTRUCTURE LOGIC-------------------------------------------------------****
-
-    
-    double distance = 9999999;
-    if(tagId != -1)
-    {
-     distance = Math.abs(base.getLocalization().getRelativePose().getTranslation().getDistance(finalPose2d.getTranslation()));
-    }
-    
-    if(!superstructure.getStateMachine().getGoalState().equals(state.get()))
-    {
-    if(state.get().equals(SuperstructureState.L4))
-    {
-      if(distance < 2 && distance > 1)
-      {
-        superstructure.setSuper(SuperstructureState.L2);
-      }
-      else if(distance < 1 && distance > 0.5)
-      {
-        superstructure.setSuper(SuperstructureState.L3);
-      }
-      else if(distance < 0.3)
-      {
-        superstructure.setSuper(SuperstructureState.L4);
-        
-      }
-       
-    }
-    else if(state.get().equals(SuperstructureState.L3))
-    {
-      if(distance < 2 && distance > 1)
-      {
-        superstructure.setSuper(SuperstructureState.L2);
-      }
-      else if(distance < 1)
-      {
-        superstructure.setSuper(SuperstructureState.L3);
-        
-      }  
-    }
-    else if(state.get().equals(SuperstructureState.L2))
-    {
-      if(distance < 1)
-      {
-        superstructure.setSuper(state.get());
-       
-      }
-    }
-    else if(state.get().equals(SuperstructureState.L1) && isDone)
-    {
-      superstructure.setSuper(SuperstructureState.L1);
-      
-    }
-  }
-  }
-   @Override
-   public void end(boolean interrupted) {  
-    System.out.println("NIGGER");
-=======
     
    
   }
    @Override
    public void end(boolean interrupted) {  
->>>>>>> Stashed changes
      base.getDrivetrain().getRobotSpeeds().setSpeeds("feedback", new ChassisSpeeds(0,0,0));
    }
  
