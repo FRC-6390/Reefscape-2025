@@ -273,6 +273,7 @@ public interface Constants {
         // .setProfiledPID(new ProfiledPIDController(0.000, 0, 0, new Constraints(50, 50)))
         .setCurrentLimit(60);
 
+
         MechanismConfig<StatefulArmMechanism<WristState>> WRIST_CONFIG = MechanismConfig.statefulArm(new ArmFeedforward(0,0,0), WristState.StartConfiguration)
         .addMotors(Motor.KRAKEN_X60, -36)
         .setEncoder(EncoderType.CTRECANcoder, 35)
@@ -290,6 +291,8 @@ public interface Constants {
 
         MechanismConfig<StatefulMechanism<RollerState>> CORAL_ROLLERS = MechanismConfig.statefulGeneric(RollerState.Stopped)
         .addMotors(Motor.KRAKEN_X60, 37)
+        //DANGER
+        .setEncoderFromMotor(37)
         .setNeutralMode(MotorNeutralMode.Brake)
         .setCanbus(CANIVORE_CANBUS)
         .setCurrentLimit(10)

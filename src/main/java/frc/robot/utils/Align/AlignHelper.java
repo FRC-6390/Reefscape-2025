@@ -44,10 +44,15 @@ import edu.wpi.first.math.trajectory.TrajectoryConfig;
  
  public class AlignHelper {
 
+  public enum AlignMode
+  {
+    LOOKAT,
+    PARALLEL
+  }
+
 
   public AlignCamera[] cams;
 
-  public Pose2d goalPose2d;
   public RobotBase<?> base;
   public boolean reached = false;
   public boolean rightPole = false;
@@ -61,20 +66,26 @@ import edu.wpi.first.math.trajectory.TrajectoryConfig;
 
   public HolonomicDriveController controller;
   public boolean isDone = false;
+  public AlignMode mode = AlignMode.PARALLEL;
 
 
 
-   public AlignHelper(RobotBase<?> base, PIDController rController, HolonomicDriveController controller, Pose2d goal, Pose2d scoring, AlignCamera... cams)
+   public AlignHelper(RobotBase<?> base, PIDController rController, HolonomicDriveController controller, AlignMode mode, AlignCamera... cams)
    {
     this.cams = cams;
     this.base = base; 
-    this.goalPose2d = goal;
-    this.finalPose2d = scoring;
     this.rController = rController;
+    this.mode = mode;
     this.controller = controller;
     tagId = -1;
     isDone = false;
    }
+
+
+  public void setGoal(Pose2d scoring)
+  {
+  this.finalPose2d = scoring;
+  }
 
    public void init() 
    {
@@ -136,6 +147,11 @@ import edu.wpi.first.math.trajectory.TrajectoryConfig;
     }
    
   }
+
+  public void setId(int id)
+  {
+    tagId = id;
+  }
   
    public Pose2d getPose2d()
    {
@@ -147,9 +163,11 @@ import edu.wpi.first.math.trajectory.TrajectoryConfig;
     for (AlignCamera alignCamera : cams) 
     {
       LimeLight cam = alignCamera.getLimelight();
-      if(cam.hasValidTarget())
+      if(cam.hasValidTarget() && cam.getAprilTagID() == tagId)
       {
-      double dist1 = cam.getPoseEstimate(PoseEstimateWithLatencyType.BOT_POSE_MT2_BLUE).getRaw()[9];
+      double dist = cam.getPoseEstimate(PoseEstimateWithLatencyType.BOT_POSE_MT2_BLUE).getRaw()[9];
+      //DANGER
+      double dist1 = Math.cos(Math.toRadians(cam.getTargetVerticalOffset())) * dist; 
       double angle1 =  cam.getTargetHorizontalOffset() - alignCamera.getYaw() -base.getLocalization().getRelativePose().getRotation().getDegrees() ;
       double x1 = (Math.cos(Math.toRadians(angle1)) * dist1) - alignCamera.getXOffset();
       double y1 = (Math.sin(Math.toRadians(angle1)) * dist1)- alignCamera.getYOffset(); 
@@ -162,6 +180,12 @@ import edu.wpi.first.math.trajectory.TrajectoryConfig;
 
     double xPos = x / count;
     double yPos = y / count;
+    if(Double.isNaN(xPos) || Double.isNaN(yPos))
+    {
+    return null;
+    }
+    else
+    {
     Pose2d pose = new Pose2d(-xPos,yPos,base.getLocalization().getRelativePose().getRotation());
      
     SmartDashboard.putNumber("Field X", Units.metersToInches(pose.getX()));
@@ -176,7 +200,9 @@ import edu.wpi.first.math.trajectory.TrajectoryConfig;
 
     }
 
-     return pose;
+   
+    return pose;
+    }
    }
 
    public boolean closeEnough(String table)
@@ -187,47 +213,30 @@ import edu.wpi.first.math.trajectory.TrajectoryConfig;
 
   public void setRelativePose()
   {
+    if(getPose2d() != null)
+    {
     base.getLocalization().resetRelativePose(getPose2d());
+    }
   }
 
   public ChassisSpeeds calculateSpeeds() 
   {
-
-    double count = 0;
-    for (AlignCamera alignCamera : cams) 
-      {
-        if(alignCamera.getLimelight().hasValidTarget())
-        {
-          thetaMeasurement += -filter.calculate(alignCamera.getLimelight().getPoseEstimate(PoseEstimateType.TARGET_POSE_ROBOT_SPACE).getRaw()[4]);
-          count++;
-        }   
-    }
-    
-    thetaMeasurement = thetaMeasurement / count;
-
-    targetMeasurement = base.getLocalization().getRelativePose().getRotation().getDegrees() - thetaMeasurement;
-
     if(tagId != -1)
     {
-
-    if(base.getLocalization().getRelativePose().getTranslation().getDistance(goalPose2d.getTranslation()) > base.getLocalization().getRelativePose().getTranslation().getDistance(finalPose2d.getTranslation()))
-    {
-      reached = true;
-    }
-
-  
-    if(base.getLocalization().getRelativePose().getTranslation().getDistance(goalPose2d.getTranslation()) > 0.075 && !reached)
-    {  
-    
-    }
-    else
-    {
-    reached = true;
 
     controller.getXController().setP(1.75);
     controller.getYController().setP(1.75);
 
-    double rSpeed = rController.calculate(base.getLocalization().getRelativePose().getRotation().getDegrees(), AprilTagMap.AprilTags.getRotation2d(tagId).getDegrees());
+    double targetRot = 0;
+    if(mode.equals(AlignMode.PARALLEL))
+    {
+      targetRot = AprilTagMap.AprilTags.getRotation2d(tagId).getDegrees();
+    }
+    else if(mode.equals(AlignMode.LOOKAT))
+    {
+      targetRot = Math.atan2(base.getLocalization().getRelativePose().getY(), base.getLocalization().getRelativePose().getX());
+    }
+    double rSpeed = rController.calculate(base.getLocalization().getRelativePose().getRotation().getDegrees(), targetRot);
     double xSpeed = controller.getXController().calculate(base.getLocalization().getRelativePose().getX(), finalPose2d.rotateBy(AprilTagMap.AprilTags.getRotation2d(tagId)).getX() * -1);
     double ySpeed = controller.getYController().calculate(base.getLocalization().getRelativePose().getY(), finalPose2d.rotateBy(AprilTagMap.AprilTags.getRotation2d(tagId)).getY() * -1);   
     
@@ -241,9 +250,8 @@ import edu.wpi.first.math.trajectory.TrajectoryConfig;
                                                         ), 
                                                 base.getLocalization().getRelativePose().getRotation()
                                                 );
-    // base.getDrivetrain().getRobotSpeeds().setSpeeds("feedback", spds);
     return spds;
   }
-  }
+  
     return null;
  }}

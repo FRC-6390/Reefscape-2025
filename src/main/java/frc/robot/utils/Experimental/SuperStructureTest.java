@@ -95,7 +95,6 @@ public class SuperStructureTest<E extends Enum<E>> {
         }
         if(currentConstraint.isValid() && currentActionableConstraint.isValid())
         {
-        System.out.println("HJKHJKSHF");
         currentState = states;
         }
         else if(currentConstraint.isValid() && !currentActionableConstraint.isValid())

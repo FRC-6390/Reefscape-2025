@@ -11,6 +11,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.BooleanSupplier;
 import java.util.function.DoubleSupplier;
+import java.util.logging.Logger;
 
 import javax.sound.midi.SysexMessage;
 
@@ -25,11 +26,13 @@ import ca.frc6390.athena.mechanisms.ArmMechanism.StatefulArmMechanism;
 import ca.frc6390.athena.mechanisms.StateMachine.SetpointProvider;
 import ca.frc6390.athena.mechanisms.StatefulMechanism;
 import ca.frc6390.athena.sensors.camera.limelight.LimeLight.PoseEstimateWithLatencyType;
+import edu.wpi.first.math.Pair;
 import edu.wpi.first.math.controller.HolonomicDriveController;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.controller.ProfiledPIDController;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.trajectory.TrapezoidProfile.Constraints;
 import edu.wpi.first.math.util.Units;
@@ -45,9 +48,12 @@ import frc.robot.Constants.Elevator.S;
 import frc.robot.Constants.EndEffector.ArmState;
 import frc.robot.Constants.EndEffector.WristState;
 import frc.robot.Constants.EndEffector.RollerState;
-import frc.robot.utils.Interpolator;
+import frc.robot.utils.Aiming.Interpolator;
+import frc.robot.utils.Aiming.Loggable;
+import frc.robot.utils.Aiming.ShotSolver;
 import frc.robot.utils.Align.AlignCamera;
 import frc.robot.utils.Align.AutoAling;
+import frc.robot.utils.Align.AlignHelper.AlignMode;
 import frc.robot.utils.Align.AlignHelper;
 import frc.robot.utils.Experimental.ActionableConstraint;
 import frc.robot.utils.Experimental.Constraint;
@@ -63,6 +69,7 @@ public class RobotContainer {
   public AlignCamera camLeft = new AlignCamera(robotBase.getVision().getLimelight("limelight-left"), -Units.inchesToMeters(0.5), -Units.inchesToMeters(9.25), 15, 0);
   public AlignCamera camRight = new AlignCamera(robotBase.getVision().getLimelight("limelight-right"), -Units.inchesToMeters(0.5), Units.inchesToMeters(9.25), -15, 0);
   
+
   public final StatefulArmMechanism<ArmState> arm = Constants.EndEffector.ARM_CONFIG.build().shuffleboard("Arm", SendableLevel.DEBUG);
   public final StatefulArmMechanism<WristState> wrist = Constants.EndEffector.WRIST_CONFIG.build().shuffleboard("Wrist", SendableLevel.DEBUG);
   public final StatefulMechanism<RollerState> rollers = Constants.EndEffector.CORAL_ROLLERS.build().shuffleboard("Rollers", SendableLevel.COMP);
@@ -92,12 +99,19 @@ public class RobotContainer {
 
   private final EnhancedXboxController driverController2 = new EnhancedXboxController(1).setSticksDeadzone(Constants.Controllers.STICK_DEADZONE); 
   public SendableChooser<Command> chooser;
+  public Loggable logger;
+
+  public AlignHelper align = new AlignHelper(
+        robotBase, 
+        rController, 
+        controller, 
+        AlignMode.PARALLEL,
+        camLeft, camRight
+      );
 
 
   public double dist = 0;
   public double armSupplier = -92d;
-
-  
 
   public RobotContainer() 
   {
@@ -110,6 +124,11 @@ public class RobotContainer {
     arm.setFeedforwardEnabled(false);
     wrist.setFeedforwardEnabled(false);
     
+    logger = new Loggable(
+      "Distance And Arm Angle", 
+            new Pair<>("Distance", () -> camLeft.getLimelight().getPoseEstimate(PoseEstimateWithLatencyType.BOT_POSE_MT2_BLUE).getRaw()[9]),
+            new Pair<>("Arm Angle", () -> arm.getPosition())
+      );
     s.addActionableConstraint(new ActionableConstraint<SuperStructureStates>(SuperStructureStates.Intaking,SuperStructureStates.Score, () -> !s.getSensor("Intake").getSensorStatus()));
     s.addUpdateEvent(() -> 
       {
@@ -123,28 +142,7 @@ public class RobotContainer {
       }
     );
 
-    NamedCommands.registerCommand("OrientLeftSide", new InstantCommand(() -> robotBase.getLocalization().resetRelativePose(new Pose2d(0,0, Rotation2d.fromRadians(-2.3631872270622845)))));
-    NamedCommands.registerCommand("OrientRightSide", new InstantCommand(() -> robotBase.getLocalization().resetRelativePose(new Pose2d(0,0, Rotation2d.fromRadians(2.3631872270622845)))));
-    NamedCommands.registerCommand("OrientMidSide", new InstantCommand(() -> robotBase.getLocalization().resetRelativePose(new Pose2d(0,0, Rotation2d.fromRadians(3.141592653589793)))));
-   
-    NamedCommands.registerCommand("DisableLocal", 
-    new  InstantCommand(() ->
-    {
-      robotBase.getVision().getLimelight("limelight-left").setUseForLocalization(false);
-      robotBase.getVision().getLimelight("limelight-right").setUseForLocalization(false);
-      robotBase.getVision().getPhotonVision("Tag").setUseForLocalization(false); 
-      robotBase.getVision().getPhotonVision("TagFront").setUseForLocalization(false);
-    }));
-    
-    NamedCommands.registerCommand("EnableLocal", 
-    new InstantCommand(() ->
-    {
-      robotBase.getVision().getLimelight("limelight-left").setUseForLocalization(true); 
-      robotBase.getVision().getLimelight("limelight-right").setUseForLocalization(true);
-      robotBase.getVision().getPhotonVision("Tag").setUseForLocalization(true); 
-      robotBase.getVision().getPhotonVision("TagFront").setUseForLocalization(true);
-    }));
-
+    NamedCommands.registerCommand("Orient", new InstantCommand(() -> robotBase.getLocalization().resetRelativePose(new Pose2d(0,0, Rotation2d.fromRadians(-2.3631872270622845)))));
 
     chooser = Autos.AUTOS.createChooser(AUTOS.Left);
     SmartDashboard.putData(chooser);
@@ -158,19 +156,14 @@ public class RobotContainer {
     driverController.rightTrigger.tiggerAt(0.5).onTrue(() -> s.setGoalState(SuperStructureStates.Score));
 
     driverController.leftBumper.whileTrue(
-      new AutoAling(new AlignHelper(
-        robotBase, 
-        rController, 
-        controller, 
-        new Pose2d(Units.inchesToMeters(40), Units.inchesToMeters(0), new Rotation2d()), 
-        new Pose2d(Units.inchesToMeters(20), Units.inchesToMeters(0), new Rotation2d()), 
-        camLeft, camRight
-      )
+      new AutoAling(align
     ));
     
     driverController.a.onTrue(() -> s.setGoalState(SuperStructureStates.Home));
   
     driverController.start.onTrue(() -> robotBase.getDrivetrain().getIMU().setYaw(0)).after(2).onTrue(() -> {robotBase.getLocalization().resetFieldPose(0,0, 0); robotBase.getLocalization().resetRelativePose(0,0, 0);});
+
+    driverController2.a.onTrue(() -> logger.LogDataToJson());
   }
 
   public Command getAutonomousCommand() 

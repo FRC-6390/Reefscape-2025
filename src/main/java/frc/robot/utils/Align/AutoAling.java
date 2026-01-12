@@ -17,6 +17,14 @@ public class AutoAling extends Command {
     this.base = align.base;
   }
 
+  public Pose2d calculateClosestPoint(double radius, Pose2d currentPose)
+  {
+    double x = (radius * currentPose.getX()) / (Math.sqrt((currentPose.getX() * currentPose.getX()) + (currentPose.getY() * currentPose.getY())));
+    double y = (radius * currentPose.getY()) / (Math.sqrt((currentPose.getX() * currentPose.getX()) + (currentPose.getY() * currentPose.getY())));
+    
+    return new Pose2d(x, y, new Rotation2d());
+  }
+
   @Override
   public void initialize() 
   {
@@ -25,15 +33,14 @@ public class AutoAling extends Command {
 
   @Override
   public void execute() 
-  {
-
-    LimeLight camera_left = base.getVision().getLimelight("limelight-left");
-    LimeLight camera_right = base.getVision().getLimelight("limelight-right");
-    
-
+  {    
     align.setId();
     align.setRelativePose();
+    align.setGoal(calculateClosestPoint(1, base.getLocalization().getRelativePose()));
+    if(align.calculateSpeeds() != null)
+    {
     base.getRobotSpeeds().setSpeeds("feedback", align.calculateSpeeds()); 
+    }
   }
 
   @Override
