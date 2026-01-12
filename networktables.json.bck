@@ -1,104 +1,8 @@
 [
   {
-    "name": "/Sim/Mechanisms/StatefulElevatorMechanism/LimitSwitch-5/Override",
-    "type": "boolean",
-    "value": false,
-    "properties": {
-      "persistent": true
-    }
-  },
-  {
-    "name": "/Sim/Mechanisms/StatefulElevatorMechanism/LimitSwitch-5/ManualValue",
-    "type": "boolean",
-    "value": false,
-    "properties": {
-      "persistent": true
-    }
-  },
-  {
-    "name": "/Preferences/RobotLocalization/FieldPoseX",
-    "type": "double",
-    "value": 3.3365133609365727,
-    "properties": {
-      "persistent": true
-    }
-  },
-  {
-    "name": "/Preferences/RobotLocalization/FieldPoseY",
-    "type": "double",
-    "value": 7.215248975951684,
-    "properties": {
-      "persistent": true
-    }
-  },
-  {
-    "name": "/Preferences/RobotLocalization/FieldPoseZ",
-    "type": "double",
-    "value": 0.0,
-    "properties": {
-      "persistent": true
-    }
-  },
-  {
-    "name": "/Preferences/RobotLocalization/FieldPoseRollDeg",
-    "type": "double",
-    "value": 0.0,
-    "properties": {
-      "persistent": true
-    }
-  },
-  {
-    "name": "/Preferences/RobotLocalization/FieldPosePitchDeg",
-    "type": "double",
-    "value": 0.0,
-    "properties": {
-      "persistent": true
-    }
-  },
-  {
-    "name": "/Preferences/RobotLocalization/FieldPoseYawDeg",
-    "type": "double",
-    "value": -73.91213835343741,
-    "properties": {
-      "persistent": true
-    }
-  },
-  {
-    "name": "/Preferences/RobotLocalization/DriverYawDeg",
-    "type": "double",
-    "value": -72.01628727689422,
-    "properties": {
-      "persistent": true
-    }
-  },
-  {
-    "name": "/Preferences/RobotLocalization/Valid",
-    "type": "boolean",
-    "value": true,
-    "properties": {
-      "persistent": true
-    }
-  },
-  {
-    "name": "/Shuffleboard/Elevator/Sim/StatefulElevatorMechanism/LimitSwitch-5/Override",
-    "type": "boolean",
-    "value": false,
-    "properties": {
-      "persistent": true
-    }
-  },
-  {
-    "name": "/Shuffleboard/Elevator/Sim/StatefulElevatorMechanism/LimitSwitch-5/ManualValue",
-    "type": "boolean",
-    "value": false,
-    "properties": {
-      "persistent": true
-    }
-  },
-  {
     "name": "/Preferences/Shuffleboard/Localization/Save Data/FieldPoseX",
     "type": "double",
-    "value": 10.464022784095235,
+    "value": 1.3027832123678758,
     "properties": {
       "persistent": true
     }
@@ -106,7 +10,7 @@
   {
     "name": "/Preferences/Shuffleboard/Localization/Save Data/FieldPoseY",
     "type": "double",
-    "value": 2.913054427608836,
+    "value": 0.4553667094446315,
     "properties": {
       "persistent": true
     }
@@ -138,7 +42,7 @@
   {
     "name": "/Preferences/Shuffleboard/Localization/Save Data/FieldPoseYawDeg",
     "type": "double",
-    "value": -13.61125155129508,
+    "value": 0.0,
     "properties": {
       "persistent": true
     }
@@ -146,7 +50,7 @@
   {
     "name": "/Preferences/Shuffleboard/Localization/Save Data/DriverYawDeg",
     "type": "double",
-    "value": 161.88567457103287,
+    "value": 0.0,
     "properties": {
       "persistent": true
     }

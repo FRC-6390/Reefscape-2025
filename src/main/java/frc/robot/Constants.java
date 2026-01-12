@@ -3,25 +3,29 @@ package frc.robot;
 import java.util.List;
 
 import ca.frc6390.athena.controllers.ElevatorFeedForwardsSendable;
-import ca.frc6390.athena.core.RobotBase.RobotBaseConfig;
+import ca.frc6390.athena.core.RobotCore.RobotCoreConfig;
 import ca.frc6390.athena.core.RobotDrivetrain.RobotDrivetrainIDs.DrivetrainIDs;
 import ca.frc6390.athena.core.localization.RobotLocalizationConfig;
-import ca.frc6390.athena.devices.EncoderConfig.EncoderType;
-import ca.frc6390.athena.devices.IMU.IMUType;
-import ca.frc6390.athena.devices.MotorController.Motor;
-import ca.frc6390.athena.devices.MotorControllerConfig.MotorNeutralMode;
 import ca.frc6390.athena.drivetrains.swerve.SwerveDrivetrain;
 import ca.frc6390.athena.drivetrains.swerve.SwerveDrivetrainConfig;
 import ca.frc6390.athena.drivetrains.swerve.modules.SwerveVendorSDS;
-import ca.frc6390.athena.mechanisms.MechanismConfig;
+import ca.frc6390.athena.hardware.encoder.AthenaEncoder;
+import ca.frc6390.athena.hardware.imu.AthenaImu;
+import ca.frc6390.athena.hardware.motor.AthenaMotor;
+import ca.frc6390.athena.hardware.motor.MotorNeutralMode;
 import ca.frc6390.athena.mechanisms.ArmMechanism.StatefulArmMechanism;
+import ca.frc6390.athena.mechanisms.MechanismConfig;
 import ca.frc6390.athena.mechanisms.ElevatorMechanism.StatefulElevatorMechanism;
 import ca.frc6390.athena.mechanisms.MechanismConfig.ElevatorSimulationParameters;
 import ca.frc6390.athena.mechanisms.StatefulMechanism;
 import ca.frc6390.athena.mechanisms.StateMachine.SetpointProvider;
+import ca.frc6390.athena.mechanisms.SuperstructureConfig;
+import ca.frc6390.athena.mechanisms.SuperstructureMechanism;
 import ca.frc6390.athena.sensors.camera.limelight.LimeLight.PoseEstimateWithLatencyType;
+import ca.frc6390.athena.sensors.limitswitch.GenericLimitSwitch.GenericLimitSwitchConfig;
 import ca.frc6390.athena.sensors.camera.ConfigurableCamera;
 import ca.frc6390.athena.sensors.camera.limelight.LimeLightConfig;
+import java.util.function.BooleanSupplier;
 import edu.wpi.first.math.controller.ArmFeedforward;
 import edu.wpi.first.math.controller.ElevatorFeedforward;
 import edu.wpi.first.math.controller.ProfiledPIDController;
@@ -43,13 +47,13 @@ public interface Constants {
         double[] ENCODER_OFFSETS = {0.23535156250000003,0.09350585937499999,0.19873046875000003,0.361572265625};
         
         SwerveDrivetrainConfig DRIVETRAIN_CONFIG = SwerveDrivetrainConfig.defualt(TRACKWIDTH_METERS)
-                                                    .setIMU(IMUType.CTREPigeon2, false)
+                                                    .setIMU(AthenaImu.PIGEON2, false)
                                                     .setIds(DrivetrainIDs.SWERVE_CHASSIS_STANDARD)
                                                     .modules(
-                                                            SwerveVendorSDS.MK4n.L1_PLUS.config(Motor.KRAKEN_X60,EncoderType.CTRECANcoder).setP(0.45), 
-                                                            SwerveVendorSDS.MK4n.L1_PLUS.config(Motor.KRAKEN_X60,EncoderType.CTRECANcoder).setP(0.45), 
-                                                            SwerveVendorSDS.MK4i.L1_PLUS.config(Motor.KRAKEN_X60,EncoderType.CTRECANcoder).setP(0.5), 
-                                                            SwerveVendorSDS.MK4i.L1_PLUS.config(Motor.KRAKEN_X60,EncoderType.CTRECANcoder).setP(0.5)
+                                                            SwerveVendorSDS.MK4n.L1_PLUS.config(AthenaMotor.KRAKEN_X60,AthenaEncoder.CANCODER).setP(0.45), 
+                                                            SwerveVendorSDS.MK4n.L1_PLUS.config(AthenaMotor.KRAKEN_X60,AthenaEncoder.CANCODER).setP(0.45), 
+                                                            SwerveVendorSDS.MK4i.L1_PLUS.config(AthenaMotor.KRAKEN_X60,AthenaEncoder.CANCODER).setP(0.5), 
+                                                            SwerveVendorSDS.MK4i.L1_PLUS.config(AthenaMotor.KRAKEN_X60,AthenaEncoder.CANCODER).setP(0.5)
                                                             )   
                                                     .setEncoderOffset(ENCODER_OFFSETS)
                                                     .setCanbus(CANIVORE_CANBUS)
@@ -72,7 +76,7 @@ public interface Constants {
         //X -11.75
         //Y 9 inches
         //Z 33.5
-        RobotBaseConfig<SwerveDrivetrain> ROBOT_BASE = RobotBaseConfig.swerve(DRIVETRAIN_CONFIG)
+        RobotCoreConfig<SwerveDrivetrain> ROBOT_BASE = RobotCoreConfig.swerve(DRIVETRAIN_CONFIG)
                                                                       .setLocalization(LOCALIZATION_CONFIG)
                                                                       .setVision(CAMERAS);
 
@@ -145,8 +149,8 @@ public interface Constants {
         ElevatorFeedForwardsSendable FEEDFORWARD = new ElevatorFeedForwardsSendable(0, 0.117, 0.1,0);
 
         MechanismConfig<StatefulElevatorMechanism<ElevatorState>> ELEVATOR_CONFIG = MechanismConfig.statefulElevator(new ElevatorFeedforward(0,0.117,0.1, 0), ElevatorState.HomeReset)
-        .addMotors(Motor.KRAKEN_X60, 20, -21)
-        .setEncoder(EncoderType.CTRECANcoder, 42)
+        .addMotors(AthenaMotor.KRAKEN_X60, 20, -21)
+        .setEncoder(AthenaEncoder.CANCODER, 42)
         .setNeutralMode(MotorNeutralMode.Brake)
         .setEncoderConversion(3d)
         .setEncoderConversionOffset(OFFSET_FROM_FLOOR)
@@ -244,8 +248,8 @@ public interface Constants {
         }
 
         MechanismConfig<StatefulArmMechanism<ArmState>> ARM_CONFIG = MechanismConfig.statefulArm(new ArmFeedforward(0,0,0), ArmState.StartConfiguration)
-        .addMotors(Motor.KRAKEN_X60, -31)
-        .setEncoder(EncoderType.CTRECANcoder, 32)
+        .addMotors(AthenaMotor.KRAKEN_X60, -31)
+        .setEncoder(AthenaEncoder.CANCODER, 32)
         .setNeutralMode(MotorNeutralMode.Brake)
         .setEncoderGearRatio(1d/1d)
         .setEncoderOffset(0.7705078125)
@@ -260,8 +264,8 @@ public interface Constants {
         .setCurrentLimit(60);
 
         MechanismConfig<StatefulArmMechanism<WristState>> WRIST_CONFIG = MechanismConfig.statefulArm(new ArmFeedforward(0,0,0), WristState.StartConfiguration)
-        .addMotors(Motor.KRAKEN_X60, -36)
-        .setEncoder(EncoderType.CTRECANcoder, 35)
+        .addMotors(AthenaMotor.KRAKEN_X60, -36)
+        .setEncoder(AthenaEncoder.CANCODER, 35)
         .setNeutralMode(MotorNeutralMode.Brake)
         .setEncoderOffset(0.2587890625)
         // .setEncoderOffset(0.20849609375)
@@ -275,17 +279,112 @@ public interface Constants {
         .setCurrentLimit(60);
 
         MechanismConfig<StatefulMechanism<RollerState>> CORAL_ROLLERS = MechanismConfig.statefulGeneric(RollerState.Stopped)
-        .addMotors(Motor.KRAKEN_X60, 37)
+        .addMotors(AthenaMotor.KRAKEN_X60, 37)
         .setNeutralMode(MotorNeutralMode.Brake)
         .setCanbus(CANIVORE_CANBUS)
         .setCurrentLimit(10)
+        .addLimitSwitch(null)
         .setUseSetpointAsOutput(true);
 
         MechanismConfig<StatefulMechanism<RollerState>> ALGAE_ROLLERS = MechanismConfig.statefulGeneric(RollerState.Stopped)
-        .addMotors(Motor.KRAKEN_X60, 33)
+        .addMotors(AthenaMotor.KRAKEN_X60, 33)
         .setNeutralMode(MotorNeutralMode.Brake)
         .setCanbus(CANIVORE_CANBUS)
         .setCurrentLimit(10)
         .setUseSetpointAsOutput(true);                                                                                                                                          
+    }
+
+    public interface Superstructure {
+
+        record EndEffectorTuple(EndEffector.RollerState coralRollerState,
+                                EndEffector.RollerState algaeRollerState,
+                                EndEffector.ArmState joint1state,
+                                EndEffector.WristState joint2state) {}
+
+        enum EndEffectorState implements SetpointProvider<EndEffectorTuple> {
+            L4(new EndEffectorTuple(null, null, EndEffector.ArmState.ScoringL4, EndEffector.WristState.ScoringL4)),
+            L3(new EndEffectorTuple(null, null, EndEffector.ArmState.Scoring, EndEffector.WristState.Scoring)),
+            L2(new EndEffectorTuple(null, null, EndEffector.ArmState.Scoring, EndEffector.WristState.Scoring)),
+            L1(new EndEffectorTuple(null, null, EndEffector.ArmState.Scoringl1, EndEffector.WristState.Scoringl1)),
+            Score(new EndEffectorTuple(EndEffector.RollerState.Running, EndEffector.RollerState.Running, null, null)),
+            AlgaeScore(new EndEffectorTuple(EndEffector.RollerState.Stopped, EndEffector.RollerState.Stopped, EndEffector.ArmState.AlgaeScore, EndEffector.WristState.AlgaeScore)),
+            ScoreAlgae(new EndEffectorTuple(EndEffector.RollerState.Stopped, EndEffector.RollerState.Running, EndEffector.ArmState.AlgaeScore, EndEffector.WristState.AlgaeScore)),
+
+            Stop(new EndEffectorTuple(EndEffector.RollerState.Stopped, EndEffector.RollerState.Stopped, null, null)),
+            StartConfiguration(new EndEffectorTuple(EndEffector.RollerState.Stopped, EndEffector.RollerState.Stopped, EndEffector.ArmState.StartConfiguration, EndEffector.WristState.StartConfiguration)),
+            Home(new EndEffectorTuple(EndEffector.RollerState.Stopped, EndEffector.RollerState.Stopped, EndEffector.ArmState.Home, EndEffector.WristState.Home)),
+
+            Reverse(new EndEffectorTuple(EndEffector.RollerState.Reverse, EndEffector.RollerState.Reverse, null, null)),
+            Intaking(new EndEffectorTuple(EndEffector.RollerState.Running, EndEffector.RollerState.Slow, EndEffector.ArmState.Intaking, EndEffector.WristState.Intaking)),
+            AlgaeHigh(new EndEffectorTuple(EndEffector.RollerState.Stopped, EndEffector.RollerState.Reverse, EndEffector.ArmState.AlgaeHigh, EndEffector.WristState.AlgaeHigh)),
+            AlgaeLow(new EndEffectorTuple(EndEffector.RollerState.Stopped, EndEffector.RollerState.Reverse, EndEffector.ArmState.AlgaeLow, EndEffector.WristState.AlgaeLow)),
+
+            Transition(new EndEffectorTuple(EndEffector.RollerState.Stopped, EndEffector.RollerState.Stopped, EndEffector.ArmState.TransitionState, EndEffector.WristState.TransitionState));
+
+            private final EndEffectorTuple states;
+            EndEffectorState(EndEffectorTuple states) {
+                this.states = states;
+            }
+            @Override
+            public EndEffectorTuple getSetpoint() {
+                return states;
+            }
+        }
+
+        record SuperstructureTuple(EndEffectorState endEffector, Elevator.ElevatorState elevator) {}
+
+        enum SuperstructureState implements SetpointProvider<SuperstructureTuple> {
+            AlgaeHigh(new SuperstructureTuple(EndEffectorState.AlgaeHigh, Elevator.ElevatorState.AlgaeHigh)),
+            NONE(new SuperstructureTuple(null, null)),
+
+            AlgaeLow(new SuperstructureTuple(EndEffectorState.AlgaeLow, Elevator.ElevatorState.AlgaeLow)),
+            AlgaeScore(new SuperstructureTuple(EndEffectorState.AlgaeScore, Elevator.ElevatorState.L4)),
+            ScoreAlgae(new SuperstructureTuple(EndEffectorState.ScoreAlgae, null)),
+
+            AlgaeSpit(new SuperstructureTuple(EndEffectorState.AlgaeScore, null)),
+
+            L4(new SuperstructureTuple(EndEffectorState.L4, Elevator.ElevatorState.L4)),
+            L3(new SuperstructureTuple(EndEffectorState.L3, Elevator.ElevatorState.L3)),
+            L2(new SuperstructureTuple(EndEffectorState.L2, Elevator.ElevatorState.L2)),
+            L1(new SuperstructureTuple(EndEffectorState.L1, Elevator.ElevatorState.L1)),
+
+            StartConfiguration(new SuperstructureTuple(EndEffectorState.StartConfiguration, Elevator.ElevatorState.HomeReset)),
+            Align(new SuperstructureTuple(EndEffectorState.Home, Elevator.ElevatorState.Aligning)),
+            Home(new SuperstructureTuple(EndEffectorState.Home, Elevator.ElevatorState.HomeReset)),
+            Stopped(new SuperstructureTuple(EndEffectorState.Stop, null)),
+            HomePID(new SuperstructureTuple(EndEffectorState.Home, Elevator.ElevatorState.HomePID)),
+
+            Score(new SuperstructureTuple(EndEffectorState.Score, null)),
+            Intaking(new SuperstructureTuple(EndEffectorState.Intaking, Elevator.ElevatorState.Intaking));
+
+            private final SuperstructureTuple states;
+            SuperstructureState(SuperstructureTuple states) {
+                this.states = states;
+            }
+
+            @Override
+            public SuperstructureTuple getSetpoint() {
+                return states;
+            }
+        }
+
+        GenericLimitSwitchConfig HAS_GAME_PIECE_SENSOR = GenericLimitSwitchConfig.create(-4).setName("hasPiece").setDelay(Units.millisecondsToSeconds(40));
+
+        SuperstructureConfig<EndEffectorState, EndEffectorTuple> ENDEFFECTOR_CONFIG = SuperstructureConfig.create(EndEffectorState.Home)
+                        .addMech(EndEffector.ARM_CONFIG, EndEffectorTuple::joint1state)
+                        .addMech(EndEffector.WRIST_CONFIG, EndEffectorTuple::joint2state)
+                        .addMech(EndEffector.CORAL_ROLLERS, EndEffectorTuple::coralRollerState)
+                        .addMech(EndEffector.ALGAE_ROLLERS, EndEffectorTuple::algaeRollerState)
+                        .addInput("hasPiece", HAS_GAME_PIECE_SENSOR) //if name not defined we can set or override it here
+                        .setStateMachineDelay(Units.millisecondsToSeconds(40));
+
+        SuperstructureConfig<SuperstructureState, SuperstructureTuple> SUPERSTRUCTURE_CONFIG = SuperstructureConfig.create(SuperstructureState.Home)
+                        .addMech(Elevator.ELEVATOR_CONFIG, SuperstructureTuple::elevator)
+                        .addMech(ENDEFFECTOR_CONFIG, SuperstructureTuple::endEffector)
+                        .addGuard(SuperstructureState.Intaking,
+                                ctx -> ctx.getMechanism(SuperstructureTuple::endEffector).input("hasPiece") //ctx should not merge inputs from other mechanisms and ctx should use same getmechanism syntax / method
+                                        ? ctx.getMechanism(SuperstructureTuple::elevator).getStateMachine().atState(Elevator.ElevatorState.Intaking)
+                                        : true)
+                        .setStateMachineDelay(Units.millisecondsToSeconds(40));
     }
 }

@@ -1,8 +1,9 @@
 package frc.robot.subsystems.superstructure;
 
-import com.ctre.phoenix.led.CANdle;
 
-import ca.frc6390.athena.core.RobotBase;
+import com.ctre.phoenix6.hardware.CANdle;
+
+import ca.frc6390.athena.core.RobotCore;
 import ca.frc6390.athena.sensors.camera.LocalizationCamera;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
@@ -13,9 +14,9 @@ public class CANdleSubsystem extends SubsystemBase {
   private final CANdle candle;
 
   private int red = 0, blue = 0, green = 0;
-  public RobotBase<?> base;
+  public RobotCore<?> base;
 
-  public CANdleSubsystem(RobotBase<?> base)
+  public CANdleSubsystem(RobotCore<?> base)
   {
     this.base = base;;
     this.candle = new CANdle(Constants.EndEffector.CANDLE_ID, Constants.CANIVORE_CANBUS);
@@ -43,6 +44,6 @@ public class CANdleSubsystem extends SubsystemBase {
     red = noTarget("limelight-left") && noTarget("limelight-right") ? 255 : 0;
     blue = (!closeEnough("limelight-left") && !closeEnough("limelight-right")) ? 255 : 0;
     green = closeEnough("limelight-left") || closeEnough("limelight-right") ? 255 : 0;
-    candle.setLEDs(red, green, blue);
+    // candle.set(red, green, blue);
   }
 }

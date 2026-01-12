@@ -3,7 +3,7 @@
 package frc.robot.commands.auto;
  
 import ca.frc6390.athena.controllers.DelayedOutput;
- import ca.frc6390.athena.core.RobotBase;
+import ca.frc6390.athena.core.RobotCore;
 import ca.frc6390.athena.core.RobotSpeeds;
 import ca.frc6390.athena.sensors.camera.limelight.LimeLight;
  import ca.frc6390.athena.sensors.camera.limelight.LimeLight.PoseEstimateType;
@@ -34,8 +34,9 @@ import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
  import edu.wpi.first.wpilibj2.command.Command;
-import frc.robot.subsystems.Superstructure;
-import frc.robot.subsystems.Superstructure.SuperstructureState;
+import ca.frc6390.athena.mechanisms.SuperstructureMechanism;
+import frc.robot.Constants.Superstructure.SuperstructureState;
+import frc.robot.Constants.Superstructure.SuperstructureTuple;
 import frc.robot.utils.ReefScoringPos.ReefPole;
 import edu.wpi.first.math.trajectory.Trajectory;
 import edu.wpi.first.math.trajectory.TrajectoryConfig;
@@ -47,12 +48,12 @@ import edu.wpi.first.math.trajectory.TrajectoryConfig;
   public LimeLight camera_right;
   public Pose2d goalPose2d = new Pose2d(Units.inchesToMeters(25), Units.inchesToMeters(6.5),new Rotation2d());
 
-  public RobotBase<?> base;
+  public RobotCore<?> base;
   public boolean reached = false;
   public boolean rightPole = false;
   public double thetaMeasurement = 0;
   
-  public Superstructure superstructure;
+  public SuperstructureMechanism<SuperstructureState, SuperstructureTuple> superstructure;
   public Supplier<SuperstructureState> state;
   public int tagId = -1;
   public MedianFilter filter;
@@ -69,7 +70,7 @@ import edu.wpi.first.math.trajectory.TrajectoryConfig;
 
 
 
-   public V2(RobotBase<?> base,String lltable, boolean rightPole, Superstructure superstructure, Supplier<SuperstructureState> state)
+   public V2(RobotCore<?> base,String lltable, boolean rightPole, SuperstructureMechanism<SuperstructureState, SuperstructureTuple> superstructure, Supplier<SuperstructureState> state)
    {
     // camera_right = base.getVision().getLimelight("limelight-right");
     // camera_left = base.getVision().getLimelight("limelight-left");
