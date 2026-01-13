@@ -20,12 +20,10 @@ import ca.frc6390.athena.mechanisms.MechanismConfig.ElevatorSimulationParameters
 import ca.frc6390.athena.mechanisms.StatefulMechanism;
 import ca.frc6390.athena.mechanisms.StateMachine.SetpointProvider;
 import ca.frc6390.athena.mechanisms.SuperstructureConfig;
-import ca.frc6390.athena.mechanisms.SuperstructureMechanism;
 import ca.frc6390.athena.sensors.camera.limelight.LimeLight.PoseEstimateWithLatencyType;
 import ca.frc6390.athena.sensors.limitswitch.GenericLimitSwitch.GenericLimitSwitchConfig;
 import ca.frc6390.athena.sensors.camera.ConfigurableCamera;
 import ca.frc6390.athena.sensors.camera.limelight.LimeLightConfig;
-import java.util.function.BooleanSupplier;
 import edu.wpi.first.math.controller.ArmFeedforward;
 import edu.wpi.first.math.controller.ElevatorFeedforward;
 import edu.wpi.first.math.controller.ProfiledPIDController;
@@ -368,22 +366,22 @@ public interface Constants {
             }
         }
 
-        GenericLimitSwitchConfig HAS_GAME_PIECE_SENSOR = GenericLimitSwitchConfig.create(-4).setName("hasPiece").setDelay(Units.millisecondsToSeconds(40));
+        GenericLimitSwitchConfig HAS_GAME_PIECE_SENSOR = GenericLimitSwitchConfig.create(4).setDelay(Units.millisecondsToSeconds(40));
 
         SuperstructureConfig<EndEffectorState, EndEffectorTuple> ENDEFFECTOR_CONFIG = SuperstructureConfig.create(EndEffectorState.Home)
-                        .addMech(EndEffector.ARM_CONFIG, EndEffectorTuple::joint1state)
-                        .addMech(EndEffector.WRIST_CONFIG, EndEffectorTuple::joint2state)
-                        .addMech(EndEffector.CORAL_ROLLERS, EndEffectorTuple::coralRollerState)
-                        .addMech(EndEffector.ALGAE_ROLLERS, EndEffectorTuple::algaeRollerState)
+                        .addMechanism(EndEffector.ARM_CONFIG, EndEffectorTuple::joint1state)
+                        .addMechanism(EndEffector.WRIST_CONFIG, EndEffectorTuple::joint2state)
+                        .addMechanism(EndEffector.CORAL_ROLLERS, EndEffectorTuple::coralRollerState)
+                        .addMechanism(EndEffector.ALGAE_ROLLERS, EndEffectorTuple::algaeRollerState)
                         .addInput("hasPiece", HAS_GAME_PIECE_SENSOR) //if name not defined we can set or override it here
                         .setStateMachineDelay(Units.millisecondsToSeconds(40));
 
         SuperstructureConfig<SuperstructureState, SuperstructureTuple> SUPERSTRUCTURE_CONFIG = SuperstructureConfig.create(SuperstructureState.Home)
-                        .addMech(Elevator.ELEVATOR_CONFIG, SuperstructureTuple::elevator)
-                        .addMech(ENDEFFECTOR_CONFIG, SuperstructureTuple::endEffector)
+                        .addMechanism(Elevator.ELEVATOR_CONFIG, SuperstructureTuple::elevator)
+                        .addMechanism(ENDEFFECTOR_CONFIG, SuperstructureTuple::endEffector)
                         .addGuard(SuperstructureState.Intaking,
-                                ctx -> ctx.getMechanism(SuperstructureTuple::endEffector).input("hasPiece") //ctx should not merge inputs from other mechanisms and ctx should use same getmechanism syntax / method
-                                        ? ctx.getMechanism(SuperstructureTuple::elevator).getStateMachine().atState(Elevator.ElevatorState.Intaking)
+                                ctx -> ctx.getMechanisms().superstructure(SuperstructureTuple::endEffector).input("hasPiece") //ctx should not merge inputs from other mechanisms and ctx should use same getmechanism syntax / method
+                                        ? ctx.getMechanisms().elevator(SuperstructureTuple::elevator).getStateMachine().atState(Elevator.ElevatorState.Intaking)
                                         : true)
                         .setStateMachineDelay(Units.millisecondsToSeconds(40));
     }

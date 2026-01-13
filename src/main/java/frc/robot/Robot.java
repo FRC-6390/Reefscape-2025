@@ -10,7 +10,6 @@ import ca.frc6390.athena.core.RobotCore;
 import ca.frc6390.athena.core.RobotSendableSystem.SendableLevel;
 import ca.frc6390.athena.drivetrains.swerve.SwerveDrivetrain;
 import ca.frc6390.athena.mechanisms.ArmMechanism.StatefulArmMechanism;
-import ca.frc6390.athena.mechanisms.Mechanism;
 import ca.frc6390.athena.mechanisms.StatefulMechanism;
 import ca.frc6390.athena.mechanisms.SuperstructureMechanism;
 import ca.frc6390.athena.mechanisms.ElevatorMechanism.StatefulElevatorMechanism;
@@ -31,12 +30,6 @@ import frc.robot.Constants.Superstructure.EndEffectorTuple;
 import frc.robot.Constants.Superstructure.SuperstructureTuple;
 import frc.robot.commands.auto.V2;
 import frc.robot.subsystems.superstructure.CANdleSubsystem;
-import ca.frc6390.athena.controllers.DelayedOutput;
-import ca.frc6390.athena.sensors.limitswitch.GenericLimitSwitch;
-import java.util.List;
-import java.util.Map;
-import java.util.function.BooleanSupplier;
-import ca.frc6390.athena.mechanisms.Mechanism;
 
 public class Robot extends RobotCore<SwerveDrivetrain> {
 
@@ -115,7 +108,7 @@ public class Robot extends RobotCore<SwerveDrivetrain> {
 
     controller.leftBumper.onTrue(
         Commands.either(
-        Commands.either(setState(SuperstructureState.Intaking), Commands.none(), () -> !superstructure.getMechanisms(SuperstructureTuple::endEffector).getInput("hasPiece")),
+        Commands.either(setState(SuperstructureState.Intaking), Commands.none(), () -> !endEffector.inputSupplier("hasPiece").getAsBoolean()),
         setState(SuperstructureState.HomePID),
         () -> !superstructure.getStateMachine().getGoalState().equals(SuperstructureState.Intaking)));
 
@@ -165,7 +158,7 @@ public class Robot extends RobotCore<SwerveDrivetrain> {
     auto.registerNamedCommand("Home", setState(SuperstructureState.HomePID));
     auto.registerNamedCommand("OrientLeftSide", () -> getLocalization().resetRelativePose(new Pose2d(0,0, Rotation2d.fromRadians(-2.3631872270622845))));
 
-    auto.registerNamedCommand("Intake", Commands.either(setState(SuperstructureState.Intaking), Commands.none(), () -> !hasPiece()));
+    auto.registerNamedCommand("Intake", Commands.either(setState(SuperstructureState.Intaking), Commands.none(), () -> !endEffector.inputSupplier("hasPiece").getAsBoolean()));
 
     auto.registerNamedCommand("L4", setState(SuperstructureState.L4));
     auto.registerNamedCommand("L3", setState(SuperstructureState.L3));
@@ -175,7 +168,7 @@ public class Robot extends RobotCore<SwerveDrivetrain> {
     auto.registerNamedCommand("StartEject", setState(SuperstructureState.Score));
     auto.registerNamedCommand("WaitForElevator",superstructure.getStateMachine().waitUntilAtGoal());
     auto.registerNamedCommand("WaitForEffector",endEffector.getStateMachine().waitUntil(EndEffectorState.L4));
-    auto.registerNamedCommand("WaitForEjector", new edu.wpi.first.wpilibj2.command.WaitUntilCommand(this::hasPiece));
+    auto.registerNamedCommand("WaitForEjector", new edu.wpi.first.wpilibj2.command.WaitUntilCommand(endEffector.inputSupplier("hasPiece")));
 
     auto.registerNamedCommand("AlignRight", alignRight);
     auto.registerNamedCommand("AlignLeft", alginLeft);
