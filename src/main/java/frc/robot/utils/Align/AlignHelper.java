@@ -219,6 +219,22 @@ import edu.wpi.first.math.trajectory.TrajectoryConfig;
     }
   }
 
+  public Pose2d getRobotPositionRelativeToTag()
+  {
+    return base.getLocalization().getRelativePose();
+  }
+
+  public double getDistanceToTag()
+  {
+    return base.getLocalization().getRelativePose().getTranslation().getDistance(new Translation2d());
+  }
+
+  public Rotation2d getAngleToTag()
+  {
+    return base.getLocalization().getRelativePose().getTranslation().getAngle();
+  }
+
+
   public ChassisSpeeds calculateSpeeds() 
   {
     if(tagId != -1)
