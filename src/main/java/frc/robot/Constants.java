@@ -9,17 +9,23 @@ import ca.frc6390.athena.core.localization.RobotLocalizationConfig;
 import ca.frc6390.athena.drivetrains.swerve.SwerveDrivetrain;
 import ca.frc6390.athena.drivetrains.swerve.SwerveDrivetrainConfig;
 import ca.frc6390.athena.drivetrains.swerve.modules.SwerveVendorSDS;
+import ca.frc6390.athena.drivetrains.swerve.sim.SwerveSimulationConfig;
 import ca.frc6390.athena.hardware.encoder.AthenaEncoder;
 import ca.frc6390.athena.hardware.imu.AthenaImu;
 import ca.frc6390.athena.hardware.motor.AthenaMotor;
 import ca.frc6390.athena.hardware.motor.MotorNeutralMode;
 import ca.frc6390.athena.mechanisms.ArmMechanism.StatefulArmMechanism;
+import ca.frc6390.athena.mechanisms.FlywheelMechanism.StatefulFlywheelMechanism;
 import ca.frc6390.athena.mechanisms.MechanismConfig;
 import ca.frc6390.athena.mechanisms.ElevatorMechanism.StatefulElevatorMechanism;
+import ca.frc6390.athena.mechanisms.MechanismConfig.ArmSimulationParameters;
 import ca.frc6390.athena.mechanisms.MechanismConfig.ElevatorSimulationParameters;
+import ca.frc6390.athena.mechanisms.MechanismConfig.SimpleMotorSimulationParameters;
 import ca.frc6390.athena.mechanisms.StatefulMechanism;
 import ca.frc6390.athena.mechanisms.StateMachine.SetpointProvider;
+import ca.frc6390.athena.mechanisms.TurretMechanism.StatefulTurretMechanism;
 import ca.frc6390.athena.mechanisms.SuperstructureConfig;
+import ca.frc6390.athena.mechanisms.sim.MechanismVisualizationConfig;
 import ca.frc6390.athena.sensors.camera.limelight.LimeLight.PoseEstimateWithLatencyType;
 import ca.frc6390.athena.sensors.limitswitch.GenericLimitSwitch.GenericLimitSwitchConfig;
 import ca.frc6390.athena.sensors.camera.ConfigurableCamera;
@@ -27,8 +33,11 @@ import ca.frc6390.athena.sensors.camera.limelight.LimeLightConfig;
 import edu.wpi.first.math.controller.ArmFeedforward;
 import edu.wpi.first.math.controller.ElevatorFeedforward;
 import edu.wpi.first.math.controller.ProfiledPIDController;
+import edu.wpi.first.math.controller.SimpleMotorFeedforward;
+import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Transform3d;
+import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.math.trajectory.TrapezoidProfile.Constraints;
 import edu.wpi.first.math.util.Units;
 import frc.robot.Constants.EndEffector.ArmState;
@@ -56,7 +65,13 @@ public interface Constants {
                                                     .setEncoderOffset(ENCODER_OFFSETS)
                                                     .setCanbus(CANIVORE_CANBUS)
                                                     .setDriveCurrentLimit(60)
-                                                    .setSteerCurrentLimit(40);
+                                                    .setSteerCurrentLimit(40)
+                                                    .setSimulationConfig(SwerveSimulationConfig.defaults()
+                                                        .withRobotMassKg(Units.lbsToKilograms(115))
+                                                        .withNominalVoltage(12.0)
+                                                        .withWheelCoefficientOfFriction(1.1)
+                                                    )
+                                                    .setFieldRelative(true);
 
         //UP 40
         //LEFT SIDE 8.5
@@ -87,21 +102,6 @@ public interface Constants {
 
     public interface Elevator {
 
-
-        public enum S implements SetpointProvider<List<Enum<?>>> {
-            Intaking(List.of(ArmState.Intaking, WristState.Intaking));
-
-
-            List<Enum<?>> pos;
-            private S(List<Enum<?>> pos){
-                this.pos = pos;
-            }
-
-            @Override
-            public List<Enum<?>> getSetpoint() {
-            return pos;
-            }
-        }
 
         public enum ElevatorState implements SetpointProvider<Double> {
             //ELEVATOR HEIGHT FROM FLOOR IN INCHES
@@ -173,6 +173,12 @@ public interface Constants {
     public interface EndEffector {
 
         int CANDLE_ID = 22;
+        // Tune these for your robot geometry.
+        double FIXED_ARM_LENGTH_METERS = Units.inchesToMeters(10.0);
+        double ARM_LENGTH_METERS = Units.inchesToMeters(24.0);
+        double WRIST_LENGTH_METERS = Units.inchesToMeters(10.0);
+        double ARM_MOTOR_REDUCTION = 100.0;
+        double WRIST_MOTOR_REDUCTION = 100.0;
 
         enum ArmState implements SetpointProvider<Double>{
             Intaking(0), //150.38085937
@@ -257,6 +263,27 @@ public interface Constants {
         .setCanbus(CANIVORE_CANBUS)
         .setTolerance(5)
         .setPID(0.011, 0, 0)
+        .setSimulationArm(new ArmSimulationParameters()
+            .setArmLengthMeters(ARM_LENGTH_METERS)
+            .setMotorReduction(ARM_MOTOR_REDUCTION)
+            .setMomentOfInertia(0.05)
+            .setAngleRangeRadians(Units.degreesToRadians(-180), Units.degreesToRadians(180))
+            .setStartingAngleRadians(Units.degreesToRadians(ArmState.StartConfiguration.getSetpoint()))
+            .setUnitsPerRadian(Units.radiansToDegrees(1.0))
+            .setSimulateGravity(false))
+        .setVisualizationConfig(
+            MechanismVisualizationConfig.builder("Arm")
+                .withStaticRootPose(new Pose3d())
+                .addNode("FixedArm", "Arm",
+                    mech -> new Pose3d(new Translation3d(FIXED_ARM_LENGTH_METERS, 0.0, 0.0), new Rotation3d()))
+                .addNode("ArmTip", "FixedArm",
+                    mech -> {
+                        double angleRad = Units.degreesToRadians(mech.getPosition());
+                        double x = ARM_LENGTH_METERS * Math.cos(angleRad);
+                        double y = ARM_LENGTH_METERS * Math.sin(angleRad);
+                        return new Pose3d(new Translation3d(x, y, 0.0), new Rotation3d(0.0, 0.0, angleRad));
+                    })
+                .build())
         // .setPIDIZone(7)
         // .setProfiledPID(new ProfiledPIDController(0.000, 0, 0, new Constraints(50, 50)))
         .setCurrentLimit(60);
@@ -273,6 +300,24 @@ public interface Constants {
         .setEncoderConversion(360)
         .setCanbus(CANIVORE_CANBUS)
         .setPID(0.009, 0, 0.00)
+        .setSimulationArm(new ArmSimulationParameters()
+            .setArmLengthMeters(WRIST_LENGTH_METERS)
+            .setMotorReduction(WRIST_MOTOR_REDUCTION)
+            .setAngleRangeRadians(Units.degreesToRadians(-180), Units.degreesToRadians(180))
+            .setStartingAngleRadians(Units.degreesToRadians(WristState.StartConfiguration.getSetpoint()))
+            .setUnitsPerRadian(Units.radiansToDegrees(1.0))
+            .setSimulateGravity(false))
+        .setVisualizationConfig(
+            MechanismVisualizationConfig.builder("Wrist")
+                .withStaticRootPose(new Pose3d())
+                .addNode("WristTip", "Wrist",
+                    mech -> {
+                        double angleRad = Units.degreesToRadians(mech.getPosition());
+                        double x = WRIST_LENGTH_METERS * Math.cos(angleRad);
+                        double y = WRIST_LENGTH_METERS * Math.sin(angleRad);
+                        return new Pose3d(new Translation3d(x, y, 0.0), new Rotation3d(0.0, 0.0, angleRad));
+                    })
+                .build())
         // .setProfiledPID(new ProfiledPIDController(0, 0, 0, new Constraints(0, 0)))
         .setCurrentLimit(60);
 
@@ -281,7 +326,6 @@ public interface Constants {
         .setNeutralMode(MotorNeutralMode.Brake)
         .setCanbus(CANIVORE_CANBUS)
         .setCurrentLimit(10)
-        .addLimitSwitch(null)
         .setUseSetpointAsOutput(true);
 
         MechanismConfig<StatefulMechanism<RollerState>> ALGAE_ROLLERS = MechanismConfig.statefulGeneric(RollerState.Stopped)
@@ -289,7 +333,150 @@ public interface Constants {
         .setNeutralMode(MotorNeutralMode.Brake)
         .setCanbus(CANIVORE_CANBUS)
         .setCurrentLimit(10)
-        .setUseSetpointAsOutput(true);                                                                                                                                          
+        .setUseSetpointAsOutput(true);             
+
+        
+    }
+
+    public interface Turret {
+
+        int TURRET_MOTOR_ID = 40;
+        int TURRET_ENCODER_ID = 41;
+        int HOOD_MOTOR_ID = 42;
+        int HOOD_ENCODER_ID = 43;
+        int SHOOTER_MOTOR_ID = 44;
+        int SHOOTER_ENCODER_ID = 45;
+
+        double TURRET_GEAR_RATIO = 100.0;
+        double HOOD_GEAR_RATIO = 50.0;
+        double HOOD_LENGTH_METERS = Units.inchesToMeters(8.0);
+
+        enum TurretState implements SetpointProvider<Double> {
+            Off(0.0),
+            Hub(0.0),
+            Neutral(90.0),
+            Opponent(180.0);
+
+            double angleDeg;
+            TurretState(double angleDeg) {
+                this.angleDeg = angleDeg;
+            }
+
+            @Override
+            public Double getSetpoint() {
+                return angleDeg;
+            }
+        }
+
+        enum HoodState implements SetpointProvider<Double> {
+            Stow(0.0),
+            Low(15.0),
+            High(45.0);
+
+            double angleDeg;
+            HoodState(double angleDeg) {
+                this.angleDeg = angleDeg;
+            }
+
+            @Override
+            public Double getSetpoint() {
+                return angleDeg;
+            }
+        }
+
+        enum ShooterState implements SetpointProvider<Double> {
+            Off(0.0),
+            SpinUp(rpm(3000.0)),
+            Fire(rpm(4500.0));
+
+            double radiansPerSecond;
+            ShooterState(double radiansPerSecond) {
+                this.radiansPerSecond = radiansPerSecond;
+            }
+
+            @Override
+            public Double getSetpoint() {
+                return radiansPerSecond;
+            }
+        }
+
+        record TurretTuple(TurretState turret, HoodState hood, ShooterState shooter) {}
+
+        enum TurretSuperState implements SetpointProvider<TurretTuple> {
+            Stowed(new TurretTuple(TurretState.Off, HoodState.Stow, ShooterState.Off)),
+            Aim(new TurretTuple(TurretState.Neutral, HoodState.Low, ShooterState.SpinUp)),
+            Fire(new TurretTuple(TurretState.Neutral, HoodState.High, ShooterState.Fire));
+
+            private final TurretTuple setpoint;
+
+            TurretSuperState(TurretTuple setpoint) {
+                this.setpoint = setpoint;
+            }
+
+            @Override
+            public TurretTuple getSetpoint() {
+                return setpoint;
+            }
+        }
+
+        MechanismConfig<StatefulTurretMechanism<TurretState>> TURRET_CONFIG =
+            MechanismConfig.statefulTurret(new SimpleMotorFeedforward(0.2, 0.1, 0.0), TurretState.Off)
+                .addMotors(AthenaMotor.KRAKEN_X60, TURRET_MOTOR_ID)
+                .setEncoder(AthenaEncoder.CANCODER, TURRET_ENCODER_ID)
+                .setNeutralMode(MotorNeutralMode.Brake)
+                .setEncoderGearRatio(TURRET_GEAR_RATIO)
+                .setEncoderConversion(360.0)
+                .setUseEncoderAbsolute(true)
+                .setCanbus(CANIVORE_CANBUS)
+                .setPID(0.02, 0.0, 0.0)
+                .setBounds(0.0, 270.0)
+                .setSimulationSimpleMotor(new SimpleMotorSimulationParameters()
+                    .setMomentOfInertia(0.02));
+
+        MechanismConfig<StatefulArmMechanism<HoodState>> HOOD_CONFIG =
+            MechanismConfig.statefulArm(new ArmFeedforward(0.1, 0.2, 0.0, 0.0), HoodState.Stow)
+                .addMotors(AthenaMotor.KRAKEN_X60, HOOD_MOTOR_ID)
+                .setEncoder(AthenaEncoder.CANCODER, HOOD_ENCODER_ID)
+                .setNeutralMode(MotorNeutralMode.Brake)
+                .setEncoderGearRatio(HOOD_GEAR_RATIO)
+                .setEncoderConversion(360.0)
+                .setUseEncoderAbsolute(true)
+                .setCanbus(CANIVORE_CANBUS)
+                .setPID(0.02, 0.0, 0.0)
+                .setBounds(0.0, 70.0)
+                .setSimulationArm(new ArmSimulationParameters()
+                    .setArmLengthMeters(HOOD_LENGTH_METERS)
+                    .setMotorReduction(HOOD_GEAR_RATIO)
+                    .setAngleRangeRadians(Units.degreesToRadians(0.0), Units.degreesToRadians(70.0))
+                    .setStartingAngleRadians(Units.degreesToRadians(HoodState.Stow.getSetpoint()))
+                    .setUnitsPerRadian(Units.radiansToDegrees(1.0))
+                    .setSimulateGravity(false));
+
+        MechanismConfig<StatefulFlywheelMechanism<ShooterState>> SHOOTER_CONFIG =
+            MechanismConfig.statefulFlywheel(new SimpleMotorFeedforward(0.15, 0.12, 0.0), ShooterState.Off)
+                .addMotors(AthenaMotor.KRAKEN_X44, SHOOTER_MOTOR_ID)
+                .setEncoder(AthenaEncoder.CANCODER, SHOOTER_ENCODER_ID)
+                .setNeutralMode(MotorNeutralMode.Coast)
+                .setEncoderGearRatio(1.0)
+                .setEncoderConversion(2.0 * Math.PI)
+                .setCanbus(CANIVORE_CANBUS)
+                .setPID(0.1, 0.0, 0.0)
+                .setPidUseVelocity(true)
+                .setBounds(0.0, rpm(5000.0))
+                .setSimulationSimpleMotor(new SimpleMotorSimulationParameters()
+                    .setMomentOfInertia(0.01));
+
+        SuperstructureConfig<TurretSuperState, TurretTuple> TURRET_SUPERSTRUCTURE_CONFIG =
+            SuperstructureConfig.create(TurretSuperState.Stowed)
+                .addMechanism(TURRET_CONFIG, TurretTuple::turret)
+                .addMechanism(HOOD_CONFIG, TurretTuple::hood)
+                .addMechanism(SHOOTER_CONFIG, TurretTuple::shooter)
+                .setStateMachineDelay(Units.millisecondsToSeconds(40));
+
+        static double rpm(double rpm) {
+            return Units.rotationsPerMinuteToRadiansPerSecond(rpm);
+        }
+
     }
 
     public interface Superstructure {
@@ -366,7 +553,7 @@ public interface Constants {
             }
         }
 
-        GenericLimitSwitchConfig HAS_GAME_PIECE_SENSOR = GenericLimitSwitchConfig.create(4).setDelay(Units.millisecondsToSeconds(40));
+        GenericLimitSwitchConfig HAS_GAME_PIECE_SENSOR = GenericLimitSwitchConfig.create(-4).setDelay(Units.millisecondsToSeconds(40));
 
         SuperstructureConfig<EndEffectorState, EndEffectorTuple> ENDEFFECTOR_CONFIG = SuperstructureConfig.create(EndEffectorState.Home)
                         .addMechanism(EndEffector.ARM_CONFIG, EndEffectorTuple::joint1state)
@@ -379,10 +566,48 @@ public interface Constants {
         SuperstructureConfig<SuperstructureState, SuperstructureTuple> SUPERSTRUCTURE_CONFIG = SuperstructureConfig.create(SuperstructureState.Home)
                         .addMechanism(Elevator.ELEVATOR_CONFIG, SuperstructureTuple::elevator)
                         .addMechanism(ENDEFFECTOR_CONFIG, SuperstructureTuple::endEffector)
-                        .addGuard(SuperstructureState.Intaking,
+                        .addConstraint(SuperstructureState.Intaking,
                                 ctx -> ctx.getMechanisms().superstructure(SuperstructureTuple::endEffector).input("hasPiece") //ctx should not merge inputs from other mechanisms and ctx should use same getmechanism syntax / method
                                         ? ctx.getMechanisms().elevator(SuperstructureTuple::elevator).getStateMachine().atState(Elevator.ElevatorState.Intaking)
                                         : true)
+                        .setSimulation(sim -> sim
+                                .attachResolved(
+                                        ctx -> ctx.getMechanisms()
+                                                .superstructure(SuperstructureTuple::endEffector)
+                                                .getMechanisms()
+                                                .arm(EndEffectorTuple::joint1state),
+                                        ctx -> {
+                                            var elevator = ctx.getMechanisms().elevator(SuperstructureTuple::elevator);
+                                            Pose3d carriagePose = elevator.getMechanism3dPoses().get("Carriage");
+                                            if (carriagePose != null) {
+                                                return carriagePose;
+                                            }
+                                            double elevatorMeters = Units.inchesToMeters(elevator.getPosition());
+                                            return new Pose3d(1.5, elevatorMeters, 0.0, new Rotation3d(0,180,0));
+                                        })
+                                .attachResolved(
+                                        ctx -> ctx.getMechanisms()
+                                                .superstructure(SuperstructureTuple::endEffector)
+                                                .getMechanisms()
+                                                .arm(EndEffectorTuple::joint2state),
+                                        ctx -> {
+                                            var arm = ctx.getMechanisms()
+                                                    .superstructure(SuperstructureTuple::endEffector)
+                                                    .getMechanisms()
+                                                    .arm(EndEffectorTuple::joint1state);
+                                            Pose3d armTip = arm.getMechanism3dPoses().get("ArmTip");
+                                            if (armTip != null) {
+                                                return armTip;
+                                            }
+                                            var elevator = ctx.getMechanisms().elevator(SuperstructureTuple::elevator);
+                                            double elevatorMeters = Units.inchesToMeters(elevator.getPosition());
+                                            double armAngle = Units.degreesToRadians(arm.getPosition());
+                                            double x = EndEffector.FIXED_ARM_LENGTH_METERS
+                                                    + EndEffector.ARM_LENGTH_METERS * Math.cos(armAngle);
+                                            double y = elevatorMeters
+                                                    + EndEffector.ARM_LENGTH_METERS * Math.sin(armAngle);
+                                            return new Pose3d(x, y, 0.0, new Rotation3d(0.0, 0.0, armAngle));
+                                        }))
                         .setStateMachineDelay(Units.millisecondsToSeconds(40));
     }
 }
