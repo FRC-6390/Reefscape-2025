@@ -4,12 +4,17 @@
 
 package frc.robot.utils.Align;
 
+import org.photonvision.PhotonCamera;
+
 import ca.frc6390.athena.sensors.camera.limelight.LimeLight;
+import ca.frc6390.athena.sensors.camera.photonvision.PhotonVision;
 
 /** Add your docs here. */
 public class AlignCamera 
 {
     public LimeLight ll;
+    public PhotonVision pc;
+
     public double xOffsetFromCenter;
     public double yOffsetFromCenter;
     public double heighOffGround;
@@ -17,6 +22,15 @@ public class AlignCamera
     public AlignCamera(LimeLight ll, double x, double y, double yaw, double height)
     {
         this.ll = ll;
+        this.xOffsetFromCenter = x;
+        this.yOffsetFromCenter = y;
+        this.yaw = yaw;
+        this.heighOffGround = height;
+    }
+
+    public AlignCamera(PhotonVision pc, double x, double y, double yaw, double height)
+    {
+        this.pc = pc;
         this.xOffsetFromCenter = x;
         this.yOffsetFromCenter = y;
         this.yaw = yaw;
@@ -40,6 +54,11 @@ public class AlignCamera
     public LimeLight getLimelight()
     {
         return ll;
+    }
+
+    public PhotonVision getPhotonVision()
+    {
+        return pc;
     }
 
     public double getHeight()

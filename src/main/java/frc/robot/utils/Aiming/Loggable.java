@@ -12,6 +12,9 @@ import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 
 import edu.wpi.first.math.Pair;
+import edu.wpi.first.networktables.NetworkTableEvent;
+import edu.wpi.first.networktables.NetworkTableListenerPoller;
+import edu.wpi.first.wpilibj2.command.button.NetworkButton;
 
 public class Loggable
 {
@@ -26,6 +29,7 @@ public class Loggable
 
     public void LogDataToJson()
     {
+
         JSONArray logArray = new JSONArray();
 
         try (FileReader reader = new FileReader(entryName))

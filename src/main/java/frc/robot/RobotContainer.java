@@ -37,12 +37,14 @@ import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.trajectory.TrapezoidProfile.Constraints;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.DigitalInput;
+import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
+import edu.wpi.first.wpilibj2.command.button.NetworkButton;
 import frc.robot.Autos.AUTOS;
 import frc.robot.Constants.Elevator.S;
 import frc.robot.Constants.EndEffector.ArmState;
@@ -54,6 +56,8 @@ import frc.robot.utils.Aiming.ShotSolver;
 import frc.robot.utils.Align.AlignCamera;
 import frc.robot.utils.Align.AutoAling;
 import frc.robot.utils.Align.AlignHelper.AlignMode;
+import frc.robot.utils.DashboardConfiguration.ArmCalibrator;
+import frc.robot.utils.DashboardConfiguration.ArmCalibrator.DashboardType;
 import frc.robot.utils.Align.AlignHelper;
 import frc.robot.utils.Experimental.ActionableConstraint;
 import frc.robot.utils.Experimental.Constraint;
@@ -70,7 +74,7 @@ public class RobotContainer {
   public AlignCamera camRight = new AlignCamera(robotBase.getVision().getLimelight("limelight-right"), -Units.inchesToMeters(0.5), Units.inchesToMeters(9.25), -15, 0);
   
 
-  public final StatefulArmMechanism<ArmState> arm = Constants.EndEffector.ARM_CONFIG.build().shuffleboard("Arm", SendableLevel.DEBUG);
+  public StatefulArmMechanism<ArmState> arm = Constants.EndEffector.ARM_CONFIG.build().shuffleboard("Arm", SendableLevel.DEBUG);
   public final StatefulArmMechanism<WristState> wrist = Constants.EndEffector.WRIST_CONFIG.build().shuffleboard("Wrist", SendableLevel.DEBUG);
   public final StatefulMechanism<RollerState> rollers = Constants.EndEffector.CORAL_ROLLERS.build().shuffleboard("Rollers", SendableLevel.COMP);
   public final StatefulMechanism<RollerState> algaeRollers = Constants.EndEffector.ALGAE_ROLLERS.build().shuffleboard("Algae Rollers", SendableLevel.COMP);;
@@ -80,6 +84,7 @@ public class RobotContainer {
                                                             .addSensors(new DigitalSensor("Intake", new DigitalInput(4), true))
                                                             .build();
 
+  public ArmCalibrator calibrator;
   public PIDController rController = new PIDController(0.11, 0, 0);
 
 
@@ -101,7 +106,19 @@ public class RobotContainer {
   public SendableChooser<Command> chooser;
   public Loggable logger;
 
-  public AlignHelper align = new AlignHelper(
+  public AlignHelper shotTracker = new AlignHelper(
+        10,
+        new Pose2d(-Units.inchesToMeters(10), 0, new Rotation2d()),
+        robotBase, 
+        rController, 
+        controller, 
+        AlignMode.LOOKAT,
+        camLeft, camRight
+      );
+
+  public AlignHelper climbTracker = new AlignHelper(
+        15,
+        new Pose2d(Units.inchesToMeters(20), -Units.inchesToMeters(10), new Rotation2d()),
         robotBase, 
         rController, 
         controller, 
@@ -109,9 +126,12 @@ public class RobotContainer {
         camLeft, camRight
       );
 
+  
+
 
   public double dist = 0;
   public double armSupplier = -92d;
+  public boolean isAiming = false;
 
   public RobotContainer() 
   {
@@ -123,22 +143,40 @@ public class RobotContainer {
     wrist.setPidEnabled(true);
     arm.setFeedforwardEnabled(false);
     wrist.setFeedforwardEnabled(false);
+    shotTracker.init();
+    climbTracker.init();
+
     
-    logger = new Loggable(
-      "Distance And Arm Angle", 
-            new Pair<>("Distance", () -> camLeft.getLimelight().getPoseEstimate(PoseEstimateWithLatencyType.BOT_POSE_MT2_BLUE).getRaw()[9]),
-            new Pair<>("Arm Angle", () -> arm.getPosition())
-      );
     s.addActionableConstraint(new ActionableConstraint<SuperStructureStates>(SuperStructureStates.Intaking,SuperStructureStates.Score, () -> !s.getSensor("Intake").getSensorStatus()));
     s.addUpdateEvent(() -> 
       {
-        double d = camLeft.getLimelight().getPoseEstimate(PoseEstimateWithLatencyType.BOT_POSE_MT2_BLUE).getRaw()[9];
-        if(d > 0)
+        shotTracker.setRelativePose();
+        climbTracker.setRelativePose();
+        shotTracker.shuffleboard();
+        climbTracker.shuffleboard();
+
+        armSupplier = 
+            ShotSolver.computeAngleInDegrees(
+              Units.inchesToMeters(10), 
+              Units.inchesToMeters(20), 
+              shotTracker.getDistanceToTarget(),
+              rollers.getVelocity(), 
+              Units.inchesToMeters(2)
+            );
+
+        //turrentSupplier = shotTracker.getAngleToTarget().getDegrees();
+
+        if(isAiming)
         {
-          dist = d;
+          ChassisSpeeds speeds = robotBase.getRobotSpeeds().getSpeeds("feedback");
+          robotBase.getRobotSpeeds().setSpeeds("feedback", 
+            speeds.vxMetersPerSecond, 
+            speeds.vyMetersPerSecond, 
+            rController.calculate(
+              robotBase.getLocalization().getFieldPose().getRotation().getDegrees(),
+              shotTracker.getAngleToTarget().getDegrees())
+            );
         }
-        armSupplier = Interpolator.interpolate(Constants.EndEffector.distanceAndArm, dist);
-        System.out.println(armSupplier);
       }
     );
 
@@ -146,24 +184,20 @@ public class RobotContainer {
 
     chooser = Autos.AUTOS.createChooser(AUTOS.Left);
     SmartDashboard.putData(chooser);
+
   }
 
   private void configureBindings() 
   {
     s.getSensor("Intake").getTrigger().onTrue(() -> s.setGoalState(SuperStructureStates.Home));
-    driverController.leftTrigger.tiggerAt(0.5).onTrue(() -> s.setGoalState(SuperStructureStates.Aim));
-    driverController.leftTrigger.tiggerAt(0.5).onFalse(() -> s.setGoalState(SuperStructureStates.Home));
-    driverController.rightTrigger.tiggerAt(0.5).onTrue(() -> s.setGoalState(SuperStructureStates.Score));
+    driverController.leftTrigger.tiggerAt(0.5).onTrue(() -> {s.setGoalState(SuperStructureStates.Aim); isAiming = true;});
+    driverController.leftTrigger.tiggerAt(0.5).onFalse(() -> {s.setGoalState(SuperStructureStates.Home); isAiming = false;});
+    driverController.rightTrigger.tiggerAt(0.5).onTrue(() -> s.setGoalState(SuperStructureStates.Intaking));
 
-    driverController.leftBumper.whileTrue(
-      new AutoAling(align
-    ));
+    driverController.leftBumper.whileTrue(new AutoAling(climbTracker));
     
-    driverController.a.onTrue(() -> s.setGoalState(SuperStructureStates.Home));
-  
-    driverController.start.onTrue(() -> robotBase.getDrivetrain().getIMU().setYaw(0)).after(2).onTrue(() -> {robotBase.getLocalization().resetFieldPose(0,0, 0); robotBase.getLocalization().resetRelativePose(0,0, 0);});
 
-    driverController2.a.onTrue(() -> logger.LogDataToJson());
+    driverController.start.onTrue(() -> robotBase.getDrivetrain().getIMU().setYaw(0)).after(2).onTrue(() -> {robotBase.getLocalization().resetFieldPose(0,0, 0); robotBase.getLocalization().resetRelativePose(0,0, 0);});
   }
 
   public Command getAutonomousCommand() 
