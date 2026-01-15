@@ -218,6 +218,7 @@ public interface Constants {
                 TransitionState(() -> 62),
                 AlgaeScore(() -> 168.92),
                 Aim(() -> 55),
+                Calibration(() -> Robot.m_robotContainer.calibrator.getEntryFromList("Pluh").getDouble(0.0)),
 
 
                 StartConfiguration(() -> 0),
@@ -303,6 +304,13 @@ public interface Constants {
         .setNeutralMode(MotorNeutralMode.Brake)
         .setCanbus(CANIVORE_CANBUS)
         .setCurrentLimit(10)
-        .setUseSetpointAsOutput(true);                                                                                                                                          
+        .setUseSetpointAsOutput(true);    
+        
+        //INTAKE ROLLER
+        //CONVEYER ROLLER
+        
+        //Superstructurestate.aim -> aim turret aim pivot max shooter 
+        //Superstructurestate.shoot -> conveyer on
+        //
     }
 }

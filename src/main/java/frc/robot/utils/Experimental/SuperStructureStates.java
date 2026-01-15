@@ -14,7 +14,7 @@ public enum SuperStructureStates
     {
 
         Intaking(WristState.Intaking, ArmState.Intaking, RollerState.Running),
-        Aim(WristState.Aim, ArmState.Aim, RollerState.Stopped),
+        Aim(WristState.Aim, ArmState.Aim, RollerState.Reverse),
 
         Score(RollerState.Running),
 

@@ -54,108 +54,36 @@ import edu.wpi.first.math.trajectory.TrajectoryConfig;
   public AlignCamera[] cams;
 
   public RobotBase<?> base;
-  public boolean reached = false;
-  public boolean rightPole = false;
-  public double thetaMeasurement = 0;
   
   public int tagId = -1;
-  public MedianFilter filter;
   public double targetMeasurement;
   public Pose2d finalPose2d;
   public PIDController rController;
 
   public HolonomicDriveController controller;
-  public boolean isDone = false;
   public AlignMode mode = AlignMode.PARALLEL;
 
 
 
-   public AlignHelper(RobotBase<?> base, PIDController rController, HolonomicDriveController controller, AlignMode mode, AlignCamera... cams)
+   public AlignHelper(int tagId, Pose2d targetPose2d ,RobotBase<?> base, PIDController rController, HolonomicDriveController controller, AlignMode mode, AlignCamera... cams)
    {
     this.cams = cams;
     this.base = base; 
+    this.finalPose2d = targetPose2d;
     this.rController = rController;
     this.mode = mode;
     this.controller = controller;
-    tagId = -1;
-    isDone = false;
+    this.tagId = tagId;
    }
-
-
-  public void setGoal(Pose2d scoring)
-  {
-  this.finalPose2d = scoring;
-  }
 
    public void init() 
    {
-    thetaMeasurement = 0;
     rController.enableContinuousInput(-180, 180);
-    rController.setTolerance(5);
-
-    isDone = false;
-    filter = new MedianFilter(50);
-    tagId = -1;
-
-    reached = false;
-    
-  }
-
-   public static int findMostFrequent(List<Integer> nums) 
-    {
-        
-    Map<Integer, Integer> frequencyMap = new HashMap<>();
-    for (int num : nums) 
-    {
-        frequencyMap.put(num, frequencyMap.getOrDefault(num, 0) + 1);
-    }
-
-    int maxCount = 0;
-    int mostFrequent = nums.get(0);
-    for (Map.Entry<Integer, Integer> entry : frequencyMap.entrySet()) 
-    {
-        if (entry.getValue() > maxCount || (entry.getValue() == maxCount && entry.getKey() > mostFrequent)) 
-            {
-            maxCount = entry.getValue();
-            mostFrequent = entry.getKey();
-            }
-    }
-    return mostFrequent;
-    }
- 
-
-  
-  public void setId()
-  {
-    if(tagId == -1)
-    {
-    List<Integer> ids = new ArrayList<>();
-
-    for (AlignCamera cam : cams)
-        {
-            LimeLight limelight = cam.getLimelight();
-            if(limelight.hasValidTarget())
-            {
-                ids.add((int)limelight.getAprilTagID());
-            }
-        }
-        
-        if(tagId == -1 && !ids.isEmpty())
-        {
-        tagId = findMostFrequent(ids);
-        }
-    }
-   
-  }
-
-  public void setId(int id)
-  {
-    tagId = id;
+    rController.setTolerance(5);    
   }
   
    public Pose2d getPose2d()
    {
-
     double x = 0;
     double y = 0;
     double count = 0;
@@ -187,29 +115,10 @@ import edu.wpi.first.math.trajectory.TrajectoryConfig;
     else
     {
     Pose2d pose = new Pose2d(-xPos,yPos,base.getLocalization().getRelativePose().getRotation());
-     
-    SmartDashboard.putNumber("Field X", Units.metersToInches(pose.getX()));
-    SmartDashboard.putNumber("Field Y", Units.metersToInches(pose.getY()));
-
-    if(finalPose2d != null)
-    {
-
-    SmartDashboard.putNumber("Scoring Pos X", Units.metersToInches(finalPose2d.rotateBy(AprilTagMap.AprilTags.getRotation2d(tagId)).getX()));
-    SmartDashboard.putNumber("Scoring Pos Y", Units.metersToInches(finalPose2d.rotateBy(AprilTagMap.AprilTags.getRotation2d(tagId)).getY()));
-    SmartDashboard.putNumber("Tag ID", tagId);
-
-    }
-
-   
     return pose;
     }
-   }
 
-   public boolean closeEnough(String table)
-    {
-      LimeLight camera = base.getVision().getLimelight(table);
-      return camera.hasValidTarget() && Math.abs(camera.getPoseEstimate(PoseEstimateWithLatencyType.BOT_POSE_MT2_BLUE).getRaw()[9]) <= 0.525 && Math.abs(camera.getTargetHorizontalOffset()) < 10;
-    }
+  }
 
   public void setRelativePose()
   {
@@ -219,11 +128,55 @@ import edu.wpi.first.math.trajectory.TrajectoryConfig;
     }
   }
 
-  public ChassisSpeeds calculateSpeeds() 
+  public void shuffleboard()
   {
-    if(tagId != -1)
+    SmartDashboard.putNumber("Field X", Units.metersToInches(getPose2d().getX()));
+    SmartDashboard.putNumber("Field Y", Units.metersToInches(getPose2d().getY()));
+
+    if(finalPose2d != null)
     {
 
+    SmartDashboard.putNumber("Scoring Pos X", Units.metersToInches(finalPose2d.rotateBy(AprilTagMap.AprilTags.getRotation2d(tagId)).getX()));
+    SmartDashboard.putNumber("Scoring Pos Y", Units.metersToInches(finalPose2d.rotateBy(AprilTagMap.AprilTags.getRotation2d(tagId)).getY()));
+    SmartDashboard.putNumber("Tag ID", tagId);
+
+    }
+  }
+
+  public void setGoal(Pose2d targetPose2d)
+  {
+    finalPose2d = targetPose2d;
+  }
+
+  public Pose2d getRobotPositionRelativeToTag()
+  {
+    return base.getLocalization().getRelativePose();
+  }
+
+  public double getDistanceToTag()
+  {
+    return base.getLocalization().getRelativePose().getTranslation().getDistance(new Translation2d());
+  }
+
+  public double getDistanceToTarget()
+  {
+    return base.getLocalization().getRelativePose().getTranslation().getDistance(finalPose2d.rotateBy(AprilTagMap.AprilTags.getRotation2d(tagId)).getTranslation().times(-1));
+  }
+
+  public Rotation2d getAngleToTag()
+  {
+    return base.getLocalization().getRelativePose().getTranslation().getAngle();
+  }
+
+  public Rotation2d getAngleToTarget()
+  {
+    Translation2d f = finalPose2d.rotateBy(AprilTagMap.AprilTags.getRotation2d(tagId)).getTranslation().times(-1);
+    return Rotation2d.fromRadians(Math.atan2(f.getY() - base.getLocalization().getRelativePose().getTranslation().getY(), f.getX() - base.getLocalization().getRelativePose().getTranslation().getX()));
+  }
+
+
+  public ChassisSpeeds calculateSpeeds() 
+  {
     controller.getXController().setP(1.75);
     controller.getYController().setP(1.75);
 
@@ -251,7 +204,6 @@ import edu.wpi.first.math.trajectory.TrajectoryConfig;
                                                 base.getLocalization().getRelativePose().getRotation()
                                                 );
     return spds;
-  }
   
-    return null;
- }}
+ }
+}

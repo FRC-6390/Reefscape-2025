@@ -21,7 +21,7 @@ public class AprilTagMap {
 
         NONE(-1, -1, Rotation2d.fromDegrees(0)),
 
-        A(10, 10, Rotation2d.fromDegrees(-60)),
+        A(10, 25, Rotation2d.fromDegrees(0)),
 
         C(-1, -1, Rotation2d.fromDegrees(0)),
 
@@ -31,7 +31,7 @@ public class AprilTagMap {
 
         I(-1, -1, Rotation2d.fromDegrees(0)),
 
-        K(-1, -1, Rotation2d.fromDegrees(0));
+        K(15, 32, Rotation2d.fromDegrees(0));
 
         private final long redId;
         private final long blueId;
@@ -43,6 +43,7 @@ public class AprilTagMap {
             this.rotation = rotation;
             this.redId = redid;
             this.blueId = blueid;
+
         }
 
         public long getApriltagId() {

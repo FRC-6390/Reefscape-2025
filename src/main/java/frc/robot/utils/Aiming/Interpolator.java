@@ -12,6 +12,8 @@ import java.util.Map;
 import java.util.function.DoubleSupplier;
 
 import edu.wpi.first.math.Pair;
+import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Translation2d;
 
 /** Add your docs here. */
 public class Interpolator 
@@ -47,4 +49,5 @@ public class Interpolator
 
     return y1 + (x - lowerKey) * ( (y2 - y1) / (upperKey - lowerKey) );
 }
+    
 }
