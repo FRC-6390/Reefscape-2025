@@ -15,12 +15,12 @@ import edu.wpi.first.math.Pair;
 
 public class Loggable
 {
-    private String entryName;
+    private String fileName;
     private List<Pair<String, DoubleSupplier>> dataSupplier;
 
-    public Loggable(String entryName, Pair<String, DoubleSupplier>... dataSupplier)
+    public Loggable(String fileName, Pair<String, DoubleSupplier>... dataSupplier)
     {
-        this.entryName = entryName;
+        this.fileName = fileName;
         this.dataSupplier = List.of(dataSupplier);
     }
 
@@ -28,7 +28,7 @@ public class Loggable
     {
         JSONArray logArray = new JSONArray();
 
-        try (FileReader reader = new FileReader(entryName))
+        try (FileReader reader = new FileReader(fileName))
         {
             Object parsed = new JSONParser().parse(reader);
             if (parsed instanceof JSONArray)
@@ -49,7 +49,7 @@ public class Loggable
 
         logArray.add(entry);
 
-        try (FileWriter file = new FileWriter(entryName))
+        try (FileWriter file = new FileWriter(fileName))
         {
             file.write(logArray.toJSONString());
         }
