@@ -2,6 +2,8 @@ package frc.robot;
 
 import java.util.List;
 
+import org.photonvision.PhotonPoseEstimator.PoseStrategy;
+
 import ca.frc6390.athena.controllers.ElevatorFeedForwardsSendable;
 import ca.frc6390.athena.core.RobotCore.RobotCoreConfig;
 import ca.frc6390.athena.core.RobotDrivetrain.RobotDrivetrainIDs.DrivetrainIDs;
@@ -30,6 +32,7 @@ import ca.frc6390.athena.sensors.camera.limelight.LimeLight.PoseEstimateWithLate
 import ca.frc6390.athena.sensors.limitswitch.GenericLimitSwitch.GenericLimitSwitchConfig;
 import ca.frc6390.athena.sensors.camera.ConfigurableCamera;
 import ca.frc6390.athena.sensors.camera.limelight.LimeLightConfig;
+import ca.frc6390.athena.sensors.camera.photonvision.PhotonVisionConfig;
 import edu.wpi.first.math.controller.ArmFeedforward;
 import edu.wpi.first.math.controller.ElevatorFeedforward;
 import edu.wpi.first.math.controller.ProfiledPIDController;
@@ -82,8 +85,8 @@ public interface Constants {
         {                                                                 
         LimeLightConfig.table("limelight-left").setTrustDistance(100).setUseForLocalization(true).setCameraRobotSpace(new Transform3d(Units.inchesToMeters(-0.5),Units.inchesToMeters(9.25),Units.inchesToMeters(8),new Rotation3d(0, Units.degreesToRadians(-15), Units.degreesToRadians(-15)))).setPoseEstimateType(PoseEstimateWithLatencyType.BOT_POSE_MT2_BLUE).setLocalizationTagFilter(17,18,19,20,21,22,6,7,8,9,10,11), 
         LimeLightConfig.table("limelight-right").setTrustDistance(100).setUseForLocalization(true).setCameraRobotSpace(new Transform3d(Units.inchesToMeters(-0.5),Units.inchesToMeters(-9.25),Units.inchesToMeters(8),new Rotation3d(0,  Units.degreesToRadians(-15), Units.degreesToRadians(15)))).setPoseEstimateType(PoseEstimateWithLatencyType.BOT_POSE_MT2_BLUE).setLocalizationTagFilter(17,18,19,20,21,22,6,7,8,9,10,11),
-        // PhotonVisionConfig.table("Tag").setTrustDistance(1).setUseForLocalization(false).setCameraRobotSpace(new Transform3d(-Units.inchesToMeters(10.5),-Units.inchesToMeters(9.5),Units.inchesToMeters(36),new Rotation3d(0, 0, 180))).setPoseStrategy(PoseStrategy.MULTI_TAG_PNP_ON_COPROCESSOR),
-        // PhotonVisionConfig.table("TagFront").setTrustDistance(1).setUseForLocalization(false).setCameraRobotSpace(new Transform3d(-Units.inchesToMeters(7),Units.inchesToMeters(8.5),Units.inchesToMeters(40),new Rotation3d(0, 0, 0))).setPoseStrategy(PoseStrategy.MULTI_TAG_PNP_ON_COPROCESSOR)
+        PhotonVisionConfig.table("Tag").setTrustDistance(1).setUseForLocalization(false).setCameraRobotSpace(new Transform3d(-Units.inchesToMeters(10.5),-Units.inchesToMeters(9.5),Units.inchesToMeters(36),new Rotation3d(0, 0, 180))).setPoseStrategy(PoseStrategy.MULTI_TAG_PNP_ON_COPROCESSOR),
+        PhotonVisionConfig.table("TagFront").setTrustDistance(1).setUseForLocalization(false).setCameraRobotSpace(new Transform3d(-Units.inchesToMeters(7),Units.inchesToMeters(8.5),Units.inchesToMeters(40),new Rotation3d(0, 0, 0))).setPoseStrategy(PoseStrategy.MULTI_TAG_PNP_ON_COPROCESSOR)
         };
 
         //X -11.75

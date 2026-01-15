@@ -32,7 +32,6 @@ import frc.robot.Constants.Superstructure.EndEffectorTuple;
 import frc.robot.Constants.Superstructure.SuperstructureTuple;
 import frc.robot.Constants.Turret.TurretSuperState;
 import frc.robot.Constants.Turret.TurretTuple;
-import frc.robot.commands.auto.V2;
 import frc.robot.subsystems.superstructure.CANdleSubsystem;
 
 public class Robot extends RobotCore<SwerveDrivetrain> {
@@ -55,8 +54,6 @@ public class Robot extends RobotCore<SwerveDrivetrain> {
   private final EnhancedXboxController driverController2 = new EnhancedXboxController(1).setSticksDeadzone(Constants.Controllers.STICK_DEADZONE); 
 
   public static SuperstructureState selectedState = SuperstructureState.L4;
-  public V2 alignRight;
-  public V2 alginLeft;
 
   PowerDistribution pdh;
 
@@ -103,9 +100,6 @@ public class Robot extends RobotCore<SwerveDrivetrain> {
 
     configureDriverController(driverController);
     configureOperatorController(driverController2);
-
-    alignRight = new V2(this, "limelight-left", true, superstructure, () -> selectedState);
-    alginLeft = new V2(this, "limelight-right", false, superstructure, () -> selectedState);
   }
 
   @Override
@@ -142,15 +136,7 @@ public class Robot extends RobotCore<SwerveDrivetrain> {
     controller.pov.left.whileTrue(setState(SuperstructureState.AlgaeLow)).onFalse(setState(SuperstructureState.Home));
     controller.pov.right.whileTrue(setState(SuperstructureState.AlgaeHigh)).onFalse(setState(SuperstructureState.Home));
    
-    controller.rightTrigger.tiggerAt(0.5)
-    .onTrue(()-> CommandScheduler.getInstance().schedule(alignRight))
-    .onFalse(() -> 
-    {
-      CommandScheduler.getInstance().cancel(alignRight); 
-      // CommandScheduler.getInstance().schedule(superstructure.setState(SuperstructureState.Score));
-    }
-    );
-    controller.leftTrigger.tiggerAt(0.5).onTrue(()-> CommandScheduler.getInstance().schedule(alginLeft)).onFalse(() -> {CommandScheduler.getInstance().cancel(alginLeft);});
+    
     controller.pov.down.onTrue(setState(SuperstructureState.HomePID)).after(1).onTrue(setState(SuperstructureState.Home));
 
     controller.a.onTrue(setState(SuperstructureState.L1));
