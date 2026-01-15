@@ -2,45 +2,15 @@
 
 package frc.robot.utils.Align;
  
-import ca.frc6390.athena.controllers.DelayedOutput;
- import ca.frc6390.athena.core.RobotBase;
-import ca.frc6390.athena.core.RobotSpeeds;
-import ca.frc6390.athena.sensors.camera.limelight.LimeLight;
- import ca.frc6390.athena.sensors.camera.limelight.LimeLight.PoseEstimateType;
- import ca.frc6390.athena.sensors.camera.limelight.LimeLight.PoseEstimateWithLatencyType;
-
-import static edu.wpi.first.units.Units.Rotation;
-
-import java.text.NumberFormat.Style;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.function.Supplier;
-
-import edu.wpi.first.math.MathUtil;
+import ca.frc6390.athena.core.RobotBase;
 import edu.wpi.first.math.controller.HolonomicDriveController;
 import edu.wpi.first.math.controller.PIDController;
- import edu.wpi.first.math.controller.ProfiledPIDController;
- import edu.wpi.first.math.filter.MedianFilter;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.math.geometry.Transform2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
-import edu.wpi.first.math.kinematics.Kinematics;
-import edu.wpi.first.math.trajectory.TrajectoryGenerator;
-import edu.wpi.first.math.trajectory.TrajectoryGenerator.ControlVectorList;
-import edu.wpi.first.math.trajectory.TrapezoidProfile.Constraints;
 import edu.wpi.first.math.util.Units;
-import edu.wpi.first.util.sendable.Sendable;
-import edu.wpi.first.wpilibj.DriverStation;
-import edu.wpi.first.wpilibj.DriverStation.Alliance;
-import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
- import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.math.trajectory.Trajectory;
-import edu.wpi.first.math.trajectory.TrajectoryConfig;
  
  public class AlignHelper {
 
@@ -90,13 +60,12 @@ import edu.wpi.first.math.trajectory.TrajectoryConfig;
 
     for (AlignCamera alignCamera : cams) 
     {
-      LimeLight cam = alignCamera.getLimelight();
-      if(cam.hasValidTarget() && cam.getAprilTagID() == tagId)
+      if(alignCamera.hasValidTarget() && alignCamera.getTagId() == tagId)
       {
-      double dist = cam.getPoseEstimate(PoseEstimateWithLatencyType.BOT_POSE_MT2_BLUE).getRaw()[9];
+      double dist = alignCamera.getDistanceToTag();
       //DANGER
-      double dist1 = Math.cos(Math.toRadians(cam.getTargetVerticalOffset())) * dist; 
-      double angle1 =  cam.getTargetHorizontalOffset() - alignCamera.getYaw() -base.getLocalization().getRelativePose().getRotation().getDegrees() ;
+      double dist1 = Math.cos(Math.toRadians(alignCamera.getTargetVerticalOffset())) * dist; 
+      double angle1 =  alignCamera.getTargetHorizontalOffset() - alignCamera.getYaw() -base.getLocalization().getRelativePose().getRotation().getDegrees() ;
       double x1 = (Math.cos(Math.toRadians(angle1)) * dist1) - alignCamera.getXOffset();
       double y1 = (Math.sin(Math.toRadians(angle1)) * dist1)- alignCamera.getYOffset(); 
 
