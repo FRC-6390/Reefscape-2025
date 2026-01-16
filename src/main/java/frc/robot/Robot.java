@@ -4,24 +4,36 @@
 
 package frc.robot;
 
+import org.photonvision.PhotonCamera;
+
 import ca.frc6390.athena.controllers.EnhancedXboxController;
 import ca.frc6390.athena.core.RobotAuto;
 import ca.frc6390.athena.core.RobotCore;
 import ca.frc6390.athena.core.RobotSendableSystem.SendableLevel;
 import ca.frc6390.athena.drivetrains.swerve.SwerveDrivetrain;
+import ca.frc6390.athena.logging.TelemetryRegistry;
 import ca.frc6390.athena.mechanisms.ArmMechanism.StatefulArmMechanism;
 import ca.frc6390.athena.mechanisms.FlywheelMechanism.StatefulFlywheelMechanism;
 import ca.frc6390.athena.mechanisms.StatefulMechanism;
 import ca.frc6390.athena.mechanisms.SuperstructureMechanism;
 import ca.frc6390.athena.mechanisms.ElevatorMechanism.StatefulElevatorMechanism;
 import ca.frc6390.athena.mechanisms.TurretMechanism.StatefulTurretMechanism;
+import ca.frc6390.athena.mechanisms.examples.ExampleTurretSuperstructure.ShooterState;
 import ca.frc6390.athena.sensors.camera.LocalizationCamera;
+import ca.frc6390.athena.sensors.camera.limelight.LimeLight;
+import ca.frc6390.athena.sensors.camera.limelight.LimeLightConfig;
+import ca.frc6390.athena.sensors.camera.photonvision.PhotonVision;
+import ca.frc6390.athena.sensors.camera.photonvision.PhotonVisionConfig;
+import edu.wpi.first.math.controller.HolonomicDriveController;
+import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.PowerDistribution;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.PowerDistribution.ModuleType;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
@@ -33,10 +45,22 @@ import frc.robot.Constants.Superstructure.SuperstructureTuple;
 import frc.robot.Constants.Turret.TurretSuperState;
 import frc.robot.Constants.Turret.TurretTuple;
 import frc.robot.subsystems.superstructure.CANdleSubsystem;
+import frc.robot.utils.Align.DriveToPoint;
+import frc.robot.utils.Aiming.ShotSolver;
+import frc.robot.utils.Align.AutomationCamera;
+import frc.robot.utils.Align.RelevantPosition;
+import frc.robot.utils.Align.AprilTagMap.AprilTags;
+import frc.robot.utils.GameManager.TimedActionStep;
+import frc.robot.utils.GameManager.Objective;
+import frc.robot.utils.GameManager.ObjectiveCommand;
+import frc.robot.utils.GameManager.ObjectivePlanner;
+import frc.robot.utils.GameManager.Objectives;
+import frc.robot.utils.GameManager.ActionSequence;
+import frc.robot.utils.GameManager.ActionStep;
 
 public class Robot extends RobotCore<SwerveDrivetrain> {
 
-  private final SuperstructureMechanism<SuperstructureState, SuperstructureTuple> superstructure;
+  public final SuperstructureMechanism<SuperstructureState, SuperstructureTuple> superstructure;
   private final SuperstructureMechanism<EndEffectorState, EndEffectorTuple> endEffector;
   private final SuperstructureMechanism<TurretSuperState, TurretTuple> turretSuperstructure;
   public final StatefulTurretMechanism<Constants.Turret.TurretState> turret;
@@ -48,10 +72,23 @@ public class Robot extends RobotCore<SwerveDrivetrain> {
   public final StatefulMechanism<Constants.EndEffector.RollerState> algaeRollers;//.shuffleboard("Algae Rollers", SendableLevel.COMP);;
   public final StatefulElevatorMechanism<ElevatorState> elevator;
 
+
+  public RelevantPosition CLIMB = new RelevantPosition("Climb", AprilTags.CLIMB.getAprilTag(), new Pose2d(0.254, -0.5, new Rotation2d()), this, Constants.DriveTrain.camLeft, Constants.DriveTrain.camRight);
+  public RelevantPosition HUB = new RelevantPosition("Hub", AprilTags.HUB.getAprilTag(), new Pose2d(-0.254, 0, new Rotation2d()), this, Constants.DriveTrain.camLeft, Constants.DriveTrain.camRight);
+  
+  
+  public static double armSupplier = -92d;
+  public PIDController rController = new PIDController(0.11, 0, 0);
+  public PIDController xController = new PIDController(1.25, 0, 0);
+  public PIDController yController = new PIDController(1.25, 0, 0);
+
+
+
   public CANdleSubsystem candle = new CANdleSubsystem(this);
   
   private final EnhancedXboxController driverController = new EnhancedXboxController(0).setLeftInverted(true).setRightInverted(true).setSticksDeadzone(0.15).setLeftSlewrate(5);
   private final EnhancedXboxController driverController2 = new EnhancedXboxController(1).setSticksDeadzone(Constants.Controllers.STICK_DEADZONE); 
+
 
   public static SuperstructureState selectedState = SuperstructureState.L4;
 
@@ -59,7 +96,6 @@ public class Robot extends RobotCore<SwerveDrivetrain> {
 
   public Robot() {  
     super(Constants.DriveTrain.ROBOT_BASE);
-
     superstructure = Constants.Superstructure.SUPERSTRUCTURE_CONFIG.build();
     endEffector = superstructure.getMechanisms().superstructure(SuperstructureTuple::endEffector);
     turretSuperstructure = Constants.Turret.TURRET_SUPERSTRUCTURE_CONFIG.build();
@@ -84,6 +120,7 @@ public class Robot extends RobotCore<SwerveDrivetrain> {
     algaeRollers.shuffleboard("Algae Rollers", SendableLevel.DEBUG);
     elevator.shuffleboard("Elevator", SendableLevel.DEBUG);
 
+
     shuffleboard(SendableLevel.DEBUG);
     registerMechanism(superstructure, turretSuperstructure);
 
@@ -106,6 +143,7 @@ public class Robot extends RobotCore<SwerveDrivetrain> {
   protected void onRobotInit() {
      pdh.clearStickyFaults();
      getLocalization().resetRelativePose(0, 0, 0);
+
   }
 
   @Override
@@ -118,6 +156,17 @@ public class Robot extends RobotCore<SwerveDrivetrain> {
     Rotation2d offset = Rotation2d.fromDegrees(DriverStation.getAlliance().get().equals(Alliance.Blue) ? 0 : 180);
     getIMU().setVirtualAxis("driver", getIMU().getVirtualAxis("field").minus(offset));
   }
+
+  @Override
+  protected void onRobotPeriodic() {
+    armSupplier = ShotSolver.computeAngleInDegrees(Units.inchesToMeters(33), Units.inchesToMeters(43), HUB.getDistanceToTarget(), rollers.getVelocity(), Units.inchesToMeters(2));
+    double rot = HUB.getAngleToTarget().getDegrees();
+    SmartDashboard.putNumber("Arm Supplier", armSupplier);
+    SmartDashboard.putNumber("Rotation", rot);
+
+  }
+
+
 
   public void configureDriverController(EnhancedXboxController controller)
   {
@@ -133,9 +182,10 @@ public class Robot extends RobotCore<SwerveDrivetrain> {
 
     controller.rightBumper.onTrue(setState(SuperstructureState.Score));
 
+    controller.leftTrigger.tiggerAt(0.5).onTrue(CLIMB.driveTo(rController, xController, yController));
+
     controller.pov.left.whileTrue(setState(SuperstructureState.AlgaeLow)).onFalse(setState(SuperstructureState.Home));
     controller.pov.right.whileTrue(setState(SuperstructureState.AlgaeHigh)).onFalse(setState(SuperstructureState.Home));
-   
     
     controller.pov.down.onTrue(setState(SuperstructureState.HomePID)).after(1).onTrue(setState(SuperstructureState.Home));
 
@@ -195,7 +245,7 @@ public class Robot extends RobotCore<SwerveDrivetrain> {
     return new InstantCommand(() -> superstructure.getStateMachine().queueState(state));
   }
 
-  private void setSuper(SuperstructureState state) {
+  public void setSuper(SuperstructureState state) {
     superstructure.getStateMachine().queueState(state);
   }
 

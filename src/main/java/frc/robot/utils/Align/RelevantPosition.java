@@ -2,6 +2,7 @@
 
 package frc.robot.utils.Align;
  
+import ca.frc6390.athena.core.RobotCore;
 import edu.wpi.first.math.controller.HolonomicDriveController;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.geometry.Pose2d;
@@ -10,9 +11,10 @@ import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
-import frc.robot.Robot;
+import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.SubsystemBase;
  
- public class AlignHelper {
+ public class RelevantPosition extends SubsystemBase {
 
   public enum AlignMode
   {
@@ -21,36 +23,28 @@ import frc.robot.Robot;
   }
 
 
-  public AlignCamera[] cams;
+  private AutomationCamera[] cams;
 
-  public Robot base;
+  public RobotCore<?> base;
   
-  public int tagId = -1;
-  public double targetMeasurement;
-  public Pose2d finalPose2d;
-  public PIDController rController;
+  private int tagId = -1;
+  private AprilTag tag;
+  private double targetMeasurement;
+  private Pose2d finalPose2d;
 
-  public HolonomicDriveController controller;
-  public AlignMode mode = AlignMode.PARALLEL;
-
+  private String name;
 
 
-   public AlignHelper(int tagId, Pose2d targetPose2d ,Robot base, PIDController rController, HolonomicDriveController controller, AlignMode mode, AlignCamera... cams)
+   public RelevantPosition(String name,AprilTag tag, Pose2d targetPose2d ,RobotCore<?> base, AutomationCamera... cams)
    {
     this.cams = cams;
     this.base = base; 
     this.finalPose2d = targetPose2d;
-    this.rController = rController;
-    this.mode = mode;
-    this.controller = controller;
-    this.tagId = tagId;
+    this.tag = tag;
+    this.tagId = (int) tag.getId();
+    this.name = name;
    }
 
-   public void init() 
-   {
-    rController.enableContinuousInput(-180, 180);
-    rController.setTolerance(5);    
-  }
   
    public Pose2d getPose2d()
    {
@@ -58,13 +52,12 @@ import frc.robot.Robot;
     double y = 0;
     double count = 0;
 
-    for (AlignCamera alignCamera : cams) 
+    for (AutomationCamera alignCamera : cams) 
     {
       if(alignCamera.hasValidTarget() && alignCamera.getTagId() == tagId)
       {
       double dist = alignCamera.getDistanceToTag();
-      //DANGER
-      double dist1 = Math.cos(Math.toRadians(alignCamera.getTargetVerticalOffset())) * dist; 
+      double dist1 = Math.cos(Math.toRadians(alignCamera.getTargetVerticalOffset() + alignCamera.getPitch())) * dist; 
       double angle1 =  alignCamera.getTargetHorizontalOffset() - alignCamera.getYaw() -base.getLocalization().getRelativePose().getRotation().getDegrees() ;
       double x1 = (Math.cos(Math.toRadians(angle1)) * dist1) - alignCamera.getXOffset();
       double y1 = (Math.sin(Math.toRadians(angle1)) * dist1)- alignCamera.getYOffset(); 
@@ -105,13 +98,18 @@ import frc.robot.Robot;
     if(finalPose2d != null)
     {
 
-    SmartDashboard.putNumber("Scoring Pos X", Units.metersToInches(finalPose2d.rotateBy(AprilTagMap.AprilTags.getRotation2d(tagId)).getX()));
-    SmartDashboard.putNumber("Scoring Pos Y", Units.metersToInches(finalPose2d.rotateBy(AprilTagMap.AprilTags.getRotation2d(tagId)).getY()));
+    SmartDashboard.putNumber("Scoring Pos X", Units.metersToInches(finalPose2d.rotateBy(tag.getRotation2d()).getX()));
+    SmartDashboard.putNumber("Scoring Pos Y", Units.metersToInches(finalPose2d.rotateBy(tag.getRotation2d()).getY()));
     SmartDashboard.putNumber("Tag ID", tagId);
 
     }
   }
 
+  public void update()
+  {
+    setRelativePose();
+    shuffleboard();
+  }
   public void setGoal(Pose2d targetPose2d)
   {
     finalPose2d = targetPose2d;
@@ -129,7 +127,7 @@ import frc.robot.Robot;
 
   public double getDistanceToTarget()
   {
-    return base.getLocalization().getRelativePose().getTranslation().getDistance(finalPose2d.rotateBy(AprilTagMap.AprilTags.getRotation2d(tagId)).getTranslation().times(-1));
+    return base.getLocalization().getRelativePose().getTranslation().getDistance(finalPose2d.rotateBy(tag.getRotation2d()).getTranslation().times(-1));
   }
 
   public Rotation2d getAngleToTag()
@@ -139,28 +137,30 @@ import frc.robot.Robot;
 
   public Rotation2d getAngleToTarget()
   {
-    Translation2d f = finalPose2d.rotateBy(AprilTagMap.AprilTags.getRotation2d(tagId)).getTranslation().times(-1);
+    Translation2d f = finalPose2d.rotateBy(tag.getRotation2d()).getTranslation().times(-1);
     return Rotation2d.fromRadians(Math.atan2(f.getY() - base.getLocalization().getRelativePose().getTranslation().getY(), f.getX() - base.getLocalization().getRelativePose().getTranslation().getX()));
   }
 
 
-  public ChassisSpeeds calculateSpeeds() 
+  public DriveToPoint driveTo(PIDController rController, PIDController xController, PIDController yController)
   {
-    controller.getXController().setP(1.75);
-    controller.getYController().setP(1.75);
+    return new DriveToPoint(this, rController, xController, yController);
+  }
 
-    double targetRot = 0;
+
+  public ChassisSpeeds calculateSpeeds(PIDController rController, PIDController xController, PIDController yController, AlignMode mode) 
+  {
     if(mode.equals(AlignMode.PARALLEL))
     {
-      targetRot = AprilTagMap.AprilTags.getRotation2d(tagId).getDegrees();
+      targetMeasurement = tag.getRotation2d().getDegrees();
     }
     else if(mode.equals(AlignMode.LOOKAT))
     {
-      targetRot = Math.atan2(base.getLocalization().getRelativePose().getY(), base.getLocalization().getRelativePose().getX());
+      targetMeasurement = Math.atan2(base.getLocalization().getRelativePose().getY(), base.getLocalization().getRelativePose().getX());
     }
-    double rSpeed = rController.calculate(base.getLocalization().getRelativePose().getRotation().getDegrees(), targetRot);
-    double xSpeed = controller.getXController().calculate(base.getLocalization().getRelativePose().getX(), finalPose2d.rotateBy(AprilTagMap.AprilTags.getRotation2d(tagId)).getX() * -1);
-    double ySpeed = controller.getYController().calculate(base.getLocalization().getRelativePose().getY(), finalPose2d.rotateBy(AprilTagMap.AprilTags.getRotation2d(tagId)).getY() * -1);   
+    double rSpeed = rController.calculate(base.getLocalization().getRelativePose().getRotation().getDegrees(), targetMeasurement);
+    double xSpeed = xController.calculate(base.getLocalization().getRelativePose().getX(), finalPose2d.rotateBy(tag.getRotation2d()).getX() * -1);
+    double ySpeed = yController.calculate(base.getLocalization().getRelativePose().getY(), finalPose2d.rotateBy(tag.getRotation2d()).getY() * -1);   
     
     ChassisSpeeds spds = ChassisSpeeds.fromFieldRelativeSpeeds
                                                 (
@@ -174,5 +174,10 @@ import frc.robot.Robot;
                                                 );
     return spds;
   
+ }
+
+ @Override
+ public void periodic() {
+     update();
  }
 }

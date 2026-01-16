@@ -9,40 +9,47 @@ import org.photonvision.targeting.PhotonTrackedTarget;
 
 import ca.frc6390.athena.sensors.camera.limelight.LimeLight;
 import ca.frc6390.athena.sensors.camera.limelight.LimeLight.PoseEstimateWithLatencyType;
-import ca.frc6390.athena.sensors.camera.photonvision.PhotonVision;
 
 /** Add your docs here. */
-public class AlignCamera 
+public class AutomationCamera 
 {
     public LimeLight ll;
-    public PhotonVision pc;
+    public PhotonCamera pc;
 
     public double xOffsetFromCenter;
     public double yOffsetFromCenter;
     public double heighOffGround;
     public double yaw;
+    public double pitch;
 
-    public AlignCamera(LimeLight ll, double x, double y, double yaw, double height)
+    public AutomationCamera(LimeLight ll, double x, double y, double yaw, double pitch,double height)
     {
         this.ll = ll;
         this.xOffsetFromCenter = x;
         this.yOffsetFromCenter = y;
         this.yaw = yaw;
+        this.pitch = pitch;
         this.heighOffGround = height;
     }
 
-    public AlignCamera(PhotonVision pc, double x, double y, double yaw, double height)
+    public AutomationCamera(PhotonCamera pc, double x, double y, double yaw, double pitch, double height)
     {
         this.pc = pc;
         this.xOffsetFromCenter = x;
         this.yOffsetFromCenter = y;
         this.yaw = yaw;
+        this.pitch = pitch;
         this.heighOffGround = height;
     }
 
     public double getYaw()
     {
         return yaw;
+    }
+
+    public double getPitch()
+    {
+        return pitch;
     }
     public double getXOffset()
     {
@@ -59,7 +66,7 @@ public class AlignCamera
         return ll;
     }
 
-    public PhotonVision getPhotonVision()
+    public PhotonCamera getPhotonVision()
     {
         return pc;
     }
@@ -83,12 +90,10 @@ public class AlignCamera
         }
         else
         {
-         try (PhotonCamera camera = new PhotonCamera(pc.getName())) 
-         {
-            var result = camera.getAllUnreadResults().get(0);
+            var result = pc.getAllUnreadResults().get(0);
             PhotonTrackedTarget target = result.getBestTarget();
             return target.getBestCameraToTarget().getTranslation().getNorm();
-         }
+         
         }
     }
 
@@ -100,12 +105,10 @@ public class AlignCamera
         }
         else
         {
-         try (PhotonCamera camera = new PhotonCamera(pc.getName())) 
-         {
-            var result = camera.getAllUnreadResults().get(0);
+            var result = pc.getAllUnreadResults().get(0);
             PhotonTrackedTarget target = result.getBestTarget();
             return target.getYaw();
-         }
+         
         }
     }
 
@@ -118,12 +121,10 @@ public class AlignCamera
         }
         else
         {
-         try (PhotonCamera camera = new PhotonCamera(pc.getName())) 
-         {
-            var result = camera.getAllUnreadResults().get(0);
+            var result = pc.getAllUnreadResults().get(0);
             PhotonTrackedTarget target = result.getBestTarget();
             return target.getPitch();
-         }
+         
         }
     }
 
@@ -135,7 +136,7 @@ public class AlignCamera
         }
         else
         {
-            return pc.hasValidTarget();
+            return pc.getAllUnreadResults().get(0).hasTargets();
         }
     }
 
@@ -147,12 +148,9 @@ public class AlignCamera
         }
         else
         {
-        try (PhotonCamera camera = new PhotonCamera(pc.getName())) 
-         {
-            var result = camera.getAllUnreadResults().get(0);
+            var result = pc.getAllUnreadResults().get(0);
             PhotonTrackedTarget target = result.getBestTarget();
             return target.getFiducialId();
-         }
         }
     }
 

@@ -1,76 +1,30 @@
 package frc.robot.utils.Align;
 
-import com.pathplanner.lib.path.PathPlannerPath;
 
-import ca.frc6390.athena.sensors.camera.limelight.LimeLight;
-import ca.frc6390.athena.sensors.camera.limelight.LimeLightConfig;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.math.geometry.Translation2d;
-import edu.wpi.first.math.util.Units;
-import edu.wpi.first.wpilibj.DriverStation;
-import edu.wpi.first.wpilibj.DriverStation.Alliance;
-import frc.robot.Robot;
 public class AprilTagMap {
-
     
-
      public enum AprilTags {
 
-        NONE(-1, -1, Rotation2d.fromDegrees(0)),
+        NONE(new AprilTag(-1, -1, new Pose2d(), new Pose2d(), Rotation2d.fromDegrees(0))),
 
-        A(10, 25, Rotation2d.fromDegrees(0)),
-
-        C(-1, -1, Rotation2d.fromDegrees(0)),
-
-        E(-1, -1, Rotation2d.fromDegrees(0)),
+        CLIMB(new AprilTag(10, 25, new Pose2d(), new Pose2d(), Rotation2d.fromDegrees(0))),
         
-        G(-1, -1, Rotation2d.fromDegrees(0)),
-
-        I(-1, -1, Rotation2d.fromDegrees(0)),
-
-        K(15, 32, Rotation2d.fromDegrees(0));
-
-        private final long redId;
-        private final long blueId;
+        TOP(new AprilTag(0, 0, new Pose2d(), new Pose2d(), Rotation2d.fromDegrees(0))),
 
 
-        private final Rotation2d rotation;
-    
-        AprilTags(long redid,long blueid,Rotation2d rotation) {
-            this.rotation = rotation;
-            this.redId = redid;
-            this.blueId = blueid;
+        HUB(new AprilTag(15, 32, new Pose2d(), new Pose2d(), Rotation2d.fromDegrees(0)));
 
-        }
-
-        public long getApriltagId() {
-           return getApriltagId(DriverStation.getAlliance().get());
-        }
-
-        
-        public long getApriltagId(Alliance team) {
-            switch (team) {
-                case Red:
-                    return redId;
-                case Blue:
-                    return blueId;
-                default:
-                    DriverStation.reportError("Cant Find Team!!!", new IllegalArgumentException("Unknown team: " + team).getStackTrace());
-                    return -1;
-            }
-        }
-
-        public static Rotation2d getRotation2d(long id)
+        public AprilTag tag;
+        AprilTags(AprilTag tag)
         {
-            Rotation2d rot = new Rotation2d();
-            for (AprilTags tag : AprilTags.values()) {
-                if(tag.getApriltagId() == id)
-                {
-                    rot = tag.rotation;
-                }   
-            } 
-            return rot;
+            this.tag = tag;
+        }
+
+        public AprilTag getAprilTag()
+        {
+            return tag;
         }
 }
 }
