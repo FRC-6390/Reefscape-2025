@@ -15,7 +15,6 @@ import ca.frc6390.athena.mechanisms.StatefulMechanism;
 import ca.frc6390.athena.mechanisms.SuperstructureMechanism;
 import ca.frc6390.athena.mechanisms.ElevatorMechanism.StatefulElevatorMechanism;
 import ca.frc6390.athena.mechanisms.TurretMechanism.StatefulTurretMechanism;
-import ca.frc6390.athena.sensors.camera.LocalizationCamera;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.DriverStation;
@@ -111,7 +110,7 @@ public class Robot extends RobotCore<SwerveDrivetrain> {
   @Override
   protected void onRobotInit() {
      pdh.clearStickyFaults();
-     getLocalization().resetRelativePose(0, 0, 0);
+     getLocalization().resetPose("relative",0, 0, 0);
   }
 
   @Override
@@ -129,7 +128,7 @@ public class Robot extends RobotCore<SwerveDrivetrain> {
   {
 
     controller.start.onTrue(() -> getDrivetrain().getIMU().setYaw(0))
-                    .after(2).onTrue(() -> {getLocalization().resetFieldPose(0,0, 0); getLocalization().resetRelativePose(0,0, 0);});
+                    .after(2).onTrue(() -> {getLocalization().resetPose("field",0,0, 0); getLocalization().resetPose("relative",0,0, 0);});
 
     controller.leftBumper.onTrue(
         Commands.either(

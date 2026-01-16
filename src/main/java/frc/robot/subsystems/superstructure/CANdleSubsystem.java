@@ -4,7 +4,7 @@ package frc.robot.subsystems.superstructure;
 import com.ctre.phoenix6.hardware.CANdle;
 
 import ca.frc6390.athena.core.RobotCore;
-import ca.frc6390.athena.sensors.camera.LocalizationCamera;
+import ca.frc6390.athena.sensors.camera.VisionCamera;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
 
@@ -29,7 +29,7 @@ public class CANdleSubsystem extends SubsystemBase {
   }
 
   public boolean closeEnough(String table) {
-    LocalizationCamera ll = base.getVision().getCamera(table);
+    VisionCamera ll = base.getVision().getCamera(table);
     return ll.hasValidTarget() && ll.getTargetDistanceMeters().getAsDouble() <= 0.525
         && ll.getTargetYawDegrees().getAsDouble() < 5;
   }
