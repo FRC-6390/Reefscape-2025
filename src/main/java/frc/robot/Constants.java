@@ -1,6 +1,9 @@
 package frc.robot;
 
 import java.util.List;
+import java.util.function.DoubleSupplier;
+
+import org.photonvision.PhotonPoseEstimator.PoseStrategy;
 
 import ca.frc6390.athena.controllers.ElevatorFeedForwardsSendable;
 import ca.frc6390.athena.core.RobotCore.RobotCoreConfig;
@@ -27,10 +30,12 @@ import ca.frc6390.athena.mechanisms.StateMachine.SetpointProvider;
 import ca.frc6390.athena.mechanisms.TurretMechanism.StatefulTurretMechanism;
 import ca.frc6390.athena.mechanisms.SuperstructureConfig;
 import ca.frc6390.athena.mechanisms.sim.MechanismVisualizationConfig;
+import ca.frc6390.athena.sensors.camera.limelight.LimeLight;
 import ca.frc6390.athena.sensors.camera.limelight.LimeLight.PoseEstimateWithLatencyType;
 import ca.frc6390.athena.sensors.limitswitch.GenericLimitSwitch.GenericLimitSwitchConfig;
 import ca.frc6390.athena.sensors.camera.ConfigurableCamera;
 import ca.frc6390.athena.sensors.camera.limelight.LimeLightConfig;
+import ca.frc6390.athena.sensors.camera.photonvision.PhotonVisionConfig;
 import edu.wpi.first.math.controller.ArmFeedforward;
 import edu.wpi.first.math.controller.ElevatorFeedforward;
 import edu.wpi.first.math.controller.ProfiledPIDController;
@@ -42,7 +47,8 @@ import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.math.trajectory.TrapezoidProfile.Constraints;
 import edu.wpi.first.math.util.Units;
 import frc.robot.Constants.EndEffector.ArmState;
-import frc.robot.Constants.EndEffector.WristState;;
+import frc.robot.Constants.EndEffector.WristState;
+import frc.robot.utils.Align.AutomationCamera;;
 
 public interface Constants {
     
@@ -86,9 +92,13 @@ public interface Constants {
         {                                                                 
         LimeLightConfig.table("limelight-left").setTrustDistance(100).setUseForLocalization(true).setCameraRobotSpace(new Transform3d(Units.inchesToMeters(-0.5),Units.inchesToMeters(9.25),Units.inchesToMeters(8),new Rotation3d(0, Units.degreesToRadians(-15), Units.degreesToRadians(-15)))).setPoseEstimateType(PoseEstimateWithLatencyType.BOT_POSE_MT2_BLUE).setLocalizationTagFilter(17,18,19,20,21,22,6,7,8,9,10,11), 
         LimeLightConfig.table("limelight-right").setTrustDistance(100).setUseForLocalization(true).setCameraRobotSpace(new Transform3d(Units.inchesToMeters(-0.5),Units.inchesToMeters(-9.25),Units.inchesToMeters(8),new Rotation3d(0,  Units.degreesToRadians(-15), Units.degreesToRadians(15)))).setPoseEstimateType(PoseEstimateWithLatencyType.BOT_POSE_MT2_BLUE).setLocalizationTagFilter(17,18,19,20,21,22,6,7,8,9,10,11),
-        // PhotonVisionConfig.table("Tag").setTrustDistance(1).setUseForLocalization(false).setCameraRobotSpace(new Transform3d(-Units.inchesToMeters(10.5),-Units.inchesToMeters(9.5),Units.inchesToMeters(36),new Rotation3d(0, 0, 180))).setPoseStrategy(PoseStrategy.MULTI_TAG_PNP_ON_COPROCESSOR),
-        // PhotonVisionConfig.table("TagFront").setTrustDistance(1).setUseForLocalization(false).setCameraRobotSpace(new Transform3d(-Units.inchesToMeters(7),Units.inchesToMeters(8.5),Units.inchesToMeters(40),new Rotation3d(0, 0, 0))).setPoseStrategy(PoseStrategy.MULTI_TAG_PNP_ON_COPROCESSOR)
+        PhotonVisionConfig.table("Tag").setTrustDistance(1).setUseForLocalization(false).setCameraRobotSpace(new Transform3d(-Units.inchesToMeters(10.5),-Units.inchesToMeters(9.5),Units.inchesToMeters(36),new Rotation3d(0, 0, 180))).setPoseStrategy(PoseStrategy.MULTI_TAG_PNP_ON_COPROCESSOR),
+        PhotonVisionConfig.table("TagFront").setTrustDistance(1).setUseForLocalization(false).setCameraRobotSpace(new Transform3d(-Units.inchesToMeters(7),Units.inchesToMeters(8.5),Units.inchesToMeters(40),new Rotation3d(0, 0, 0))).setPoseStrategy(PoseStrategy.MULTI_TAG_PNP_ON_COPROCESSOR)
         };
+
+        AutomationCamera camLeft = new AutomationCamera(new LimeLight(new LimeLightConfig("limelight-left")), Units.inchesToMeters(0.5), Units.inchesToMeters(-9), 15, 0, 0);
+        AutomationCamera camRight = new AutomationCamera(new LimeLight(new LimeLightConfig("limelight-right")), Units.inchesToMeters(0.5), Units.inchesToMeters(9), -15, 0, 0);
+
 
         //X -11.75
         //Y 9 inches
@@ -184,26 +194,27 @@ public interface Constants {
         double ARM_MOTOR_REDUCTION = 100.0;
         double WRIST_MOTOR_REDUCTION = 100.0;
 
-        enum ArmState implements SetpointProvider<Double>{
-            Intaking(0), //150.38085937
-            AlgaeHigh(-112.14), //52.8
-            AlgaeLow(-113.5), //52.8
-            Home(-92), //61.083
-            StartConfiguration(-153), //0
-            Scoring(-72), //78.310546875
-            TransitionState(-85), //65
-            ScoringL4(-90), //60
-            AlgaeScore(-30), //120.58
-            Scoringl1(-84); //66.08
 
-            double angle;
-            ArmState(double angle){
+        enum ArmState implements SetpointProvider<Double>{
+            Intaking(() ->0), //150.38085937
+            AlgaeHigh(() ->-112.14), //52.8
+            AlgaeLow(() ->-113.5), //52.8
+            Home(() ->-92), //61.083
+            StartConfiguration(() ->-153), //0
+            Scoring(() ->-72), //78.310546875
+            TransitionState(() ->-85), //65
+            ScoringL4(() ->-90), //60
+            AlgaeScore(() ->-30), //120.58
+            Scoringl1(() -> Robot.armSupplier); //66.08
+
+            DoubleSupplier angle;
+            ArmState(DoubleSupplier angle){
                 this.angle = angle;
             }
 
             @Override
             public Double getSetpoint() {
-               return angle;
+               return angle.getAsDouble();
             }
 
         }
@@ -219,7 +230,8 @@ public interface Constants {
                 AlgaeScore(168.92),
 
                 StartConfiguration(0),
-                Scoringl1(109.95);
+                Scoringl1(109.95),
+                Aim(40);
 
     
                 double angle;
