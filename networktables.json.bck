@@ -2,7 +2,7 @@
   {
     "name": "/Preferences/Shuffleboard/Localization/Save Data/FieldPoseX",
     "type": "double",
-    "value": 8.964769088762935,
+    "value": 13.674806220290032,
     "properties": {
       "persistent": true
     }
@@ -10,7 +10,7 @@
   {
     "name": "/Preferences/Shuffleboard/Localization/Save Data/FieldPoseY",
     "type": "double",
-    "value": 5.262474342089668,
+    "value": 6.231447042548363,
     "properties": {
       "persistent": true
     }
@@ -42,7 +42,7 @@
   {
     "name": "/Preferences/Shuffleboard/Localization/Save Data/FieldPoseYawDeg",
     "type": "double",
-    "value": -176.0650702604555,
+    "value": 57.993100537909704,
     "properties": {
       "persistent": true
     }
@@ -50,7 +50,7 @@
   {
     "name": "/Preferences/Shuffleboard/Localization/Save Data/DriverYawDeg",
     "type": "double",
-    "value": 3.9349297395445118,
+    "value": -122.00689946209029,
     "properties": {
       "persistent": true
     }

@@ -43,7 +43,7 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
     this.tag = tag;
     this.tagId = (int) tag.getId();
     this.name = name;
-    this.base.getLocalization().addVirtualPose(name, () -> this.base.getLocalization().getVirtualPose(name));
+    // this.base.getLocalization().(name, () -> this.base.getLocalization().(name));
    }
 
   

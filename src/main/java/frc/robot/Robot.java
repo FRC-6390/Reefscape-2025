@@ -47,7 +47,7 @@ import frc.robot.utils.GameManager.TimedActionStep;
 import frc.robot.utils.GameManager.Objective;
 import frc.robot.utils.GameManager.ObjectiveCommand;
 import frc.robot.utils.GameManager.ObjectivePlanner;
-import frc.robot.utils.GameManager.Objectives;
+// import frc.robot.utils.GameManager.Objectives;
 import frc.robot.utils.GameManager.ActionSequence;
 import frc.robot.utils.GameManager.ActionStep;
 
@@ -66,8 +66,8 @@ public class Robot extends RobotCore<SwerveDrivetrain> {
   public final StatefulElevatorMechanism<ElevatorState> elevator;
 
 
-  public RelevantPosition CLIMB = new RelevantPosition("Climb", AprilTags.CLIMB.getAprilTag(), new Pose2d(0.254, -0.5, new Rotation2d()), this, Constants.DriveTrain.camLeft, Constants.DriveTrain.camRight);
-  public RelevantPosition HUB = new RelevantPosition("Hub", AprilTags.HUB.getAprilTag(), new Pose2d(-0.254, 0, new Rotation2d()), this, Constants.DriveTrain.camLeft, Constants.DriveTrain.camRight);
+  // public RelevantPosition CLIMB = new RelevantPosition("Climb", AprilTags.CLIMB.getAprilTag(), new Pose2d(0.254, -0.5, new Rotation2d()), this, Constants.DriveTrain.camLeft, Constants.DriveTrain.camRight);
+  // public RelevantPosition HUB = new RelevantPosition("Hub", AprilTags.HUB.getAprilTag(), new Pose2d(-0.254, 0, new Rotation2d()), this, Constants.DriveTrain.camLeft, Constants.DriveTrain.camRight);
   
   
   public static double armSupplier = -92d;
@@ -135,7 +135,7 @@ public class Robot extends RobotCore<SwerveDrivetrain> {
   @Override
   protected void onRobotInit() {
      pdh.clearStickyFaults();
-     getLocalization().resetPose("relative",0, 0, 0);
+    //  getLocalization().resetPose("relative",0, 0, 0);
   }
 
   @Override
@@ -151,10 +151,10 @@ public class Robot extends RobotCore<SwerveDrivetrain> {
 
   @Override
   protected void onRobotPeriodic() {
-    armSupplier = ShotSolver.computeAngleInDegrees(Units.inchesToMeters(33), Units.inchesToMeters(43), HUB.getDistanceToTarget(), rollers.getVelocity(), Units.inchesToMeters(2));
-    double rot = HUB.getAngleToTarget().getDegrees();
-    SmartDashboard.putNumber("Arm Supplier", armSupplier);
-    SmartDashboard.putNumber("Rotation", rot);
+    // armSupplier = ShotSolver.computeAngleInDegrees(Units.inchesToMeters(33), Units.inchesToMeters(43), HUB.getDistanceToTarget(), rollers.getVelocity(), Units.inchesToMeters(2));
+    // double rot = HUB.getAngleToTarget().getDegrees();
+    // SmartDashboard.putNumber("Arm Supplier", armSupplier);
+    // SmartDashboard.putNumber("Rotation", rot);
 
   }
 
@@ -174,7 +174,7 @@ public class Robot extends RobotCore<SwerveDrivetrain> {
 
     controller.rightBumper.onTrue(setState(SuperstructureState.Score));
 
-    controller.leftTrigger.tiggerAt(0.5).onTrue(CLIMB.driveTo(rController, xController, yController));
+    // controller.leftTrigger.tiggerAt(0.5).onTrue(CLIMB.driveTo(rController, xController, yController));
 
     controller.pov.left.whileTrue(setState(SuperstructureState.AlgaeLow)).onFalse(setState(SuperstructureState.Home));
     controller.pov.right.whileTrue(setState(SuperstructureState.AlgaeHigh)).onFalse(setState(SuperstructureState.Home));
