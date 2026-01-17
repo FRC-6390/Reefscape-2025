@@ -84,11 +84,55 @@ test {
 wpi.sim.addGui().defaultEnabled = true
 wpi.sim.addDriverstation()
 
+def mergedServicesDir = file("$buildDir/merged-services")
+
+task mergeServiceFiles {
+    description = 'Merges META-INF/services entries for ServiceLoader discovery in the fat jar.'
+    group = 'Build'
+    inputs.files configurations.runtimeClasspath
+    outputs.dir mergedServicesDir
+
+    doLast {
+        delete mergedServicesDir
+        mergedServicesDir.mkdirs()
+        def services = [:].withDefault { new LinkedHashSet<String>() }
+        def collectServiceLines = { FileTree tree ->
+            tree.visit { details ->
+                if (!details.isDirectory()) {
+                    def relPath = details.relativePath.pathString
+                    details.file.readLines().each { line ->
+                        def trimmed = line.trim()
+                        if (trimmed && !trimmed.startsWith('#')) {
+                            services[relPath].add(trimmed)
+                        }
+                    }
+                }
+            }
+        }
+
+        configurations.runtimeClasspath.each { File f ->
+            if (f.isDirectory()) {
+                collectServiceLines(fileTree(f).matching { include 'META-INF/services/**' })
+            } else if (f.name.endsWith('.jar')) {
+                collectServiceLines(zipTree(f).matching { include 'META-INF/services/**' })
+            }
+        }
+
+        services.each { relPath, lines ->
+            def outFile = new File(mergedServicesDir, relPath)
+            outFile.parentFile.mkdirs()
+            outFile.text = lines.join(System.lineSeparator()) + System.lineSeparator()
+        }
+    }
+}
+
 // Setting up my Jar File. In this case, adding all libraries into the main jar ('fat jar')
 // in order to make them all available at runtime. Also adding the manifest so WPILib
 // knows where to look for our Robot Class.
 jar {
+    dependsOn mergeServiceFiles
     from { configurations.runtimeClasspath.collect { it.isDirectory() ? it : zipTree(it) } }
+    from(mergedServicesDir)
     from('src') { into 'backup/src' }
     from('vendordeps') { into 'backup/vendordeps' }
     from('build.gradle') { into 'backup' }
