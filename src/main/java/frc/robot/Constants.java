@@ -354,146 +354,146 @@ public interface Constants {
         
     }
 
-    public interface Turret {
+    // public interface Turret {
 
-        int TURRET_MOTOR_ID = 40;
-        int TURRET_ENCODER_ID = 41;
-        int HOOD_MOTOR_ID = 42;
-        int HOOD_ENCODER_ID = 43;
-        int SHOOTER_MOTOR_ID = 44;
-        int SHOOTER_ENCODER_ID = 45;
+    //     int TURRET_MOTOR_ID = 40;
+    //     int TURRET_ENCODER_ID = 41;
+    //     int HOOD_MOTOR_ID = 42;
+    //     int HOOD_ENCODER_ID = 43;
+    //     int SHOOTER_MOTOR_ID = 44;
+    //     int SHOOTER_ENCODER_ID = 45;
 
-        double TURRET_GEAR_RATIO = 100.0;
-        double HOOD_GEAR_RATIO = 50.0;
-        double HOOD_LENGTH_METERS = Units.inchesToMeters(8.0);
+    //     double TURRET_GEAR_RATIO = 100.0;
+    //     double HOOD_GEAR_RATIO = 50.0;
+    //     double HOOD_LENGTH_METERS = Units.inchesToMeters(8.0);
 
-        enum TurretState implements SetpointProvider<Double> {
-            Off(0.0),
-            Hub(0.0),
-            Neutral(90.0),
-            Opponent(180.0);
+    //     enum TurretState implements SetpointProvider<Double> {
+    //         Off(0.0),
+    //         Hub(0.0),
+    //         Neutral(90.0),
+    //         Opponent(180.0);
 
-            double angleDeg;
-            TurretState(double angleDeg) {
-                this.angleDeg = angleDeg;
-            }
+    //         double angleDeg;
+    //         TurretState(double angleDeg) {
+    //             this.angleDeg = angleDeg;
+    //         }
 
-            @Override
-            public Double getSetpoint() {
-                return angleDeg;
-            }
-        }
+    //         @Override
+    //         public Double getSetpoint() {
+    //             return angleDeg;
+    //         }
+    //     }
 
-        enum HoodState implements SetpointProvider<Double> {
-            Stow(0.0),
-            Low(15.0),
-            High(45.0);
+    //     enum HoodState implements SetpointProvider<Double> {
+    //         Stow(0.0),
+    //         Low(15.0),
+    //         High(45.0);
 
-            double angleDeg;
-            HoodState(double angleDeg) {
-                this.angleDeg = angleDeg;
-            }
+    //         double angleDeg;
+    //         HoodState(double angleDeg) {
+    //             this.angleDeg = angleDeg;
+    //         }
 
-            @Override
-            public Double getSetpoint() {
-                return angleDeg;
-            }
-        }
+    //         @Override
+    //         public Double getSetpoint() {
+    //             return angleDeg;
+    //         }
+    //     }
 
-        enum ShooterState implements SetpointProvider<Double> {
-            Off(0.0),
-            SpinUp(rpm(3000.0)),
-            Fire(rpm(4500.0));
+    //     enum ShooterState implements SetpointProvider<Double> {
+    //         Off(0.0),
+    //         SpinUp(rpm(3000.0)),
+    //         Fire(rpm(4500.0));
 
-            double radiansPerSecond;
-            ShooterState(double radiansPerSecond) {
-                this.radiansPerSecond = radiansPerSecond;
-            }
+    //         double radiansPerSecond;
+    //         ShooterState(double radiansPerSecond) {
+    //             this.radiansPerSecond = radiansPerSecond;
+    //         }
 
-            @Override
-            public Double getSetpoint() {
-                return radiansPerSecond;
-            }
-        }
+    //         @Override
+    //         public Double getSetpoint() {
+    //             return radiansPerSecond;
+    //         }
+    //     }
 
-        record TurretTuple(TurretState turret, HoodState hood, ShooterState shooter) {}
+    //     record TurretTuple(TurretState turret, HoodState hood, ShooterState shooter) {}
 
-        enum TurretSuperState implements SetpointProvider<TurretTuple> {
-            Stowed(new TurretTuple(TurretState.Off, HoodState.Stow, ShooterState.Off)),
-            Aim(new TurretTuple(TurretState.Neutral, HoodState.Low, ShooterState.SpinUp)),
-            Fire(new TurretTuple(TurretState.Neutral, HoodState.High, ShooterState.Fire));
+    //     enum TurretSuperState implements SetpointProvider<TurretTuple> {
+    //         Stowed(new TurretTuple(TurretState.Off, HoodState.Stow, ShooterState.Off)),
+    //         Aim(new TurretTuple(TurretState.Neutral, HoodState.Low, ShooterState.SpinUp)),
+    //         Fire(new TurretTuple(TurretState.Neutral, HoodState.High, ShooterState.Fire));
 
-            private final TurretTuple setpoint;
+    //         private final TurretTuple setpoint;
 
-            TurretSuperState(TurretTuple setpoint) {
-                this.setpoint = setpoint;
-            }
+    //         TurretSuperState(TurretTuple setpoint) {
+    //             this.setpoint = setpoint;
+    //         }
 
-            @Override
-            public TurretTuple getSetpoint() {
-                return setpoint;
-            }
-        }
+    //         @Override
+    //         public TurretTuple getSetpoint() {
+    //             return setpoint;
+    //         }
+    //     }
 
-        MechanismConfig<StatefulTurretMechanism<TurretState>> TURRET_CONFIG =
-            MechanismConfig.statefulTurret(new SimpleMotorFeedforward(0.2, 0.1, 0.0), TurretState.Off)
-                .addMotors(AthenaMotor.KRAKEN_X60, TURRET_MOTOR_ID)
-                .setEncoder(AthenaEncoder.CANCODER, TURRET_ENCODER_ID)
-                .setNeutralMode(MotorNeutralMode.Brake)
-                .setEncoderGearRatio(TURRET_GEAR_RATIO)
-                .setEncoderConversion(360.0)
-                .setUseEncoderAbsolute(true)
-                .setCanbus(CANIVORE_CANBUS)
-                .setPID(0.02, 0.0, 0.0)
-                .setBounds(0.0, 270.0)
-                .setSimulationSimpleMotor(new SimpleMotorSimulationParameters()
-                    .setMomentOfInertia(0.02));
+    //     MechanismConfig<StatefulTurretMechanism<TurretState>> TURRET_CONFIG =
+    //         MechanismConfig.statefulTurret(new SimpleMotorFeedforward(0.2, 0.1, 0.0), TurretState.Off)
+    //             .addMotors(AthenaMotor.KRAKEN_X60, TURRET_MOTOR_ID)
+    //             .setEncoder(AthenaEncoder.CANCODER, TURRET_ENCODER_ID)
+    //             .setNeutralMode(MotorNeutralMode.Brake)
+    //             .setEncoderGearRatio(TURRET_GEAR_RATIO)
+    //             .setEncoderConversion(360.0)
+    //             .setUseEncoderAbsolute(true)
+    //             .setCanbus(CANIVORE_CANBUS)
+    //             .setPID(0.02, 0.0, 0.0)
+    //             .setBounds(0.0, 270.0)
+    //             .setSimulationSimpleMotor(new SimpleMotorSimulationParameters()
+    //                 .setMomentOfInertia(0.02));
 
-        MechanismConfig<StatefulArmMechanism<HoodState>> HOOD_CONFIG =
-            MechanismConfig.statefulArm(new ArmFeedforward(0.1, 0.2, 0.0, 0.0), HoodState.Stow)
-                .addMotors(AthenaMotor.KRAKEN_X60, HOOD_MOTOR_ID)
-                .setEncoder(AthenaEncoder.CANCODER, HOOD_ENCODER_ID)
-                .setNeutralMode(MotorNeutralMode.Brake)
-                .setEncoderGearRatio(HOOD_GEAR_RATIO)
-                .setEncoderConversion(360.0)
-                .setUseEncoderAbsolute(true)
-                .setCanbus(CANIVORE_CANBUS)
-                .setPID(0.02, 0.0, 0.0)
-                .setBounds(0.0, 70.0)
-                .setSimulationArm(new ArmSimulationParameters()
-                    .setArmLengthMeters(HOOD_LENGTH_METERS)
-                    .setMotorReduction(HOOD_GEAR_RATIO)
-                    .setAngleRangeRadians(Units.degreesToRadians(0.0), Units.degreesToRadians(70.0))
-                    .setStartingAngleRadians(Units.degreesToRadians(HoodState.Stow.getSetpoint()))
-                    .setUnitsPerRadian(Units.radiansToDegrees(1.0))
-                    .setSimulateGravity(false));
+    //     MechanismConfig<StatefulArmMechanism<HoodState>> HOOD_CONFIG =
+    //         MechanismConfig.statefulArm(new ArmFeedforward(0.1, 0.2, 0.0, 0.0), HoodState.Stow)
+    //             .addMotors(AthenaMotor.KRAKEN_X60, HOOD_MOTOR_ID)
+    //             .setEncoder(AthenaEncoder.CANCODER, HOOD_ENCODER_ID)
+    //             .setNeutralMode(MotorNeutralMode.Brake)
+    //             .setEncoderGearRatio(HOOD_GEAR_RATIO)
+    //             .setEncoderConversion(360.0)
+    //             .setUseEncoderAbsolute(true)
+    //             .setCanbus(CANIVORE_CANBUS)
+    //             .setPID(0.02, 0.0, 0.0)
+    //             .setBounds(0.0, 70.0)
+    //             .setSimulationArm(new ArmSimulationParameters()
+    //                 .setArmLengthMeters(HOOD_LENGTH_METERS)
+    //                 .setMotorReduction(HOOD_GEAR_RATIO)
+    //                 .setAngleRangeRadians(Units.degreesToRadians(0.0), Units.degreesToRadians(70.0))
+    //                 .setStartingAngleRadians(Units.degreesToRadians(HoodState.Stow.getSetpoint()))
+    //                 .setUnitsPerRadian(Units.radiansToDegrees(1.0))
+    //                 .setSimulateGravity(false));
 
-        MechanismConfig<StatefulFlywheelMechanism<ShooterState>> SHOOTER_CONFIG =
-            MechanismConfig.statefulFlywheel(new SimpleMotorFeedforward(0.15, 0.12, 0.0), ShooterState.Off)
-                .addMotors(AthenaMotor.KRAKEN_X44, SHOOTER_MOTOR_ID)
-                .setEncoder(AthenaEncoder.CANCODER, SHOOTER_ENCODER_ID)
-                .setNeutralMode(MotorNeutralMode.Coast)
-                .setEncoderGearRatio(1.0)
-                .setEncoderConversion(2.0 * Math.PI)
-                .setCanbus(CANIVORE_CANBUS)
-                .setPID(0.1, 0.0, 0.0)
-                .setPidUseVelocity(true)
-                .setBounds(0.0, rpm(5000.0))
-                .setSimulationSimpleMotor(new SimpleMotorSimulationParameters()
-                    .setMomentOfInertia(0.01));
+    //     MechanismConfig<StatefulFlywheelMechanism<ShooterState>> SHOOTER_CONFIG =
+    //         MechanismConfig.statefulFlywheel(new SimpleMotorFeedforward(0.15, 0.12, 0.0), ShooterState.Off)
+    //             .addMotors(AthenaMotor.KRAKEN_X44, SHOOTER_MOTOR_ID)
+    //             .setEncoder(AthenaEncoder.CANCODER, SHOOTER_ENCODER_ID)
+    //             .setNeutralMode(MotorNeutralMode.Coast)
+    //             .setEncoderGearRatio(1.0)
+    //             .setEncoderConversion(2.0 * Math.PI)
+    //             .setCanbus(CANIVORE_CANBUS)
+    //             .setPID(0.1, 0.0, 0.0)
+    //             .setPidUseVelocity(true)
+    //             .setBounds(0.0, rpm(5000.0))
+    //             .setSimulationSimpleMotor(new SimpleMotorSimulationParameters()
+    //                 .setMomentOfInertia(0.01));
 
-        SuperstructureConfig<TurretSuperState, TurretTuple> TURRET_SUPERSTRUCTURE_CONFIG =
-            SuperstructureConfig.create(TurretSuperState.Stowed)
-                .addMechanism(TURRET_CONFIG, TurretTuple::turret)
-                .addMechanism(HOOD_CONFIG, TurretTuple::hood)
-                .addMechanism(SHOOTER_CONFIG, TurretTuple::shooter)
-                .setStateMachineDelay(Units.millisecondsToSeconds(40));
+    //     SuperstructureConfig<TurretSuperState, TurretTuple> TURRET_SUPERSTRUCTURE_CONFIG =
+    //         SuperstructureConfig.create(TurretSuperState.Stowed)
+    //             .addMechanism(TURRET_CONFIG, TurretTuple::turret)
+    //             .addMechanism(HOOD_CONFIG, TurretTuple::hood)
+    //             .addMechanism(SHOOTER_CONFIG, TurretTuple::shooter)
+    //             .setStateMachineDelay(Units.millisecondsToSeconds(40));
 
-        static double rpm(double rpm) {
-            return Units.rotationsPerMinuteToRadiansPerSecond(rpm);
-        }
+    //     static double rpm(double rpm) {
+    //         return Units.rotationsPerMinuteToRadiansPerSecond(rpm);
+    //     }
 
-    }
+    // }
 
     public interface Superstructure {
 

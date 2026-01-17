@@ -35,8 +35,8 @@ import frc.robot.Constants.Superstructure.SuperstructureState;
 import frc.robot.Constants.Superstructure.EndEffectorState;
 import frc.robot.Constants.Superstructure.EndEffectorTuple;
 import frc.robot.Constants.Superstructure.SuperstructureTuple;
-import frc.robot.Constants.Turret.TurretSuperState;
-import frc.robot.Constants.Turret.TurretTuple;
+// import frc.robot.Constants.Turret.TurretSuperState;
+// import frc.robot.Constants.Turret.TurretTuple;
 import frc.robot.subsystems.superstructure.CANdleSubsystem;
 import frc.robot.utils.Align.DriveToPoint;
 import frc.robot.utils.Aiming.ShotSolver;
@@ -55,10 +55,10 @@ public class Robot extends RobotCore<SwerveDrivetrain> {
 
   public final SuperstructureMechanism<SuperstructureState, SuperstructureTuple> superstructure;
   private final SuperstructureMechanism<EndEffectorState, EndEffectorTuple> endEffector;
-  private final SuperstructureMechanism<TurretSuperState, TurretTuple> turretSuperstructure;
-  public final StatefulTurretMechanism<Constants.Turret.TurretState> turret;
-  public final StatefulArmMechanism<Constants.Turret.HoodState> hood;
-  public final StatefulFlywheelMechanism<Constants.Turret.ShooterState> shooter;
+  // private final SuperstructureMechanism<TurretSuperState, TurretTuple> turretSuperstructure;
+  // public final StatefulTurretMechanism<Constants.Turret.TurretState> turret;
+  // public final StatefulArmMechanism<Constants.Turret.HoodState> hood;
+  // public final StatefulFlywheelMechanism<Constants.Turret.ShooterState> shooter;
   public final StatefulArmMechanism<Constants.EndEffector.ArmState> arm;//.shuffleboard("Arm", SendableLevel.DEBUG);
   public final StatefulArmMechanism<Constants.EndEffector.WristState> wrist;//.shuffleboard("Wrist", SendableLevel.DEBUG);
   public final StatefulMechanism<Constants.EndEffector.RollerState> rollers;//.shuffleboard("Rollers", SendableLevel.DEBUG);
@@ -66,7 +66,7 @@ public class Robot extends RobotCore<SwerveDrivetrain> {
   public final StatefulElevatorMechanism<ElevatorState> elevator;
 
 
-  // public RelevantPosition CLIMB = new RelevantPosition("Climb", AprilTags.CLIMB.getAprilTag(), new Pose2d(0.254, -0.5, new Rotation2d()), this, Constants.DriveTrain.camLeft, Constants.DriveTrain.camRight);
+  public RelevantPosition CLIMB = new RelevantPosition("Climb", AprilTags.CLIMB.getAprilTag(), new Pose2d(0.254, -0.5, new Rotation2d()), new Pose2d(), this, Constants.DriveTrain.camLeft, Constants.DriveTrain.camRight);
   // public RelevantPosition HUB = new RelevantPosition("Hub", AprilTags.HUB.getAprilTag(), new Pose2d(-0.254, 0, new Rotation2d()), this, Constants.DriveTrain.camLeft, Constants.DriveTrain.camRight);
   
   
@@ -91,10 +91,10 @@ public class Robot extends RobotCore<SwerveDrivetrain> {
     super(Constants.DriveTrain.ROBOT_BASE);
     superstructure = Constants.Superstructure.SUPERSTRUCTURE_CONFIG.build();
     endEffector = superstructure.getMechanisms().superstructure(SuperstructureTuple::endEffector);
-    turretSuperstructure = Constants.Turret.TURRET_SUPERSTRUCTURE_CONFIG.build();
-    turret = turretSuperstructure.getMechanisms().turret(TurretTuple::turret);
-    hood = turretSuperstructure.getMechanisms().arm(TurretTuple::hood);
-    shooter = turretSuperstructure.getMechanisms().flywheel(TurretTuple::shooter);
+    // turretSuperstructure = Constants.Turret.TURRET_SUPERSTRUCTURE_CONFIG.build();
+    // turret = turretSuperstructure.getMechanisms().turret(TurretTuple::turret);
+    // hood = turretSuperstructure.getMechanisms().arm(TurretTuple::hood);
+    // shooter = turretSuperstructure.getMechanisms().flywheel(TurretTuple::shooter);
     arm = endEffector.getMechanisms().arm(EndEffectorTuple::joint1state);
     wrist = endEffector.getMechanisms().arm(EndEffectorTuple::joint2state);
     rollers = endEffector.getMechanisms().generic(EndEffectorTuple::coralRollerState);
@@ -103,10 +103,10 @@ public class Robot extends RobotCore<SwerveDrivetrain> {
 
     superstructure.shuffleboard("Superstructure", SendableLevel.DEBUG);
     endEffector.shuffleboard("End Effector", SendableLevel.DEBUG);
-    turretSuperstructure.shuffleboard("Turret Superstructure", SendableLevel.DEBUG);
-    turret.shuffleboard("Turret", SendableLevel.DEBUG);
-    hood.shuffleboard("Hood", SendableLevel.DEBUG);
-    shooter.shuffleboard("Shooter", SendableLevel.DEBUG);
+    // turretSuperstructure.shuffleboard("Turret Superstructure", SendableLevel.DEBUG);
+    // turret.shuffleboard("Turret", SendableLevel.DEBUG);
+    // hood.shuffleboard("Hood", SendableLevel.DEBUG);
+    // shooter.shuffleboard("Shooter", SendableLevel.DEBUG);
     arm.shuffleboard("Arm", SendableLevel.DEBUG);
     wrist.shuffleboard("Wrist", SendableLevel.DEBUG);
     rollers.shuffleboard("Coral Rollers", SendableLevel.DEBUG);
@@ -115,7 +115,7 @@ public class Robot extends RobotCore<SwerveDrivetrain> {
 
 
     shuffleboard(SendableLevel.DEBUG);
-    registerMechanism(superstructure, turretSuperstructure);
+    // registerMechanism(superstructure, turretSuperstructure);
 
     getDrivetrain().setDriveCommand(driverController);
     getLocalization().setSuppressUpdates(false);
@@ -124,6 +124,7 @@ public class Robot extends RobotCore<SwerveDrivetrain> {
     wrist.setPidEnabled(true);
     arm.setFeedforwardEnabled(false);
     wrist.setFeedforwardEnabled(false);
+    elevator.setEmergencyStopped(true);
     
 
     pdh = new PowerDistribution(14, ModuleType.kRev);

@@ -2,7 +2,13 @@
 
 package frc.robot.utils.Align;
  
+import java.util.EnumSet;
+
 import ca.frc6390.athena.core.RobotCore;
+import ca.frc6390.athena.core.localization.PoseConfig;
+import ca.frc6390.athena.core.localization.PoseConstraints;
+import ca.frc6390.athena.core.localization.PoseFrame;
+import ca.frc6390.athena.core.localization.PoseInput;
 import edu.wpi.first.math.controller.HolonomicDriveController;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.geometry.Pose2d;
@@ -35,7 +41,7 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
   private String name;
 
 
-   public RelevantPosition(String name,AprilTag tag, Pose2d targetPose2d ,RobotCore<?> base, AutomationCamera... cams)
+   public RelevantPosition(String name,AprilTag tag, Pose2d targetPose2d , Pose2d startPose, RobotCore<?> base, AutomationCamera... cams)
    {
     this.cams = cams;
     this.base = base; 
@@ -43,8 +49,17 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
     this.tag = tag;
     this.tagId = (int) tag.getId();
     this.name = name;
-    // this.base.getLocalization().(name, () -> this.base.getLocalization().(name));
-   }
+    this.base.getLocalization().registerPoseConfig(new PoseConfig(
+                name,
+                PoseFrame.FIELD,
+                EnumSet.of(PoseInput.ODOMETRY),
+                EnumSet.noneOf(PoseInput.class),
+                PoseConstraints.defaults(),
+                null,
+                true,
+                startPose,
+                null)); 
+  }
 
   
    public Pose2d getPose2d()
@@ -59,7 +74,7 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
       {
       double dist = alignCamera.getDistanceToTag();
       double dist1 = Math.cos(Math.toRadians(alignCamera.getTargetVerticalOffset() + alignCamera.getPitch())) * dist; 
-      double angle1 =  alignCamera.getTargetHorizontalOffset() - alignCamera.getYaw() -base.getLocalization().getVirtualPose(name).getRotation().getDegrees() ;
+      double angle1 =  alignCamera.getTargetHorizontalOffset() - alignCamera.getYaw() -base.getLocalization().getPose2d(name).getRotation().getDegrees() ;
       double x1 = (Math.cos(Math.toRadians(angle1)) * dist1) - alignCamera.getXOffset();
       double y1 = (Math.sin(Math.toRadians(angle1)) * dist1)- alignCamera.getYOffset(); 
 
@@ -77,7 +92,7 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
     }
     else
     {
-    Pose2d pose = new Pose2d(-xPos,yPos,base.getLocalization().getVirtualPose(name).getRotation());
+    Pose2d pose = new Pose2d(-xPos,yPos,base.getLocalization().getPose2d(name).getRotation());
     return pose;
     }
 
@@ -87,26 +102,26 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
   {
     if(getPose2d() != null)
     {
-    base.getLocalization().setVirtualPose(name, getPose2d());
+    base.getLocalization().setPoseConfigPose(name, getPose2d());
     }
   }
 
   public void initFieldRelativeStartingPose(Pose2d fieldRelativeStartingPose)
   {
-    base.getLocalization().setVirtualPose(name, new Pose2d(tag.getPose2d().minus(fieldRelativeStartingPose).getX(),tag.getPose2d().minus(fieldRelativeStartingPose).getY(), fieldRelativeStartingPose.getRotation()));
+    base.getLocalization().setPoseConfigPose(name, new Pose2d(tag.getPose2d().minus(fieldRelativeStartingPose).getX(),tag.getPose2d().minus(fieldRelativeStartingPose).getY(), fieldRelativeStartingPose.getRotation()));
   }
 
   public void shuffleboard()
   {
-    SmartDashboard.putNumber("Field X", Units.metersToInches(getPose2d().getX()));
-    SmartDashboard.putNumber("Field Y", Units.metersToInches(getPose2d().getY()));
+    SmartDashboard.putNumber( name +" Field X", Units.metersToInches(getPose2d().getX()));
+    SmartDashboard.putNumber(name+" Field Y", Units.metersToInches(getPose2d().getY()));
 
     if(finalPose2d != null)
     {
 
-    SmartDashboard.putNumber("Scoring Pos X", Units.metersToInches(finalPose2d.rotateBy(tag.getRotation2d()).getX()));
-    SmartDashboard.putNumber("Scoring Pos Y", Units.metersToInches(finalPose2d.rotateBy(tag.getRotation2d()).getY()));
-    SmartDashboard.putNumber("Tag ID", tagId);
+    SmartDashboard.putNumber(name + " Scoring Pos X", Units.metersToInches(finalPose2d.rotateBy(tag.getRotation2d()).getX()));
+    SmartDashboard.putNumber(name + " Scoring Pos Y", Units.metersToInches(finalPose2d.rotateBy(tag.getRotation2d()).getY()));
+    SmartDashboard.putNumber(name + " Tag ID", tagId);
 
     }
   }
@@ -123,28 +138,28 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
   public Pose2d getRobotPositionRelativeToTag()
   {
-    return base.getLocalization().getVirtualPose(name);
+    return base.getLocalization().getPose2d(name);
   }
 
   public double getDistanceToTag()
   {
-    return base.getLocalization().getVirtualPose(name).getTranslation().getDistance(new Translation2d());
+    return base.getLocalization().getPose2d(name).getTranslation().getDistance(new Translation2d());
   }
 
   public double getDistanceToTarget()
   {
-    return base.getLocalization().getVirtualPose(name).getTranslation().getDistance(finalPose2d.rotateBy(tag.getRotation2d()).getTranslation().times(-1));
+    return base.getLocalization().getPose2d(name).getTranslation().getDistance(finalPose2d.rotateBy(tag.getRotation2d()).getTranslation().times(-1));
   }
 
   public Rotation2d getAngleToTag()
   {
-    return base.getLocalization().getVirtualPose(name).getTranslation().getAngle();
+    return base.getLocalization().getPose2d(name).getTranslation().getAngle();
   }
 
   public Rotation2d getAngleToTarget()
   {
     Translation2d f = finalPose2d.rotateBy(tag.getRotation2d()).getTranslation().times(-1);
-    return Rotation2d.fromRadians(Math.atan2(f.getY() - base.getLocalization().getVirtualPose(name).getTranslation().getY(), f.getX() - base.getLocalization().getVirtualPose(name).getTranslation().getX()));
+    return Rotation2d.fromRadians(Math.atan2(f.getY() - base.getLocalization().getPose2d(name).getTranslation().getY(), f.getX() - base.getLocalization().getPose2d(name).getTranslation().getX()));
   }
 
 
@@ -162,11 +177,11 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
     }
     else if(mode.equals(AlignMode.LOOKAT))
     {
-      targetMeasurement = Math.atan2(base.getLocalization().getVirtualPose(name).getY(), base.getLocalization().getVirtualPose(name).getX());
+      targetMeasurement = Math.atan2(base.getLocalization().getPose2d(name).getY(), base.getLocalization().getPose2d(name).getX());
     }
-    double rSpeed = rController.calculate(base.getLocalization().getVirtualPose(name).getRotation().getDegrees(), targetMeasurement);
-    double xSpeed = xController.calculate(base.getLocalization().getVirtualPose(name).getX(), finalPose2d.rotateBy(tag.getRotation2d()).getX() * -1);
-    double ySpeed = yController.calculate(base.getLocalization().getVirtualPose(name).getY(), finalPose2d.rotateBy(tag.getRotation2d()).getY() * -1);   
+    double rSpeed = rController.calculate(base.getLocalization().getPose2d(name).getRotation().getDegrees(), targetMeasurement);
+    double xSpeed = xController.calculate(base.getLocalization().getPose2d(name).getX(), finalPose2d.rotateBy(tag.getRotation2d()).getX() * -1);
+    double ySpeed = yController.calculate(base.getLocalization().getPose2d(name).getY(), finalPose2d.rotateBy(tag.getRotation2d()).getY() * -1);   
     
     ChassisSpeeds spds = ChassisSpeeds.fromFieldRelativeSpeeds
                                                 (
@@ -176,7 +191,7 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
                                                           ySpeed, 
                                                           rSpeed 
                                                         ), 
-                                                base.getLocalization().getVirtualPose(name).getRotation()
+                                                base.getLocalization().getPose2d(name).getRotation()
                                                 );
     return spds;
   
