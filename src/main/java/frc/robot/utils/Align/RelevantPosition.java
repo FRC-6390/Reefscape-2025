@@ -75,6 +75,7 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
       double dist = alignCamera.getDistanceToTag();
       double dist1 = Math.cos(Math.toRadians(alignCamera.getTargetVerticalOffset() + alignCamera.getPitch())) * dist; 
       double angle1 =  alignCamera.getTargetHorizontalOffset() - alignCamera.getYaw() -base.getLocalization().getPose2d(name).getRotation().getDegrees() ;
+      double angle1 =  alignCamera.getTargetHorizontalOffset() - alignCamera.getYaw() -base.getLocalization().getPose2d(name).getRotation().getDegrees() ;
       double x1 = (Math.cos(Math.toRadians(angle1)) * dist1) - alignCamera.getXOffset();
       double y1 = (Math.sin(Math.toRadians(angle1)) * dist1)- alignCamera.getYOffset(); 
 

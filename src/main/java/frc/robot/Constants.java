@@ -576,7 +576,6 @@ public interface Constants {
                         .addMechanism(EndEffector.WRIST_CONFIG, EndEffectorTuple::joint2state)
                         .addMechanism(EndEffector.CORAL_ROLLERS, EndEffectorTuple::coralRollerState)
                         .addMechanism(EndEffector.ALGAE_ROLLERS, EndEffectorTuple::algaeRollerState)
-                        .addOnStateHook(null)
                         .addInput("hasPiece", HAS_GAME_PIECE_SENSOR) //if name not defined we can set or override it here
                         .setStateMachineDelay(Units.millisecondsToSeconds(40));
 
