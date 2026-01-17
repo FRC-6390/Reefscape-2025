@@ -92,8 +92,8 @@ public interface Constants {
         {                                                                 
         LimeLightConfig.table("limelight-left").setTrustDistance(100).setUseForLocalization(true).setCameraRobotSpace(new Transform3d(Units.inchesToMeters(-0.5),Units.inchesToMeters(9.25),Units.inchesToMeters(8),new Rotation3d(0, Units.degreesToRadians(-15), Units.degreesToRadians(-15)))).setPoseEstimateType(PoseEstimateWithLatencyType.BOT_POSE_MT2_BLUE).setLocalizationTagFilter(17,18,19,20,21,22,6,7,8,9,10,11), 
         LimeLightConfig.table("limelight-right").setTrustDistance(100).setUseForLocalization(true).setCameraRobotSpace(new Transform3d(Units.inchesToMeters(-0.5),Units.inchesToMeters(-9.25),Units.inchesToMeters(8),new Rotation3d(0,  Units.degreesToRadians(-15), Units.degreesToRadians(15)))).setPoseEstimateType(PoseEstimateWithLatencyType.BOT_POSE_MT2_BLUE).setLocalizationTagFilter(17,18,19,20,21,22,6,7,8,9,10,11),
-        PhotonVisionConfig.table("Tag").setTrustDistance(1).setUseForLocalization(false).setCameraRobotSpace(new Transform3d(-Units.inchesToMeters(10.5),-Units.inchesToMeters(9.5),Units.inchesToMeters(36),new Rotation3d(0, 0, 180))).setPoseStrategy(PoseStrategy.MULTI_TAG_PNP_ON_COPROCESSOR),
-        PhotonVisionConfig.table("TagFront").setTrustDistance(1).setUseForLocalization(false).setCameraRobotSpace(new Transform3d(-Units.inchesToMeters(7),Units.inchesToMeters(8.5),Units.inchesToMeters(40),new Rotation3d(0, 0, 0))).setPoseStrategy(PoseStrategy.MULTI_TAG_PNP_ON_COPROCESSOR)
+        // PhotonVisionConfig.table("Tag").setTrustDistance(1).setUseForLocalization(false).setCameraRobotSpace(new Transform3d(-Units.inchesToMeters(10.5),-Units.inchesToMeters(9.5),Units.inchesToMeters(36),new Rotation3d(0, 0, 180))).setPoseStrategy(PoseStrategy.MULTI_TAG_PNP_ON_COPROCESSOR),
+        // PhotonVisionConfig.table("TagFront").setTrustDistance(1).setUseForLocalization(false).setCameraRobotSpace(new Transform3d(-Units.inchesToMeters(7),Units.inchesToMeters(8.5),Units.inchesToMeters(40),new Rotation3d(0, 0, 0))).setPoseStrategy(PoseStrategy.MULTI_TAG_PNP_ON_COPROCESSOR)
         };
 
         AutomationCamera camLeft = new AutomationCamera(new LimeLight(new LimeLightConfig("limelight-left")), Units.inchesToMeters(0.5), Units.inchesToMeters(-9), 15, 0, 0);
@@ -196,25 +196,26 @@ public interface Constants {
 
 
         enum ArmState implements SetpointProvider<Double>{
-            Intaking(() ->0), //150.38085937
-            AlgaeHigh(() ->-112.14), //52.8
-            AlgaeLow(() ->-113.5), //52.8
-            Home(() ->-92), //61.083
-            StartConfiguration(() ->-153), //0
-            Scoring(() ->-72), //78.310546875
-            TransitionState(() ->-85), //65
-            ScoringL4(() ->-90), //60
-            AlgaeScore(() ->-30), //120.58
-            Scoringl1(() -> Robot.armSupplier); //66.08
+            Intaking(0d), //150.38085937
+            AlgaeHigh(-112.14), //52.8
+            AlgaeLow(-113.5), //52.8
+            Home(-92d), //61.083
+            StartConfiguration(-153d), //0
+            Scoring(-72d), //78.310546875
+            TransitionState(-85d), //65
+            ScoringL4(-90d), //60
+            AlgaeScore(-30d), //120.58
+            ScoringL1(66.08d - 180),
+            Aim(-90d); //66.08
 
-            DoubleSupplier angle;
-            ArmState(DoubleSupplier angle){
+            Double angle;
+            ArmState(Double angle){
                 this.angle = angle;
             }
 
             @Override
             public Double getSetpoint() {
-               return angle.getAsDouble();
+               return angle;
             }
 
         }
@@ -506,7 +507,7 @@ public interface Constants {
             L4(new EndEffectorTuple(null, null, EndEffector.ArmState.ScoringL4, EndEffector.WristState.ScoringL4)),
             L3(new EndEffectorTuple(null, null, EndEffector.ArmState.Scoring, EndEffector.WristState.Scoring)),
             L2(new EndEffectorTuple(null, null, EndEffector.ArmState.Scoring, EndEffector.WristState.Scoring)),
-            L1(new EndEffectorTuple(null, null, EndEffector.ArmState.Scoringl1, EndEffector.WristState.Scoringl1)),
+            L1(new EndEffectorTuple(null, null, EndEffector.ArmState.ScoringL1, EndEffector.WristState.Scoringl1)),
             Score(new EndEffectorTuple(EndEffector.RollerState.Running, EndEffector.RollerState.Running, null, null)),
             AlgaeScore(new EndEffectorTuple(EndEffector.RollerState.Stopped, EndEffector.RollerState.Stopped, EndEffector.ArmState.AlgaeScore, EndEffector.WristState.AlgaeScore)),
             ScoreAlgae(new EndEffectorTuple(EndEffector.RollerState.Stopped, EndEffector.RollerState.Running, EndEffector.ArmState.AlgaeScore, EndEffector.WristState.AlgaeScore)),

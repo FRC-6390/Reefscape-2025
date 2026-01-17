@@ -67,6 +67,7 @@ public class Robot extends RobotCore<SwerveDrivetrain> {
 
 
   public RelevantPosition CLIMB = new RelevantPosition("Climb", AprilTags.CLIMB.getAprilTag(), new Pose2d(0.254, -0.5, new Rotation2d()), new Pose2d(), this, Constants.DriveTrain.camLeft, Constants.DriveTrain.camRight);
+;
   // public RelevantPosition HUB = new RelevantPosition("Hub", AprilTags.HUB.getAprilTag(), new Pose2d(-0.254, 0, new Rotation2d()), this, Constants.DriveTrain.camLeft, Constants.DriveTrain.camRight);
   
   
@@ -77,7 +78,7 @@ public class Robot extends RobotCore<SwerveDrivetrain> {
 
 
 
-  public CANdleSubsystem candle = new CANdleSubsystem(this);
+  // public CANdleSubsystem candle = new CANdleSubsystem(this);
   
   private final EnhancedXboxController driverController = new EnhancedXboxController(0).setLeftInverted(true).setRightInverted(true).setSticksDeadzone(0.15).setLeftSlewrate(5);
   private final EnhancedXboxController driverController2 = new EnhancedXboxController(1).setSticksDeadzone(Constants.Controllers.STICK_DEADZONE); 
@@ -101,17 +102,17 @@ public class Robot extends RobotCore<SwerveDrivetrain> {
     algaeRollers = endEffector.getMechanisms().generic(EndEffectorTuple::algaeRollerState);
     elevator = superstructure.getMechanisms().elevator(SuperstructureTuple::elevator);
 
-    superstructure.shuffleboard("Superstructure", SendableLevel.DEBUG);
-    endEffector.shuffleboard("End Effector", SendableLevel.DEBUG);
-    // turretSuperstructure.shuffleboard("Turret Superstructure", SendableLevel.DEBUG);
-    // turret.shuffleboard("Turret", SendableLevel.DEBUG);
-    // hood.shuffleboard("Hood", SendableLevel.DEBUG);
-    // shooter.shuffleboard("Shooter", SendableLevel.DEBUG);
-    arm.shuffleboard("Arm", SendableLevel.DEBUG);
-    wrist.shuffleboard("Wrist", SendableLevel.DEBUG);
-    rollers.shuffleboard("Coral Rollers", SendableLevel.DEBUG);
-    algaeRollers.shuffleboard("Algae Rollers", SendableLevel.DEBUG);
-    elevator.shuffleboard("Elevator", SendableLevel.DEBUG);
+    superstructure.shuffleboard("Superstructure", SendableLevel.COMP);
+    endEffector.shuffleboard("End Effector", SendableLevel.COMP);
+    // turretSuperstructure.shuffleboard("Turret Superstructure", SendableLevel.COMP);
+    // turret.shuffleboard("Turret", SendableLevel.COMP);
+    // hood.shuffleboard("Hood", SendableLevel.COMP);
+    // shooter.shuffleboard("Shooter", SendableLevel.COMP);
+    arm.shuffleboard("Arm", SendableLevel.COMP);
+    wrist.shuffleboard("Wrist", SendableLevel.COMP);
+    rollers.shuffleboard("Coral Rollers", SendableLevel.COMP);
+    algaeRollers.shuffleboard("Algae Rollers", SendableLevel.COMP);
+    elevator.shuffleboard("Elevator", SendableLevel.COMP);
 
 
     shuffleboard(SendableLevel.DEBUG);
@@ -120,8 +121,10 @@ public class Robot extends RobotCore<SwerveDrivetrain> {
     getDrivetrain().setDriveCommand(driverController);
     getLocalization().setSuppressUpdates(false);
 
-    arm.setPidEnabled(true);
-    wrist.setPidEnabled(true);
+    arm.setPidEnabled(false);
+    wrist.setPidEnabled(false);
+    elevator.setPidEnabled(false);
+    elevator.setFeedforwardEnabled(false);
     arm.setFeedforwardEnabled(false);
     wrist.setFeedforwardEnabled(false);
     elevator.setEmergencyStopped(true);
@@ -148,6 +151,11 @@ public class Robot extends RobotCore<SwerveDrivetrain> {
   public void onAutonomousExit() {
     Rotation2d offset = Rotation2d.fromDegrees(DriverStation.getAlliance().get().equals(Alliance.Blue) ? 0 : 180);
     getIMU().setVirtualAxis("driver", getIMU().getVirtualAxis("field").minus(offset));
+  }
+
+  @Override
+  protected void onAutonomousInit() {
+
   }
 
   @Override
@@ -229,7 +237,7 @@ public class Robot extends RobotCore<SwerveDrivetrain> {
     // auto.registerNamedCommand("DisableLocal", () -> getVision().getCameras().values().forEach(camera -> camera.setUseForLocalization(false)));
     // auto.registerNamedCommand("EnableLocal", () -> getVision().getCameras().values().forEach(camera -> camera.setUseForLocalization(true)));
 
-    auto.registerChoreoAuto("test", "test2026");
+    // auto.registerChoreoAuto("test", "test2026");
     // auto.registerPathPlannerAuto("Right", "CompMidSide");
     // auto.registerPathPlannerAuto("Mid", "CompMidSide");
   }

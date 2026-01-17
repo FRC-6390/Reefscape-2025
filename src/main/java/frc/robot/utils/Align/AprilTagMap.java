@@ -9,12 +9,12 @@ public class AprilTagMap {
 
         NONE(new AprilTag(-1, -1, new Pose2d(), new Pose2d(), Rotation2d.fromDegrees(0))),
 
-        CLIMB(new AprilTag(10, 25, new Pose2d(), new Pose2d(), Rotation2d.fromDegrees(0))),
+        CLIMB(new AprilTag(15, 31, new Pose2d(), new Pose2d(), Rotation2d.fromDegrees(0))),
         
         TOP(new AprilTag(0, 0, new Pose2d(), new Pose2d(), Rotation2d.fromDegrees(0))),
 
 
-        HUB(new AprilTag(15, 32, new Pose2d(), new Pose2d(), Rotation2d.fromDegrees(0)));
+        HUB(new AprilTag(120, 02, new Pose2d(), new Pose2d(), Rotation2d.fromDegrees(0)));
 
         public AprilTag tag;
         AprilTags(AprilTag tag)

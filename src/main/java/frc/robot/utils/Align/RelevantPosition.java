@@ -33,7 +33,6 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
   public RobotCore<?> base;
   
-  private int tagId = -1;
   private AprilTag tag;
   private double targetMeasurement;
   private Pose2d finalPose2d;
@@ -47,7 +46,6 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
     this.base = base; 
     this.finalPose2d = targetPose2d;
     this.tag = tag;
-    this.tagId = (int) tag.getId();
     this.name = name;
     this.base.getLocalization().registerPoseConfig(new PoseConfig(
                 name,
@@ -70,11 +68,10 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
     for (AutomationCamera alignCamera : cams) 
     {
-      if(alignCamera.hasValidTarget() && alignCamera.getTagId() == tagId)
+      if(alignCamera.hasValidTarget() && alignCamera.getTagId() == tag.getId())
       {
       double dist = alignCamera.getDistanceToTag();
       double dist1 = Math.cos(Math.toRadians(alignCamera.getTargetVerticalOffset() + alignCamera.getPitch())) * dist; 
-      double angle1 =  alignCamera.getTargetHorizontalOffset() - alignCamera.getYaw() -base.getLocalization().getPose2d(name).getRotation().getDegrees() ;
       double angle1 =  alignCamera.getTargetHorizontalOffset() - alignCamera.getYaw() -base.getLocalization().getPose2d(name).getRotation().getDegrees() ;
       double x1 = (Math.cos(Math.toRadians(angle1)) * dist1) - alignCamera.getXOffset();
       double y1 = (Math.sin(Math.toRadians(angle1)) * dist1)- alignCamera.getYOffset(); 
@@ -114,21 +111,27 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
   public void shuffleboard()
   {
+    if(getPose2d() != null)
+    {
     SmartDashboard.putNumber( name +" Field X", Units.metersToInches(getPose2d().getX()));
     SmartDashboard.putNumber(name+" Field Y", Units.metersToInches(getPose2d().getY()));
-
+    }
     if(finalPose2d != null)
     {
 
     SmartDashboard.putNumber(name + " Scoring Pos X", Units.metersToInches(finalPose2d.rotateBy(tag.getRotation2d()).getX()));
     SmartDashboard.putNumber(name + " Scoring Pos Y", Units.metersToInches(finalPose2d.rotateBy(tag.getRotation2d()).getY()));
-    SmartDashboard.putNumber(name + " Tag ID", tagId);
+    if(tag != null)
+    {
+    SmartDashboard.putNumber(name + " Tag ID", tag.getId());
+    }
 
     }
   }
 
   public void update()
   {
+    
     setRelativePose();
     shuffleboard();
   }
