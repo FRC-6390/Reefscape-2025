@@ -114,6 +114,7 @@ public class Robot extends RobotCore<SwerveDrivetrain> {
     algaeRollers.shuffleboard("Algae Rollers", SendableLevel.COMP);
     elevator.shuffleboard("Elevator", SendableLevel.COMP);
 
+    getDrivetrain().shuffleboard("DDD", SendableLevel.DEBUG);
 
     shuffleboard(SendableLevel.DEBUG);
     // registerMechanism(superstructure, turretSuperstructure);
@@ -167,13 +168,18 @@ public class Robot extends RobotCore<SwerveDrivetrain> {
 
   }
 
+  @Override
+  protected void onTeleopInit() {
+
+  }
+
 
 
   public void configureDriverController(EnhancedXboxController controller)
   {
 
     controller.start.onTrue(() -> getDrivetrain().getIMU().setYaw(0))
-                    .after(2).onTrue(() -> {getLocalization().resetPose("field",0,0, 0); getLocalization().resetPose("relative",0,0, 0);});
+                    .after(2).onTrue(() -> {getLocalization().resetPose("field",0,0, 0); getLocalization().resetPose("relative",0,0, 0); CLIMB.resetPosition();});
 
     controller.leftBumper.onTrue(
         Commands.either(

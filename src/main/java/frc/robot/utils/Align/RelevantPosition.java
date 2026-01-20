@@ -104,6 +104,11 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
     }
   }
 
+  public void resetPosition()
+  {
+    base.getLocalization().setPoseConfigPose(name, new Pose2d());
+  }
+
   public void initFieldRelativeStartingPose(Pose2d fieldRelativeStartingPose)
   {
     base.getLocalization().setPoseConfigPose(name, new Pose2d(tag.getPose2d().minus(fieldRelativeStartingPose).getX(),tag.getPose2d().minus(fieldRelativeStartingPose).getY(), fieldRelativeStartingPose.getRotation()));
@@ -115,7 +120,13 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
     {
     SmartDashboard.putNumber( name +" Field X", Units.metersToInches(getPose2d().getX()));
     SmartDashboard.putNumber(name+" Field Y", Units.metersToInches(getPose2d().getY()));
+
     }
+
+        SmartDashboard.putNumber( name +" Field X Direct", Units.metersToInches(base.getLocalization().getPose2d(name).getX()));
+    SmartDashboard.putNumber(name+" Field Y Direct", Units.metersToInches(base.getLocalization().getPose2d(name).getY()));
+    SmartDashboard.putNumber(name+" Field Rots Direct", Units.metersToInches(base.getLocalization().getPose2d(name).getRotation().getDegrees()));
+    
     if(finalPose2d != null)
     {
 
