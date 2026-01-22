@@ -47,16 +47,7 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
     this.finalPose2d = targetPose2d;
     this.tag = tag;
     this.name = name;
-    this.base.getLocalization().registerPoseConfig(new PoseConfig(
-                name,
-                PoseFrame.FIELD,
-                EnumSet.of(PoseInput.ODOMETRY),
-                EnumSet.noneOf(PoseInput.class),
-                PoseConstraints.defaults(),
-                null,
-                true,
-                startPose,
-                null)); 
+    this.base.getLocalization().registerPoseConfig(PoseConfig.defaults(name, startPose).withShuffleboardPublishing(true)); 
   }
 
   

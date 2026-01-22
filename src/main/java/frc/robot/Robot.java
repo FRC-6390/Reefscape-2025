@@ -4,12 +4,20 @@
 
 package frc.robot;
 
+import java.util.EnumSet;
+
 import org.photonvision.PhotonCamera;
 
 import ca.frc6390.athena.controllers.EnhancedXboxController;
 import ca.frc6390.athena.core.RobotAuto;
 import ca.frc6390.athena.core.RobotCore;
 import ca.frc6390.athena.core.RobotSendableSystem.SendableLevel;
+import ca.frc6390.athena.core.localization.PoseConfig;
+import ca.frc6390.athena.core.localization.PoseConstraints;
+import ca.frc6390.athena.core.localization.PoseInput;
+import ca.frc6390.athena.core.localization.RobotLocalizationConfig.BackendConfig;
+import ca.frc6390.athena.core.localization.RobotLocalizationConfig.BackendConfig.SlipStrategy;
+import ca.frc6390.athena.core.localization.RobotLocalizationConfig.BackendConfig.VisionStrategy;
 import ca.frc6390.athena.drivetrains.swerve.SwerveDrivetrain;
 import ca.frc6390.athena.logging.TelemetryRegistry;
 import ca.frc6390.athena.mechanisms.ArmMechanism.StatefulArmMechanism;
@@ -20,7 +28,10 @@ import ca.frc6390.athena.mechanisms.ElevatorMechanism.StatefulElevatorMechanism;
 import ca.frc6390.athena.mechanisms.TurretMechanism.StatefulTurretMechanism;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Pose3d;
+
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.PowerDistribution;
@@ -91,6 +102,11 @@ public class Robot extends RobotCore<SwerveDrivetrain> {
   public Robot() {  
     super(Constants.DriveTrain.ROBOT_BASE);
     superstructure = Constants.Superstructure.SUPERSTRUCTURE_CONFIG.build();
+    // getLocalization().updatePoseConfig("field", cfg -> cfg.withConstraints(PoseConstraints.defaults()).withContinuousInputs(EnumSet.of(PoseInput.ODOMETRY)));
+    // getLocalization().shuffleboard("null")
+   
+
+    shuffleboard(SendableLevel.COMP);
     endEffector = superstructure.getMechanisms().superstructure(SuperstructureTuple::endEffector);
     // turretSuperstructure = Constants.Turret.TURRET_SUPERSTRUCTURE_CONFIG.build();
     // turret = turretSuperstructure.getMechanisms().turret(TurretTuple::turret);
@@ -102,21 +118,21 @@ public class Robot extends RobotCore<SwerveDrivetrain> {
     algaeRollers = endEffector.getMechanisms().generic(EndEffectorTuple::algaeRollerState);
     elevator = superstructure.getMechanisms().elevator(SuperstructureTuple::elevator);
 
-    superstructure.shuffleboard("Superstructure", SendableLevel.COMP);
-    endEffector.shuffleboard("End Effector", SendableLevel.COMP);
+
+
+    // superstructure.shuffleboard("Superstructure", SendableLevel.COMP);
+    // endEffector.shuffleboard("End Effector", SendableLevel.COMP);
     // turretSuperstructure.shuffleboard("Turret Superstructure", SendableLevel.COMP);
     // turret.shuffleboard("Turret", SendableLevel.COMP);
     // hood.shuffleboard("Hood", SendableLevel.COMP);
     // shooter.shuffleboard("Shooter", SendableLevel.COMP);
-    arm.shuffleboard("Arm", SendableLevel.COMP);
-    wrist.shuffleboard("Wrist", SendableLevel.COMP);
-    rollers.shuffleboard("Coral Rollers", SendableLevel.COMP);
-    algaeRollers.shuffleboard("Algae Rollers", SendableLevel.COMP);
-    elevator.shuffleboard("Elevator", SendableLevel.COMP);
+    // arm.shuffleboard("Arm", SendableLevel.COMP);
+    // wrist.shuffleboard("Wrist", SendableLevel.COMP);
+    // rollers.shuffleboard("Coral Rollers", SendableLevel.COMP);
+    // algaeRollers.shuffleboard("Algae Rollers", SendableLevel.COMP);
+    // elevator.shuffleboard("Elevator", SendableLevel.COMP);
 
-    getDrivetrain().shuffleboard("DDD", SendableLevel.DEBUG);
 
-    shuffleboard(SendableLevel.DEBUG);
     // registerMechanism(superstructure, turretSuperstructure);
 
     getDrivetrain().setDriveCommand(driverController);

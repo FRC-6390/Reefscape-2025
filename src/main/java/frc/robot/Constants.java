@@ -1,5 +1,6 @@
 package frc.robot;
 
+import java.util.EnumSet;
 import java.util.List;
 import java.util.function.DoubleSupplier;
 
@@ -9,7 +10,12 @@ import ca.frc6390.athena.controllers.ElevatorFeedForwardsSendable;
 import ca.frc6390.athena.core.RobotCore.RobotCoreConfig;
 import ca.frc6390.athena.core.RobotDrivetrain.RobotDrivetrainIDs.DrivetrainIDs;
 import ca.frc6390.athena.core.localization.PoseConfig;
+import ca.frc6390.athena.core.localization.PoseConstraints;
+import ca.frc6390.athena.core.localization.PoseInput;
 import ca.frc6390.athena.core.localization.RobotLocalizationConfig;
+import ca.frc6390.athena.core.localization.RobotLocalizationConfig.BackendConfig;
+import ca.frc6390.athena.core.localization.RobotLocalizationConfig.BackendConfig.SlipStrategy;
+import ca.frc6390.athena.core.localization.RobotLocalizationConfig.BackendConfig.VisionStrategy;
 import ca.frc6390.athena.drivetrains.swerve.SwerveDrivetrain;
 import ca.frc6390.athena.drivetrains.swerve.SwerveDrivetrainConfig;
 import ca.frc6390.athena.drivetrains.swerve.modules.SwerveVendorSDS;
@@ -40,7 +46,9 @@ import edu.wpi.first.math.controller.ArmFeedforward;
 import edu.wpi.first.math.controller.ElevatorFeedforward;
 import edu.wpi.first.math.controller.ProfiledPIDController;
 import edu.wpi.first.math.controller.SimpleMotorFeedforward;
+import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Pose3d;
+import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.geometry.Translation3d;
@@ -58,7 +66,7 @@ public interface Constants {
         double TRACKWIDTH_METERS = Units.inchesToMeters(18.375); 
     
         //SIREN
-        double[] ENCODER_OFFSETS = {-0.23535156250000003,-0.09350585937499999,-0.19873046875000003,-0.361572265625};
+        double[] ENCODER_OFFSETS = {0.23535156250000003,0.09350585937499999,0.19873046875000003,0.361572265625};
         
         SwerveDrivetrainConfig DRIVETRAIN_CONFIG = SwerveDrivetrainConfig.defualt(TRACKWIDTH_METERS)
                                                     .setIMU(AthenaImu.PIGEON2, false)
@@ -86,7 +94,17 @@ public interface Constants {
         RobotLocalizationConfig LOCALIZATION_CONFIG = RobotLocalizationConfig.vision(0.8, 0.8, 9999)
                                                             .setAutoPlannerPID(7,0,0, 2,0,0)
                                                             .setVisionEnabled(true)
-                                                            .addPoseConfig(PoseConfig.defaults("field"))
+                                                            .addPoseConfig(PoseConfig.defaults("field").withShuffleboardPublishing(true))
+                                                             .addPoseConfig(PoseConfig.odometry("pose-odo-2d", new Pose2d()))
+    .addPoseConfig(PoseConfig.odometry("pose-odo-imu", new Pose2d(0, 0, Rotation2d.fromDegrees(0))).withContinuousInputs(EnumSet.of(PoseInput.ODOMETRY, PoseInput.IMU_YAW)).withShuffleboardPublishing(true))
+    .addPoseConfig(PoseConfig.vision("pose-vision-only", new Pose2d(0,0, Rotation2d.fromDegrees(30))).withShuffleboardPublishing(true))
+    .addPoseConfig(PoseConfig.defaults("pose-default", new Pose2d(0,0, Rotation2d.fromDegrees(90))).withShuffleboardPublishing(true))
+
+    .addPoseConfig(PoseConfig.custom("pose-vision-on-demand", new Pose2d(0,0, Rotation2d.fromDegrees(120))).withContinuousInputs(EnumSet.of(PoseInput.ODOMETRY, PoseInput.IMU_YAW)).withOnDemandInputs(EnumSet.of(PoseInput.VISION)).withShuffleboardPublishing(true))
+    .addPoseConfig(PoseConfig.custom("pose-vision-required", new Pose2d(0,0, Rotation2d.fromDegrees(180))).withConstraints(new PoseConstraints(0.02, 0.2, true, false)).withShuffleboardPublishing(true))
+    .addPoseConfig(PoseConfig.custom("pose-backend-stress", new Pose2d(0,0, Rotation2d.fromDegrees(-90))).withBackendOverride(BackendConfig.defualt().withSlipStrategy(SlipStrategy.SWERVE_VARIANCE).withVisionStrategy(VisionStrategy.MULTI).withSlipThreshold(0.05).withPoseJumpMeters(0.5).withPoseJumpHoldSeconds(0.1).withPoseJumpAgreementMeters(0.25)).withShuffleboardPublishing(true))
+    .addPoseConfig(PoseConfig.defaults("pose-3d", new Pose3d(0,0,0, new Rotation3d(0,0,Math.toRadians(45)))).withShuffleboardPublishing(true))
+
                                                             .setAutoPoseName("field");
         ConfigurableCamera[] CAMERAS =
         {                                                                 
